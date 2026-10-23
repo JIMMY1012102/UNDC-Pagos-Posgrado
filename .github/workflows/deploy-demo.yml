@@ -84,7 +84,23 @@ jobs:
           SSH_TARGET: undcdeploy@163.176.230.238
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes "$SSH_TARGET" 'test -f /var/www/undc-pagos/.env && test -d /var/www/undc-pagos/storage'
+          ssh -o BatchMode=yes "$SSH_TARGET" '
+            set -eu
+            BASE=/var/www/undc-pagos
+            test -f "$BASE/.env"
+            test -d "$BASE/storage"
+            if [ ! -w "$BASE/bootstrap" ]; then
+              BACKUP="$HOME/undc-bootstrap-inicial-respaldo"
+              if [ -e "$BACKUP" ]; then
+                echo "No se puede preparar bootstrap: existe respaldo previo" >&2
+                exit 1
+              fi
+              mv "$BASE/bootstrap" "$BACKUP"
+              mkdir -m 0755 "$BASE/bootstrap"
+              cp -R "$BACKUP/." "$BASE/bootstrap/"
+              echo "Bootstrap de UNDC-Pagos preparado sin sudo; respaldo conservado en home"
+            fi
+          '
           rsync -rltz --delete \
             --exclude='/.git/' \
             --exclude='/.github/' \
