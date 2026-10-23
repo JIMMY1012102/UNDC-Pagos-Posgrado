@@ -1,47 +1,26 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Instrucciones a Codex — UNDC-Pagos-Posgrado
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+## Principios
+Trabajar en laptop, mediante Git y Pull Requests. No configurar Codespaces, despliegue automático ni servicios de Oracle por iniciativa propia. Seguir KISS: cambios pequeños y probados. Revisar `docs/ARQUITECTURA.md` y `docs/MODULOS.md` antes de generar código.
 
-## Prerequisites
+**No instalar paquetes, ejecutar migraciones ni generar credenciales automáticamente.** Comprobar primero el entorno y solicitar autorización si se necesita modificar dependencias o esquema.
 
-Verify that PHP and Composer are available:
+## Límites
+- `app/Modules/Acceso`: cuenta y perfil; inicio de sesión no acredita identidad académica.
+- `app/Modules/Tienda`: catálogo, carrito, validación de precios en servidor y pedidos pendientes.
+- `app/Modules/Pagos`: intentos, verificación servidor-servidor, idempotencia, manejo de estados inciertos y trazabilidad.
+- `app/Modules/Tesoreria`: consultas internas solo con autenticación/autorización y datos permitidos.
+- `app/Integrations/`: adaptadores a terceros, independientes de la lógica del dominio.
 
-```sh
-php -v
-composer -V
-```
+Usar `App\\Modules\\...` (PSR-4 ya configurado). Poner las rutas de cada módulo en su `routes.php`; registrar solo operaciones realmente implementadas y probadas. Mantener la portada actual mientras no exista catálogo.
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+## Prohibiciones y cautelas
+- No usar datos personales reales ni pagos reales en la demo HTTP.
+- No dar por contratada ni implementada la pasarela Pay-me.
+- No suponer disponibles las API bancarias de Interbank.
+- No alterar las tablas históricas de SISPAGOS ni migrar contra bases institucionales sin acuerdo.
+- No acreditar pagos por la redirección del navegador.
+- No versionar `.env`, secretos, llaves SSH ni dumps de producción.
 
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## Antes de merge
+Ejecutar `php artisan test`; cuando corresponda `composer validate --strict` y `npm run build`. Incluir pruebas nuevas por módulo. Documentar decisiones pendientes y nunca afirmar que una pantalla equivale a un flujo funcional.
