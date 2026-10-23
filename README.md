@@ -1,27 +1,32 @@
 # UNDC-Pagos-Posgrado
 
-Proyecto de desarrollo para la tienda virtual de pagos de Posgrado de la Universidad Nacional de Cañete (UNDC), articulada con el sistema de Tesorería SISPAGOS.
+Tienda virtual de pagos para Posgrado de la Universidad Nacional de Cañete (UNDC), vinculada conceptualmente al trabajo de Tesorería/SISPAGOS.
 
-## Tecnologías previstas
+**Estado:** Laravel 13 inicializado; estructura modular preparada; funcionalidades de negocio e integraciones aún pendientes. No confundir el avance de SISPAGOS compartido por Alfonso con esta nueva aplicación.
 
-- PHP 8.3 y Laravel
-- Blade, Livewire, Tailwind CSS y Alpine.js
-- Spatie Laravel Permission para roles y permisos
-- MariaDB/MySQL
-- Nginx y PHP-FPM en el entorno de demostración
-- GitHub Actions para pruebas y despliegue a un entorno de demostración
+## Módulos de negocio
 
-## Alcance inicial
+| Proceso | Carpeta | Responsabilidad |
+|---|---|---|
+| Acceso y datos personales | `app/Modules/Acceso` | Cuenta, perfil, datos de comprador/beneficiario |
+| Compra en tienda | `app/Modules/Tienda` | Catálogo, carrito, precios, pedidos pendientes |
+| Pago | `app/Modules/Pagos` | Intentos, verificación, estados, reintentos |
+| Consulta Tesorería | `app/Modules/Tesoreria` | Consultas autorizadas, conciliación, reportes |
 
-1. Portal del pagador: autenticación, catálogo, pedidos y consulta de deudas.
-2. Gestión de cobros: integración de pasarela y continuidad del canal Interbank.
-3. Tesorería: consultas, reportes, conciliación y comprobantes según reglas institucionales.
-4. Soporte a gestión contable: información para los procedimientos autorizados.
+Los adaptadores externos están separados en `app/Integrations/` (Sispagos, Payme, Interbank). Sus carpetas no significan que estén implementados.
 
-## Seguridad y entornos
+## Documentación
 
-Este repositorio es privado. No almacenar contraseñas, claves SSH, tokens, archivos `.env` ni información personal real de estudiantes. La instancia de demostración utilizará datos ficticios o anonimizados; la operación con pagos reales requiere autorización y controles institucionales.
+- [Arquitectura](docs/ARQUITECTURA.md)
+- [Plan de módulos](docs/MODULOS.md)
+- [Desarrollo local con Codex](docs/DESARROLLO_LOCAL.md)
+- [Actualización manual de Oracle](docs/DESPLIEGUE.md)
+- [Instrucciones a Codex](AGENTS.md)
 
-## Estado
+## Flujo de trabajo
 
-Repositorio inicializado. Pendiente incorporar el proyecto Laravel, automatización de pruebas y pipeline de despliegue.
+**Laptop con Codex → rama Git → push → Pull Request → merge a main → actualización manual de Oracle cuando se autorice.** El CI de GitHub solo ejecuta pruebas y compilación; **no despliega**.
+
+Tecnología instalada: Laravel 13, PHP compatible con 8.3, Blade, Vite. Livewire, Spatie y demás componentes están previstos, no necesariamente instalados.
+
+Seguridad: la demo alojada en HTTP es para **datos ficticios**. Nunca publicar datos reales, credenciales, Google OAuth real, SISPAGOS productivo o pasarelas de pago reales sin autorización y controles institucionales.
