@@ -1,12 +1,8 @@
 name: Desplegar demo en Oracle Cloud
 
-# Primera prueba: se dispara solo al modificar este workflow; tras validarla activaremos push completo.
+# Despliegue automático desactivado. Solo se ejecuta si alguien lo inicia manualmente.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/deploy-demo.yml'
 
 permissions:
   contents: read
