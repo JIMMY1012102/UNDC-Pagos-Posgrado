@@ -2,7 +2,7 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb]
+    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb, test/tienda-regresion-completa]
   pull_request:
     branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth]
   workflow_dispatch:
