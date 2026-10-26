@@ -1,26 +1,81 @@
-# Diccionario institucional SISPAGOS — fuente histórica parcial
+# Diccionario SISPAGOS — estructura histórica reproducida en CI
 
-**Origen:** `docs/BASE_DE_DATOS.md` construido a partir del respaldo de febrero de 2026. **No** se almacena en GitHub el volcado con datos personales, ni se confunde con el DDL vigente del servidor.
+Fuente: `tests/Fixtures/tesoreria_schema_ci.sql`. Esta es una copia sanitizada de estructura histórica de febrero de 2026, **no** un DDL obtenido de producción actual. No contiene datos personales.
 
-| Tabla | Clave primaria documentada | Responsabilidad | Columnas identificadas (lista parcial) |
+Los campos, tipos y restricciones siguientes se extraen directamente del fixture SQL.
+
+## `tm_oficina`
+
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
 |---|---|---|---|
-| `tm_oficina` | `oficina_id` — INT firmado | Oficinas institucionales | `oficina_nom, estado` |
-| `tm_rol` | `rol_id` — INT firmado | Roles internos SISPAGOS | `rol_nom, estado` |
-| `tm_usuario` | `usu_id` — INT firmado | Operadores institucionales | `rol_id, oficina_id, usu_correo, estado, fech_elim` |
-| `tm_conceptos` | `id_concepto` — INT firmado | Conceptos e importes oficiales | `codigo_concepto, concepto, costo, centro_costo, codigo_banco` |
-| `tm_recaudacion` | `id_recaudacion` — INT firmado | Archivo de recaudación bancaria | `codigo_deudor, codigo_cuota, referencia1/2, concepto1..concepto7, tipo_operacion` |
-| `tm_resultado` | `i_resultado` — INT firmado | Resultados bancarios importados | `codigo_deudor, codigo_cuota, numero_operacion, importe_pagado, fecha_pago, hora_pago` |
+| `oficina_id` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `estado` | `INT` | NO | DEFAULT 1 |
 
-## Integridad y relaciones
-- El respaldo histórico documentado tiene PRIMARY KEY y no declara FOREIGN KEY ni UNIQUE adicionales dentro de las seis tablas originales.
-- `tm_usuario.rol_id` y `tm_usuario.oficina_id` sugieren asociaciones lógicas con `tm_rol` y `tm_oficina`; no dibujar como FK físicas.
-- `tm_conceptos.centro_costo` **no** constituye FK confirmada a `tm_oficina`.
-- Los 12 enlaces físicos documentados son desde tablas nuevas hacia cinco tablas originales y se definen únicamente en la migración 000005.
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
 
-## Alcance no verificado
-- No se dispone en el repositorio de un DDL completo y sanitizado de estas seis tablas; no es responsable inventar tipos, nullability, índices o columnas restantes.
-- Se requiere un **SHOW CREATE TABLE** / `information_schema` de solo lectura y sin filas de datos, autorizado por OTI/Tesorería, para cerrar el diccionario completo.
-- No publicar archivos SQL que incluyan información de estudiantes, contribuyentes, contraseñas o registros bancarios.
+## `tm_rol`
 
-## Regla de conservación
-No renombrar, alterar, eliminar ni recrear tablas `tm_*` durante esta fase documental.
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
+|---|---|---|---|
+| `rol_id` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `estado` | `INT` | NO | DEFAULT 1 |
+
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
+
+## `tm_usuario`
+
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
+|---|---|---|---|
+| `usu_id` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `rol_id` | `INT` | NO | — |
+| `oficina_id` | `INT` | NO | — |
+| `fech_crea` | `DATETIME` | NO | DEFAULT CURRENT_TIMESTAMP |
+| `fech_modi` | `DATETIME` | SÍ | DEFAULT NULL; ON UPDATE CURRENT_TIMESTAMP |
+| `fech_elim` | `DATETIME` | SÍ | DEFAULT NULL |
+| `estado` | `INT` | NO | DEFAULT 1 |
+
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
+
+## `tm_conceptos`
+
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
+|---|---|---|---|
+| `id_concepto` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `clasificador_ingresos` | `INT` | SÍ | DEFAULT NULL |
+| `cuenta_corriente` | `INT` | SÍ | DEFAULT NULL |
+| `plan_contable` | `INT` | SÍ | DEFAULT NULL |
+| `centro_costo` | `INT` | SÍ | DEFAULT NULL |
+| `creado_en` | `TIMESTAMP` | NO | DEFAULT CURRENT_TIMESTAMP |
+
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
+
+## `tm_recaudacion`
+
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
+|---|---|---|---|
+| `id_recaudacion` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `emision` | `DATE` | SÍ | DEFAULT NULL |
+| `vencimiento` | `DATE` | SÍ | DEFAULT NULL |
+
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
+
+## `tm_resultado`
+
+| Campo | Tipo SQL | Nulabilidad | Claves y valores predeterminados |
+|---|---|---|---|
+| `i_resultado` | `INT` | NO | PRIMARY KEY; AUTO_INCREMENT |
+| `fecha_pago` | `DATE` | SÍ | DEFAULT NULL |
+| `hora_pago` | `TIME` | SÍ | DEFAULT NULL |
+| `fecha_emision` | `DATE` | SÍ | DEFAULT NULL |
+| `fecha_vencimiento` | `DATE` | SÍ | DEFAULT NULL |
+| `created_at` | `TIMESTAMP` | NO | DEFAULT CURRENT_TIMESTAMP |
+
+No se declaran FK ni UNIQUE adicionales para esta tabla en el fixture.
+
+## Relaciones y límites
+
+- `tm_usuario.rol_id` y `tm_usuario.oficina_id` son referencias lógicas; el fixture no declara FK históricas.
+- `tm_conceptos.centro_costo` no es una FK demostrada a `tm_oficina`.
+- Las 12 FK desde tienda hacia `tm_*` se definen en la migración 000005 y se documentan por separado.
+- El modelo vigente institucional aún debe validarse mediante metadatos autorizados, sin exportar registros personales.
+- No modificar las tablas `tm_*` ni ejecutar SQL para este trabajo.
