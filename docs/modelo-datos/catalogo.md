@@ -36,10 +36,15 @@ BOOLEAN is_approved
 TIMESTAMP created_at
 TIMESTAMP updated_at
   }
+  tm_oficina ||--o| store_office_settings : "legacy_office_id"
+  tm_oficina ||--o{ store_catalog_items : "legacy_office_id"
+  tm_conceptos ||--o{ store_catalog_items : "legacy_concept_id"
   store_catalog_items ||--o{ store_catalog_price_versions : "catalog_item_id"
-  style store_office_settings fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_catalog_items fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_catalog_price_versions fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
+
+
+## Convención de cardinalidades
+La relación `||--o{` se representa desde el padre hacia cero o muchos hijos; `||--o|` hacia cero o un hijo (FK individual UNIQUE). Cuando la FK del hijo es nullable se señala **(opcional)**; las relaciones a entidades externas al módulo aparecen como nodos de referencia sin alterar sus estructuras. Consultar [matriz completa](./MATRIZ_CARDINALIDADES.md).
+
