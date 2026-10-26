@@ -36,11 +36,18 @@ Fuente: migraciones Laravel 000001–000005 y documentación existente `docs/BAS
 
 - [x] Inventario visual de las 38 entidades agrupadas: `MAPA_38_TABLAS.md`.
 - [x] Diccionario de las ocho tablas creadas por las tres migraciones Laravel; `migrations` se identifica como tabla operativa del framework sin DDL encontrado en esas migraciones.
-- [x] Diccionario parcial de SISPAGOS trazado al documento existente `docs/BASE_DE_DATOS.md`.
+- [x] Diccionario de las 67 columnas incluidas en el fixture sanitizado `tests/Fixtures/tesoreria_schema_ci.sql`; fuente histórica de CI, pendiente validar DDL institucional actual.
 - [x] Aplicación inicial de paleta de dominio a los diagramas Mermaid, sujeta a compatibilidad de renderizado de GitHub.
 - [ ] Completar tipos, PK/FK/índices y nullability de **todas** las columnas institucionales cuando se apruebe compartir DDL sanitizado del entorno vigente.
 - [ ] Confirmar DDL exacto de `migrations` y comparar contra inventario de MariaDB.
-- [ ] Revisar visualmente los siete ER en GitHub y las cardinalidades opcionales; el mapa general es un mapa de dominio, no reemplaza un ER físico integral.
+- [x] Elaborar matriz de cardinalidades y diagramas por módulo con FK internas y externas desde el código.
+- [ ] Validar manualmente el renderizado de los diagramas Mermaid en GitHub; el mapa general es una agrupación de dominio, no reemplaza un ER físico integral.
 - [ ] Registrar decisiones de OTI/Tesorería sobre puntos estructurales antes de cualquier propuesta de migración.
 
 **Nota metodológica:** Esta documentación se deduce del código versionado. La ejecución exitosa de CI anterior no sustituye la aceptación funcional de todas las reglas de negocio. No se ha ejecutado ningún DDL ni añadido backend.
+
+## Acuerdo de alcance actual
+
+**Aplazado explícitamente:** decisiones de tarifas, permisos, roles, reglas de conciliación, validación, constancias y políticas financieras. No bloquear el avance documental por estas definiciones ni tratarlas como aprobadas. La revisión estructural describe riesgos, pero **no** instruye cambiar migraciones. Permanecen como requisitos futuros.
+
+**Sin evidencia de producción:** falta contrastar el fixture CI con el esquema institucional vigente y la estructura exacta de la tabla `migrations` en MariaDB. No afirmar que esta comprobación haya sido realizada.
