@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('payment_attempts', function (Blueprint $table) {
+        Schema::create('store_payment_attempts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
+            $table->foreignId('order_id')->constrained('store_orders')->restrictOnDelete();
             $table->string('channel', 32); // gateway, interbank, manual, future
             $table->string('provider', 40);
             $table->string('status', 32)->default('initiated');
@@ -27,10 +27,10 @@ return new class extends Migration
         });
 
         // Registro de cobros observados, incluso si corresponden a un doble cobro.
-        Schema::create('payment_transactions', function (Blueprint $table) {
+        Schema::create('store_payment_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
-            $table->foreignId('payment_attempt_id')->nullable()->constrained('payment_attempts')->restrictOnDelete();
+            $table->foreignId('order_id')->constrained('store_orders')->restrictOnDelete();
+            $table->foreignId('payment_attempt_id')->nullable()->constrained('store_payment_attempts')->restrictOnDelete();
             $table->string('provider', 40);
             $table->string('provider_transaction_reference', 150)->nullable();
             $table->string('status', 32)->default('pending_verification');
@@ -48,18 +48,18 @@ return new class extends Migration
 
         // Garantía relacional: como máximo un pago aplicado a cada pedido.
         // Otros cobros se mantienen en payment_transactions como incidencias.
-        Schema::create('order_payment_claims', function (Blueprint $table) {
+        Schema::create('store_order_payment_claims', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->unique()->constrained('orders')->restrictOnDelete();
-            $table->foreignId('payment_transaction_id')->unique()->constrained('payment_transactions')->restrictOnDelete();
+            $table->foreignId('order_id')->unique()->constrained('store_orders')->restrictOnDelete();
+            $table->foreignId('payment_transaction_id')->unique()->constrained('store_payment_transactions')->restrictOnDelete();
             $table->timestamp('claimed_at');
         });
 
-        Schema::create('payment_webhook_events', function (Blueprint $table) {
+        Schema::create('store_payment_webhook_events', function (Blueprint $table) {
             $table->id();
             $table->string('provider', 40);
             $table->string('event_key', 150);
-            $table->foreignId('payment_attempt_id')->nullable()->constrained('payment_attempts')->nullOnDelete();
+            $table->foreignId('payment_attempt_id')->nullable()->constrained('store_payment_attempts')->nullOnDelete();
             $table->string('processing_status', 32)->default('received');
             $table->boolean('signature_valid')->default(false);
             $table->char('payload_digest', 64);
@@ -72,10 +72,10 @@ return new class extends Migration
             // No guardar tarjetas, tokens de pago ni payloads sensibles.
         });
 
-        Schema::create('payment_incidents', function (Blueprint $table) {
+        Schema::create('store_payment_incidents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
-            $table->foreignId('payment_transaction_id')->nullable()->constrained('payment_transactions')->restrictOnDelete();
+            $table->foreignId('order_id')->constrained('store_orders')->restrictOnDelete();
+            $table->foreignId('payment_transaction_id')->nullable()->constrained('store_payment_transactions')->restrictOnDelete();
             $table->string('kind', 60); // duplicate_charge, uncertain, mismatch...
             $table->string('status', 32)->default('open');
             $table->text('description')->nullable();
@@ -85,9 +85,9 @@ return new class extends Migration
             $table->index(['kind', 'status'], 'idx_incident_queue');
         });
 
-        Schema::create('refunds', function (Blueprint $table) {
+        Schema::create('store_refunds', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_transaction_id')->constrained('payment_transactions')->restrictOnDelete();
+            $table->foreignId('payment_transaction_id')->constrained('store_payment_transactions')->restrictOnDelete();
             $table->string('provider_refund_reference', 150)->nullable();
             $table->decimal('amount', 14, 2);
             $table->char('currency', 3)->default('PEN');
@@ -103,11 +103,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('refunds');
-        Schema::dropIfExists('payment_incidents');
-        Schema::dropIfExists('payment_webhook_events');
-        Schema::dropIfExists('order_payment_claims');
-        Schema::dropIfExists('payment_transactions');
-        Schema::dropIfExists('payment_attempts');
+        Schema::dropIfExists('store_refunds');
+        Schema::dropIfExists('store_payment_incidents');
+        Schema::dropIfExists('store_payment_webhook_events');
+        Schema::dropIfExists('store_order_payment_claims');
+        Schema::dropIfExists('store_payment_transactions');
+        Schema::dropIfExists('store_payment_attempts');
     }
 };
