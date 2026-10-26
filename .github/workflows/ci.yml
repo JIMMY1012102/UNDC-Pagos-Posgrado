@@ -133,6 +133,10 @@ jobs:
           composer install --no-interaction --prefer-dist --no-progress
           cp .env.example .env
           php artisan key:generate
+          echo 'SESSION_DRIVER=file' >> .env
+          echo 'CACHE_STORE=file' >> .env
+          echo 'DB_CONNECTION=sqlite' >> .env
+          touch database/database.sqlite
       - name: Preparar Node y Chromium
         uses: actions/setup-node@v4
         with:
@@ -148,4 +152,5 @@ jobs:
             if curl -fsS http://127.0.0.1:8000/tienda >/dev/null; then break; fi
             sleep 1
           done
+          curl -fsS http://127.0.0.1:8000/tienda >/dev/null || { cat /tmp/undc-serve.log; exit 1; }
           node tests/browser/storefront.mjs
