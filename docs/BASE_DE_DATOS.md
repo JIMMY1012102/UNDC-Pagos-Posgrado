@@ -1,122 +1,135 @@
-# Modelo relacional escalable — tienda de pagos UNDC (v1 propuesta)
+# UNDC · Modelo de datos compartido SISPAGOS + tienda (propuesta v2)
 
-**Estado:** migraciones versionadas y pruebas automatizadas de esquema. **No** es una base institucional instalada ni una integración funcional. Pendiente de revisión con OTI, Posgrado y Tesorería.
+**Fuente primaria:** `tesoreria.sql` entregado en el proyecto. Exportación phpMyAdmin 5.2.1 del **20/02/2026**, MariaDB **10.4.32**, base `tesoreria`. Se revisaron las declaraciones de tablas, índices, incrementos automáticos y el formato de los registros. **El volcado original incluye datos personales: no se versiona en GitHub.**
 
-## Fuentes y criterios
+**Estado:** adaptación de migraciones Laravel revisable. No se ejecutaron migraciones en servidor, no se intervino en SISPAGOS, no hay Pay-me contratado/implementado. La definición real de acceso y despliegue debe aprobarla OTI/Tesorería.
 
-Este diseño toma como referencia el Informe N.° 0217-2025 (validación por Tesorería, registro, reportes y constancia), el flujo de cuatro procesos del proyecto (Acceso, Tienda, Pagos, Tesorería), los manuales de gestión económica como referencias funcionales y las coordinaciones documentadas sobre Interbank, SISPAGOS y Pay-me.
+## 1. Tablas originales que son el punto de partida
 
-No se presume que los manuales externos sean especificación aprobada, que Pay-me esté contratado, que haya un contrato de API Interbank, ni que la copia local de `tesoreria.sql` sea el esquema final.
+| Tabla existente (se conserva) | PK (INT firmado) | Campos relevantes | Responsabilidad |
+|---|---|---|---|
+| `tm_oficina` | `oficina_id` | `oficina_nom`, `estado` | 37 oficinas, incluidas Posgrado y Tesorería |
+| `tm_rol` | `rol_id` | `rol_nom`, `estado` | 4 roles internos |
+| `tm_usuario` | `usu_id` | `rol_id`, `oficina_id`, `usu_correo`, `estado`, `fech_elim` | Personal interno de SISPAGOS |
+| `tm_conceptos` | `id_concepto` | `codigo_concepto`, `concepto`, `costo`, `centro_costo`, `codigo_banco`, campos contables | Conceptos y costo institucional |
+| `tm_recaudacion` | `id_recaudacion` | `codigo_deudor`, `codigo_cuota`, `referencia1/2`, `concepto1..concepto7`, `tipo_operacion` | Cobranza cargada al banco |
+| `tm_resultado` | `i_resultado` | `codigo_deudor`, `codigo_cuota`, `numero_operacion`, `importe_pagado`, `fecha_pago`, `hora_pago` | Resultados bancarios importados |
 
-## 25 tablas de negocio — 4 grupos
+**Hallazgos importantes del SQL real**:
+- Solo hay **PRIMARY KEY**, sin declaraciones de FOREIGN KEY ni claves únicas adicionales para `tm_*`. Por ello, correlaciones entre tablas son **lógicas, no garantizadas** por el respaldo.
+- `tm_conceptos` ya contiene conceptos de Posgrado. No crear una segunda tabla maestra `concepts`.
+- `tm_oficina` ya incluye Posgrado (ID 7) y Tesorería (ID 19) **en esta exportación**; no asumir IDs idénticos en otro ambiente.
+- `tm_conceptos.centro_costo` **no tiene FK** a `tm_oficina.oficina_id`; no equipararlos sin confirmación. La nueva tabla de publicación requiere asociación explícita validada.
+- `tm_recaudacion` separa los importes en siete columnas; **no** presupone que `codigo_cuota` sea `codigo_concepto`, ni que una sola fila equivalga a un pedido web.
+- `tm_resultado.importe_pagado` permite cero y `numero_operacion` es nullable, sin unicidad. No basta `importe_pagado IS NOT NULL` para verificar pagos. Un matching solo por nombre/código/cuota no confirma monto, duplicados ni identidad.
+- El volcado **no prueba** que el esquema del servidor actual sea idéntico al de febrero de 2026. Verificar antes de producción.
 
-| Grupo | Tablas |
-|---|---|
-| Identidad, autorizaciones y catálogo (8) | `offices`, `staff_roles`, `staff_role_assignments`, `customer_profiles`, `oauth_identities`, `beneficiaries`, `concepts`, `concept_prices` |
-| Compra y pedidos (5) | `carts`, `cart_items`, `orders`, `order_items`, `order_status_history` |
-| Pagos e incidencias (6) | `payment_attempts`, `payment_transactions`, `order_payment_claims`, `payment_webhook_events`, `payment_incidents`, `refunds` |
-| Tesorería y trazabilidad (6) | `reconciliation_batches`, `reconciliation_entries`, `external_system_links`, `payment_validations`, `validation_certificates`, `audit_events` |
-
-Se reutiliza `users` y el resto de infraestructura estándar de Laravel; **no** se altera ninguna tabla `tm_*` histórica.
-
-### Relaciones y recorrido
+## 2. Arquitectura definitiva propuesta: una sola base, dos aplicaciones
 
 ```text
-users ────── 1:1 ─── customer_profiles ─── 1:N ─── beneficiaries
-  │                        │
-  ├─ 1:N oauth_identities  └── (datos del comprador; documentos NO únicos)
-  ├─ 1:N carts ── 1:N cart_items ────────── concepts ── 1:N concept_prices
-  ├─ 1:N orders ─ 1:N order_items ─────────┘
-  │              ├── 1:N order_status_history
-  │              ├── 1:N payment_attempts
-  │              ├── 1:N payment_transactions ── 1:N refunds
-  │              │             │
-  │              ├── 0..1 order_payment_claims (único por pedido)
-  │              ├── 1:N payment_incidents
-  │              ├── 1:N payment_validations ── 0..1 validation_certificates
-  │              └── 1:N external_system_links (IDs externos, no FK al legado)
-  └─ 1:N staff_role_assignments ─── staff_roles + offices
-
-offices ── 1:N concepts, offices ── 1:N order_items
-reconciliation_batches ── 1:N reconciliation_entries ── 0..1 payment_transactions
-payment_webhook_events ── 0..1 payment_attempts
-audit_events ── actor + tipo/ID del recurso (sin datos bancarios sensibles)
+               Tienda virtual (Laravel)
+               usuarios públicos / pedidos
+                          │
+                          ▼
+             MISMA BASE: tesoreria
+             ┌──────────────────────────┐
+             │ tm_*  = SISPAGOS actual  │
+             │ store_* = tienda nueva   │
+             │ users  = comprador web   │
+             └──────────────────────────┘
+                          ▲
+                          │
+               SISPAGOS (Tesorería)
+               validación, reportes, control
 ```
 
-Un pedido contiene líneas con `office_id`: hoy puede usarse solo Posgrado y mañana varias oficinas, sin agregar columnas por cada oficina. Los precios se versionan por vigencia; las líneas del pedido conservan nombre, código, monto y beneficiario como *snapshot*.
+Las tablas `tm_*` se mantienen intactas. Se agregan tablas **`store_*` en el mismo esquema** de MariaDB. Dos aplicaciones pueden leer los datos según **privilegios SQL, roles, restricciones y políticas** aprobados; no significa que la tienda deba tener permiso para editar toda la Tesorería.
 
-## Reglas funcionales y dónde se hacen cumplir
+`users` de Laravel corresponde a cuentas web; `tm_usuario` corresponde a personal interno de SISPAGOS. **No se unifican por correo automáticamente**, porque la autenticación y los privilegios son diferentes.
 
-| Regla | BD | Backend pendiente |
-|---|---|---|
-| Conceptos independientes por oficina | FK + unicidad (oficina, código/slug) | Visibilidad según permisos y tarifas aprobadas |
-| Tarifas históricas | Tabla `concept_prices` e índice por vigencia | Evitar solapamientos y seleccionar precio vigente en transacción |
-| Documento del comprador no necesariamente único | Índice no único | Validar formato, consentimiento y elegibilidad real |
-| Pedidos con importes congelados | `order_items` con snapshots | Recalcular total, bloquear cambios posteriores, validar suma/currency |
-| Canales alternativos de cobro | `channel` y `provider` extensibles | Desactivar cobro adicional tras acreditación; controlar carreras concurrentes |
-| Idempotencia de inicio/callback | `idempotency_key` único y (provider, event_key) único | Validar firma/origen, verificar operación remotamente, procesar en transacción |
-| Cobro acreditado una vez por pedido | `order_payment_claims.order_id` único | Dentro de una transacción y con bloqueo del pedido, verificar importe, divisa, estado y transacción asociada |
-| Segundo cobro real conservado | Múltiples `payment_transactions` + incidentes | Detectar duplicado, alertar a Tesorería y gestionar devolución |
-| Conciliación separada de confirmación | Lotes y filas, `settled_at` opcional | Comparar liquidación, comisiones, abono y diferencias |
-| Interbank y SISPAGOS preexistentes | Lotes y `external_system_links` | Acuerdo de integración; mapear IDs y evitar doble registro |
-| Validación institucional | `payment_validations` | Autorización de Tesorería y requisitos acordados |
-| Constancia con código/QR verificable | `validation_certificates` y token guardado como hash | Emitir solo tras validación aprobada; endpoint seguro de consulta y revocación |
-| Historial y reportes | Historiales, índices, auditoría y conciliación | Construir consultas según rol, exportaciones y controles de PII |
+## 3. Tablas nuevas por proceso (23)
 
-### Reglas críticas de dinero
+| Grupo | Tablas nuevas |
+|---|---|
+| Publicación, identidad y precios (6) | `store_office_settings`, `store_catalog_items`, `store_catalog_price_versions`, `store_customer_profiles`, `store_oauth_identities`, `store_beneficiaries` |
+| Carrito y compra (5) | `store_carts`, `store_cart_items`, `store_orders`, `store_order_items`, `store_order_status_history` |
+| Pasarelas y transacciones (6) | `store_payment_attempts`, `store_payment_transactions`, `store_order_payment_claims`, `store_payment_webhook_events`, `store_payment_incidents`, `store_refunds` |
+| Conciliación y Tesorería (6) | `store_reconciliation_batches`, `store_reconciliation_entries`, `store_external_system_links`, `store_payment_validations`, `store_validation_certificates`, `store_audit_events` |
 
-1. **Nunca marcar pagado por volver del navegador.** Validar la notificación autenticada y consultar el estado según contrato del proveedor.
-2. En la transacción de aplicación, bloquear el pedido (`SELECT ... FOR UPDATE` / `lockForUpdate`), verificar total, moneda, estado, pertenencia del intento y unicidad del identificador externo.
-3. Insertar `payment_transactions`; para aplicar al pedido intentar insertar `order_payment_claims`. La restricción `UNIQUE(order_id)` impide acreditar dos transacciones diferentes al mismo pedido incluso entre Pay-me e Interbank.
-4. Si llega un segundo cobro, **no borrarlo**: persistir como transacción e incidencia `duplicate_charge`, sin reclamar el pedido de nuevo. No asumir que impedir el segundo registro evita un cobro externo real.
-5. Un estado `confirmed` de pasarela **no** implica `settled` bancario ni constancia aprobada por Tesorería.
-6. Las devoluciones van a `refunds`; no se eliminan ni se sobrescriben los cobros históricos.
-7. No aceptar montos o moneda desde el frontend como fuente de verdad, ni permitir que una línea cambie después de confirmarse el pedido.
+### 3.1 Identificación exacta de maestros
 
-### Restricciones que aún no impone la BD
+- `store_office_settings.legacy_office_id` = `tm_oficina.oficina_id`; atributos de tienda (slug, publicación), sin duplicar nombres maestros.
+- `store_catalog_items.legacy_concept_id` = `tm_conceptos.id_concepto`. `legacy_office_id` apunta explícitamente a la oficina autorizada para ofrecer ese concepto. Los códigos, nombres y costo oficial **se consultan de la tabla original**.
+- `store_catalog_price_versions` permite tarifas aprobadas con intervalos, sin reescribir la historia; la regla de precedencia con `tm_conceptos.costo` requiere acuerdo de Tesorería. Un servicio debe impedir periodos activos solapados.
+- En `store_order_items` se guarda una **instantánea** de concepto, monto y beneficiario. Cambiar la tarifa o nombre original después NO altera un pedido ya aceptado.
 
-Las columnas `status`, `provider` y `channel` son cadenas deliberadamente extensibles en vez de ENUM. El servicio debe definir máquinas de estados y validaciones. La BD por sí sola **no** garantiza: importes positivos, igualdad de sumas, no solapamiento de tarifas, pertenencia de beneficiarios/cobros al comprador, unicidad de una constancia activa por pedido, valor único de pedidos pendientes, ni autorización de roles. Añadir pruebas específicas al implementar cada servicio. No basta con las pruebas de migraciones.
+**Nota técnica:** IDs originales son `INT(11)` **firmados** y las nuevas referencias `legacy_*` usan `integer` firmado. No se establecen todavía FOREIGN KEY a `tm_*` porque las migraciones se prueban también en SQLite sin copiar el legado; se validará existencia en aplicación, con la verificación estructural y una auditoría de referencias en MariaDB. Una FK cruzada puede acordarse como migración separada **después** de inspeccionar el entorno real.
 
-## Integración segura con SISPAGOS e Interbank
+### 3.2 Canales: Pay-me e Interbank
 
-- `external_system_links` registra `system_code`, entidad externa y clave externa; permite relacionar un pedido o pago local sin imponer FK sobre la base histórica.
-- `reconciliation_batches` y `reconciliation_entries` preservan entradas importadas, código de deudor, concepto, cuota, referencia, montos bruto/neto, comisiones y estado de cotejo.
-- No copiar ciegamente `tm_recaudacion`/`tm_resultado` al nuevo modelo. Se necesita un **mapeo aprobado** con la versión real de SISPAGOS, y reglas de lectura/escritura autorizadas.
-- Reporte al día siguiente por Interbank y confirmación en línea por pasarela deben coexistir. No hay pruebas de API/SOAP/servicio bancario contratado en esta rama.
+- `store_payment_attempts` registra intentos, proveedor, monto esperado, idempotencia y estado.
+- `store_payment_transactions` registra las operaciones observadas y su verificación; **no** se borra el segundo cargo.
+- `store_order_payment_claims` tiene un índice único por `order_id`; la aplicación solo aplica un cobro a cada pedido, después de validar con el servidor el monto, moneda, orden, proveedor y referencia.
+- `store_payment_webhook_events` impide registrar dos veces el mismo identificador de evento por proveedor. No almacenar CVV/PAN, llaves ni payloads sensibles.
+- `store_payment_incidents` registra cobro duplicado, importe distinto, resultado incierto, etc.; `store_refunds` registra devoluciones y su resultado.
 
-## Privacidad, seguridad y operaciones
+La unicidad SQL **no puede impedir que dos proveedores externos cobren dinero**: permite detectar, conservar evidencia y **no acreditar dos veces** en la UNDC. Se requieren locks/transacciones y confirmación servidor-servidor.
 
-- Solo datos ficticios hasta disponer de HTTPS, control de acceso y entorno institucional autorizado.
-- Tokens de carrito y constancias guardados como **hash**, no token original; no almacenar PAN/CVV, secretos OAuth, payloads bancarios completos ni documentos en auditoría.
-- Proteger DNI, nombres, teléfono y correo con controles institucionales, permisos por oficina, cifrado y política de retención a definir.
-- Toda acción financiera requiere auditoría y permisos de servidor, no solo visibilidad de interfaz.
-- Evaluar respaldos, restauración, índices y crecimiento tras conocer volumen real. No hacer borrado en cascada de pedidos, pagos o conciliación.
+### 3.3 Unión con archivos de Interbank, SISPAGOS y constancias
 
-## Instalación SOLO en entorno de prueba autorizado
+- `store_reconciliation_batches` agrupa lotes de resultados de pasarela o importaciones bancarias.
+- `store_reconciliation_entries.legacy_result_id` identifica, cuando corresponda, `tm_resultado.i_resultado`; `legacy_recaudacion_id` identifica `tm_recaudacion.id_recaudacion`. Campos nullable: no se debe inventar una coincidencia.
+- `store_external_system_links` guarda `system_code`, `external_entity`, `external_record_key` e ID externo para otros mapeos; sin necesidad de modificar registros históricos.
+- `store_payment_validations` separa la decisión de Tesorería de la confirmación de la pasarela. `legacy_reviewer_id` se refiere a personal de `tm_usuario`.
+- `store_validation_certificates` prepara código y hash de token QR para una futura constancia aprobada; **la emisión no está implementada**.
+- `store_audit_events` registra actor comprador/funcionario y evento sin datos de tarjeta ni secretos.
 
-Migraciones incluidas en `database/migrations/2026_10_25_00000{1,2,3,4}_*.php`; no contienen datos reales ni alteraciones históricas. GitHub CI las prueba usando SQLite en memoria a través de `RefreshDatabase`. Para probar MariaDB local por separado:
+## 4. Reglas que exige el backend antes de producción
+
+1. El catálogo muestra solo oficinas activas, conceptos originales válidos, publicaciones aprobadas y tarifas vigentes (verificación **servidor**).
+2. El carrito permite seleccionar concepto/beneficiario; el pedido congela precio, moneda, cantidad y datos sin depender de valores recibidos del navegador.
+3. Nunca confirmar un pago solo por una redirección; verificar operación y firma según especificación del proveedor.
+4. Para acreditar un pago: transacción DB + bloqueo del pedido + comprobación de moneda, monto, estado, referencia, beneficiario y idempotencia; crear `store_order_payment_claims`.
+5. El informe bancario no convierte una operación cero/null/no conciliada en `pagado`; matching debe resolver diferencias y duplicados con reglas acordadas y registro de evidencia.
+6. Tesorería solo visualiza, aprueba y exporta información de acuerdo con autorización institucional; los usuarios de `tm_usuario` deben comprobar `estado`, `fech_elim` y rol/oficina. No vincularlos implícitamente con `users`.
+7. Constancia y QR solamente después de la aprobación real de Tesorería; mecanismos de revocación y control de duplicados.
+8. Mantener fuentes de auditoría y políticas de retención, seguridad de PII y permisos mínimos.
+
+Las cadenas de estado son deliberadamente extensibles, pero **las migraciones por sí mismas no implementan máquinas de estados, importadores, vistas de SISPAGOS, control de saldos, reglas bancarias ni autorización**.
+
+## 5. Preparación y pruebas sin tocar producción
 
 ```bash
-# Requiere disponer de una base NUEVA de prueba, nunca una institucional
+# Verificar seis tablas y columnas en la conexión activa, sin escrituras:
+php artisan treasury:schema-check
+
+# Validar estado de migraciones:
 php artisan migrate:status
 php artisan migrate --pretend
-# Solo tras revisar credenciales y nombre de BD de prueba:
-php artisan migrate
+
+# Pruebas SQLite en memoria, datos ficticios:
 php artisan test
+
+# Ejecutar migraciones SOLAMENTE después de configurar una copia de desarrollo
+# de MariaDB y acordar el esquema con la OTI/Tesorería:
+php artisan migrate
 ```
 
-No lanzar `migrate:fresh` contra bases existentes: elimina tablas. No ejecutar migraciones desde GitHub Actions a Oracle.
+Las migraciones solo crean `store_*`. No llaman `ALTER TABLE tm_*`, no insertan pagos y no configuran conectores externos. Un `php artisan migrate` sobre una base nueva sin las seis tablas históricas **no crea por arte de magia la base compartida**; primero debe existir copia de **estructura del legado** en el entorno de pruebas, sin trasladar datos personales de producción.
 
-## Pendientes de decisión institucional
+Antes de utilizarla en la UNDC: verificar conexiones de ambas aplicaciones hacia el mismo esquema, permisos por cuenta SQL, compatibilidad con la versión actual y validación de **lectura desde SISPAGOS** de las nuevas tablas mediante consultas o vistas autorizadas.
 
-- Catálogo oficial y normas de aprobación de tarifas; fechas de vigencia y restricciones de conceptos.
-- Datos obligatorios de Posgrado, identidad verificada, requisitos académicos y beneficiario.
-- Esquema y acceso real de SISPAGOS; significado de códigos, cuotas, estado de pago y validación.
-- Acuerdo de medios Pay-me, comisiones, callbacks, referencias, reintentos, devoluciones y liquidación.
-- Especificaciones de conciliación Interbank y del archivo bancario, o acceso a su interfaz autorizada.
-- Quién aprueba la constancia, si es obligatoria en todo caso, formato oficial, QR y condiciones de revocación.
-- Políticas de retención, auditoría, permisos, cifrado y control de datos personales.
+## 6. Información pendiente de confirmación con Alfonso y Tesorería
 
-## Evolución prevista
+- Versión **vigente** de la BD SISPAGOS, mapeo exacto de códigos de cuota/deudor/concepto, permisos, roles y relaciones reales.
+- Qué conceptos de Posgrado se venderán, precios aprobados, tarifas, diferencias entre matrícula, pensión, prospecto y derecho de examen.
+- Qué lectura/escritura requerirá la tienda sobre `tm_recaudacion` y `tm_resultado`; quién sube el archivo bancario y cuándo se concilia.
+- Proveedor de pasarela, referencias, integración y reglas de cobro y devolución; Pay-me continúa candidato.
+- Quién valida, cuándo se emite la constancia, tratamiento de comprobante oficial/QR y conexión con trámites académicos.
+- Escenarios de doble pago Interbank/pasarela, anulaciones, pagos parciales y continuidad para futuros conceptos y oficinas.
 
-Se puede agregar una oficina y conceptos sin cambiar las tablas existentes. Nuevos proveedores se resuelven en `app/Integrations/`; cualquier nuevo dato específico de un proveedor debe ir en una tabla de extensión y no añadir decenas de columnas nulas a `orders`. Si más adelante se incorporan comprobantes tributarios, inscripción/matrícula, fraccionamientos, becas o devoluciones parciales complejas, crear módulos y migraciones **nuevas** después de formalizar sus reglas. No se afirma que estos futuros requisitos estén ya implementados.
+## 7. Alcance de esta corrección
+
+Se corrigió el borrador del PR #2 que proponía duplicar `offices`, `staff_roles`, `concepts`. Ahora el **catálogo institucional tiene una sola fuente maestra: SISPAGOS**. La nueva tienda conserva sus propias entidades transaccionales sin copiar históricos. El diseño es preparado para crecer, pero todavía debe validarse contra la base activa y las reglas acordadas con el equipo.
+
+**Prohibición operacional:** no subir `tesoreria.sql` con registros reales, `.env`, credenciales, llaves privadas o datos bancarios identificables al repositorio.
