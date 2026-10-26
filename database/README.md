@@ -1,13 +1,13 @@
-# Base de datos de la tienda UNDC — propuesta v1
+# Base de datos compartida SISPAGOS + Tienda UNDC
 
-Esta rama incorpora **25 tablas de negocio** mediante cuatro migraciones Laravel agrupadas por identidad/catálogo, comercio, pagos y Tesorería. También conserva las migraciones estándar de Laravel y contiene pruebas de integridad y deduplicación.
+**La fuente de datos institucional existente es `tesoreria.sql` (seis tablas `tm_*`).** La tienda Laravel y SISPAGOS deben apuntar al mismo esquema autorizado, incorporando únicamente las nuevas entidades `store_*`, sin recrear los maestros de Tesorería.
 
-Ver el documento principal: [Modelo relacional, decisiones y controles pendientes](../docs/BASE_DE_DATOS.md).
+Se han diseñado **23 tablas `store_*` nuevas**, en 4 migraciones. La tienda reutiliza conceptualmente `tm_oficina`, `tm_conceptos`, `tm_usuario`, `tm_rol`, `tm_recaudacion` y `tm_resultado` mediante referencias `legacy_*` y consultas autorizadas. `users` (Laravel) es exclusivamente para compradores web; no sustituye `tm_usuario` del personal interno.
 
-## Seguridad de ejecución
+- **Documento central:** [Análisis del archivo real y esquema adaptado](../docs/BASE_DE_DATOS.md).
+- **Preflight solo lectura:** `php artisan treasury:schema-check` verifica existencia de seis tablas y columnas críticas en la conexión de base de datos.
+- **Pruebas SQLite:** `php artisan test` cubre migraciones, mapeo, snapshots y restricciones de duplicidad.
+- **MariaDB:** ensayar en copia **de estructura y datos ficticios**, nunca en el sistema institucional sin autorización.
+- **No se versiona** el respaldo `tesoreria.sql` original con sus datos personales.
 
-- **No se ha migrado** ninguna base institucional ni el servidor Oracle desde esta rama.
-- El SQL local `~/Proyectos/undc-pagos-db` (14 tablas, 4 vistas, 9 triggers según reporte anterior) no se ha importado: hace falta comparar entidades y validar con Tesorería.
-- Esta base es el esquema de la **nueva tienda**, NO una sustitución automática de las tablas históricas `tm_recaudacion` y `tm_resultado` de SISPAGOS.
-- Ejecutar `php artisan test` para pruebas SQLite en memoria. Migrar únicamente una base nueva de prueba autorizada y configurada explícitamente.
-- Los servicios, políticas, controladores, restricciones transaccionales de aplicación e integraciones bancarias están pendientes. Las migraciones **no** constituyen un flujo de pago en funcionamiento.
+Las migraciones no agregan, alteran ni eliminan tablas `tm_*`; tampoco se ejecutan en Oracle ni en Tesorería automáticamente. El backend aún debe verificar claves lógicas, reglas de precios, autenticación/roles, validación bancaria, control de concurrencia, constancias y conciliación.
