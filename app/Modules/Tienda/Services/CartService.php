@@ -39,6 +39,36 @@ final class CartService
         return $cart ? $this->snapshot((int) $cart->id) : null;
     }
 
+    /** Associate an anonymous cart with the authenticated buyer once. */
+    public function claim(string $token, int $userId): ?array
+    {
+        return DB::transaction(function () use ($token, $userId): ?array {
+            $cart = $this->activeCart($token, true);
+            if ($cart === null) {
+                return null;
+            }
+
+            DB::table('store_carts')->where('id', $cart->id)->update([
+                'user_id' => $userId,
+                'token_hash' => null,
+                'updated_at' => now(),
+            ]);
+
+            return $this->snapshot((int) $cart->id);
+        });
+    }
+
+    /** @return array<string,mixed>|null */
+    public function forBuyer(int $userId): ?array
+    {
+        $cart = DB::table('store_carts')->where('user_id', $userId)
+            ->where('status', 'active')
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->latest('id')->first();
+
+        return $cart ? $this->snapshot((int) $cart->id) : null;
+    }
+
     /** @return array<string,mixed>|null */
     public function add(string $token, int $catalogId, int $quantity): ?array
     {
