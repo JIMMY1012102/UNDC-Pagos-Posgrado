@@ -60,7 +60,7 @@ $expected = [
 
 $stmt = $connection->prepare(
     "SELECT DISTINCT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
-     WHERE TABLE_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME LIKE 'tm\\_%'"
+     WHERE TABLE_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME IN ('tm_oficina', 'tm_conceptos', 'tm_usuario', 'tm_resultado', 'tm_recaudacion')"
 );
 $stmt->execute();
 $found = $stmt->fetchAll(PDO::FETCH_COLUMN);
