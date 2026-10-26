@@ -96,6 +96,11 @@ flowchart LR
   class I8 infraestructura
   classDef legado fill:#CBD5E1,stroke:#64748B,color:#111827
   classDef tienda fill:#BBF7D0,stroke:#15803D,color:#14532D
+  class I0 seguridad
+  class T0 seguridad
+  class T1 seguridad
+  class T2 seguridad
+  classDef seguridad fill:#DDD6FE,stroke:#7C3AED,color:#3B0764
   classDef infraestructura fill:#E5E7EB,stroke:#9CA3AF,color:#111827
 ```
 
@@ -125,3 +130,9 @@ flowchart LR
 
 ## Límites
 La vista de 38 entidades es **mapa de agrupación**, no un ER físico completo: las columnas e índices SISPAGOS vigentes permanecen sin verificar, y no existe una FK histórica acreditada hacia `tm_rol`. Ninguna tabla fue creada ni modificada.
+
+## Lectura del mapa
+- Las cajas representan **38 tablas existentes según el informe de desarrollo**; la vista no inventa nuevos esquemas físicos.
+- En morado están el comprador web `users` y sus tres extensiones de identidad. `tm_usuario` sigue gris por ser un usuario del sistema institucional, no un comprador.
+- Los vínculos relacionales detallados se encuentran en [Matriz de cardinalidades](./MATRIZ_CARDINALIDADES.md). Esta vista visual privilegia legibilidad por áreas.
+- Los criterios de **tarifas, permisos, conciliación y emisión** se reservan para una etapa posterior; aquí no se aprueban políticas funcionales.
