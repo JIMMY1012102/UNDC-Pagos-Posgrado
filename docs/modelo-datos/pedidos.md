@@ -75,6 +75,11 @@ TIMESTAMP occurred_at
   store_carts ||--o{ store_orders : "cart_id"
   store_orders ||--o{ store_order_items : "order_id"
   store_orders ||--o{ store_order_status_history : "order_id"
+  style store_carts fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_cart_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_orders fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_status_history fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
