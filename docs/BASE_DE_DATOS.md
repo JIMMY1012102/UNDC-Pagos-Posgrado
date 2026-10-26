@@ -63,7 +63,7 @@ Las tablas `tm_*` se mantienen intactas. Se agregan tablas **`store_*` en el mis
 - `store_catalog_price_versions` permite tarifas aprobadas con intervalos, sin reescribir la historia; la regla de precedencia con `tm_conceptos.costo` requiere acuerdo de Tesorería. Un servicio debe impedir periodos activos solapados.
 - En `store_order_items` se guarda una **instantánea** de concepto, monto y beneficiario. Cambiar la tarifa o nombre original después NO altera un pedido ya aceptado.
 
-**Nota técnica:** IDs originales son `INT(11)` **firmados** y las nuevas referencias `legacy_*` usan `integer` firmado. No se establecen todavía FOREIGN KEY a `tm_*` porque las migraciones se prueban también en SQLite sin copiar el legado; se validará existencia en aplicación, con la verificación estructural y una auditoría de referencias en MariaDB. Una FK cruzada puede acordarse como migración separada **después** de inspeccionar el entorno real.
+**Nota técnica (migración 000005):** los IDs históricos son `INT(11)` firmados y las columnas nuevas `legacy_*` usan `integer` firmado. La migración de integración exige la presencia del esquema histórico en MariaDB/MySQL y agrega **12 claves foráneas reales** hacia `tm_oficina`, `tm_conceptos`, `tm_usuario`, `tm_recaudacion` y `tm_resultado` con borrado/actualización restringidos. Se omite únicamente en SQLite de pruebas, que no importa las seis tablas originales. Se realiza otra prueba en MariaDB aislada con un fixture que replica las estructuras sin datos reales. No se modifica ninguna `tm_*`. No se fuerza una relación de `tm_conceptos.centro_costo` a oficina: la publicación lo define explícitamente.
 
 ### 3.2 Canales: Pay-me e Interbank
 
@@ -115,7 +115,7 @@ php artisan test
 php artisan migrate
 ```
 
-Las migraciones solo crean `store_*`. No llaman `ALTER TABLE tm_*`, no insertan pagos y no configuran conectores externos. Un `php artisan migrate` sobre una base nueva sin las seis tablas históricas **no crea por arte de magia la base compartida**; primero debe existir copia de **estructura del legado** en el entorno de pruebas, sin trasladar datos personales de producción.
+Las primeras cuatro migraciones crean `store_*`, y la quinta aplica restricciones a esas nuevas tablas para referenciar registros `tm_*` existentes. Ninguna llama `ALTER TABLE tm_*`, inserta pagos ni configura conectores externos. Un `php artisan migrate` sobre una base nueva sin las seis tablas históricas **no crea por arte de magia la base compartida**; primero debe existir copia de **estructura del legado** en el entorno de pruebas, sin trasladar datos personales de producción.
 
 Antes de utilizarla en la UNDC: verificar conexiones de ambas aplicaciones hacia el mismo esquema, permisos por cuenta SQL, compatibilidad con la versión actual y validación de **lectura desde SISPAGOS** de las nuevas tablas mediante consultas o vistas autorizadas.
 
@@ -133,3 +133,26 @@ Antes de utilizarla en la UNDC: verificar conexiones de ambas aplicaciones hacia
 Se corrigió el borrador del PR #2 que proponía duplicar `offices`, `staff_roles`, `concepts`. Ahora el **catálogo institucional tiene una sola fuente maestra: SISPAGOS**. La nueva tienda conserva sus propias entidades transaccionales sin copiar históricos. El diseño es preparado para crecer, pero todavía debe validarse contra la base activa y las reglas acordadas con el equipo.
 
 **Prohibición operacional:** no subir `tesoreria.sql` con registros reales, `.env`, credenciales, llaves privadas o datos bancarios identificables al repositorio.
+
+## 8. Integración física y crecimiento (actualización del PR)
+
+La migración `database/migrations/2026_10_25_000005_add_store_legacy_foreign_keys.php` vincula los registros de la tienda a maestros históricos a nivel InnoDB:
+
+| Tabla nueva | Columna | Maestro original |
+|---|---|---|
+| `store_office_settings` | `legacy_office_id` | `tm_oficina.oficina_id` |
+| `store_catalog_items` | `legacy_office_id`, `legacy_concept_id` | `tm_oficina`, `tm_conceptos` |
+| `store_order_items` | `legacy_office_id`, `legacy_concept_id` | `tm_oficina`, `tm_conceptos` |
+| `store_reconciliation_batches` | `legacy_importer_id` | `tm_usuario.usu_id` |
+| `store_reconciliation_entries` | `legacy_result_id`, `legacy_recaudacion_id` | `tm_resultado`, `tm_recaudacion` |
+| `store_payment_validations` | `legacy_reviewer_id` | `tm_usuario.usu_id` |
+| `store_validation_certificates` | `legacy_issuer_id`, `legacy_revoker_id` | `tm_usuario.usu_id` |
+| `store_audit_events` | `legacy_staff_id` | `tm_usuario.usu_id` |
+
+**Lectura conectada:** `app/Modules/Tienda/Queries/PublishedCatalogQuery.php` realiza JOIN desde `store_catalog_items` a `tm_conceptos`, `tm_oficina` y `store_office_settings` (solo oficinas activas/publicadas), retornando el **costo original** como importe de referencia. No publica endpoint HTTP hasta aprobar tarifas, reglas académicas y protección de datos. `database/queries/sispagos_store_payments_readonly.sql` muestra en sentido inverso los pedidos de tienda para SISPAGOS.
+
+**Pruebas reales:** `.github/workflows/ci.yml` incorpora un trabajo MariaDB 10.11 con esquema original **ficticio/sin estudiantes**, ejecuta las cinco migraciones y verifica las 12 claves foráneas y el rechazo de referencias inexistentes. El job SQLite mantiene pruebas de estructura y regresión sin almacenar `tesoreria.sql`.
+
+**Extensibilidad:** nuevas oficinas se habilitan en `tm_oficina` + `store_office_settings`, los conceptos en `tm_conceptos` + `store_catalog_items`. Nuevos flujos internos se agregan en módulos y migraciones nuevos con pruebas, no alterando tablas originales arbitrariamente. Proveedores se incorporan mediante adaptadores independientes y tablas de extensión si requieren información adicional. Las tablas de auditoría, estados y reportes permiten evolución, pero no sustituyen especificación, seguridad ni pruebas del dominio.
+
+**Precaución:** en una base real los cambios de DDL deben acordarse en ventana autorizada, revisando copias, privilegios, motores, compatibilidad, referencias y posibles bloqueos de metadatos. Aunque la migración solo altera tablas nuevas, una FK restringe el borrado/actualización de un maestro histórico referenciado: es un cambio conductual que debe aprobar Tesorería.
