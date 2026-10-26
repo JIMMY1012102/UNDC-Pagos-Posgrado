@@ -2,7 +2,7 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad]
+    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb]
   pull_request:
     branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth]
   workflow_dispatch:
@@ -80,6 +80,7 @@ jobs:
       DB_DATABASE: undc_tesoreria_ci
       DB_USERNAME: root
       DB_PASSWORD: ci_only_password
+      UNDC_INTEGRATION_FIXTURE: '1'
     steps:
       - name: Descargar código
         uses: actions/checkout@v4
@@ -109,3 +110,6 @@ jobs:
 
       - name: Comprobar llaves foráneas reales y uniones de catálogo
         run: php tests/Fixtures/mariadb_check.php verify
+
+      - name: Probar recorrido HTTP completo con MariaDB real
+        run: php artisan test tests/Feature/Integration/CompletePurchaseJourneyTest.php --no-ansi
