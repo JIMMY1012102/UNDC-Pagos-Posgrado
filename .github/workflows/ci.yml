@@ -2,9 +2,9 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra]
+    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion]
   pull_request:
-    branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado]
+    branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra]
   workflow_dispatch:
 
 permissions:
