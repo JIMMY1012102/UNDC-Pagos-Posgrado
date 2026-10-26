@@ -412,4 +412,13 @@ TIMESTAMP occurred_at
 
 ## Inventario general (38 entidades)
 
-Consultar [Mapa de 38 tablas](./MAPA_38_TABLAS.md) para la agrupación visual completa, [Diccionario técnico Laravel](./DICCIONARIO_LARAVEL.md) y [Diccionario histórico SISPAGOS](./DICCIONARIO_SISPAGOS.md). La identificación de columnas SISPAGOS aún requiere DDL institucional completo autorizado.
+Consultar [Mapa de 38 tablas](./MAPA_38_TABLAS.md) para la agrupación visual completa, [Diccionario técnico Laravel](./DICCIONARIO_LARAVEL.md) y [Diccionario histórico SISPAGOS](./DICCIONARIO_SISPAGOS.md). Las 67 columnas históricas identificadas provienen de un fixture CI sanitizado; sigue pendiente compararlas con el DDL institucional vigente autorizado.
+
+
+## Estado documental
+- [Mapa de 38 tablas](./MAPA_38_TABLAS.md), con identidad y seguridad en morado.
+- [Diccionario histórico SISPAGOS](./DICCIONARIO_SISPAGOS.md): 67 columnas documentadas desde fixture CI, sin datos privados.
+- [Diccionario de infraestructura Laravel](./DICCIONARIO_LARAVEL.md): ocho tablas con DDL de migraciones y `migrations` de control del framework por confirmar.
+- [Matriz de cardinalidades](./MATRIZ_CARDINALIDADES.md): 47 relaciones declaradas en la tienda o hacia SISPAGOS.
+- **Decisiones aplazadas por indicación del proyecto:** tarifas, roles, permisos, políticas de pagos, conciliación, constancias y demás reglas funcionales.
+- No se han ejecutado migraciones, creado endpoints ni modificado `tm_*`, Oracle o main.
