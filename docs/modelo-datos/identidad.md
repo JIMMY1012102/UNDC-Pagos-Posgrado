@@ -34,10 +34,14 @@ VARCHAR phone
 TIMESTAMP created_at
 TIMESTAMP updated_at
   }
+  users ||--o| store_customer_profiles : "user_id"
+  users ||--o{ store_oauth_identities : "user_id"
   store_customer_profiles ||--o{ store_beneficiaries : "customer_profile_id"
-  style store_customer_profiles fill:#DDD6FE,stroke:#7C3AED,color:#111827
-  style store_oauth_identities fill:#DDD6FE,stroke:#7C3AED,color:#111827
-  style store_beneficiaries fill:#DDD6FE,stroke:#7C3AED,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
+
+
+## Convención de cardinalidades
+La relación `||--o{` se representa desde el padre hacia cero o muchos hijos; `||--o|` hacia cero o un hijo (FK individual UNIQUE). Cuando la FK del hijo es nullable se señala **(opcional)**; las relaciones a entidades externas al módulo aparecen como nodos de referencia sin alterar sus estructuras. Consultar [matriz completa](./MATRIZ_CARDINALIDADES.md).
+
