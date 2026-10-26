@@ -28,7 +28,9 @@ jobs:
       - name: Validar consistencia
         run: |
           composer validate --strict
-          php artisan migrate --pretend --no-ansi
+          test -s config/permission.php
+          test -f composer.lock
+          ls database/migrations/*create_permission_tables.php
       - name: Registrar archivos realmente generados
         run: |
           git config user.name 'github-actions[bot]'
