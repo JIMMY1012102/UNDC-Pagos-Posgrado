@@ -35,6 +35,9 @@ TIMESTAMP created_at
 TIMESTAMP updated_at
   }
   store_customer_profiles ||--o{ store_beneficiaries : "customer_profile_id"
+  style store_customer_profiles fill:#DDD6FE,stroke:#7C3AED,color:#111827
+  style store_oauth_identities fill:#DDD6FE,stroke:#7C3AED,color:#111827
+  style store_beneficiaries fill:#DDD6FE,stroke:#7C3AED,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
