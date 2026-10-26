@@ -51,3 +51,13 @@ Fuente: migraciones Laravel 000001–000005 y documentación existente `docs/BAS
 **Aplazado explícitamente:** decisiones de tarifas, permisos, roles, reglas de conciliación, validación, constancias y políticas financieras. No bloquear el avance documental por estas definiciones ni tratarlas como aprobadas. La revisión estructural describe riesgos, pero **no** instruye cambiar migraciones. Permanecen como requisitos futuros.
 
 **Sin evidencia de producción:** falta contrastar el fixture CI con el esquema institucional vigente y la estructura exacta de la tabla `migrations` en MariaDB. No afirmar que esta comprobación haya sido realizada.
+
+## Verificación de consistencia del ER integral
+
+- [x] Se creó `ER_INTEGRAL_38_TABLAS.md` con 38 definiciones de entidad distintas y 47 relaciones físicas registradas en la matriz.
+- [x] Revisión automatizada de referencias del texto Mermaid: los 47 enlaces usan identificadores declarados en el mismo diagrama, sin referencias huérfanas.
+- [x] Se conservan las 12 FK de integración histórica y las relaciones opcionales identificadas desde migraciones.
+- [ ] **No se verificó visualmente el renderizado en el navegador de GitHub**. Mermaid ordena automáticamente las entidades, por lo que no se garantiza ausencia de cruces en la vista integral.
+- [ ] Estructura exacta de `migrations` y equivalencia fixture CI vs SISPAGOS vigente: requieren lectura autorizada del entorno institucional.
+
+Las decisiones sobre tarifas, permisos, roles y reglas de negocio quedan aplazadas. El PR permanece en borrador sin merge.
