@@ -8,6 +8,7 @@ Route::middleware(['auth', 'throttle:30,1'])
     ->prefix('api/v1/acceso')
     ->name('api.acceso.')
     ->group(function (): void {
+        Route::get('/estado', [BuyerProfileController::class, 'state'])->name('estado');
         Route::get('/perfil', [BuyerProfileController::class, 'show'])->name('perfil.show');
         Route::put('/perfil', [BuyerProfileController::class, 'update'])->name('perfil.update');
     });

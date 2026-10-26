@@ -19,6 +19,22 @@ final class BuyerProfileController extends Controller
         ])->header('Cache-Control', 'no-store');
     }
 
+    public function state(Request $request, BuyerProfileService $service): JsonResponse
+    {
+        $complete = $service->isComplete((int) $request->user()->id);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'authenticated' => true,
+                'profile_complete' => $complete,
+                'next_step' => $complete ? 'tienda' : 'complete_profile',
+                'profile' => $service->find((int) $request->user()->id),
+            ],
+            'message' => $complete ? 'El comprador ya completó su registro.' : 'Debe completar sus datos personales.',
+        ])->header('Cache-Control', 'no-store');
+    }
+
     public function update(Request $request, BuyerProfileService $service): JsonResponse
     {
         $validator = Validator::make($request->all(), [

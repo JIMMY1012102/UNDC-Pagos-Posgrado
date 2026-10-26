@@ -14,6 +14,15 @@ final class BuyerProfileService
         return $profile === null ? null : $this->present($profile);
     }
 
+    public function isComplete(int $userId): bool
+    {
+        $profile = $this->find($userId);
+
+        return $profile !== null
+            && collect(['first_names', 'last_names', 'document_type', 'document_number'])
+                ->every(static fn (string $key): bool => filled($profile[$key] ?? null));
+    }
+
     /** @param array<string,string|null> $input
      *  @return array<string,mixed>
      */
