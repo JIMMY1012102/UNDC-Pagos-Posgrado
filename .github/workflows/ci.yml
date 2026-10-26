@@ -2,9 +2,9 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/backend-catalogo-posgrado]
   pull_request:
-    branches: [main]
+    branches: [main, feat/base-datos-escalable-v1]
   workflow_dispatch:
 
 permissions:
