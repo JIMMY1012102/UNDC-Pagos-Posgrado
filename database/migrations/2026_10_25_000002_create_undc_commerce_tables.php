@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('carts', function (Blueprint $table) {
+        Schema::create('store_carts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             // Nunca persistir el identificador de sesión/carrito en texto claro.
@@ -20,22 +20,22 @@ return new class extends Migration
             $table->index(['user_id', 'status'], 'idx_cart_owner_status');
         });
 
-        Schema::create('cart_items', function (Blueprint $table) {
+        Schema::create('store_cart_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cart_id')->constrained('carts')->cascadeOnDelete();
-            $table->foreignId('concept_id')->constrained('concepts')->restrictOnDelete();
-            $table->foreignId('beneficiary_id')->nullable()->constrained('beneficiaries')->restrictOnDelete();
+            $table->foreignId('cart_id')->constrained('store_carts')->cascadeOnDelete();
+            $table->foreignId('catalog_item_id')->constrained('store_catalog_items')->restrictOnDelete();
+            $table->foreignId('beneficiary_id')->nullable()->constrained('store_beneficiaries')->restrictOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
-            $table->index(['cart_id', 'concept_id'], 'idx_cart_concept');
+            $table->index(['cart_id', 'catalog_item_id'], 'idx_cart_concept');
             // Concepto repetido para distintos beneficiarios: agrupar en el servicio.
         });
 
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('store_orders', function (Blueprint $table) {
             $table->id();
             $table->string('code', 48)->unique();
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
-            $table->foreignId('cart_id')->nullable()->constrained('carts')->nullOnDelete();
+            $table->foreignId('cart_id')->nullable()->constrained('store_carts')->nullOnDelete();
             $table->string('status', 32)->default('pending');
             $table->char('currency', 3)->default('PEN');
             $table->decimal('total_amount', 14, 2);
@@ -55,12 +55,13 @@ return new class extends Migration
             $table->index(['status', 'created_at'], 'idx_orders_status_date');
         });
 
-        Schema::create('order_items', function (Blueprint $table) {
+        Schema::create('store_order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
-            $table->foreignId('concept_id')->constrained('concepts')->restrictOnDelete();
-            $table->foreignId('office_id')->constrained('offices')->restrictOnDelete();
-            $table->foreignId('beneficiary_id')->nullable()->constrained('beneficiaries')->restrictOnDelete();
+            $table->foreignId('order_id')->constrained('store_orders')->restrictOnDelete();
+            $table->foreignId('catalog_item_id')->constrained('store_catalog_items')->restrictOnDelete();
+            $table->integer('legacy_concept_id'); // tm_conceptos.id_concepto, snapshot
+            $table->integer('legacy_office_id'); // tm_oficina.oficina_id, snapshot
+            $table->foreignId('beneficiary_id')->nullable()->constrained('store_beneficiaries')->restrictOnDelete();
             $table->string('concept_code', 64);
             $table->string('concept_name', 220);
             $table->unsignedInteger('quantity');
@@ -71,12 +72,12 @@ return new class extends Migration
             $table->string('beneficiary_document_type', 30);
             $table->string('beneficiary_document_number', 32);
             $table->timestamps();
-            $table->index(['office_id', 'order_id'], 'idx_items_office_order');
+            $table->index(['legacy_office_id', 'order_id'], 'idx_items_office_order');
         });
 
-        Schema::create('order_status_history', function (Blueprint $table) {
+        Schema::create('store_order_status_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
+            $table->foreignId('order_id')->constrained('store_orders')->restrictOnDelete();
             $table->foreignId('actor_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('from_status', 32)->nullable();
             $table->string('to_status', 32);
@@ -89,10 +90,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('order_status_history');
-        Schema::dropIfExists('order_items');
-        Schema::dropIfExists('orders');
-        Schema::dropIfExists('cart_items');
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists('store_order_status_history');
+        Schema::dropIfExists('store_order_items');
+        Schema::dropIfExists('store_orders');
+        Schema::dropIfExists('store_cart_items');
+        Schema::dropIfExists('store_carts');
     }
 };
