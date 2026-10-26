@@ -53,6 +53,10 @@ JSON safe_context
 TIMESTAMP occurred_at
   }
   store_payment_validations ||--o{ store_validation_certificates : "payment_validation_id"
+  style store_external_system_links fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_validations fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_validation_certificates fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_audit_events fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
