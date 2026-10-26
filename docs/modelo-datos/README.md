@@ -358,6 +358,29 @@ TIMESTAMP occurred_at
   store_payment_transactions ||--o{ store_payment_validations : "payment_transaction_id"
   store_payment_validations ||--o{ store_validation_certificates : "payment_validation_id"
   store_orders ||--o{ store_validation_certificates : "order_id"
+  style store_customer_profiles fill:#DDD6FE,stroke:#15803D,color:#111827
+  style store_oauth_identities fill:#DDD6FE,stroke:#15803D,color:#111827
+  style store_beneficiaries fill:#DDD6FE,stroke:#15803D,color:#111827
+  style store_office_settings fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_catalog_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_catalog_price_versions fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_carts fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_cart_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_orders fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_status_history fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_attempts fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_transactions fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_payment_claims fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_webhook_events fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_incidents fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_refunds fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_reconciliation_batches fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_reconciliation_entries fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_external_system_links fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_validations fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_validation_certificates fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_audit_events fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 ## Enlaces físicos con SISPAGOS
@@ -386,3 +409,7 @@ TIMESTAMP occurred_at
 - [control](./control.md)
 
 [Diccionario de datos](./DICCIONARIO_DATOS.md) · [Revisión estructural](./REVISION_ESTRUCTURAL.md)
+
+## Inventario general (38 entidades)
+
+Consultar [Mapa de 38 tablas](./MAPA_38_TABLAS.md) para la agrupación visual completa, [Diccionario técnico Laravel](./DICCIONARIO_LARAVEL.md) y [Diccionario histórico SISPAGOS](./DICCIONARIO_SISPAGOS.md). La identificación de columnas SISPAGOS aún requiere DDL institucional completo autorizado.
