@@ -71,15 +71,24 @@ VARCHAR reason
 JSON context
 TIMESTAMP occurred_at
   }
+  users ||--o{ store_carts : "user_id (opcional)"
   store_carts ||--o{ store_cart_items : "cart_id"
-  store_carts ||--o{ store_orders : "cart_id"
+  store_catalog_items ||--o{ store_cart_items : "catalog_item_id"
+  store_beneficiaries ||--o{ store_cart_items : "beneficiary_id (opcional)"
+  users ||--o{ store_orders : "user_id"
+  store_carts ||--o{ store_orders : "cart_id (opcional)"
   store_orders ||--o{ store_order_items : "order_id"
+  store_catalog_items ||--o{ store_order_items : "catalog_item_id"
+  store_beneficiaries ||--o{ store_order_items : "beneficiary_id (opcional)"
+  tm_oficina ||--o{ store_order_items : "legacy_office_id"
+  tm_conceptos ||--o{ store_order_items : "legacy_concept_id"
   store_orders ||--o{ store_order_status_history : "order_id"
-  style store_carts fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_cart_items fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_orders fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_order_items fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_order_status_history fill:#BBF7D0,stroke:#15803D,color:#111827
+  users ||--o{ store_order_status_history : "actor_user_id (opcional)"
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
+
+
+## Convención de cardinalidades
+La relación `||--o{` se representa desde el padre hacia cero o muchos hijos; `||--o|` hacia cero o un hijo (FK individual UNIQUE). Cuando la FK del hijo es nullable se señala **(opcional)**; las relaciones a entidades externas al módulo aparecen como nodos de referencia sin alterar sus estructuras. Consultar [matriz completa](./MATRIZ_CARDINALIDADES.md).
+
