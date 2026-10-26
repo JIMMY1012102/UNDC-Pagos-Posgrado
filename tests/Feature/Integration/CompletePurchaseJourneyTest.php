@@ -93,6 +93,52 @@ class CompletePurchaseJourneyTest extends TestCase
         $this->assertSame(1, DB::table('store_customer_profiles')->where('user_id', $buyer->id)->count());
     }
 
+    public function test_invalid_expired_and_reused_tokens_cannot_claim_a_cart(): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)
+            ->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => 'invalid'])
+            ->assertUnprocessable();
+
+        $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
+        DB::table('store_carts')->where('token_hash', hash('sha256', $token))
+            ->update(['expires_at' => now()->subSecond()]);
+        $this->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $token])
+            ->assertNotFound();
+
+        $new = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
+        $this->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $new])
+            ->assertOk();
+        $this->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $new])
+            ->assertNotFound();
+
+        $this->assertDatabaseCount('store_orders', 0);
+        $this->assertDatabaseCount('store_payment_transactions', 0);
+    }
+
+    public function test_returning_buyer_can_recover_previous_cart_without_registering_again(): void
+    {
+        $buyer = User::factory()->create();
+        $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
+        $this->actingAs($buyer)->postJson('/api/v1/tienda/precompra/vincular-carrito', [
+            'cart_token' => $token,
+        ])->assertOk();
+
+        $this->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Cliente', 'last_names' => 'Recurrente',
+            'document_type' => 'DNI', 'document_number' => '00000001',
+        ])->assertOk();
+
+        $this->flushSession();
+        $this->actingAs($buyer->fresh())->getJson('/api/v1/acceso/estado')
+            ->assertJsonPath('data.profile_complete', true);
+        $this->getJson('/api/v1/tienda/precompra/resumen')
+            ->assertJsonPath('data.profile.document_number', '00000001')
+            ->assertJsonPath('data.cart.items_count', 0);
+
+        $this->assertSame(1, DB::table('store_customer_profiles')->where('user_id', $buyer->id)->count());
+    }
+
     public function test_one_buyers_claimed_cart_is_not_accessible_from_another_account(): void
     {
         $created = $this->postJson('/api/v1/tienda/carritos')->assertCreated();
