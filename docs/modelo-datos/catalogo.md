@@ -37,6 +37,9 @@ TIMESTAMP created_at
 TIMESTAMP updated_at
   }
   store_catalog_items ||--o{ store_catalog_price_versions : "catalog_item_id"
+  style store_office_settings fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_catalog_items fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_catalog_price_versions fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
