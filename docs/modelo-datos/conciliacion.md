@@ -40,6 +40,8 @@ TIMESTAMP created_at
 TIMESTAMP updated_at
   }
   store_reconciliation_batches ||--o{ store_reconciliation_entries : "reconciliation_batch_id"
+  style store_reconciliation_batches fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_reconciliation_entries fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
