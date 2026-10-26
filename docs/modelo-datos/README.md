@@ -422,3 +422,11 @@ Consultar [Mapa de 38 tablas](./MAPA_38_TABLAS.md) para la agrupación visual co
 - [Matriz de cardinalidades](./MATRIZ_CARDINALIDADES.md): 47 relaciones declaradas en la tienda o hacia SISPAGOS.
 - **Decisiones aplazadas por indicación del proyecto:** tarifas, roles, permisos, políticas de pagos, conciliación, constancias y demás reglas funcionales.
 - No se han ejecutado migraciones, creado endpoints ni modificado `tm_*`, Oracle o main.
+
+## Diagramas de presentación
+
+- [ER integral de las 38 tablas y sus 47 FK](./ER_INTEGRAL_38_TABLAS.md) — lectura general de relaciones.
+- [Mapa por dominios](./MAPA_38_TABLAS.md) — más sencillo para exponer.
+- [Matriz de cardinalidades](./MATRIZ_CARDINALIDADES.md) — detalle de cada FK.
+
+**Advertencia de presentación:** Mermaid realiza distribución automática, por lo que el ER integral puede verse extenso; para una exposición usar el mapa por dominios junto a los seis diagramas individuales. Las decisiones de tarifas, permisos y otras reglas de negocio permanecen aplazadas.
