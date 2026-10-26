@@ -34,7 +34,7 @@ class PrepurchaseFlowTest extends TestCase
 
     public function test_public_tienda_screen_does_not_require_authentication(): void
     {
-        $this->get('/tienda')->assertOk()->assertSee('Comprar');
+        $this->get('/tienda')->assertOk()->assertSee('Continuar con mi compra');
         $this->getJson('/api/v1/tienda/precompra/resumen')->assertUnauthorized();
         $this->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => str_repeat('a', 64)])->assertUnauthorized();
     }
