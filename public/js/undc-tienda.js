@@ -14,7 +14,7 @@ function badge(){const n=state.cart?.items_count||0;$('cartBadge').textContent=n
 function renderCart(){
 const items=state.cart?.items||[];badge();
 const list=$('cartRows');list.replaceChildren();
-if(!items.length){list.innerHTML='<div class="empty">🛒<br>Tu carrito está vacío.<br><small>Selecciona un concepto para empezar.</small></div>';}
+if(!items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='🛒 Tu carrito está vacío. Selecciona un concepto para empezar.';list.append(empty);}
 for(const line of items){const row=document.createElement('div');row.className='cart-row';
 const info=document.createElement('div');const label=document.createElement('b');label.textContent=line.slug||'Concepto '+line.catalog_item_id;const q=document.createElement('small');q.textContent='Cantidad: '+line.quantity;info.append(label,q);row.append(info);
 if(!state.owned){const remove=document.createElement('button');remove.type='button';remove.className='mini';remove.textContent='Quitar';remove.setAttribute('aria-label','Quitar '+label.textContent);remove.onclick=()=>removeItem(line.id);row.append(remove)}list.append(row);}
@@ -24,7 +24,7 @@ $('cartContinue').disabled=!items.length;$('sideContinue').disabled=!items.lengt
 function renderCatalog(items){
 state.catalog=items;const query=$('search').value.toLocaleLowerCase('es');const target=$('catalogCards');target.replaceChildren();
 const filtered=items.filter(item=>(item.name+' '+item.code+' '+(item.description||'')).toLocaleLowerCase('es').includes(query));
-if(!filtered.length){target.innerHTML='<div class="empty">No encontramos conceptos publicados para esta búsqueda.</div>';return;}
+if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No encontramos conceptos publicados para esta búsqueda.';target.append(empty);return;}
 for(const item of filtered){const card=document.createElement('article');card.className='product';
 const icon=document.createElement('div');icon.className='product-icon';icon.textContent='📄';
 const h=document.createElement('h3');h.textContent=item.name;
@@ -42,8 +42,8 @@ async function removeItem(id){try{state.cart=await api('/api/v1/tienda/carritos/
 async function authState(){const res=await fetch('/api/v1/acceso/estado',{headers:{Accept:'application/json'},credentials:'same-origin'});if(res.status===401){state.authenticated=false;return false}if(!res.ok)throw new Error('No se pudo verificar la sesión.');state.authenticated=true;return true}
 async function purchase(){if(!(state.cart?.items_count>0)){toast('Agrega al menos un concepto para continuar.',true);return}screen('cart');await continuePurchase()}
 async function continuePurchase(){
-try{if(!(await authState())){sessionStorage.setItem('undc_resume_purchase','1');screen('identity');$('loginBox').hidden=false;$('profileBox').hidden=true;return}
-if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null}
+try{if(!(await authState())){screen('identity');$('loginBox').hidden=false;$('profileBox').hidden=true;return}
+if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null;state.owned=true}
 await refreshReview()}catch(e){toast(e.message,true)}}
 async function refreshReview(){
 const data=await api('/api/v1/tienda/precompra/resumen');state.owned=!!data.cart;state.cart=data.cart;state.profile=data.profile;renderCart();
