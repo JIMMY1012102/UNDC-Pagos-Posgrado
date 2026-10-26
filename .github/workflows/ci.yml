@@ -147,7 +147,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Iniciar Laravel y comprobar pantallas en navegador
         run: |
-          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/undc-serve.log 2>&1 &
+          SESSION_DRIVER=file CACHE_STORE=file DB_CONNECTION=sqlite DB_DATABASE=database/database.sqlite php artisan serve --host=127.0.0.1 --port=8000 > /tmp/undc-serve.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8000/tienda >/dev/null; then break; fi
             sleep 1
