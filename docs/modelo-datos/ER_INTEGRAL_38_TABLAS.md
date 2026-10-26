@@ -23,76 +23,76 @@ erDiagram
     INT i_resultado PK
   }
   store_customer_profiles {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_oauth_identities {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_beneficiaries {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_office_settings {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_catalog_items {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_catalog_price_versions {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_carts {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_cart_items {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_orders {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_order_items {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_order_status_history {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_payment_attempts {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_payment_transactions {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_order_payment_claims {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_payment_webhook_events {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_payment_incidents {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_refunds {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_reconciliation_batches {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_reconciliation_entries {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_external_system_links {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_payment_validations {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_validation_certificates {
-    VARCHAR id PK
+    BIGINT id PK
   }
   store_audit_events {
-    VARCHAR id PK
+    BIGINT id PK
   }
   users {
-    VARCHAR id PK
+    BIGINT id PK
   }
   password_reset_tokens {
     VARCHAR email PK
@@ -107,16 +107,16 @@ erDiagram
     VARCHAR key PK
   }
   jobs {
-    VARCHAR id PK
+    BIGINT id PK
   }
   job_batches {
     VARCHAR id PK
   }
   failed_jobs {
-    VARCHAR id PK
+    BIGINT id PK
   }
   migrations {
-    VARCHAR id PK
+    INT id PK
   }
   users ||--o| store_customer_profiles : "user_id"
   users ||--o{ store_oauth_identities : "user_id"
