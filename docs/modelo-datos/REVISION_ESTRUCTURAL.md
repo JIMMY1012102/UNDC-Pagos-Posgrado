@@ -31,3 +31,16 @@ Fuente: migraciones Laravel 000001–000005 y documentación existente `docs/BAS
 - Alfonso/OTI y Tesorería deben confirmar esquema, política de borrado RESTRICT, tarifas, estados, roles y conciliación.
 - Cualquier corrección DDL debe justificarse por causa e impacto y presentarse en otra revisión antes de aplicarse.
 - Prohibido modificar `tm_*`, desarrollar backend, fusionar a main, migrar Oracle o usar datos personales de producción.
+
+## Control de cierre documental — 26/10/2026
+
+- [x] Inventario visual de las 38 entidades agrupadas: `MAPA_38_TABLAS.md`.
+- [x] Diccionario de las ocho tablas creadas por las tres migraciones Laravel; `migrations` se identifica como tabla operativa del framework sin DDL encontrado en esas migraciones.
+- [x] Diccionario parcial de SISPAGOS trazado al documento existente `docs/BASE_DE_DATOS.md`.
+- [x] Aplicación inicial de paleta de dominio a los diagramas Mermaid, sujeta a compatibilidad de renderizado de GitHub.
+- [ ] Completar tipos, PK/FK/índices y nullability de **todas** las columnas institucionales cuando se apruebe compartir DDL sanitizado del entorno vigente.
+- [ ] Confirmar DDL exacto de `migrations` y comparar contra inventario de MariaDB.
+- [ ] Revisar visualmente los siete ER en GitHub y las cardinalidades opcionales; el mapa general es un mapa de dominio, no reemplaza un ER físico integral.
+- [ ] Registrar decisiones de OTI/Tesorería sobre puntos estructurales antes de cualquier propuesta de migración.
+
+**Nota metodológica:** Esta documentación se deduce del código versionado. La ejecución exitosa de CI anterior no sustituye la aceptación funcional de todas las reglas de negocio. No se ha ejecutado ningún DDL ni añadido backend.
