@@ -86,6 +86,12 @@ TIMESTAMP updated_at
   store_payment_attempts ||--o{ store_payment_webhook_events : "payment_attempt_id"
   store_payment_transactions ||--o{ store_payment_incidents : "payment_transaction_id"
   store_payment_transactions ||--o{ store_refunds : "payment_transaction_id"
+  style store_payment_attempts fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_transactions fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_order_payment_claims fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_webhook_events fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_payment_incidents fill:#BBF7D0,stroke:#15803D,color:#111827
+  style store_refunds fill:#BBF7D0,stroke:#15803D,color:#111827
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
