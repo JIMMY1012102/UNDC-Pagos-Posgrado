@@ -39,9 +39,16 @@ TIMESTAMP matched_at
 TIMESTAMP created_at
 TIMESTAMP updated_at
   }
+  tm_usuario ||--o{ store_reconciliation_batches : "legacy_importer_id (opcional)"
   store_reconciliation_batches ||--o{ store_reconciliation_entries : "reconciliation_batch_id"
-  style store_reconciliation_batches fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_reconciliation_entries fill:#BBF7D0,stroke:#15803D,color:#111827
+  store_payment_transactions ||--o{ store_reconciliation_entries : "payment_transaction_id (opcional)"
+  tm_resultado ||--o{ store_reconciliation_entries : "legacy_result_id (opcional)"
+  tm_recaudacion ||--o{ store_reconciliation_entries : "legacy_recaudacion_id (opcional)"
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
+
+
+## Convención de cardinalidades
+La relación `||--o{` se representa desde el padre hacia cero o muchos hijos; `||--o|` hacia cero o un hijo (FK individual UNIQUE). Cuando la FK del hijo es nullable se señala **(opcional)**; las relaciones a entidades externas al módulo aparecen como nodos de referencia sin alterar sus estructuras. Consultar [matriz completa](./MATRIZ_CARDINALIDADES.md).
+
