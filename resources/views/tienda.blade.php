@@ -103,6 +103,14 @@
  (async()=>{
   try{
    await ensureCart();
+   // On returning visits, show a previously claimed cart even if the new
+   // anonymous browser cart is empty. No new Google login is required.
+   const auth=await fetch('/api/v1/acceso/estado',{headers:{Accept:'application/json'},credentials:'same-origin'});
+   if(auth.ok && !token){await review();}
+   if(auth.ok && token && lines.length===0){
+     const previous=await api('/api/v1/tienda/precompra/resumen');
+     if(previous.cart?.items_count>0){await review();}
+   }
    if(sessionStorage.getItem('undc_resume_purchase')==='1'){
     sessionStorage.removeItem('undc_resume_purchase');await continuePurchase();
    }
