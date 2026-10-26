@@ -81,17 +81,22 @@ TIMESTAMP completed_at
 TIMESTAMP created_at
 TIMESTAMP updated_at
   }
-  store_payment_attempts ||--o{ store_payment_transactions : "payment_attempt_id"
-  store_payment_transactions ||--o{ store_order_payment_claims : "payment_transaction_id"
-  store_payment_attempts ||--o{ store_payment_webhook_events : "payment_attempt_id"
-  store_payment_transactions ||--o{ store_payment_incidents : "payment_transaction_id"
+  store_orders ||--o{ store_payment_attempts : "order_id"
+  store_orders ||--o{ store_payment_transactions : "order_id"
+  store_payment_attempts ||--o{ store_payment_transactions : "payment_attempt_id (opcional)"
+  store_orders ||--o| store_order_payment_claims : "order_id"
+  store_payment_transactions ||--o| store_order_payment_claims : "payment_transaction_id"
+  store_payment_attempts ||--o{ store_payment_webhook_events : "payment_attempt_id (opcional)"
+  store_orders ||--o{ store_payment_incidents : "order_id"
+  store_payment_transactions ||--o{ store_payment_incidents : "payment_transaction_id (opcional)"
+  users ||--o{ store_payment_incidents : "resolved_by (opcional)"
   store_payment_transactions ||--o{ store_refunds : "payment_transaction_id"
-  style store_payment_attempts fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_payment_transactions fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_order_payment_claims fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_payment_webhook_events fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_payment_incidents fill:#BBF7D0,stroke:#15803D,color:#111827
-  style store_refunds fill:#BBF7D0,stroke:#15803D,color:#111827
+  users ||--o{ store_refunds : "requested_by (opcional)"
 ```
 
 Vista funcional. Consultar el diagrama general para relaciones externas al módulo.
+
+
+## Convención de cardinalidades
+La relación `||--o{` se representa desde el padre hacia cero o muchos hijos; `||--o|` hacia cero o un hijo (FK individual UNIQUE). Cuando la FK del hijo es nullable se señala **(opcional)**; las relaciones a entidades externas al módulo aparecen como nodos de referencia sin alterar sus estructuras. Consultar [matriz completa](./MATRIZ_CARDINALIDADES.md).
+
