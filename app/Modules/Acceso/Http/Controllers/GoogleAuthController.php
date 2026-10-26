@@ -4,6 +4,7 @@ namespace App\Modules\Acceso\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Acceso\Services\GoogleIdentityService;
+use App\Modules\Acceso\Services\BuyerProfileService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ final class GoogleAuthController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback(Request $request, GoogleIdentityService $service): RedirectResponse
+    public function callback(Request $request, GoogleIdentityService $service, BuyerProfileService $profiles): RedirectResponse
     {
         abort_unless($this->enabled($request), 404);
 
@@ -41,7 +42,13 @@ final class GoogleAuthController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return redirect('/')->with('auth_success', 'Sesión iniciada correctamente.');
+        // Public catalog remains available before authentication; the first
+        // authenticated visit needs a profile once, subsequent visits do not.
+        $destination = $profiles->isComplete((int) $user->id)
+            ? '/?registration=complete'
+            : '/?registration=pending';
+
+        return redirect($destination)->with('auth_success', 'Sesión iniciada correctamente.');
     }
 
     public function logout(Request $request): RedirectResponse
