@@ -1223,5 +1223,9 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
 
 /* Small desktop adjustment, keeping the group inside the page. */
 @media (min-width: 1001px) {
-  .market-login-intro { transform: translateY(-20px); }
+  .market-login-intro { transform: translateY(-50px); }
+}
+
+@media (min-width: 1001px) {
+  .market-login-card { position: relative; top: -30px; }
 }
