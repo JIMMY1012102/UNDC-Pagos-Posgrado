@@ -1094,3 +1094,8 @@ html[data-accessibility-text] .market-login-heading, html[data-accessibility-tex
 
 /* Standalone sign-in: restore the store header when leaving this view. */
 .market-login-view > .site-header { display: none; }
+
+/* Raise the sign-in illustration group where there are two columns. */
+@media (min-width: 1001px) {
+  .market-login-intro { transform: translateY(-80px); }
+}
