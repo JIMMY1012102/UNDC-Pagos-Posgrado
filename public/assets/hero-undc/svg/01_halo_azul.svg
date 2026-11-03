@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="760" viewBox="0 0 1000 760">
+<defs>
+ <radialGradient id="halo"><stop offset="0%" stop-color="#069DFA" stop-opacity=".37"/><stop offset="47%" stop-color="#0571D9" stop-opacity=".18"/><stop offset="100%" stop-color="#014175" stop-opacity="0"/></radialGradient>
+ <radialGradient id="halo2"><stop offset="0%" stop-color="#06A9FB" stop-opacity=".35"/><stop offset="60%" stop-color="#066BC5" stop-opacity=".13"/><stop offset="100%" stop-color="#066BC5" stop-opacity="0"/></radialGradient>
+ <linearGradient id="halo3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0" stop-color="#002D66" stop-opacity="0"/><stop offset=".55" stop-color="#0B7BE9" stop-opacity=".25"/><stop offset="1" stop-color="#053668" stop-opacity="0"/></linearGradient>
+</defs>
+<ellipse cx="550" cy="376" rx="530" ry="357" fill="url(#halo)"/>
+<ellipse cx="490" cy="126" rx="300" ry="110" fill="url(#halo2)"/>
+<path d="M75 270 C250 75 663 10 990 155 L990 295 C755 182 420 140 100 430 Z" fill="url(#halo3)" opacity=".58"/>
+</svg>
