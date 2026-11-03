@@ -1208,3 +1208,15 @@ body.light-mode #accessibilityPanel .accessibility-swatch { background: #fff; co
 html[data-accessibility-text] #accessibilityPanel .accessibility-heading { flex-wrap: wrap; }
 html[data-accessibility-text] #accessibilityPanel .accessibility-themes { grid-template-columns: repeat(auto-fit, minmax(65px, 1fr)); }
 html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Reuse the shared accessibility popover on the standalone sign-in view. */
+.market-login-toolbar { display: flex; justify-content: flex-end; margin: 0 0 16px; }
+.market-login-accessibility { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 8px 18px; border: 1px solid #168aff; border-radius: 999px; color: var(--undc-text); background: var(--undc-card); font-size: calc(14px * var(--a11y-text-scale, 1)); }
+.market-login-accessibility svg { width: 24px; height: 24px; color: #168aff; flex-shrink: 0; }
+.market-login-accessibility:hover, .market-login-accessibility[aria-expanded="true"] { box-shadow: 0 0 0 3px rgb(22 138 255 / 16%); }
+.market-login-accessibility:focus-visible { outline: 3px solid #168aff; outline-offset: 4px; }
+.market-login-view #accessibilityPanel { top: 76px; }
+@media (max-width: 600px) {
+ .market-login-toolbar { margin-bottom: 16px; }
+ .market-login-view #accessibilityPanel { top: 70px; max-height: calc(100dvh - 82px); }
+}
