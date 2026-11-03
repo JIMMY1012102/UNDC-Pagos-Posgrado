@@ -2,7 +2,7 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="description" content="Tienda virtual de conceptos de Posgrado — Universidad Nacional de Cañete">
-<title>Tienda virtual de pagos · UNDC</title>
+<title>UNDC MARKET · Tienda virtual de pagos</title>
 <link rel="icon" type="image/png" href="{{ asset('Logo_UNDC_OF.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
 </head><body>
 <header class="site-header">
 <div class="top"><div class="top-inner">
-<a href="/tienda" class="brand" aria-label="UNDC Postgrado — Inicio"><img class="crest" src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo de la Universidad Nacional de Cañete"><span class="brand-copy"><span class="brand-title"><b>UNDC</b> <em>Postgrado</em></span></span></a>
+<a href="/tienda" class="brand" aria-label="UNDC MARKET — Inicio"><img class="crest" src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo de la Universidad Nacional de Cañete"><span class="brand-copy"><span class="brand-title"><b>UNDC</b> <em>MARKET</em></span></span></a>
 <div class="utility-controls" aria-label="Configuraciones">
 <div class="language-picker" data-language-picker data-no-translate><button class="utility-control language-button" type="button" aria-haspopup="true" aria-expanded="false"><span class="language-flag peru-flag" aria-hidden="true"><i></i></span><span class="language-label">ESPAÑOL</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg></button><div class="language-menu" hidden><button type="button" data-language="es"><span class="peru-flag" aria-hidden="true"><i></i></span>Español</button><button type="button" data-language="en"><span class="usa-flag" aria-hidden="true"><i></i></span>English</button></div></div>
 <button class="utility-control theme-control" type="button" data-theme-toggle aria-pressed="true"><span class="moon-pill"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg></span><span class="theme-label">Modo oscuro</span><span class="theme-switch" aria-hidden="true"><i></i></span></button>
