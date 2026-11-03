@@ -16,8 +16,8 @@
 <div class="language-picker" data-language-picker data-no-translate><button class="utility-control language-button" type="button" aria-haspopup="true" aria-expanded="false"><span class="language-flag peru-flag" aria-hidden="true"><i></i></span><span class="language-label">ESPAÑOL</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg></button><div class="language-menu" hidden><button type="button" data-language="es"><span class="peru-flag" aria-hidden="true"><i></i></span>Español</button><button type="button" data-language="en"><span class="usa-flag" aria-hidden="true"><i></i></span>English</button></div></div>
 <button class="utility-control accessibility-toggle" type="button" data-accessibility-toggle aria-expanded="false" aria-controls="accessibilityPanel"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="4" r="2"/><path d="M4 8h16m-8 0v6m0 0-5 7m5-7 5 7"/></svg><span>Accesibilidad</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
 </div>
-<div class="nav-actions"><button id="cartButton" class="cart-button" type="button" aria-label="Abrir carrito"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg><span id="cartBadge">0</span></button><span class="action-divider" aria-hidden="true"></span><a class="login-button" href="/auth/google/redirect"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Inicia sesión</span></a></div>
-<div class="mobile-primary-actions"><button id="mobileCartButton" class="mobile-cart" type="button" aria-label="Abrir carrito"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg><span id="mobileCartBadge">0</span></button><a class="mobile-login" href="/auth/google/redirect" aria-label="Inicia sesión"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a></div>
+<div class="nav-actions"><button id="cartButton" class="cart-button" type="button" aria-label="Abrir carrito"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg><span id="cartBadge">0</span></button><span class="action-divider" aria-hidden="true"></span><a class="login-button" data-login-trigger href="/tienda?login=1"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Inicia sesión</span></a></div>
+<div class="mobile-primary-actions"><button id="mobileCartButton" class="mobile-cart" type="button" aria-label="Abrir carrito"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg><span id="mobileCartBadge">0</span></button><a class="mobile-login" data-login-trigger href="/tienda?login=1" aria-label="Inicia sesión"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a></div>
 <button id="headerMenuButton" class="menu-toggle" type="button" aria-controls="headerNavPanel" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Abrir menú</span></button>
 </div></div>
 <div class="subheader" id="headerNavPanel"><nav class="nav" aria-label="Navegación principal">
@@ -71,6 +71,35 @@
 <button class="btn block" id="cartContinue" type="button" disabled>Continuar con mi compra →</button>
 <p class="smallprint cart-reassurance"><span aria-hidden="true">ⓘ</span> <span>Solo al continuar te pediremos iniciar sesión. No se realizará ningún cobro en esta etapa.</span></p>
 </div></section>
+
+<section class="screen market-login-screen" data-screen="login" aria-labelledby="marketLoginTitle">
+<div class="market-login-layout">
+<div class="market-login-intro">
+<a href="/tienda" class="market-login-brand"><img src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo UNDC"><span><strong>UNDC <em>MARKET</em></strong><small>Tienda virtual de pagos de la UNDC</small></span></a>
+<img class="market-login-mascot" src="{{ asset('assets/login/robot-undc.png') }}" alt="Asistente universitario UNDC con birrete y computadora" width="1024" height="1024">
+<div class="market-login-benefits"><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20m-15 5h4"/></svg><b>Organiza tus trámites</b></span><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><b>Acceso a tu perfil</b></span><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>Consulta en línea</b></span></div>
+</div>
+<div class="market-login-card">
+<button class="back" type="button" data-go="catalog">← Volver a la tienda</button>
+<div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l3 12h11l2-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Inicia sesión en<br><strong>UNDC <em>MARKET</em></strong></h1><p>Accede a la tienda virtual de pagos de la UNDC.</p></div></div>
+<div class="market-login-password" aria-describedby="marketPasswordNotice"><label for="marketLoginEmail">Correo institucional o usuario</label><div class="market-login-input"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg><input id="marketLoginEmail" type="text" placeholder="Correo institucional o usuario" disabled></div>
+<label for="marketLoginPassword">Contraseña</label><div class="market-login-input"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input id="marketLoginPassword" type="password" placeholder="Contraseña" disabled></div>
+<button type="button" class="market-login-forgot" disabled>¿Olvidaste tu contraseña?</button>
+<button type="button" class="btn market-login-submit" disabled>Iniciar sesión</button>
+<p id="marketPasswordNotice" class="market-login-notice">El acceso con contraseña y su recuperación estarán disponibles próximamente.</p></div>
+<div class="market-login-divider"><span>o</span></div>
+@php($marketGoogleReady = config('services.google.enabled') === true && filled(config('services.google.client_id')) && filled(config('services.google.client_secret')) && filled(config('services.google.redirect')) && request()->isSecure() && str_starts_with((string) config('services.google.redirect'), 'https://'))
+@if($marketGoogleReady)
+<a id="marketLoginGoogle" class="market-login-google" href="/auth/google/redirect"><span class="market-google-letter" aria-hidden="true">G</span>Continuar con Google</a>
+@else
+<button id="marketLoginGoogle" class="market-login-google" type="button" disabled><span class="market-google-letter" aria-hidden="true">G</span>Continuar con Google</button>
+<p class="market-login-notice">El acceso con Google estará disponible cuando OTI complete su configuración.</p>
+@endif
+<div class="market-login-register"><span>¿Aún no tienes una cuenta?</span><button type="button" disabled>Regístrate · Próximamente</button></div>
+</div>
+</div>
+</section>
+
 <section class="screen" data-screen="identity">
 <div class="panel"><button class="back" type="button" data-go="cart">← Volver al carrito</button><h2>¡Ya casi terminamos!</h2><p class="subtle">Identifícate de forma segura para continuar con tus conceptos seleccionados.</p>
 <div id="loginBox"><div class="login-note"><span class="google">G</span><div><b>Ingresar con tu cuenta Google</b><p class="smallprint" style="margin:4px 0">Puedes utilizar una cuenta Google personal o institucional. No necesitas registrarte antes de elegir conceptos.</p></div></div>

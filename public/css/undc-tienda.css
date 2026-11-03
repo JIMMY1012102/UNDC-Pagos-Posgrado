@@ -1022,3 +1022,72 @@ body.light-mode .cart-review-panel .cart-remove { color: #e5475d; background: #f
 }
 html[data-accessibility-text] .cart-review-panel .cart-service-row { display: flex; flex-wrap: wrap; }
 html[data-accessibility-text] .cart-service-info { flex: 1 1 200px; }
+
+/* UNDC Market sign-in presentation. */
+.market-login-view { background: radial-gradient(ellipse at 0 15%, #153f69, transparent 65%), var(--undc-bg); }
+.market-login-view main.wrap { width: min(calc(100% - 48px), 1400px); padding: 32px 0 50px; }
+.market-login-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 60px); }
+.market-login-intro { min-width: 0; }
+.market-login-brand { display: flex; align-items: center; gap: 18px; }
+.market-login-brand img { width: 76px; height: 84px; object-fit: contain; }
+.market-login-brand > span { border-left: 1px solid #6398c3; padding-left: 18px; min-width: 0; }
+.market-login-brand strong { display: block; font-size: calc(clamp(25px, 2.8vw, 42px) * var(--a11y-text-scale, 1)); line-height: 1.1; font-weight: 800; }
+.market-login-brand em, .market-login-heading em { color: #168aff; font-style: normal; }
+.market-login-brand small { display: block; font-size: calc(15px * var(--a11y-text-scale, 1)); margin-top: 8px; }
+.market-login-mascot { display: block; width: min(90%, 450px); height: auto; margin: 26px auto; object-fit: contain; }
+.market-login-benefits { display: flex; align-items: stretch; background: #103b62; border-radius: 24px; padding: 20px 12px; }
+.market-login-benefits > span { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 12px; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+.market-login-benefits > span + span { border-left: 1px solid #285681; }
+.market-login-benefits svg { width: 30px; height: 30px; flex-shrink: 0; color: #168aff; }
+.market-login-card { border: 1px solid var(--undc-card-border); border-radius: 32px; padding: clamp(24px, 3.5vw, 48px); background: var(--undc-card); box-shadow: 0 16px 45px rgb(0 8 24 / 20%); min-width: 0; }
+.market-login-card > .back { margin-bottom: 24px; }
+.market-login-heading { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 28px; }
+.market-login-heading > div { min-width: 0; }
+.market-login-heading h1 { margin: 0; font-size: calc(clamp(23px, 2.3vw, 34px) * var(--a11y-text-scale, 1)); line-height: 1.2; font-weight: 650; letter-spacing: -.025em; }
+.market-login-heading h1 strong { font-weight: 800; }
+.market-login-heading p { margin: 10px 0 0; color: var(--undc-muted); font-size: calc(14px * var(--a11y-text-scale, 1)); line-height: 1.5; }
+.market-login-symbol { display: grid; place-items: center; width: 72px; height: 72px; flex-shrink: 0; border-radius: 22px; background: #103b62; color: #168aff; }
+.market-login-symbol svg { width: 42px; height: 42px; }
+.market-login-password label { display: block; margin: 15px 0 7px; font-size: calc(12px * var(--a11y-text-scale, 1)); color: var(--undc-muted); }
+.market-login-input { display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 0 18px; border: 1px solid var(--undc-card-border); border-radius: 18px; background: var(--undc-bg); }
+.market-login-input svg { width: 24px; height: 24px; color: #168aff; flex-shrink: 0; }
+.market-login-input input { width: 100%; min-width: 0; border: 0; outline: none; padding: 16px 0; color: var(--undc-text); background: transparent; font-size: calc(15px * var(--a11y-text-scale, 1)); opacity: 1; -webkit-text-fill-color: var(--undc-text); }
+.market-login-input input::placeholder { color: var(--undc-muted); opacity: 1; }
+.market-login-forgot { display: block; margin: 12px 0 22px auto; border: 0; background: transparent; color: #168aff; padding: 4px 0; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+.market-login-submit { width: 100%; min-height: 54px; border-radius: 16px; font-size: calc(18px * var(--a11y-text-scale, 1)); }
+.market-login-notice { margin: 10px 0 0; color: var(--undc-muted); font-size: calc(12px * var(--a11y-text-scale, 1)); line-height: 1.6; text-align: center; }
+.market-login-divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--undc-muted); }
+.market-login-divider::before, .market-login-divider::after { content: ""; flex: 1; height: 1px; background: var(--undc-card-border); }
+.market-login-google { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; min-height: 56px; border: 1px solid var(--undc-card-border); border-radius: 18px; background: var(--undc-bg); color: var(--undc-text); padding: 12px 16px; font-size: calc(17px * var(--a11y-text-scale, 1)); font-weight: 700; text-align: center; }
+.market-google-letter { color: #4285f4; font-family: Arial, sans-serif; font-size: calc(28px * var(--a11y-text-scale, 1)); font-weight: 800; }
+.market-login-register { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 28px; font-size: calc(13px * var(--a11y-text-scale, 1)); }
+.market-login-register button { border: 0; padding: 0; background: transparent; color: #168aff; font-weight: 700; }
+.market-login-google:focus-visible, .market-login-brand:focus-visible { outline: 3px solid #168aff; outline-offset: 4px; }
+body.light-mode.market-login-view { background: radial-gradient(ellipse at 0 15%, #dbeeff, transparent 65%), #f3f8ff; }
+body.light-mode .market-login-card { background: linear-gradient(145deg, #fff, #f8fbff); border-color: #dce9f8; box-shadow: 0 16px 45px rgb(25 95 160 / 12%); }
+body.light-mode .market-login-brand strong, body.light-mode .market-login-heading h1 { color: #102f50; }
+body.light-mode .market-login-benefits, body.light-mode .market-login-symbol { background: #dfedff; }
+body.light-mode .market-login-benefits > span + span { border-color: #bdd6f2; }
+body.light-mode .market-login-input, body.light-mode .market-login-google { background: #fcfdff; border-color: #cfdef0; box-shadow: 0 3px 8px rgb(20 80 140 / 5%); }
+@media (max-width: 1000px) {
+ .market-login-layout { grid-template-columns: minmax(0, 1fr); max-width: 650px; margin: auto; }
+ .market-login-brand { justify-content: center; }
+ .market-login-mascot { width: 220px; margin: 16px auto; }
+ .market-login-benefits { padding: 16px 10px; }
+ .market-login-brand img { width: 58px; height: 68px; }
+}
+@media (max-width: 480px) {
+ .market-login-view main.wrap { width: calc(100% - 24px); padding-top: 20px; }
+ .market-login-brand { gap: 10px; }
+ .market-login-brand > span { padding-left: 10px; }
+ .market-login-brand strong { font-size: calc(24px * var(--a11y-text-scale, 1)); }
+ .market-login-brand small { font-size: calc(11px * var(--a11y-text-scale, 1)); }
+ .market-login-card { padding: 22px 18px; border-radius: 24px; }
+ .market-login-heading { gap: 12px; }
+ .market-login-symbol { width: 48px; height: 48px; border-radius: 14px; }
+ .market-login-symbol svg { width: 30px; height: 30px; }
+ .market-login-heading h1 { font-size: calc(22px * var(--a11y-text-scale, 1)); }
+ .market-login-benefits > span { flex-direction: column; text-align: center; padding: 0 7px; font-size: calc(10px * var(--a11y-text-scale, 1)); }
+}
+html[data-accessibility-text] .market-login-layout { grid-template-columns: minmax(0, 1fr); }
+html[data-accessibility-text] .market-login-heading, html[data-accessibility-text] .market-login-benefits { flex-wrap: wrap; }

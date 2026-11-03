@@ -3,6 +3,24 @@ const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name=
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:'catalog',authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Volver a la tienda":"Back to the store",
+"Tienda virtual de pagos de la UNDC":"UNDC virtual payment store",
+"Asistente universitario UNDC con birrete y computadora":"UNDC university assistant with graduation cap and laptop",
+"Organiza tus trámites":"Organize your services",
+"Acceso a tu perfil":"Access your profile",
+"Consulta en línea":"Browse online",
+"Inicia sesión en":"Sign in to",
+"Accede a la tienda virtual de pagos de la UNDC.":"Access the UNDC virtual payment store.",
+"Correo institucional o usuario":"Institutional email or username",
+"Contraseña":"Password",
+"¿Olvidaste tu contraseña?":"Forgot your password?",
+"Iniciar sesión":"Sign in",
+"El acceso con contraseña y su recuperación estarán disponibles próximamente.":"Password sign-in and recovery will be available soon.",
+"El acceso con Google estará disponible cuando OTI complete su configuración.":"Google sign-in will be available once OTI completes its configuration.",
+"¿Aún no tienes una cuenta?":"Don't have an account yet?",
+"Regístrate · Próximamente":"Register · Coming soon",
+"o":"or",
+
 "Resumen de tu selección":"Selection summary",
 "Conceptos seleccionados":"Selected services",
 "Total referencial":"Reference total",
@@ -266,7 +284,7 @@ $('visibleConceptCount').textContent=visible.length+' '+localized(visible.length
 const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalogResultsTitle').textContent=selected?localized(selected.name,selected.en):localized('Todos los conceptos','All services');
 }
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Referencia documental','Document reference'))+'</small><strong>TUSNE '+esc(item.tusne||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(localized('Escuela de Posgrado','Graduate School'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
-function screen(name){state.screen=name;document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
+function screen(name){state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0)+referenceCart.length;$('cartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
 function referenceCartEstimate(referenceItems,hasInstitutionalItems){
@@ -468,5 +486,12 @@ if(speechAvailable){
  speechStatus('La lectura en voz alta no está disponible en este navegador.','Read aloud is not available in this browser.');
 }
 document.querySelectorAll('[data-language]').forEach(button=>button.addEventListener('click',()=>{stopReading(false);populateVoices();if(speechAvailable)$('accessibilityStatus').textContent=''}));
+
+
+document.querySelectorAll('[data-login-trigger]').forEach(link=>link.addEventListener('click',event=>{
+ event.preventDefault();closeHeaderMenu();screen('login');$('marketLoginTitle').focus({preventScroll:true});
+}));
+$('marketLoginGoogle')?.addEventListener('click',()=>{if(state.cart?.items_count>0)sessionStorage.setItem('undc_resume_purchase','1')});
+if(new URLSearchParams(window.location.search).get('login')==='1')screen('login');
 
 })();
