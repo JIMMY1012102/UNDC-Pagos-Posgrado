@@ -3,6 +3,11 @@ const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name=
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:'catalog',authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Resumen de tu selección":"Selection summary",
+"Conceptos seleccionados":"Selected services",
+"Total referencial":"Reference total",
+"Total referencial:":"Reference total:",
+
 "Tu carrito está vacío":"Your cart is empty",
 "Selecciona un concepto de nuestros catálogos o trámites para comenzar tu compra.":"Select a service from our catalogs to start your purchase.",
 "Explorar conceptos y agregar al carrito":"Explore services and add to cart",
@@ -264,17 +269,41 @@ function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id
 function screen(name){state.screen=name;document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0)+referenceCart.length;$('cartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
+function referenceCartEstimate(referenceItems,hasInstitutionalItems){
+ if(hasInstitutionalItems||referenceItems.some(item=>item.unit))return localized('Por confirmar','To be confirmed');
+ const cents=referenceItems.reduce((total,item)=>{const match=item.price.match(/^S\/\s*([\d,]+)\.(\d{2})$/);return match?total+Number(match[1].replace(/,/g,''))*100+Number(match[2]):NaN},0);
+ return Number.isFinite(cents)?'S/ '+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):localized('Por confirmar','To be confirmed');
+}
 function renderCart(){
-const items=state.cart?.items||[],referenceItems=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);badge();
-const sideItems=$('sideCartItems');sideItems.replaceChildren();for(const line of items){const entry=document.createElement('p');entry.className='side-cart-item';entry.textContent=line.slug||'Concepto '+line.catalog_item_id;sideItems.append(entry)}for(const item of referenceItems){const entry=document.createElement('p');entry.className='side-cart-item';entry.textContent=localized(item.name,item.en)+' · '+localized('Referencial','Reference');sideItems.append(entry)}$('sideCartSummary').textContent=items.length||referenceItems.length?localized('Tus conceptos seleccionados:','Your selected services:'):localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.');
-const list=$('cartRows');list.replaceChildren();
-const cartIsEmpty=!items.length&&!referenceItems.length;$('cartEmptyState').hidden=!cartIsEmpty;document.querySelector('.cart-review-panel').classList.toggle('is-empty',cartIsEmpty);
-for(const line of items){const row=document.createElement('div');row.className='cart-row';
-const info=document.createElement('div');const label=document.createElement('b');label.textContent=line.slug||'Concepto '+line.catalog_item_id;const q=document.createElement('small');q.textContent='Cantidad: '+line.quantity;info.append(label,q);row.append(info);
-if(!state.owned){const remove=document.createElement('button');remove.type='button';remove.className='mini';remove.textContent='Quitar';remove.setAttribute('aria-label','Quitar '+label.textContent);remove.onclick=()=>removeItem(line.id);row.append(remove)}list.append(row);}
-for(const item of referenceItems){const category=categoryById(item.category),row=document.createElement('div');row.className='cart-row reference-cart-row';const info=document.createElement('div'),label=document.createElement('b'),detail=document.createElement('small'),price=document.createElement('small');label.textContent=localized(item.name,item.en);detail.textContent='TUSNE '+(item.tusne||item.id)+' · '+localized(category.name,category.en)+' · '+localized('Referencial · no pagable','Reference · not payable');price.textContent=item.price;info.append(label,detail,price);row.append(info);const remove=document.createElement('button');remove.type='button';remove.className='mini';remove.textContent=localized('Quitar','Remove');remove.setAttribute('aria-label',localized('Quitar ','Remove ')+label.textContent);remove.onclick=()=>{referenceCart=referenceCart.filter(id=>id!==item.id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart()};row.append(remove);list.append(row)}
-$('cartTotalCount').textContent=((state.cart?.items_count||0)+referenceItems.length)+' '+localized('conceptos','services');
-$('cartContinue').disabled=!items.length;$('sideContinue').disabled=!items.length;
+ const items=state.cart?.items||[],referenceItems=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);badge();
+ const count=items.length+referenceItems.length,cartIsEmpty=count===0;
+ $('cartEmptyState').hidden=!cartIsEmpty;
+ document.querySelector('.cart-review-panel').classList.toggle('is-empty',cartIsEmpty);
+ document.querySelector('.page-grid').classList.toggle('cart-has-items',!cartIsEmpty);
+ $('cartListHeading').hidden=cartIsEmpty;$('cartEstimateRow').hidden=cartIsEmpty;
+ $('cartPurchaseSummary').hidden=cartIsEmpty;
+ const estimate=referenceCartEstimate(referenceItems,items.length>0);
+ $('cartEstimate').textContent=estimate;$('cartSummaryEstimate').textContent=estimate;
+ $('cartSummaryCount').textContent=String(count);
+ $('cartTotalCount').textContent=localized('Tu selección','Your selection')+' ('+count+')';
+ const sideItems=$('sideCartItems');sideItems.replaceChildren();
+ $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes referenciales, sujetos a validación.','Reference amounts, subject to validation.');
+ const list=$('cartRows');list.replaceChildren();
+ const trash='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';
+ function appendRow({name,detail,price,icon,remove}){
+  const row=document.createElement('div');row.className='cart-row cart-service-row';
+  const visual=document.createElement('span');visual.className='cart-service-icon';visual.setAttribute('aria-hidden','true');visual.textContent=icon;
+  const info=document.createElement('div');info.className='cart-service-info';
+  const title=document.createElement('b');title.textContent=name;
+  const meta=document.createElement('small');meta.textContent=detail;info.append(title,meta);
+  const amount=document.createElement('strong');amount.className='cart-service-price';amount.textContent=price;
+  row.append(visual,info,amount);
+  if(remove){const button=document.createElement('button');button.type='button';button.className='mini cart-remove';button.innerHTML=trash;button.setAttribute('aria-label',localized('Quitar ','Remove ')+name);button.title=localized('Quitar','Remove');button.onclick=remove;row.append(button)}
+  list.append(row);
+ }
+ for(const line of items)appendRow({name:line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Cantidad: ','Quantity: ')+line.quantity,price:localized('Por confirmar','To be confirmed'),icon:'▤',remove:state.owned?null:()=>removeItem(line.id)});
+ for(const item of referenceItems){const category=categoryById(item.category);appendRow({name:localized(item.name,item.en),detail:'TUSNE '+(item.tusne||item.id)+' · '+localized(category.name,category.en)+' · '+localized('Referencial · no pagable','Reference · not payable'),price:item.price+(item.unit?' / '+localized(item.unit,item.unitEn):''),icon:category.icon||'▤',remove:()=>{referenceCart=referenceCart.filter(id=>id!==item.id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart()}})}
+ $('cartContinue').disabled=!items.length;$('sideContinue').disabled=!items.length;
 }
 function toggleReferenceCart(id){if(referenceCart.includes(id))referenceCart=referenceCart.filter(itemId=>itemId!==id);else referenceCart.push(id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart();const added=referenceCart.includes(id);toast(added?localized('Concepto agregado al carrito como selección referencial.','Service added as a reference selection.'):localized('Concepto retirado del carrito.','Service removed from cart.'));}
 async function ensureCart(){if(state.token){try{state.cart=await api('/api/v1/tienda/carritos/actual','GET',null,true);renderCart();return}catch(e){if(e.status!==404)throw e;sessionStorage.removeItem('undc_cart_token');state.token=null}}
