@@ -1220,3 +1220,9 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
  .market-login-toolbar { margin-bottom: 16px; }
  .market-login-view #accessibilityPanel { top: 70px; max-height: calc(100dvh - 82px); }
 }
+
+/* Small desktop adjustment, keeping the group inside the page. */
+@media (min-width: 1001px) {
+  .market-login-view main.wrap { padding-top: 40px; }
+  .market-login-intro { transform: translateY(-20px); }
+}
