@@ -1107,3 +1107,31 @@ html[data-accessibility-text] .market-login-heading, html[data-accessibility-tex
 @media (min-width: 1001px) {
   .market-login-benefits { position: relative; top: -30px; }
 }
+
+/* Compact sign-in card: show all access options together. */
+.market-login-view main.wrap { padding-top: 20px; padding-bottom: 28px; }
+.market-login-card { width: 100%; max-width: 580px; justify-self: end; padding: 26px 32px; }
+.market-login-card > .back { margin-bottom: 14px; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+.market-login-heading { gap: 14px; margin-bottom: 20px; }
+.market-login-symbol { width: 58px; height: 58px; border-radius: 18px; }
+.market-login-symbol svg { width: 34px; height: 34px; }
+.market-login-heading h1 { font-size: calc(26px * var(--a11y-text-scale, 1)); }
+.market-login-heading p { margin-top: 6px; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+.market-login-password label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.market-login-input { min-height: 46px; border-radius: 15px; padding-inline: 16px; }
+.market-login-input + label + .market-login-input { margin-top: 14px; }
+.market-login-input input { padding-block: 12px; font-size: calc(14px * var(--a11y-text-scale, 1)); }
+.market-login-forgot { margin: 10px 0 16px auto; font-size: calc(12px * var(--a11y-text-scale, 1)); opacity: 1; }
+.market-login-submit { min-height: 46px; padding-block: 10px; font-size: calc(16px * var(--a11y-text-scale, 1)); opacity: 1 !important; background: linear-gradient(110deg, #008cff, #0050a7); }
+.market-login-notice { font-size: calc(11px * var(--a11y-text-scale, 1)); line-height: 1.4; margin-top: 8px; }
+.market-login-divider { margin: 14px 0; }
+.market-login-google { min-height: 46px; padding: 10px 14px; font-size: calc(15px * var(--a11y-text-scale, 1)); border-radius: 15px; gap: 12px; opacity: 1 !important; }
+.market-google-icon { width: 25px; height: 25px; flex: 0 0 25px; }
+.market-login-register { margin-top: 16px; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+.market-login-register button { opacity: 1; }
+@media (max-width: 1000px) { .market-login-card { justify-self: center; } }
+@media (max-width: 480px) {
+ .market-login-card { padding: 22px 18px; }
+ .market-login-heading h1 { font-size: calc(22px * var(--a11y-text-scale, 1)); }
+ .market-login-symbol { width: 46px; height: 46px; }
+}
