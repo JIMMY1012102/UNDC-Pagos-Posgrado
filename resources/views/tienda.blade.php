@@ -71,6 +71,7 @@
 </div></section>
 
 <section class="screen market-login-screen" data-screen="login" aria-labelledby="marketLoginTitle">
+<div class="market-login-toolbar"><button class="market-login-accessibility" type="button" data-accessibility-toggle aria-expanded="false" aria-controls="accessibilityPanel"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M4 8h16m-8 0v6m0 0-5 7m5-7 5 7"/></svg><span>Accesibilidad</span><span aria-hidden="true">⌄</span></button></div>
 <div class="market-login-layout">
 <div class="market-login-intro">
 <a href="/tienda" class="market-login-brand"><img src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo UNDC"><span><strong>UNDC <em>MARKET</em></strong><small>Tienda virtual de pagos de la UNDC</small></span></a>
