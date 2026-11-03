@@ -1091,3 +1091,6 @@ body.light-mode .market-login-input, body.light-mode .market-login-google { back
 }
 html[data-accessibility-text] .market-login-layout { grid-template-columns: minmax(0, 1fr); }
 html[data-accessibility-text] .market-login-heading, html[data-accessibility-text] .market-login-benefits { flex-wrap: wrap; }
+
+/* Standalone sign-in: restore the store header when leaving this view. */
+.market-login-view > .site-header { display: none; }
