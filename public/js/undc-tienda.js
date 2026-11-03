@@ -3,6 +3,25 @@ const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name=
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:'catalog',authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Accesibilidad":"Accessibility",
+"Cerrar accesibilidad":"Close accessibility",
+"Tamaño del texto":"Text size",
+"Disminuir tamaño del texto":"Decrease text size",
+"Aumentar tamaño del texto":"Increase text size",
+"Tema de color":"Colour theme",
+"Tema claro":"Light theme",
+"Tema sepia":"Sepia theme",
+"Tema oscuro":"Dark theme",
+"Alto contraste blanco":"White high contrast",
+"Alto contraste amarillo":"Yellow high contrast",
+"Leer en voz alta":"Read aloud",
+"Selección":"Selection",
+"Página":"Page",
+"Detener":"Stop",
+"Voz":"Voice",
+"Velocidad de lectura":"Speech rate",
+"Restablecer configuración":"Reset settings",
+
 'Tienda virtual de pagos · UNDC':'Virtual payment store · UNDC',
 'Tienda virtual de conceptos de Posgrado — Universidad Nacional de Cañete':'Virtual store for Graduate School services — National University of Cañete',
 'Escudo de la Universidad Nacional de Cañete':'National University of Cañete crest',
@@ -301,4 +320,126 @@ $('profileForm').addEventListener('submit',async event=>{event.preventDefault();
 try{await api('/api/v1/acceso/perfil','PUT',Object.fromEntries(form.entries()));await refreshReview();toast('Tus datos quedaron guardados para próximas compras.')}catch(e){let msg=e.message;if(e.errors){msg=Object.values(e.errors).flat().join(' ')}toast(msg,true)}});
 $('reviewBack').addEventListener('click',()=>screen('cart'));
 renderTusneCatalog();restore();if(state.office)loadCatalog();
+
+/* Accessibility panel: browser-native speech, local preferences, keyboard access. */
+const accessibilityPanel=$('accessibilityPanel');
+const accessibilityTriggers=[...document.querySelectorAll('[data-accessibility-toggle]')];
+let accessibilityOpener=null, accessibilitySelection='', accessibilityTheme='dark';
+const preference=(key,fallback)=>{try{return localStorage.getItem(key)||fallback}catch{return fallback}};
+const savePreference=(key,value)=>{try{localStorage.setItem(key,String(value))}catch{}};
+let accessibilitySize=Math.max(1,Math.min(2,Number(preference('undc_accessibility_size','1'))||1));
+function setAccessibilitySize(value){
+ accessibilitySize=Math.round(Math.max(1,Math.min(2,value))*10)/10;
+ document.documentElement.style.setProperty('--a11y-text-scale',String(accessibilitySize));
+ document.documentElement.toggleAttribute('data-accessibility-text',accessibilitySize>1);
+ $('accessibilityTextSize').textContent=Math.round(accessibilitySize*100)+' %';
+ $('accessibilitySmaller').disabled=accessibilitySize<=1;
+ $('accessibilityLarger').disabled=accessibilitySize>=2;
+ savePreference('undc_accessibility_size',accessibilitySize);
+}
+function setAccessibilityTheme(value){
+ accessibilityTheme=['light','sepia','dark','contrast','yellow'].includes(value)?value:'dark';
+ delete document.body.dataset.accessibilityColor;
+ const base=['light','sepia'].includes(accessibilityTheme)?'light':'dark';
+ applyTheme(base);savePreference('undc_theme',base);
+ if(!['light','dark'].includes(accessibilityTheme))document.body.dataset.accessibilityColor=accessibilityTheme;
+ document.querySelectorAll('[data-accessibility-theme]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.accessibilityTheme===accessibilityTheme)));
+ savePreference('undc_accessibility_theme',accessibilityTheme);
+}
+function closeAccessibility(restoreFocus=false){
+ accessibilityPanel.hidden=true;
+ accessibilityTriggers.forEach(button=>button.setAttribute('aria-expanded','false'));
+ if(restoreFocus&&accessibilityOpener?.isConnected)accessibilityOpener.focus();
+}
+accessibilityTriggers.forEach(button=>{
+ button.addEventListener('pointerdown',()=>{const selected=window.getSelection()?.toString().trim();if(selected)accessibilitySelection=selected});
+ button.addEventListener('click',()=>{
+  if(!accessibilityPanel.hidden){closeAccessibility(true);return}
+  const selected=window.getSelection()?.toString().trim();if(selected)accessibilitySelection=selected;
+  accessibilityOpener=button;
+  accessibilityPanel.hidden=false;
+  accessibilityTriggers.forEach(item=>item.setAttribute('aria-expanded','true'));
+  $('accessibilityClose').focus();
+ });
+});
+$('accessibilityClose').addEventListener('click',()=>closeAccessibility(true));
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!accessibilityPanel.hidden){event.preventDefault();event.stopPropagation();closeAccessibility(true)}});
+document.addEventListener('click',event=>{if(!accessibilityPanel.hidden&&!accessibilityPanel.contains(event.target)&&!accessibilityTriggers.some(button=>button.contains(event.target)))closeAccessibility()});
+document.addEventListener('selectionchange',()=>{
+ const selection=window.getSelection(),selected=selection?.toString().trim();
+ if(selected&&!selection.anchorNode?.parentElement?.closest('#accessibilityPanel'))accessibilitySelection=selected;
+});
+$('accessibilitySmaller').addEventListener('click',()=>setAccessibilitySize(accessibilitySize-.1));
+$('accessibilityLarger').addEventListener('click',()=>setAccessibilitySize(accessibilitySize+.1));
+document.querySelectorAll('[data-accessibility-theme]').forEach(button=>button.addEventListener('click',()=>setAccessibilityTheme(button.dataset.accessibilityTheme)));
+setAccessibilitySize(accessibilitySize);
+setAccessibilityTheme(preference('undc_accessibility_theme',preference('undc_theme','dark')));
+
+const speechAvailable='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+const speechEngine=speechAvailable?window.speechSynthesis:null;
+let speechVoices=[],speechGeneration=0,speechUtterance=null;
+const voiceSelect=$('accessibilityVoice'),rateInput=$('accessibilityRate');
+rateInput.value=String(Math.max(.5,Math.min(2,Number(preference('undc_accessibility_rate','1'))||1)));
+function updateSpeechRate(){
+ $('accessibilityRateValue').textContent=Number(rateInput.value).toFixed(1)+'×';
+ rateInput.setAttribute('aria-valuetext',Number(rateInput.value).toFixed(1)+'×');
+ savePreference('undc_accessibility_rate',rateInput.value);
+}
+function speechStatus(es,en){$('accessibilityStatus').textContent=currentLanguage==='en'?en:es}
+function stopReading(announce=true){speechGeneration++;speechEngine?.cancel();speechUtterance=null;if(announce)speechStatus('Lectura detenida.','Reading stopped.')}
+function populateVoices(){
+ const saved=voiceSelect.value||preference('undc_accessibility_voice','');
+ speechVoices=speechEngine?.getVoices()||[];
+ voiceSelect.replaceChildren();
+ const automatic=document.createElement('option');automatic.value='';automatic.textContent=currentLanguage==='en'?'Automatic (page language)':'Automática (idioma de la página)';voiceSelect.append(automatic);
+ speechVoices.forEach(voice=>{const option=document.createElement('option');option.value=voice.voiceURI;option.textContent=voice.name+' ('+voice.lang+')';voiceSelect.append(option)});
+ voiceSelect.value=speechVoices.some(voice=>voice.voiceURI===saved)?saved:'';
+}
+function readText(text){
+ if(!speechAvailable)return;
+ stopReading(false);
+ const clean=String(text||'').replace(/\s+/g,' ').trim();
+ if(!clean){speechStatus('Selecciona primero un texto de la página.','Select some page text first.');return}
+ // Queue short utterances to avoid long-text truncation in speech engines.
+ const chunks=clean.match(/.{1,180}(?:\s|$)|.{1,180}/g)||[clean];
+ const generation=speechGeneration,chosen=speechVoices.find(voice=>voice.voiceURI===voiceSelect.value);
+ const language=currentLanguage==='en'?'en':'es';
+ const voice=chosen||speechVoices.find(item=>item.lang.toLowerCase().startsWith(language));
+ let next=0;
+ const speakNext=()=>{
+  if(generation!==speechGeneration)return;
+  if(next>=chunks.length){speechUtterance=null;speechStatus('Lectura finalizada.','Reading finished.');return}
+  const utterance=new window.SpeechSynthesisUtterance(chunks[next++]);
+  speechUtterance=utterance;utterance.lang=voice?.lang||(language==='en'?'en-US':'es-PE');
+  if(voice)utterance.voice=voice;
+  utterance.rate=Number(rateInput.value);
+  utterance.onend=speakNext;
+  utterance.onerror=event=>{if(generation===speechGeneration&&event.error!=='canceled'&&event.error!=='interrupted')speechStatus('No se pudo iniciar la voz. Prueba otra voz disponible.','Could not start speech. Try another available voice.')};
+  speechEngine.speak(utterance);
+ };
+ speechStatus('Leyendo…','Reading…');speakNext();
+}
+$('accessibilitySelection').addEventListener('click',()=>readText(window.getSelection()?.toString().trim()||accessibilitySelection));
+$('accessibilityPage').addEventListener('click',()=>{
+ const hero=[...document.querySelectorAll('.hero')].find(element=>!element.hidden);
+ readText([hero?.innerText,document.querySelector('main')?.innerText].filter(Boolean).join('. '));
+});
+$('accessibilityStop').addEventListener('click',()=>stopReading());
+voiceSelect.addEventListener('change',()=>{savePreference('undc_accessibility_voice',voiceSelect.value);stopReading(false)});
+rateInput.addEventListener('input',()=>{updateSpeechRate();stopReading(false)});
+$('accessibilityReset').addEventListener('click',()=>{
+ stopReading(false);setAccessibilitySize(1);setAccessibilityTheme('light');
+ voiceSelect.value='';savePreference('undc_accessibility_voice','');rateInput.value='1';updateSpeechRate();
+ speechStatus('Configuración restablecida.','Settings reset.');
+});
+updateSpeechRate();populateVoices();
+if(speechAvailable){
+ speechEngine.addEventListener('voiceschanged',populateVoices);
+ window.addEventListener('pagehide',()=>stopReading(false));
+}else{
+ ['accessibilitySelection','accessibilityPage','accessibilityStop','accessibilityVoice','accessibilityRate'].forEach(id=>$(id).disabled=true);
+ speechStatus('La lectura en voz alta no está disponible en este navegador.','Read aloud is not available in this browser.');
+}
+document.querySelectorAll('[data-language]').forEach(button=>button.addEventListener('click',()=>{stopReading(false);populateVoices();if(speechAvailable)$('accessibilityStatus').textContent=''}));
+
 })();
