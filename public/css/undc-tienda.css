@@ -1095,18 +1095,11 @@ html[data-accessibility-text] .market-login-heading, html[data-accessibility-tex
 /* Standalone sign-in: restore the store header when leaving this view. */
 .market-login-view > .site-header { display: none; }
 
-/* Raise the sign-in illustration group where there are two columns. */
-@media (min-width: 1001px) {
-  .market-login-intro { transform: translateY(-80px); }
-}
 
-@media (min-width: 1001px) {
-  .market-login-brand, .market-login-mascot { position: relative; top: -15px; }
-}
 
-@media (min-width: 1001px) {
-  .market-login-benefits { position: relative; top: -30px; }
-}
+
+
+
 
 /* Compact sign-in card: show all access options together. */
 .market-login-view main.wrap { padding-top: 20px; padding-bottom: 28px; }
@@ -1135,3 +1128,27 @@ html[data-accessibility-text] .market-login-heading, html[data-accessibility-tex
  .market-login-heading h1 { font-size: calc(22px * var(--a11y-text-scale, 1)); }
  .market-login-symbol { width: 46px; height: 46px; }
 }
+
+/* Keep the sign-in groups aligned without negative offsets. */
+.market-login-layout { align-items: center; }
+.market-login-intro { transform: none; min-width: 0; }
+.market-login-brand, .market-login-mascot, .market-login-benefits { top: auto; }
+.market-login-brand strong, .market-login-brand small { overflow-wrap: anywhere; }
+.market-login-benefits > span { min-width: 0; }
+@media (max-width: 1000px) {
+ .market-login-layout { gap: 24px; }
+ .market-login-intro { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+ .market-login-mascot { margin: 0 auto; }
+ .market-login-benefits { width: 100%; }
+}
+@media (max-width: 480px) {
+ .market-login-view main.wrap { width: calc(100% - 24px); }
+ .market-login-brand img { width: 46px; height: 56px; }
+ .market-login-brand strong { font-size: calc(clamp(19px, 6vw, 24px) * var(--a11y-text-scale, 1)); }
+ .market-login-mascot { width: min(52vw, 180px); }
+ .market-login-heading { flex-wrap: wrap; }
+ .market-login-heading h1 { overflow-wrap: anywhere; }
+ .market-login-google { flex-wrap: wrap; }
+}
+html[data-accessibility-text] .market-login-intro { transform: none; }
+html[data-accessibility-text] .market-login-benefits > span { flex: 1 1 150px; }
