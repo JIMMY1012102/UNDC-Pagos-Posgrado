@@ -1229,3 +1229,6 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
 @media (min-width: 1001px) {
   .market-login-card { position: relative; top: -30px; }
 }
+
+.market-login-heading { flex-direction: column; align-items: center; text-align: center; }
+.market-login-heading h1 { font-weight: 800; }
