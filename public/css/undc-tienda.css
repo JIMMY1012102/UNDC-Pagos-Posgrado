@@ -285,7 +285,7 @@ body.light-mode .dialog-note { background: #edf7fc; }
 .hero-arc { z-index: 2; }
 .hero-campus-image { position: absolute; z-index: 3; top: 50%; left: 0; width: 100%; max-width: none; height: auto; display: block; transform: translateY(-50%); }
 .hero[data-main-view="procedures"] .hero-campus-image { left: 10%; width: 80%; transform: translateY(calc(-50% - 20px)); }
-.hero[data-main-view="catalogs"] .hero-campus-image { left: 10%; width: 80%; transform: translateY(calc(-50% - 50px)); }
+.hero[data-main-view="catalogs"] .hero-campus-image { left: 5%; width: 90%; transform: translateY(calc(-50% - 50px)); }
 .hero[data-main-view="categories"] .hero-campus-image { left: 7%; width: 86%; transform: translateY(calc(-50% - 90px)); }
 .hero[data-main-view="catalogs"] .hero-decor-layer,
 .hero[data-main-view="procedures"] .hero-decor-layer { display: none; }
