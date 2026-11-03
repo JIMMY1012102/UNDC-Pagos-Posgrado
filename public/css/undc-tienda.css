@@ -1232,3 +1232,6 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
 
 .market-login-heading { flex-direction: column; align-items: center; text-align: center; }
 .market-login-heading h1 { font-weight: 800; }
+
+/* Use the former subtitle space above the centered sign-in heading. */
+.market-login-heading { padding-top: 24px; }
