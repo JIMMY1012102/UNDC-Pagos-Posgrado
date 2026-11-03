@@ -62,11 +62,7 @@
 </section>
 <dialog class="concept-dialog" id="conceptDialog" aria-labelledby="conceptDialogTitle"><button class="dialog-close" id="conceptDialogClose" type="button" aria-label="Cerrar detalle">×</button><div id="conceptDialogContent"></div></dialog>
 <div class="page-grid"><div>
-<section class="screen visible" data-screen="catalog">
-<div class="panel official-catalog"><div class="title-row"><div><h2>Catálogo oficial publicado</h2><p class="subtle">Consulta únicamente conceptos vinculados y autorizados mediante los servicios institucionales existentes.</p></div><span class="chip">SISPAGOS · Catálogo institucional</span></div>
-<div class="field"><label for="office">Identificador de oficina autorizado</label><div style="display:flex;gap:10px"><input type="number" id="office" min="1" placeholder="ID definido por Tesorería" autocomplete="off"><button class="btn" id="load" type="button">Consultar</button></div></div>
-<p id="catalogNote" class="subtle">Introduce el identificador oficial de la oficina para consultar el catálogo.</p>
-<div class="products" id="catalogCards"><div class="empty">📚<br>Aquí aparecerán tus conceptos disponibles.</div></div></div></section>
+<section class="screen visible" data-screen="catalog"></section>
 <section class="screen" data-screen="cart">
 <div class="panel"><button class="back" type="button" data-go="catalog">← Seguir explorando</button><h2>Revisa tu carrito</h2><p class="subtle">Confirma los conceptos que seleccionaste antes de identificarte.</p>
 <div id="cartRows"></div><div class="cart-total"><strong id="cartTotalCount">0 conceptos</strong></div>
