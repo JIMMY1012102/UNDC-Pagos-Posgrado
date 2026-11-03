@@ -269,16 +269,6 @@ $('cartTotalCount').textContent=((state.cart?.items_count||0)+referenceItems.len
 $('cartContinue').disabled=!items.length;$('sideContinue').disabled=!items.length;
 }
 function toggleReferenceCart(id){if(referenceCart.includes(id))referenceCart=referenceCart.filter(itemId=>itemId!==id);else referenceCart.push(id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart();const added=referenceCart.includes(id);toast(added?localized('Concepto agregado al carrito como selección referencial.','Service added as a reference selection.'):localized('Concepto retirado del carrito.','Service removed from cart.'));}
-function renderCatalog(items){
-state.catalog=items;const query=$('search').value.toLocaleLowerCase('es');const target=$('catalogCards');target.replaceChildren();
-const filtered=items.filter(item=>(item.name+' '+item.code+' '+(item.description||'')).toLocaleLowerCase('es').includes(query));
-if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No encontramos conceptos publicados para esta búsqueda.';target.append(empty);return;}
-for(const item of filtered){const visual=getCatalogVisual(item),office=item.office?.name,requirements=item.requirements;const card=document.createElement('article');card.className='product catalog-card';
-card.innerHTML='<div class="concept-card-main"><div class="concept-copy"><div class="concept-card-head"><span class="concept-icon" aria-hidden="true">'+visual.icon+'</span><div class="concept-heading"><span class="category-tag">'+esc(localized('Catálogo institucional','Institutional catalog'))+'</span><h3>'+esc(item.name)+'</h3></div></div><p class="concept-description">'+esc(item.description||localized('Concepto publicado en el catálogo institucional.','Service published in the institutional catalog.'))+'</p></div>'+catalogIllustration(visual)+'</div>'+(office?'<div class="concept-facts"><span><b>'+esc(localized('Oficina','Office'))+'</b> '+esc(office)+'</span></div>':'')+'<div class="concept-meta"><small><b>'+esc(localized('Código','Code'))+'</b><span>'+esc(item.code)+'</span></small><span class="concept-price"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(localized('Pendiente','Pending'))+'</strong></span></div><div class="concept-actions"><details class="official-details"><summary>'+esc(localized('Ver detalles','View details'))+'</summary><div class="official-details-body">'+(requirements?'<b>'+esc(localized('Requisitos','Requirements'))+'</b><p>'+esc(requirements)+'</p>':'<p>'+esc(item.description||localized('Concepto publicado en el catálogo institucional.','Service published in the institutional catalog.'))+'</p>')+'</div></details><button type="button" class="reference-add-button official-add-button">'+cartGlyph()+'<span>'+esc(localized('Agregar al carrito','Add to cart'))+'</span></button></div><span class="unavailable-label">'+esc(localized('Selección referencial · No habilitada para pago','Reference selection · Payment not enabled'))+'</span>';
-const add=card.querySelector('.official-add-button');add.addEventListener('click',()=>addItem(item.id));target.append(card);}
-}
-async function loadCatalog(){const id=$('office').value.trim();if(!/^[1-9]\d*$/.test(id)){toast('Indica un ID de oficina habilitado por Tesorería.',true);return}
-try{const items=await api('/api/v1/tienda/catalogo?office_id='+encodeURIComponent(id));state.office=id;sessionStorage.setItem('undc_office_id',id);renderCatalog(items);$('catalogNote').textContent=items.length+' conceptos publicados';if(!items.length)toast('Todavía no hay conceptos publicados para esa oficina.');}catch(e){toast(e.message,true)}}
 async function ensureCart(){if(state.token){try{state.cart=await api('/api/v1/tienda/carritos/actual','GET',null,true);renderCart();return}catch(e){if(e.status!==404)throw e;sessionStorage.removeItem('undc_cart_token');state.token=null}}
 const result=await api('/api/v1/tienda/carritos','POST');state.token=result.token;sessionStorage.setItem('undc_cart_token',state.token);state.cart=result.cart;state.owned=false;renderCart()}
 async function addItem(id){try{if(state.owned){toast('Tu precompra anterior ya está vinculada. La edición de carritos vinculados se habilitará en una versión posterior.',true);return}await ensureCart();state.cart=await api('/api/v1/tienda/carritos/actual/items','POST',{catalog_item_id:id,quantity:1},true);renderCart();toast('¡Concepto agregado al carrito!')}catch(e){toast(e.message,true)}}
@@ -304,10 +294,10 @@ try{if(await authState()){const owned=await api('/api/v1/tienda/precompra/resume
 if(!state.owned)await ensureCart();
 if(sessionStorage.getItem('undc_resume_purchase')==='1'){sessionStorage.removeItem('undc_resume_purchase');await continuePurchase();}
 }catch(e){toast(e.message,true)}}
-$('office').value=state.office;$('load').addEventListener('click',loadCatalog);$('search').addEventListener('input',()=>{renderTusneCatalog();renderCatalog(state.catalog)});
+$('search').addEventListener('input',()=>{renderTusneCatalog();});
 $('catalogFilters').addEventListener('click',event=>{const button=event.target.closest('[data-category-filter]');if(!button)return;tusneCategory=button.dataset.categoryFilter;renderTusneCatalog()});
 $('tusneResults').addEventListener('click',event=>{const addButton=event.target.closest('[data-reference-cart]');if(addButton){toggleReferenceCart(addButton.dataset.referenceCart);return}const button=event.target.closest('[data-concept-detail]');if(button)openConceptDetail(button.dataset.conceptDetail)});
-$('clearCatalogFilters').addEventListener('click',()=>{tusneCategory='all';$('search').value='';renderTusneCatalog();renderCatalog(state.catalog)});
+$('clearCatalogFilters').addEventListener('click',()=>{tusneCategory='all';$('search').value='';renderTusneCatalog();});
 $('conceptDialogClose').addEventListener('click',()=>$('conceptDialog').close());$('conceptDialog').addEventListener('click',event=>{if(event.target===$('conceptDialog'))$('conceptDialog').close()});
 const headerNav=$('headerNavPanel'),menuButton=$('headerMenuButton'),closeHeaderMenu=()=>{headerNav?.classList.remove('is-open');menuButton?.setAttribute('aria-expanded','false')};
 menuButton?.addEventListener('click',()=>{const open=headerNav.classList.toggle('is-open');menuButton.setAttribute('aria-expanded',String(open))});
@@ -319,7 +309,7 @@ $('googleButton').addEventListener('click',()=>{sessionStorage.setItem('undc_res
 $('profileForm').addEventListener('submit',async event=>{event.preventDefault();const form=new FormData(event.currentTarget);
 try{await api('/api/v1/acceso/perfil','PUT',Object.fromEntries(form.entries()));await refreshReview();toast('Tus datos quedaron guardados para próximas compras.')}catch(e){let msg=e.message;if(e.errors){msg=Object.values(e.errors).flat().join(' ')}toast(msg,true)}});
 $('reviewBack').addEventListener('click',()=>screen('cart'));
-renderTusneCatalog();restore();if(state.office)loadCatalog();
+renderTusneCatalog();restore();
 
 /* Accessibility panel: browser-native speech, local preferences, keyboard access. */
 const accessibilityPanel=$('accessibilityPanel');
