@@ -287,7 +287,8 @@ body.light-mode .dialog-note { background: #edf7fc; }
 .hero[data-main-view="procedures"] .hero-campus-image { left: 10%; width: 80%; transform: translateY(calc(-50% - 20px)); }
 .hero[data-main-view="catalogs"] .hero-campus-image { transform: translateY(calc(-50% - 50px)); }
 .hero[data-main-view="categories"] .hero-campus-image { left: 7%; width: 86%; transform: translateY(calc(-50% - 90px)); }
-.hero[data-main-view="catalogs"] .hero-decor-layer { display: none; }
+.hero[data-main-view="catalogs"] .hero-decor-layer,
+.hero[data-main-view="procedures"] .hero-decor-layer { display: none; }
 .hero-dots-top, .hero-dots-bottom { z-index: 4; }
 .hero-symbol {
   width: 126px;
