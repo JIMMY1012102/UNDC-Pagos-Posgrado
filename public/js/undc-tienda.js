@@ -3,6 +3,8 @@ const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name=
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:'catalog',authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Estándar":"Standard","Cálido":"Warm","Azul oscuro":"Dark blue","Alto contraste":"High contrast","Invertido":"Inverted","Pausar":"Pause","Reanudar":"Resume","Restablecer ajustes":"Reset settings",
+
 "Volver a la tienda":"Back to the store",
 "Tienda virtual de pagos de la UNDC":"UNDC virtual payment store",
 "Asistente universitario UNDC con birrete y computadora":"UNDC university assistant with graduation cap and laptop",
@@ -440,8 +442,15 @@ function updateSpeechRate(){
  rateInput.setAttribute('aria-valuetext',Number(rateInput.value).toFixed(1)+'×');
  savePreference('undc_accessibility_rate',rateInput.value);
 }
+function setReadingState(value){
+ const labels={inactive:['Lectura: inactiva','Reading: inactive'],active:['Lectura: activa','Reading: active'],paused:['Lectura: pausada','Reading: paused']};
+ const badge=$('accessibilityReadingState');badge.textContent=labels[value][currentLanguage==='en'?1:0];badge.dataset.reading=value;
+ $('accessibilityPause').disabled=value==='inactive';
+ $('accessibilityPause').setAttribute('aria-pressed',String(value==='paused'));
+ $('accessibilityPauseLabel').textContent=localized(value==='paused'?'Reanudar':'Pausar',value==='paused'?'Resume':'Pause');
+}
 function speechStatus(es,en){$('accessibilityStatus').textContent=currentLanguage==='en'?en:es}
-function stopReading(announce=true){speechGeneration++;speechEngine?.cancel();speechUtterance=null;if(announce)speechStatus('Lectura detenida.','Reading stopped.')}
+function stopReading(announce=true){speechGeneration++;speechEngine?.cancel();speechUtterance=null;setReadingState('inactive');if(announce)speechStatus('Lectura detenida.','Reading stopped.')}
 function populateVoices(){
  const saved=voiceSelect.value||preference('undc_accessibility_voice','');
  speechVoices=speechEngine?.getVoices()||[];
@@ -463,21 +472,27 @@ function readText(text){
  let next=0;
  const speakNext=()=>{
   if(generation!==speechGeneration)return;
-  if(next>=chunks.length){speechUtterance=null;speechStatus('Lectura finalizada.','Reading finished.');return}
+  if(next>=chunks.length){speechUtterance=null;setReadingState('inactive');speechStatus('Lectura finalizada.','Reading finished.');return}
   const utterance=new window.SpeechSynthesisUtterance(chunks[next++]);
   speechUtterance=utterance;utterance.lang=voice?.lang||(language==='en'?'en-US':'es-PE');
   if(voice)utterance.voice=voice;
   utterance.rate=Number(rateInput.value);
   utterance.onend=speakNext;
-  utterance.onerror=event=>{if(generation===speechGeneration&&event.error!=='canceled'&&event.error!=='interrupted')speechStatus('No se pudo iniciar la voz. Prueba otra voz disponible.','Could not start speech. Try another available voice.')};
+  utterance.onerror=event=>{if(generation===speechGeneration&&event.error!=='canceled'&&event.error!=='interrupted'){setReadingState('inactive');speechStatus('No se pudo iniciar la voz. Prueba otra voz disponible.','Could not start speech. Try another available voice.')}};
   speechEngine.speak(utterance);
  };
- speechStatus('Leyendo…','Reading…');speakNext();
+ setReadingState('active');speechStatus('Leyendo…','Reading…');speakNext();
 }
 $('accessibilitySelection').addEventListener('click',()=>readText(window.getSelection()?.toString().trim()||accessibilitySelection));
 $('accessibilityPage').addEventListener('click',()=>{
  const hero=[...document.querySelectorAll('.hero')].find(element=>!element.hidden);
  readText([hero?.innerText,document.querySelector('main')?.innerText].filter(Boolean).join('. '));
+});
+$('accessibilityPause').addEventListener('click',()=>{
+ if(!speechAvailable||!speechUtterance)return;
+ const paused=$('accessibilityReadingState').dataset.reading==='paused';
+ if(paused){speechEngine.resume();setReadingState('active');speechStatus('Leyendo…','Reading…')}
+ else{speechEngine.pause();setReadingState('paused');speechStatus('Lectura pausada.','Reading paused.')}
 });
 $('accessibilityStop').addEventListener('click',()=>stopReading());
 voiceSelect.addEventListener('change',()=>{savePreference('undc_accessibility_voice',voiceSelect.value);stopReading(false)});
@@ -487,12 +502,12 @@ $('accessibilityReset').addEventListener('click',()=>{
  voiceSelect.value='';savePreference('undc_accessibility_voice','');rateInput.value='1';updateSpeechRate();
  speechStatus('Configuración restablecida.','Settings reset.');
 });
-updateSpeechRate();populateVoices();
+updateSpeechRate();populateVoices();setReadingState('inactive');
 if(speechAvailable){
  speechEngine.addEventListener('voiceschanged',populateVoices);
  window.addEventListener('pagehide',()=>stopReading(false));
 }else{
- ['accessibilitySelection','accessibilityPage','accessibilityStop','accessibilityVoice','accessibilityRate'].forEach(id=>$(id).disabled=true);
+ ['accessibilitySelection','accessibilityPage','accessibilityPause','accessibilityStop','accessibilityVoice','accessibilityRate'].forEach(id=>$(id).disabled=true);
  speechStatus('La lectura en voz alta no está disponible en este navegador.','Read aloud is not available in this browser.');
 }
 document.querySelectorAll('[data-language]').forEach(button=>button.addEventListener('click',()=>{stopReading(false);populateVoices();if(speechAvailable)$('accessibilityStatus').textContent=''}));
