@@ -1103,3 +1103,7 @@ html[data-accessibility-text] .market-login-heading, html[data-accessibility-tex
 @media (min-width: 1001px) {
   .market-login-brand, .market-login-mascot { position: relative; top: -15px; }
 }
+
+@media (min-width: 1001px) {
+  .market-login-benefits { position: relative; top: -10px; }
+}
