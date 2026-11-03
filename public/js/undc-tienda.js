@@ -3,6 +3,14 @@ const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name=
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:'catalog',authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Tu carrito está vacío":"Your cart is empty",
+"Selecciona un concepto de nuestros catálogos o trámites para comenzar tu compra.":"Select a service from our catalogs to start your purchase.",
+"Explorar conceptos y agregar al carrito":"Explore services and add to cart",
+"Solo al continuar te pediremos iniciar sesión. No se realizará ningún cobro en esta etapa.":"We will only ask you to sign in when you continue. No charge will be made at this stage.",
+"Ingresa y gestiona tus pagos en cualquier momento.":"Access and manage your payments anytime.",
+"Agrega todos los trámites o servicios que necesites.":"Add all the procedures or services you need.",
+"Accede de forma segura y reutiliza tus datos.":"Sign in securely and reuse your details.",
+
 "Accesibilidad":"Accessibility",
 "Cerrar accesibilidad":"Close accessibility",
 "Tamaño del texto":"Text size",
@@ -260,7 +268,7 @@ function renderCart(){
 const items=state.cart?.items||[],referenceItems=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);badge();
 const sideItems=$('sideCartItems');sideItems.replaceChildren();for(const line of items){const entry=document.createElement('p');entry.className='side-cart-item';entry.textContent=line.slug||'Concepto '+line.catalog_item_id;sideItems.append(entry)}for(const item of referenceItems){const entry=document.createElement('p');entry.className='side-cart-item';entry.textContent=localized(item.name,item.en)+' · '+localized('Referencial','Reference');sideItems.append(entry)}$('sideCartSummary').textContent=items.length||referenceItems.length?localized('Tus conceptos seleccionados:','Your selected services:'):localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.');
 const list=$('cartRows');list.replaceChildren();
-if(!items.length&&!referenceItems.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=localized('🛒 Tu carrito está vacío. Selecciona un concepto para empezar.','🛒 Your cart is empty. Select a service to get started.');list.append(empty);}
+const cartIsEmpty=!items.length&&!referenceItems.length;$('cartEmptyState').hidden=!cartIsEmpty;document.querySelector('.cart-review-panel').classList.toggle('is-empty',cartIsEmpty);
 for(const line of items){const row=document.createElement('div');row.className='cart-row';
 const info=document.createElement('div');const label=document.createElement('b');label.textContent=line.slug||'Concepto '+line.catalog_item_id;const q=document.createElement('small');q.textContent='Cantidad: '+line.quantity;info.append(label,q);row.append(info);
 if(!state.owned){const remove=document.createElement('button');remove.type='button';remove.className='mini';remove.textContent='Quitar';remove.setAttribute('aria-label','Quitar '+label.textContent);remove.onclick=()=>removeItem(line.id);row.append(remove)}list.append(row);}
