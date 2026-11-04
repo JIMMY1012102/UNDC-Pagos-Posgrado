@@ -1317,3 +1317,30 @@ html[data-accessibility-text] .market-cart-view .cart-mascot { position: static;
  .market-cart-view .utility-controls .accessibility-toggle { border-left: 1px solid #168aff; font-size: calc(12px * var(--a11y-text-scale, 1)); }
  .market-cart-view .mobile-primary-actions { margin-left: auto; }
 }
+
+/* Mobile navigation drawer; native modal handles focus and background inertness. */
+.mobile-drawer { box-sizing: border-box; position: fixed; inset: 0 auto 0 0; width: min(88vw, 360px); max-width: 100%; height: 100dvh; max-height: 100dvh; margin: 0; padding: 20px 16px; border: 1px solid var(--undc-card-border); border-left: 0; border-radius: 0 24px 24px 0; overflow-y: auto; overscroll-behavior: contain; background: var(--undc-card); color: var(--undc-text); box-shadow: 12px 0 36px rgb(0 15 40 / 22%); }
+.mobile-drawer::backdrop { background: rgb(0 23 48 / 65%); }
+body.mobile-drawer-open { overflow: hidden; }
+.drawer-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 3px 0 22px; border-bottom: 1px solid var(--undc-card-border); }
+.drawer-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.drawer-brand img { object-fit: contain; flex-shrink: 0; }
+.drawer-brand strong { font-size: calc(clamp(18px, 5vw, 23px) * var(--a11y-text-scale, 1)); line-height: 1.15; letter-spacing: -.04em; }
+.drawer-brand em { color: #0085ff; font-style: normal; }
+#mobileDrawerClose { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border: 0; background: transparent; color: inherit; font: 36px/1 Arial, sans-serif; border-radius: 10px; }
+.drawer-links { display: grid; gap: 4px; padding: 22px 0; border-bottom: 1px solid var(--undc-card-border); }
+.drawer-links a, .drawer-row { display: flex; align-items: center; gap: 14px; min-height: 58px; width: 100%; padding: 12px 14px; border: 0; border-radius: 12px; background: transparent; color: inherit; font-size: calc(17px * var(--a11y-text-scale, 1)); line-height: 1.4; text-align: left; }
+.drawer-links a { font-weight: 750; position: relative; }
+.drawer-links a.active { background: rgb(0 133 255 / 16%); color: var(--undc-text); }
+.drawer-links a.active::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 0; width: 4px; background: #0085ff; border-radius: 4px; }
+.drawer-links svg, .drawer-row svg { width: 26px; height: 26px; flex: 0 0 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: #168aff; }
+.drawer-arrow { margin-left: auto; font-size: 26px; line-height: 1; flex-shrink: 0; }
+.drawer-settings { display: grid; gap: 2px; padding-top: 18px; }
+.drawer-settings .language-flag { margin-inline: 0; }
+.drawer-settings .language-menu { left: 12px; right: 12px; top: 100%; transform: none; min-width: 0; z-index: 2; }
+.drawer-cart-count { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 6px; background: #0085ff; color: #fff; border-radius: 999px; font-size: 14px; font-weight: 750; }
+.drawer-user { min-width: 0; overflow-wrap: anywhere; }
+.mobile-drawer a:focus-visible, .mobile-drawer button:focus-visible { outline: 3px solid #168aff; outline-offset: 2px; }
+body.light-mode .mobile-drawer { background: #fff; color: #123653; border-color: #c8dbee; }
+body.light-mode .drawer-links a.active { background: #dcecff; }
+@media (prefers-reduced-motion: no-preference) { .mobile-drawer[open] { animation: drawer-enter 180ms ease-out; } @keyframes drawer-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } } }

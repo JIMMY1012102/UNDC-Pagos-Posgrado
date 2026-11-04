@@ -15,7 +15,7 @@
 @else
 <a class="mobile-login" data-login-trigger href="/tienda/login" aria-label="Inicia sesión"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a>
 @endauth</div>
-<button id="headerMenuButton" class="menu-toggle" type="button" aria-controls="headerNavPanel" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Abrir menú</span></button>
+<button id="headerMenuButton" class="menu-toggle" type="button" aria-controls="mobileDrawer" aria-haspopup="dialog" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Abrir menú</span></button>
 </div></div>
 @unless(request()->routeIs('tienda.carrito'))
 <div class="subheader" id="headerNavPanel"><nav class="nav" aria-label="Navegación principal">
@@ -25,3 +25,17 @@
 </nav></div>
 @endunless
 </header>
+
+<dialog id="mobileDrawer" class="mobile-drawer" aria-labelledby="mobileDrawerTitle">
+<div class="drawer-heading"><a href="/tienda" class="drawer-brand"><img src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo UNDC" width="44" height="52"><strong id="mobileDrawerTitle">UNDC <em>MARKET</em></strong></a><button type="button" id="mobileDrawerClose" aria-label="Cerrar menú">×</button></div>
+<nav class="drawer-links" aria-label="Navegación móvil"><a href="/tienda"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3Z"/></svg><span>Para ti</span><span class="drawer-arrow" aria-hidden="true">›</span></a><a class="active" href="/tienda#catalogo" data-main-view-link="procedures" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6Z"/><path d="M14 2v5h5M9 12h6m-6 4h6"/></svg><span>Mis trámites</span><span class="drawer-arrow" aria-hidden="true">›</span></a><a href="/tienda#catalogo" data-main-view-link="catalogs"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Catálogos</span><span class="drawer-arrow" aria-hidden="true">›</span></a><a href="/tienda#catalogo" data-main-view-link="categories"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Z"/><path d="M6 11v5c3 3 9 3 12 0v-5"/></svg><span>Categorías</span><span class="drawer-arrow" aria-hidden="true">›</span></a></nav>
+<div class="drawer-settings">
+<div class="language-picker" data-language-picker data-no-translate><button type="button" class="language-button drawer-row" aria-haspopup="true" aria-expanded="false"><span class="language-flag peru-flag" aria-hidden="true"><i></i></span><span>Idioma</span><span class="language-label sr-only">ESPAÑOL</span><span class="drawer-arrow" aria-hidden="true">⌄</span></button><div class="language-menu" hidden><button type="button" data-language="es"><span class="peru-flag" aria-hidden="true"><i></i></span>Español</button><button type="button" data-language="en"><span class="usa-flag" aria-hidden="true"><i></i></span>English</button></div></div>
+<button type="button" class="drawer-row" data-accessibility-toggle aria-expanded="false" aria-controls="accessibilityPanel"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M4 8h16m-8 0v6m0 0-5 7m5-7 5 7"/></svg><span>Accesibilidad</span><span class="drawer-arrow" aria-hidden="true">›</span></button>
+@auth
+<div class="drawer-row" data-no-translate><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="drawer-user">{{ auth()->user()->name }}</span></div>
+@else
+<a class="drawer-row" data-login-trigger href="/tienda/login"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Iniciar sesión</span><span class="drawer-arrow" aria-hidden="true">›</span></a>
+@endauth
+<a class="drawer-row" href="/tienda/carrito"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg><strong>Carrito</strong><span class="drawer-cart-count" id="drawerCartBadge">0</span><span class="drawer-arrow" aria-hidden="true">›</span></a>
+</div></dialog>
