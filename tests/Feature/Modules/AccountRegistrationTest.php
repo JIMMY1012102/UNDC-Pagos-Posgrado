@@ -121,4 +121,15 @@ class AccountRegistrationTest extends TestCase
             ->assertRedirect('/tienda');
         $this->assertGuest();
     }
+
+    public function test_logout_without_an_active_session_redirects_to_market_login(): void
+    {
+        $this->post('/auth/logout')->assertRedirect('/tienda/login');
+        $this->assertGuest();
+    }
+
+    public function test_guest_api_requests_remain_unauthorized_json(): void
+    {
+        $this->getJson('/api/v1/acceso/estado')->assertUnauthorized();
+    }
 }
