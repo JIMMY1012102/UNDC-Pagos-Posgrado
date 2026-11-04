@@ -101,4 +101,24 @@ class AccountRegistrationTest extends TestCase
         $this->assertDatabaseCount('store_customer_profiles', 0);
     }
 
+
+    public function test_cancel_profile_returns_to_login_without_saving_data(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->withSession(['market_google_profile' => ['first_names' => 'Demo']])
+            ->post('/auth/logout', ['return_to' => 'login'])
+            ->assertRedirect('/tienda/login')
+            ->assertSessionMissing('market_google_profile');
+        $this->assertGuest();
+        $this->assertFalse(app(BuyerProfileService::class)->isComplete($user->id));
+        $this->get('/tienda/login')->assertOk();
+    }
+
+    public function test_logout_ignores_arbitrary_redirect_destinations(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post('/auth/logout', ['return_to' => 'https://example.test'])
+            ->assertRedirect('/tienda');
+        $this->assertGuest();
+    }
 }
