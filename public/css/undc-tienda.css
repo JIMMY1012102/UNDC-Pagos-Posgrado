@@ -1227,7 +1227,7 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
 }
 
 @media (min-width: 1001px) {
-  .market-login-card { position: relative; top: -30px; }
+  .market-login-card { position: relative; top: 0; }
 }
 
 .market-login-heading { flex-direction: column; align-items: center; text-align: center; }
@@ -1242,3 +1242,21 @@ html[data-accessibility-text] #accessibilityPanel .accessibility-reading { grid-
 .market-login-card > .back:focus-visible { outline: 3px solid #168aff; outline-offset: 3px; }
 body.light-mode .market-login-card > .back { background: #edf6ff; color: #075ca8; border-color: #a7ccef; }
 body.light-mode .market-login-card > .back:hover { background: #dceeff; border-color: #168aff; }
+
+/* Independent toolbar and sign-in card: no vertical overlap. */
+.market-login-toolbar { margin-bottom: 20px; }
+.market-login-card { position: relative; top: 0; }
+.market-login-card > .back { position: absolute; top: 20px; left: 32px; margin: 0; z-index: 1; }
+.market-login-heading { padding-top: 24px; margin-bottom: 24px; gap: 12px; }
+.market-login-forgot { min-height: 30px; margin-top: 10px; margin-bottom: 18px; }
+.market-login-register { margin-top: 20px; margin-bottom: 4px; }
+.market-login-accessibility { min-height: 44px; padding: 5px 14px 5px 7px; gap: 12px; font-weight: 700; box-shadow: 0 4px 12px rgb(0 93 190 / 10%); }
+.market-login-accessibility svg { box-sizing: content-box; width: 22px; height: 22px; padding: 7px; color: #fff; background: #0085ff; border-radius: 50%; }
+@media (max-width: 1000px) {
+ .market-login-card { top: 0; }
+}
+@media (max-width: 480px) {
+ .market-login-card > .back { position: static; margin-bottom: 16px; }
+ .market-login-heading { padding-top: 0; }
+}
+html[data-accessibility-text] .market-login-card > .back { position: static; margin-bottom: 16px; }
