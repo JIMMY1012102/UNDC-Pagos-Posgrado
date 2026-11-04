@@ -3,6 +3,8 @@
 use App\Modules\Acceso\Http\Controllers\BuyerProfileController;
 use Illuminate\Support\Facades\Route;
 
+Route::view('/tienda/login', 'modules.acceso.login')->name('tienda.login');
+
 // Authentication is provided by a trusted session, never by user_id in JSON.
 Route::middleware(['auth', 'throttle:30,1'])
     ->prefix('api/v1/acceso')
@@ -19,3 +21,4 @@ Route::middleware('throttle:15,1')->group(function (): void {
     Route::get('/auth/google/callback', [\App\Modules\Acceso\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
 Route::post('/auth/logout', [\App\Modules\Acceso\Http\Controllers\GoogleAuthController::class, 'logout'])->middleware(['auth', 'throttle:15,1'])->name('auth.logout');
+

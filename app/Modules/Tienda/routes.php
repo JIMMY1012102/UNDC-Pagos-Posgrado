@@ -5,6 +5,9 @@ use App\Modules\Tienda\Http\Controllers\CartController;
 use App\Modules\Tienda\Http\Controllers\PrepurchaseController;
 use Illuminate\Support\Facades\Route;
 
+// Dedicated cart page; profile and review remain steps within this page.
+Route::view('/tienda/carrito', 'modules.tienda.cart')->name('tienda.carrito');
+
 // Public read-only endpoint. Published content does not authorize checkout.
 Route::middleware('throttle:60,1')
     ->prefix('api/v1/tienda')
@@ -24,3 +27,4 @@ Route::middleware(['auth', 'throttle:30,1'])->prefix('api/v1/tienda')->name('api
         Route::post('/precompra/vincular-carrito', [PrepurchaseController::class, 'claim'])->name('precompra.claim');
         Route::get('/precompra/resumen', [PrepurchaseController::class, 'summary'])->name('precompra.summary');
     });
+

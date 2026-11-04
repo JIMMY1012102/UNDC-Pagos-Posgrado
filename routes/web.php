@@ -8,7 +8,13 @@ Route::get('/', function () {
 })->name('inicio');
 
 // Interfaz de precompra: no crea pedidos ni procesa pagos.
-Route::get('/tienda', fn () => view('tienda'))->name('tienda');
+Route::get('/tienda', function (\Illuminate\Http\Request $request) {
+    if ($request->query('login') === '1') {
+        return redirect()->route('tienda.login');
+    }
+
+    return view('tienda');
+})->name('tienda');
 
 
 // Enrutamiento modular: cada dominio registra solo funcionalidades listas.
@@ -16,3 +22,4 @@ require app_path('Modules/Acceso/routes.php');
 require app_path('Modules/Tienda/routes.php');
 require app_path('Modules/Pagos/routes.php');
 require app_path('Modules/Tesoreria/routes.php');
+
