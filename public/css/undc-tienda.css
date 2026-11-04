@@ -1362,3 +1362,14 @@ body.light-mode .drawer-links a.active { background: #dcecff; }
  .site-header .crest { height: 48px; }
  .site-header .top-inner > .menu-toggle { display: grid; order: 1; width: 44px; height: 44px; flex: 0 0 44px; padding: 0 10px; align-content: center; gap: 5px; }
 }
+
+/* Product suggestions share the search field width on desktop and mobile. */
+.header-search{position:relative}
+.search-suggestions{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;max-height:min(380px,55dvh);overflow-y:auto;background:var(--panel,#102b4b);color:var(--text,#fff);border:1px solid var(--line,#5aa9e5);border-radius:16px;box-shadow:0 12px 30px #001d3d30;padding:6px}
+.search-suggestions[hidden]{display:none}
+.search-suggestion{display:flex;flex-direction:column;gap:5px;padding:12px 14px;border-radius:10px;cursor:pointer;line-height:1.4;overflow-wrap:anywhere}
+.search-suggestion strong{font-size:calc(14px * var(--a11y-text-scale,1))}
+.search-suggestion small{font-size:calc(12px * var(--a11y-text-scale,1));opacity:.8}
+.search-suggestion:hover,.search-suggestion[aria-selected="true"]{background:#168af526;outline:1px solid #168af5}
+.search-no-results{padding:16px;font-size:14px}
+body.light-mode .search-suggestions{background:#fff;color:#17324f}
