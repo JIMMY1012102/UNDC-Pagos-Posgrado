@@ -16,6 +16,7 @@
 
 
 @include('modules.tienda.partials.checkout')
+@include('modules.tienda.partials.payment-preview')
 </div>
 @include('modules.tienda.partials.sidebar')
 </div>
