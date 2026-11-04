@@ -8,7 +8,7 @@ function expand(text){return text.replace(/@include\('([^']+)'\)/g,(_,name)=>exp
 class Element {
  constructor(){this.dataset={};this.listeners={};this.style={setProperty(){}};this.classList={toggle(){},remove(){},contains(){return false}};this.content='csrf';this.value='';this.hidden=true;this.children=[];this.attrs={};}
  querySelectorAll(){return []} querySelector(){return null}
- addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} focus(){} contains(){return false}
+ addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
 async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map()}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
@@ -53,4 +53,19 @@ test('authenticated incomplete profile goes to personal data before resuming car
  const app=await boot('cart',{authenticated:true,complete:false,resume:true});
  assert.deepEqual(app.assigned,['/tienda/perfil']);
  assert.equal(app.storage.get('undc_resume_purchase'),'1');
+});
+
+test('header search finds services across categories without accents or word-order restrictions',async()=>{
+ const app=await boot('catalog');const input=app.ids.get('search');
+ input.value='  MAESTRIA matricula  ';input.listeners.input();
+ assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
+ assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto/);
+ input.value='6.15';input.listeners.input();
+ assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto/);
+ assert.match(app.ids.get('visibleConceptCount').textContent,/^1 /);
+ input.value='xyz-inexistente';input.listeners.input();
+ assert.equal(app.ids.get('tusneEmpty').hidden,false);
+ input.value='';input.listeners.input();
+ assert.equal(app.ids.get('tusneEmpty').hidden,true);
+ assert.equal(app.ids.get('visibleConceptCount').textContent.split(' ')[0],String(app.context.marketTest.tusneConcepts.length));
 });
