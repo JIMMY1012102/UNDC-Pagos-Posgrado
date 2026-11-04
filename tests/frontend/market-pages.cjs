@@ -19,7 +19,7 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
  const store=m=>({getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)});
  const document={body,documentElement:new Element(),getElementById:id=>ids.get(id)||null,querySelector:s=>s.startsWith('meta')?new Element():s==='.page-grid'||s==='.cart-review-panel'?new Element():null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
  const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch:async url=>({status:url.endsWith('/estado')&&!authenticated?401:200,ok:!url.endsWith('/estado')||authenticated,json:async()=>({data:url.endsWith('/estado')?{profile_complete:complete}:url.endsWith('/resumen')?{cart:null}:{token:'test-token',cart:{items:[],items_count:0}}})})});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,toggleReferenceCart,tusneConcepts};})();');
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,toggleReferenceCart,tusneConcepts,catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html};
 }
@@ -68,4 +68,19 @@ test('header search finds services across categories without accents or word-ord
  input.value='';input.listeners.input();
  assert.equal(app.ids.get('tusneEmpty').hidden,true);
  assert.equal(app.ids.get('visibleConceptCount').textContent.split(' ')[0],String(app.context.marketTest.tusneConcepts.length));
+});
+
+test('search suggestions rank exact names first, limit results and select a product',async()=>{
+ const app=await boot('catalog');const api=app.context.marketTest;
+ const suggestions=api.catalogSuggestions('matricula');assert.ok(suggestions.length>0);assert.ok(suggestions.length<=6);
+ const product=suggestions[0];
+ assert.equal(api.catalogSuggestions(product.name)[0].id,product.id);
+ assert.equal(api.catalogSuggestions('xyz-inexistente').length,0);
+ assert.equal(api.catalogSuggestions('   ').length,0);
+ const input=app.ids.get('search'),list=app.ids.get('searchSuggestions');
+ input.value='matricula';input.listeners.input();
+ assert.equal(list.hidden,false);assert.equal(input.attrs['aria-expanded'],'true');
+ api.chooseSearchSuggestion(0);
+ assert.equal(input.value,product.name);assert.equal(list.hidden,true);
+ assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
 });
