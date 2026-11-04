@@ -1260,3 +1260,8 @@ body.light-mode .market-login-card > .back:hover { background: #dceeff; border-c
  .market-login-heading { padding-top: 0; }
 }
 html[data-accessibility-text] .market-login-card > .back { position: static; margin-bottom: 16px; }
+
+/* Raise the desktop sign-in card by 25px. */
+@media (min-width: 1001px) {
+ .market-login-card { top: -25px; }
+}
