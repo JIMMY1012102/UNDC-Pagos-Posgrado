@@ -12,7 +12,11 @@
 <div class="market-login-benefits"><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20m-15 5h4"/></svg><b>Organiza tus trámites</b></span><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><b>Acceso a tu perfil</b></span><span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>Consulta en línea</b></span></div>
 </div>
 <div class="market-login-card account-data-card">
-<a class="back" href="{{ route('tienda.login') }}">← Regresar</a>
+<form method="POST" action="{{ route('auth.logout') }}" data-logout-form>
+@csrf
+<input type="hidden" name="return_to" value="login">
+<button class="back" type="submit">← Regresar</button>
+</form>
 <div class="market-login-heading" style="padding-top:56px"><h1>COMPLETA TUS DATOS</h1></div>
 @include('modules.acceso.partials.errors')
 <form method="post" action="{{ route('tienda.perfil.store') }}">
