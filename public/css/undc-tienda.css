@@ -1349,3 +1349,16 @@ body.light-mode .drawer-links a.active { background: #dcecff; }
 @media (max-width: 940px) {
  .market-cart-view .menu-toggle { display: inline-flex; order: 3; flex-shrink: 0; }
 }
+
+/* On phones keep only the brand and drawer trigger in the top bar. */
+@media (max-width: 940px) {
+ .site-header .top { height: auto; min-height: 70px; }
+ .site-header .top-inner { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 12px; width: calc(100% - 24px); padding: 10px 0; }
+ .site-header .top-inner > .utility-controls,
+ .site-header .top-inner > .nav-actions,
+ .site-header .top-inner > .mobile-primary-actions { display: none; }
+ .site-header .top-inner > .brand { flex: 1 1 auto; min-width: 0; margin: 0; gap: 10px; }
+ .site-header .brand-title { font-size: calc(clamp(20px, 5.8vw, 29px) * var(--a11y-text-scale, 1)); white-space: normal; }
+ .site-header .crest { height: 48px; }
+ .site-header .top-inner > .menu-toggle { display: grid; order: 1; width: 44px; height: 44px; flex: 0 0 44px; padding: 0 10px; align-content: center; gap: 5px; }
+}
