@@ -289,7 +289,7 @@ $('visibleConceptCount').textContent=visible.length+' '+localized(visible.length
 const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalogResultsTitle').textContent=selected?localized(selected.name,selected.en):localized('Todos los conceptos','All services');
 }
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Referencia documental','Document reference'))+'</small><strong>TUSNE '+esc(item.tusne||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(localized('Escuela de Posgrado','Graduate School'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
-function screen(name){const page=['identity','review'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
+function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0)+referenceCart.length;$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
 function referenceCartEstimate(referenceItems,hasInstitutionalItems){
@@ -347,10 +347,26 @@ try{
  if(!cartHasConcepts()){toast(localized('Agrega al menos un concepto para continuar.','Add at least one service to continue.'),true);return}
  if(!(await authState())){sessionStorage.setItem('undc_resume_purchase','1');screen('login');$('marketLoginTitle')?.focus({preventScroll:true});return}
  if(state.profileComplete===false)return;
- if(referenceCart.length){screen('cart');toast(localized('Los conceptos referenciales aún no están habilitados para pago.','Reference services are not enabled for payment yet.'),true);return}
+ if(referenceCart.length){await showPaymentPreview();return}
 
 if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null;state.owned=true}
 await refreshReview()}catch(e){toast(e.message,true)}}
+
+async function showPaymentPreview(){
+ const profile=await api('/api/v1/acceso/perfil');
+ const references=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);
+ const institutional=state.cart?.items||[];
+ $('paymentBuyerName').textContent=[profile?.first_names,profile?.last_names].filter(Boolean).join(' ');
+ $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
+ $('paymentBuyerEmail').textContent=profile?.contact_email||'';
+ const box=$('paymentPreviewItems');box.replaceChildren();
+ for(const item of references){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=localized(item.name,item.en);const price=document.createElement('span');price.textContent=item.price+(item.unit?' / '+localized(item.unit,item.unitEn):'');row.append(name,price);box.append(row)}
+ for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
+ $('paymentPreviewCount').textContent=String(references.length+institutional.length);
+ $('paymentPreviewTotal').textContent=referenceCartEstimate(references,institutional.length>0);
+ screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
+}
+
 async function refreshReview(){
 const data=await api('/api/v1/tienda/precompra/resumen');state.owned=!!data.cart;state.cart=data.cart;state.profile=data.profile;renderCart();
 if(!data.profile_complete){screen('identity');$('loginBox').hidden=true;$('profileBox').hidden=false;
@@ -360,7 +376,7 @@ screen('review');$('buyerName').textContent=[data.profile.first_names,data.profi
 $('buyerDocument').textContent=(data.profile.document_type||'')+' '+(data.profile.document_number||'');
 $('buyerContact').textContent=data.profile.contact_email||data.profile.phone||'No registrado';
 const box=$('reviewList');box.replaceChildren();for(const item of data.cart?.items||[]){const row=document.createElement('div');row.className='cart-row';const strong=document.createElement('b');strong.textContent=item.slug;const amount=document.createElement('small');amount.textContent='Cantidad: '+item.quantity;row.append(strong,amount);box.append(row);}
-$('reviewCount').textContent=data.cart.items_count+' conceptos';}
+$('reviewCount').textContent=data.cart.items_count+' conceptos';await showPaymentPreview();}
 async function restore(){
 if(['profile','register'].includes(marketPage))return;
 try{if(await authState()){if(state.profileComplete===false)return;const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart?.items_count>0){state.owned=true;state.cart=owned.cart;renderCart()}}
