@@ -595,4 +595,8 @@ if(marketPage==='catalog'&&['procedures','catalogs','categories'].includes(reque
 const requestedSearch=new URLSearchParams(window.location.search).get('q');
 if(marketPage==='catalog'&&requestedSearch!==null&&$('search')){$('search').value=requestedSearch;searchCatalog(true)}
 
+document.addEventListener('click',event=>{document.querySelectorAll('.account-menu[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false})});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.account-menu[open]').forEach(menu=>{menu.open=false;menu.querySelector('summary')?.focus()})});
+document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
+
 })();
