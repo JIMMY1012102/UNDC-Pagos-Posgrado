@@ -61,7 +61,7 @@ final class GoogleAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/tienda');
     }
 
     private function enabled(Request $request): bool
