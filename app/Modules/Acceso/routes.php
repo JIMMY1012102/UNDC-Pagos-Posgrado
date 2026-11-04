@@ -22,3 +22,12 @@ Route::middleware('throttle:15,1')->group(function (): void {
 });
 Route::post('/auth/logout', [\App\Modules\Acceso\Http\Controllers\GoogleAuthController::class, 'logout'])->middleware(['auth', 'throttle:15,1'])->name('auth.logout');
 
+
+// Account and profile web forms use Laravel CSRF and session protection.
+Route::middleware('throttle:10,1')->group(function (): void {
+    Route::get('/tienda/registro', [\App\Modules\Acceso\Http\Controllers\AccountController::class, 'registerForm'])->name('tienda.registro');
+    Route::post('/tienda/registro', [\App\Modules\Acceso\Http\Controllers\AccountController::class, 'register'])->name('tienda.registro.store');
+    Route::post('/tienda/login', [\App\Modules\Acceso\Http\Controllers\AccountController::class, 'login'])->name('tienda.login.store');
+});
+Route::get('/tienda/perfil', [\App\Modules\Acceso\Http\Controllers\AccountController::class, 'profileForm'])->name('tienda.perfil');
+Route::post('/tienda/perfil', [\App\Modules\Acceso\Http\Controllers\AccountController::class, 'saveProfile'])->middleware('throttle:20,1')->name('tienda.perfil.store');

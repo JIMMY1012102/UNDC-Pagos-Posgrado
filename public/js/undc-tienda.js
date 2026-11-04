@@ -340,12 +340,13 @@ function updateCartAction(){
  const label=state.authenticated?localized('Realizar pago','Make payment'):localized('Iniciar sesión para continuar','Sign in to continue');
  for(const id of ['cartContinue','sideContinue']){const button=$(id);if(!button)continue;button.disabled=!hasItems;button.textContent=label+' →'}
 }
-async function authState(){const res=await fetch('/api/v1/acceso/estado',{headers:{Accept:'application/json'},credentials:'same-origin'});if(res.status===401){state.authenticated=false;updateCartAction();return false}if(!res.ok)throw new Error('No se pudo verificar la sesión.');state.authenticated=true;updateCartAction();return true}
+async function authState(){const res=await fetch('/api/v1/acceso/estado',{headers:{Accept:'application/json'},credentials:'same-origin'});if(res.status===401){state.authenticated=false;updateCartAction();return false}if(!res.ok)throw new Error('No se pudo verificar la sesión.');state.authenticated=true;const account=await res.json();state.profileComplete=account.data?.profile_complete!==false;if(!state.profileComplete&&!['profile','register'].includes(marketPage))window.location.assign('/tienda/perfil');updateCartAction();return true}
 async function purchase(){if(!cartHasConcepts()){toast('Agrega al menos un concepto para continuar.',true);return}screen('cart');await continuePurchase()}
 async function continuePurchase(){
 try{
  if(!cartHasConcepts()){toast(localized('Agrega al menos un concepto para continuar.','Add at least one service to continue.'),true);return}
  if(!(await authState())){sessionStorage.setItem('undc_resume_purchase','1');screen('login');$('marketLoginTitle')?.focus({preventScroll:true});return}
+ if(state.profileComplete===false)return;
  if(referenceCart.length){screen('cart');toast(localized('Los conceptos referenciales aún no están habilitados para pago.','Reference services are not enabled for payment yet.'),true);return}
 
 if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null;state.owned=true}
@@ -361,7 +362,8 @@ $('buyerContact').textContent=data.profile.contact_email||data.profile.phone||'N
 const box=$('reviewList');box.replaceChildren();for(const item of data.cart?.items||[]){const row=document.createElement('div');row.className='cart-row';const strong=document.createElement('b');strong.textContent=item.slug;const amount=document.createElement('small');amount.textContent='Cantidad: '+item.quantity;row.append(strong,amount);box.append(row);}
 $('reviewCount').textContent=data.cart.items_count+' conceptos';}
 async function restore(){
-try{if(await authState()){const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart?.items_count>0){state.owned=true;state.cart=owned.cart;renderCart()}}
+if(['profile','register'].includes(marketPage))return;
+try{if(await authState()){if(state.profileComplete===false)return;const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart?.items_count>0){state.owned=true;state.cart=owned.cart;renderCart()}}
 if(!state.owned)await ensureCart();
 if(state.authenticated&&sessionStorage.getItem('undc_resume_purchase')==='1'){if(marketPage!=='cart'){screen('cart');return}sessionStorage.removeItem('undc_resume_purchase');await continuePurchase();}
 }catch(e){toast(e.message,true)}}

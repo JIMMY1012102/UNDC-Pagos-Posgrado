@@ -26,7 +26,7 @@ final class GoogleAuthController extends Controller
         abort_unless($this->enabled($request), 404);
 
         if ($request->has('error')) {
-            return redirect('/tienda')->with('auth_error', 'No se completó el inicio de sesión.');
+            return redirect('/tienda/login')->with('auth_error', 'No se completó el inicio de sesión.');
         }
 
         try {
@@ -36,17 +36,21 @@ final class GoogleAuthController extends Controller
             report($e);
 
             // Never expose OAuth access tokens, provider details, or emails.
-            return redirect('/tienda')->with('auth_error', 'No se pudo validar la cuenta. Contacta con soporte.');
+            return redirect('/tienda/login')->with('auth_error', 'No se pudo validar la cuenta. Contacta con soporte.');
         }
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
+        $request->session()->put('market_google_profile', [
+            'first_names' => (string) ($google->user['given_name'] ?? ''),
+            'last_names' => (string) ($google->user['family_name'] ?? ''),
+        ]);
 
         // Public catalog remains available before authentication; the first
         // authenticated visit needs a profile once, subsequent visits do not.
         $destination = $profiles->isComplete((int) $user->id)
-            ? '/tienda?registration=complete'
-            : '/tienda?registration=pending';
+            ? '/tienda/carrito'
+            : '/tienda/perfil';
 
         return redirect($destination)->with('auth_success', 'Sesión iniciada correctamente.');
     }
