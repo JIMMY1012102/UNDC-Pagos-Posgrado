@@ -1344,3 +1344,8 @@ body.mobile-drawer-open { overflow: hidden; }
 body.light-mode .mobile-drawer { background: #fff; color: #123653; border-color: #c8dbee; }
 body.light-mode .drawer-links a.active { background: #dcecff; }
 @media (prefers-reduced-motion: no-preference) { .mobile-drawer[open] { animation: drawer-enter 180ms ease-out; } @keyframes drawer-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } } }
+
+/* Enable the contextual drawer on the cart's mobile header. */
+@media (max-width: 940px) {
+ .market-cart-view .menu-toggle { display: inline-flex; order: 3; flex-shrink: 0; }
+}
