@@ -10,18 +10,18 @@ class Element {
  querySelectorAll(){return []} querySelector(){return null}
  addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
-async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map()}={}){
+async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),cart=null}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
- const body=new Element();body.dataset.marketPage=page;const assigned=[];
+ const body=new Element();body.dataset.marketPage=page;const assigned=[],requests=[];
  const storage=new Map(resume?[['undc_resume_purchase','1']]:[]);
  const store=m=>({getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)});
  const document={body,documentElement:new Element(),getElementById:id=>ids.get(id)||null,querySelector:s=>s.startsWith('meta')?new Element():s==='.page-grid'||s==='.cart-review-panel'?new Element():null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
- const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch:async url=>({status:url.endsWith('/estado')&&!authenticated?401:200,ok:!url.endsWith('/estado')||authenticated,json:async()=>({data:url.endsWith('/estado')?{profile_complete:complete}:url.endsWith('/resumen')?{cart:null}:{token:'test-token',cart:{items:[],items_count:0}}})})});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,toggleReferenceCart,tusneConcepts,catalogSuggestions,chooseSearchSuggestion};})();');
+ const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch:async (url,options={})=>{requests.push({url,method:options.method||'GET'});return ({status:url.endsWith('/estado')&&!authenticated?401:200,ok:!url.endsWith('/estado')||authenticated,json:async()=>({data:url.endsWith('/estado')?{profile_complete:complete}:url.endsWith('/resumen')?{cart}:url.endsWith('/perfil')?{first_names:'Estudiante',last_names:'Demo',contact_email:'demo@example.test'}:{token:'test-token',cart:{items:[],items_count:0}}})})}});
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,toggleReferenceCart,tusneConcepts,catalogSuggestions,chooseSearchSuggestion,showPaymentPreview,selectPaymentMethod,showPaymentInstructions,paymentPreviewSelection};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
- return {ids,assigned,storage,context,html};
+ return {ids,assigned,storage,context,html,requests};
 }
 for(const page of ['catalog','cart','login'])test(page+' initializes with only its own page controls',async()=>{
  const app=await boot(page);assert.equal(app.ids.has('tusneCatalog'),page==='catalog');assert.equal(app.ids.has('cartRows'),page==='cart');assert.equal(app.ids.has('marketLoginEmail'),page==='login');
@@ -83,4 +83,66 @@ test('search suggestions rank exact names first, limit results and select a prod
  api.chooseSearchSuggestion(0);
  assert.equal(input.value,product.name);assert.equal(list.hidden,true);
  assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
+});
+
+
+
+test('payment preview selects concepts, recalculates total and retains the cart',async()=>{
+ const local=new Map();const catalog=await boot('catalog',{local});
+ const products=catalog.context.marketTest.tusneConcepts.filter(item=>!item.unit).slice(0,2);
+ for(const item of products)catalog.context.marketTest.toggleReferenceCart(item.id);
+ const before=local.get('undc_tusne_reference_cart');
+ const app=await boot('cart',{local,authenticated:true});
+ await app.ids.get('cartContinue').listeners.click();
+ assert.equal(app.context.marketTest.paymentPreviewSelection().count,2);
+ const rows=app.ids.get('paymentPreviewItems').children;
+ rows[0].children[0].checked=false;rows[0].children[0].listeners.change();
+ assert.equal(app.ids.get('paymentPreviewCount').textContent,'1');
+ assert.equal(app.ids.get('paymentPreviewTotal').textContent,products[1].price);
+ rows[1].children[0].checked=false;rows[1].children[0].listeners.change();
+ assert.equal(app.ids.get('paymentPreviewTotal').textContent,'S/ 0.00');
+ assert.equal(app.ids.get('paymentContinue').disabled,true);
+ assert.equal(local.get('undc_tusne_reference_cart'),before);
+ app.context.marketTest.showPaymentInstructions();assert.equal(app.ids.get('paymentInstructions').hidden,true);
+});
+
+test('wallet instructions are a preview and switching methods clears previous instructions',async()=>{
+ const local=new Map();const catalog=await boot('catalog',{local});
+ catalog.context.marketTest.toggleReferenceCart(catalog.context.marketTest.tusneConcepts[0].id);
+ const app=await boot('cart',{local,authenticated:true});
+ await app.ids.get('cartContinue').listeners.click();
+ const requestsBefore=app.requests.length;
+ app.context.marketTest.selectPaymentMethod('wallet');
+ app.ids.get('paymentContinue').listeners.click();
+ assert.equal(app.ids.get('paymentInstructions').hidden,false);
+ assert.equal(app.ids.get('paymentQrPlaceholder').hidden,false);
+ assert.match(app.ids.get('paymentInstructionsText').textContent,/Cuando la pasarela esté habilitada/);
+ app.context.marketTest.selectPaymentMethod('card');
+ assert.equal(app.ids.get('paymentInstructions').hidden,true);
+ app.ids.get('paymentContinue').listeners.click();
+ assert.equal(app.ids.get('paymentQrPlaceholder').hidden,true);
+ assert.match(app.ids.get('paymentInstructionsText').textContent,/no solicitamos ni almacenamos/);
+ assert.equal(app.requests.length,requestsBefore,'instructions make no payment API calls');
+});
+
+test('per-unit prices never become a fixed payable total',async()=>{
+ const local=new Map();const catalog=await boot('catalog',{local});
+ const item=catalog.context.marketTest.tusneConcepts.find(item=>item.unit);
+ assert.ok(item);catalog.context.marketTest.toggleReferenceCart(item.id);
+ const app=await boot('cart',{local,authenticated:true});
+ await app.ids.get('cartContinue').listeners.click();
+ assert.equal(app.ids.get('paymentPreviewTotal').textContent,'Por confirmar');
+ assert.equal(app.ids.get('paymentContinue').disabled,false,'instructions remain available without starting a payment');
+});
+
+
+test('institutional items without approved prices stay unpriced in mixed selection',async()=>{
+ const local=new Map();const catalog=await boot('catalog',{local});
+ catalog.context.marketTest.toggleReferenceCart(catalog.context.marketTest.tusneConcepts[0].id);
+ const cart={items:[{id:1,slug:'concepto-demo',quantity:2}],items_count:1};
+ const app=await boot('cart',{local,authenticated:true,cart});
+ await app.ids.get('cartContinue').listeners.click();
+ assert.equal(app.ids.get('paymentPreviewCount').textContent,'2');
+ assert.equal(app.ids.get('paymentPreviewTotal').textContent,'Por confirmar');
+ assert.equal(app.ids.get('paymentBuyerName').textContent,'Estudiante Demo');
 });
