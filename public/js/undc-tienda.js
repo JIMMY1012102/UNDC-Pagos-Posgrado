@@ -296,7 +296,7 @@ $('visibleConceptCount').textContent=visible.length+' '+localized(visible.length
 const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalogResultsTitle').textContent=selected?localized(selected.name,selected.en):localized('Todos los conceptos','All services');
 }
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Referencia documental','Document reference'))+'</small><strong>TUSNE '+esc(item.tusne||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(localized('Escuela de Posgrado','Graduate School'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
-function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
+function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-payment-view',name==='payment');document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0)+referenceCart.length;$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
 function referenceCartEstimate(referenceItems,hasInstitutionalItems){
@@ -359,6 +359,41 @@ try{
 if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null;state.owned=true}
 await refreshReview()}catch(e){toast(e.message,true)}}
 
+// Local preview only. Never turns a selection or a browser action into a paid order.
+let paymentPreviewLines=[];
+let paymentPreviewMethod='card';
+function paymentPreviewSelection(){
+ const selected=paymentPreviewLines.filter(line=>line.selected);
+ return {count:selected.length,total:referenceCartEstimate(selected.filter(line=>line.reference).map(line=>line.reference),selected.some(line=>!line.reference))};
+}
+function updatePaymentPreview(){
+ const summary=paymentPreviewSelection();
+ $('paymentPreviewCount').textContent=String(summary.count);
+ $('paymentPreviewTotal').textContent=summary.total;
+ $('paymentContinue').disabled=summary.count===0;
+ $('paymentContinue').textContent=paymentPreviewMethod==='wallet'?'Ver instrucciones de billetera →':'Ver instrucciones de tarjeta →';
+ $('paymentInstructions').hidden=true;
+}
+function selectPaymentMethod(method){
+ if(!['card','wallet'].includes(method))return;
+ paymentPreviewMethod=method;
+ $('paymentMethodNote').textContent=method==='wallet'
+ ?'El QR y su tiempo de vigencia serán proporcionados por la pasarela. Aún no hay un QR disponible para pagar.'
+ :'El ingreso de los datos de tu tarjeta se realizará en la pasarela autorizada cuando esté disponible.';
+ updatePaymentPreview();
+}
+function showPaymentInstructions(){
+ if(!paymentPreviewSelection().count)return;
+ const wallet=paymentPreviewMethod==='wallet';
+ $('paymentInstructionsTitle').textContent=wallet?'Pago con billetera electrónica':'Pago con tarjeta';
+ $('paymentInstructionsText').textContent=wallet
+ ?'Cuando la pasarela esté habilitada, podrás escanear el QR, revisar el importe y confirmar el pago desde tu billetera. El sistema verificará el resultado antes de actualizar el estado.'
+ :'Cuando la pasarela esté habilitada, continuarás a su formulario para ingresar los datos de tu tarjeta. En esta demostración no solicitamos ni almacenamos datos de tarjetas.';
+ $('paymentQrPlaceholder').hidden=!wallet;
+ $('paymentInstructions').hidden=false;
+ $('paymentInstructionsTitle').focus({preventScroll:true});
+ $('paymentInstructions').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 async function showPaymentPreview(){
  const profile=await api('/api/v1/acceso/perfil');
  const references=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);
@@ -366,11 +401,19 @@ async function showPaymentPreview(){
  $('paymentBuyerName').textContent=[profile?.first_names,profile?.last_names].filter(Boolean).join(' ');
  $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
  $('paymentBuyerEmail').textContent=profile?.contact_email||'';
+ paymentPreviewLines=[...references.map(item=>({reference:item,name:localized(item.name,item.en),price:item.price+(item.unit?' / '+localized(item.unit,item.unitEn):''),selected:true})),...institutional.map(item=>({name:(item.slug||'Concepto')+' × '+item.quantity,price:localized('Por confirmar','To be confirmed'),selected:true}))];
  const box=$('paymentPreviewItems');box.replaceChildren();
- for(const item of references){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=localized(item.name,item.en);const price=document.createElement('span');price.textContent=item.price+(item.unit?' / '+localized(item.unit,item.unitEn):'');row.append(name,price);box.append(row)}
- for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
- $('paymentPreviewCount').textContent=String(references.length+institutional.length);
- $('paymentPreviewTotal').textContent=referenceCartEstimate(references,institutional.length>0);
+ for(const line of paymentPreviewLines){
+  const row=document.createElement('label');row.className='payment-preview-line';
+  const check=document.createElement('input');check.type='checkbox';check.checked=true;check.setAttribute('aria-label','Incluir '+line.name);
+  const name=document.createElement('strong');name.textContent=line.name;
+  const price=document.createElement('span');price.textContent=line.price;
+  check.addEventListener('change',()=>{line.selected=check.checked;updatePaymentPreview()});
+  row.append(check,name,price);box.append(row);
+ }
+ // Reset method and instructions on each entry; the cart itself is never changed.
+ document.querySelectorAll('input[name="payment_method"]').forEach(input=>{input.checked=input.value==='card'});
+ selectPaymentMethod('card');
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
 }
 
@@ -449,6 +492,9 @@ $('profileForm')?.addEventListener('submit',async event=>{event.preventDefault()
 try{await api('/api/v1/acceso/perfil','PUT',Object.fromEntries(form.entries()));await refreshReview();toast('Tus datos quedaron guardados para próximas compras.')}catch(e){let msg=e.message;if(e.errors){msg=Object.values(e.errors).flat().join(' ')}toast(msg,true)}});
 $('reviewBack')?.addEventListener('click',()=>screen('cart'));
 renderTusneCatalog();restore();
+
+document.querySelectorAll('input[name="payment_method"]').forEach(input=>input.addEventListener('change',()=>selectPaymentMethod(input.value)));
+$('paymentContinue')?.addEventListener('click',showPaymentInstructions);
 
 /* Accessibility panel: browser-native speech, local preferences, keyboard access. */
 const accessibilityPanel=$('accessibilityPanel');
@@ -600,3 +646,4 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
