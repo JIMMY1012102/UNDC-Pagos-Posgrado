@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Acceso\Services;
+namespace App\Modules\Compradores\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;

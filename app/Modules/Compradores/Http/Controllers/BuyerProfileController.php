@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\Acceso\Http\Controllers;
+namespace App\Modules\Compradores\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Acceso\Services\BuyerProfileService;
+use App\Modules\Compradores\Services\BuyerProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
