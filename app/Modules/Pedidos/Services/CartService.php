@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Modules\Tienda\Services;
+namespace App\Modules\Pedidos\Services;
 
+use App\Modules\Catalogo\Contracts\CatalogItemLookup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -9,6 +10,9 @@ use RuntimeException;
 final class CartService
 {
     private const MAX_QUANTITY = 20;
+
+    public function __construct(private readonly CatalogItemLookup $catalog) {}
+
 
     /**
      * Anonymous carts are identified by a cryptographically random bearer token.
@@ -78,18 +82,8 @@ final class CartService
                 return null;
             }
 
-            // Guard against unpublished or disabled items and inactive offices.
-            $valid = DB::table('store_catalog_items as item')
-                ->join('store_office_settings as settings', 'settings.legacy_office_id', '=', 'item.legacy_office_id')
-                ->join('tm_oficina as office', 'office.oficina_id', '=', 'item.legacy_office_id')
-                ->join('tm_conceptos as concept', 'concept.id_concepto', '=', 'item.legacy_concept_id')
-                ->where('item.id', $catalogId)
-                ->where('item.is_published', true)
-                ->where('settings.catalog_enabled', true)
-                ->where('office.estado', 1)
-                ->whereNotNull('concept.costo')
-                ->where('concept.costo', '>=', 0)
-                ->exists();
+            // Pedidos asks Catalogo; it must not query SISPAGOS tables itself.
+            $valid = $this->catalog->isAvailable($catalogId);
 
             if (! $valid) {
                 throw new RuntimeException('CATALOG_ITEM_UNAVAILABLE');

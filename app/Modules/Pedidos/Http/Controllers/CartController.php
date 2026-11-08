@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\Tienda\Http\Controllers;
+namespace App\Modules\Pedidos\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Tienda\Services\CartService;
+use App\Modules\Pedidos\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
