@@ -1,48 +1,43 @@
-# Arquitectura modular — UNDC Pagos Posgrado
+# UNDC Market — arquitectura modular basada en DDD ligero
 
-**Estado: propuesta estructurada, funcionalidades no implementadas.** Una sola aplicación Laravel, sin dividir en microservicios.
+**Estado: propuesta implementada en rama de desarrollo, no desplegada.** Un Laravel, una MariaDB y siete módulos responsables de **43 tablas**.
 
-## Cuatro procesos documentados
+| Módulo real (`app/Modules/`) | Tablas | Alcance |
+|---|---:|---|
+| Sispagos | 6 | Seis maestros históricos de SISPAGOS (sin cambios) |
+| Catalogo | 3 | Oficinas publicadas, conceptos y versiones de tarifa |
+| Compradores | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
+| Pedidos | 5 | Carrito, líneas, órdenes y sus estados |
+| Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
+| Tesoreria | 6 | Conciliación, validación, certificados y auditoría |
+| Seguridad | 13 | Roles y permisos Spatie, sesiones y soporte de Laravel |
 
-| Proceso | Módulo | Alcance |
-|---|---|---|
-| Acceso y datos personales | Acceso | Acceso, cuenta, perfil comprador/beneficiario |
-| Compra en la tienda | Tienda | Catálogo, carrito, datos, pedido pendiente |
-| Pago mediante pasarela | Pagos | Intento, respuesta verificada, estados, reintentos |
-| Consulta de Tesorería | Tesoreria | Consultas autorizadas, conciliación, reportes |
+## Flujo actual y contratos
 
-Recorrido: **Tienda → Acceso (si es necesario) → Tienda/pedido pendiente → Pagos**. Tesorería es un flujo independiente de personal autorizado.
+`Frontend → controlador del módulo → servicio del módulo → tablas propias`.
 
-## Estructura
+1. **Catalogo** muestra las publicaciones; usa un **adaptador de solo lectura Sispagos** que une `store_catalog_items` con los conceptos y oficinas maestros `tm_*`.
+2. **Compradores** conserva cuentas y perfiles; las rutas originales `/tienda/login` y `/api/v1/acceso/*` no cambian.
+3. **Pedidos** mantiene carrito y precompra; para verificar disponibilidad de un producto consume `Catalogo/Contracts/CatalogItemLookup`, **sin consultar directamente `tm_*`**.
+4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
+5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
+6. **Seguridad** soporta permisos, sesiones, caché y colas sin introducir endpoints administrativos.
 
-```text
-app/
-  Modules/
-    Acceso/{Http/Controllers,Services,routes.php}
-    Tienda/{Http/Controllers,Models,Services,routes.php}
-    Pagos/{Contracts,Http/Controllers,Services,routes.php}
-    Tesoreria/{Http/Controllers,Queries,Services,routes.php}
-  Integrations/{Sispagos,Payme,Interbank}
-routes/web.php                  # Cargador de rutas modulares
-resources/views/modules/       # Vistas por responsabilidad
-tests/Feature/Modules/         # Verificaciones de arquitectura/flujo
-```
+Las vistas existentes en `resources/views/modules/acceso` y `resources/views/modules/tienda` conservan su nombre por compatibilidad de presentación; **no** son módulos de backend aparte de los siete.
 
-Cada módulo registra sus propias rutas cuando tenga código real y pruebas. Laravel `App\\` ya mapea a `app/`; no se necesitan paquetes de modularización.
+## Regla de datos
 
-## Límites
+- Una única base `tesoreria_dev` con las 43 tablas actuales.
+- Cada módulo administra las tablas asignadas; evitar escrituras directas desde otros módulos.
+- **No alterar ninguna de las seis `tm_*`**. Los módulos nuevos las consultan a través del adaptador Sispagos bajo permisos autorizados.
+- No mover, renombrar ni volver a ejecutar migraciones Laravel ya instaladas. Sus nombres están registrados en la tabla `migrations`.
+- Mantener las FK físicas que garantizan integridad relacional. Contratos de servicio no sustituyen relaciones SQL.
+- Para funcionalidades futuras, agregar servicios y migraciones nuevas de forma incremental, no reestructurar todo.
 
-- Acceso no cobra y el login de Google no prueba condición académica.
-- Tienda valida catálogo, precios y totales **en el servidor**, no declara un cobro confirmado.
-- Pagos registra intentos y confirma resultados solo tras validación confiable; no confundir pago confirmado con dinero ya conciliado.
-- Tesorería no expone rutas públicas ni modifica tablas del sistema existente por defecto.
-- Integrations encapsula infraestructura; Pay-me continúa **en evaluación** y SISPAGOS requiere contrato de datos validado.
-- El modelo SQL preparado aparte no es automáticamente la base de esta aplicación.
+## Pruebas y despliegue
 
-## Flujo Git
+La CI de GitHub Actions usa PHP/Laravel, SQLite para pruebas unitarias, **MariaDB 10.11 efímera** con seis tablas SISPAGOS ficticias y migraciones reales, y pruebas de navegador. El test MariaDB comprueba **43 tablas**, 12 FK a maestros históricos y que la firma del DDL original `tm_*` no cambie. Nunca se conecta a Oracle Cloud ni a datos reales institucionales.
 
-Desarrollo local con Codex → rama → PR → CI → merge `main` → actualización manual de Oracle. No se configura despliegue por GitHub Actions.
+**No hacer merge ni despliegue automático**: revisar pruebas, documentos, aprobación OTI/Tesorería y el estado real de la rama desplegada. No declarar pagos ni validaciones operativas.
 
-## Seguridad
-
-Demo en HTTP únicamente con datos ficticios. OAuth real, pagos reales, webhooks, secretos y consulta de base institucional requieren un entorno autorizado y seguro.
+[Mapa general de 43 tablas y 7 colores](./modelo-datos/00_MAPA_GENERAL_43_TABLAS.md) · [Diagramas específicos](./modelo-datos/README.md).
