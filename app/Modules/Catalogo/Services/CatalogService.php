@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Modules\Tienda\Services;
+namespace App\Modules\Catalogo\Services;
 
-use App\Modules\Tienda\Queries\PublishedCatalogQuery;
+use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
 use Illuminate\Support\Collection;
 
 final class CatalogService

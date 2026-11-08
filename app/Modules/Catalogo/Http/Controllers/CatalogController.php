@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\Tienda\Http\Controllers;
+namespace App\Modules\Catalogo\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Tienda\Services\CatalogService;
+use App\Modules\Catalogo\Services\CatalogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
