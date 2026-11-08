@@ -8,6 +8,27 @@
  */
 declare(strict_types=1);
 
+/**
+ * Verify all six original tm_* table definitions remain byte-for-byte identical
+ * when we apply store migrations in ephemeral GitHub Actions MariaDB.
+ */
+function legacyFingerprint(PDO $pdo): string
+{
+    $tables = ['tm_conceptos', 'tm_oficina', 'tm_recaudacion', 'tm_resultado', 'tm_rol', 'tm_usuario'];
+    $ddl = [];
+    foreach ($tables as $table) {
+        $row = $pdo->query("SHOW CREATE TABLE {$table}")->fetch(PDO::FETCH_ASSOC);
+        if (! isset($row['Create Table'])) {
+            throw new RuntimeException("Missing original SISPAGOS table: {$table}");
+        }
+        $ddl[$table] = $row['Create Table'];
+    }
+
+    return hash('sha256', json_encode($ddl, JSON_THROW_ON_ERROR));
+}
+
+$legacyFingerprintPath = sys_get_temp_dir().'/undc_ci_legacy_modular_fingerprint.sha256';
+
 $mode = $argv[1] ?? '';
 if (! in_array($mode, ['setup', 'verify'], true)) {
     fwrite(STDERR, "Usage: php tests/Fixtures/mariadb_check.php setup|verify\n");
@@ -39,8 +60,26 @@ if ($mode === 'setup') {
         }
     }
 
+    if (file_put_contents($legacyFingerprintPath, legacyFingerprint($connection)) === false) {
+        throw new RuntimeException('Failed to store original SISPAGOS schema signature');
+    }
+
     echo "PASS: six sanitized legacy tables created in ephemeral MariaDB.\n";
     exit(0);
+}
+
+$baseline = @file_get_contents($legacyFingerprintPath);
+if ($baseline === false || $baseline !== legacyFingerprint($connection)) {
+    throw new RuntimeException('A migration changed the original SISPAGOS schema');
+}
+
+// 6 legacy + 23 store + 9 Laravel core + 5 Spatie permissions = 43.
+$numberOfTables = (int) $connection->query(
+    "SELECT COUNT(*) FROM information_schema.TABLES
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
+)->fetchColumn();
+if ($numberOfTables !== 43) {
+    throw new RuntimeException("The expected 43 tables were not created (found {$numberOfTables})");
 }
 
 $expected = [

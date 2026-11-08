@@ -3,7 +3,7 @@
 namespace Tests\Feature\Modules;
 
 use App\Models\User;
-use App\Modules\Acceso\Services\BuyerProfileService;
+use App\Modules\Compradores\Services\BuyerProfileService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;

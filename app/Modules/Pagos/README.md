@@ -1,18 +1,5 @@
 # Pagos
 
-**Estado: preparado para desarrollo, no implementado.**
+Propietario de seis tablas: `store_payment_attempts`, `store_payment_transactions`, `store_order_payment_claims`, `store_payment_webhook_events`, `store_payment_incidents`, `store_refunds`.
 
-## Responsabilidad
-Iniciar intentos ligados a pedidos, mantener estados, validar confirmación del lado del servidor, gestionar incertidumbre, reintentos e incidencias.
-
-## Restricción principal
-No marcar pagado con una redirección; prevenir doble cobro y duplicación de notificaciones.
-
-## Ubicaciones
-- `routes.php`: rutas propias del módulo, todavía sin endpoints.
-- `Contracts/`: código pendiente.
-- `Http/Controllers/`: código pendiente.
-- `Services/`: código pendiente.
-- Vistas: `resources/views/modules/pagos/`.
-
-Primero acordar requisitos, esquema, reglas de autorización y pruebas; después implementar controlador/servicio/ruta. La carpeta no acredita que la función exista.
+La base está preparada para intentos, verificaciones, incidencias y reembolsos, **no significa que Pay-me o cobros reales estén habilitados**. No exponer rutas hasta completar la integración autorizada y las verificaciones servidor-servidor.

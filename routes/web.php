@@ -17,9 +17,7 @@ Route::get('/tienda', function (\Illuminate\Http\Request $request) {
 })->name('tienda');
 
 
-// Enrutamiento modular: cada dominio registra solo funcionalidades listas.
-require app_path('Modules/Acceso/routes.php');
-require app_path('Modules/Tienda/routes.php');
-require app_path('Modules/Pagos/routes.php');
-require app_path('Modules/Tesoreria/routes.php');
-
+// Seven bounded contexts in one Laravel deployment.
+foreach (['Sispagos', 'Catalogo', 'Compradores', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
+    require app_path("Modules/{$module}/routes.php");
+}
