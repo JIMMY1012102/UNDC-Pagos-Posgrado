@@ -17,7 +17,7 @@ function legacyFingerprint(PDO $pdo): string
     $tables = ['tm_conceptos', 'tm_oficina', 'tm_recaudacion', 'tm_resultado', 'tm_rol', 'tm_usuario'];
     $ddl = [];
     foreach ($tables as $table) {
-        $row = $pdo->query("SHOW CREATE TABLE \`{$table}\`")->fetch(PDO::FETCH_ASSOC);
+        $row = $pdo->query("SHOW CREATE TABLE {$table}")->fetch(PDO::FETCH_ASSOC);
         if (! isset($row['Create Table'])) {
             throw new RuntimeException("Missing original SISPAGOS table: {$table}");
         }
