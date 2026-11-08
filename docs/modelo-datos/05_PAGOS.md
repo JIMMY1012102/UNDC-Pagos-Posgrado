@@ -36,7 +36,7 @@ erDiagram
   store_payment_transactions ||--o{ store_reconciliation_entries : "payment_transaction_id nullable"
   store_payment_transactions ||--o{ store_external_system_links : "payment_transaction_id nullable"
   store_payment_transactions ||--o{ store_payment_validations : "payment_transaction_id"
-``
+```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 
 

@@ -38,7 +38,7 @@ erDiagram
   tm_usuario ||--o{ store_validation_certificates : "legacy_revoker_id nullable"
   users ||--o{ store_audit_events : "actor_buyer_user_id nullable"
   tm_usuario ||--o{ store_audit_events : "legacy_staff_id nullable"
-``
+```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 
 

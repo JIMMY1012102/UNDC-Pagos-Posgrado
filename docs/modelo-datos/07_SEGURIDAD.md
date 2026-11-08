@@ -35,19 +35,24 @@ erDiagram
     BIGINT id PK
   }
   model_has_roles {
-    BIGINT id PK
+    BIGINT role_id PK
+    BIGINT model_id PK
+    VARCHAR model_type PK
   }
   model_has_permissions {
-    BIGINT id PK
+    BIGINT permission_id PK
+    BIGINT model_id PK
+    VARCHAR model_type PK
   }
   role_has_permissions {
-    BIGINT id PK
+    BIGINT permission_id PK
+    BIGINT role_id PK
   }
   roles ||--o{ model_has_roles : "role_id"
   permissions ||--o{ model_has_permissions : "permission_id"
   roles ||--o{ role_has_permissions : "role_id"
   permissions ||--o{ role_has_permissions : "permission_id"
-``
+```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 
 

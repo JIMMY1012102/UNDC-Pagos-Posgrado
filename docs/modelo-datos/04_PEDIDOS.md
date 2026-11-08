@@ -39,7 +39,7 @@ erDiagram
   store_orders ||--o{ store_external_system_links : "order_id nullable"
   store_orders ||--o{ store_payment_validations : "order_id"
   store_orders ||--o{ store_validation_certificates : "order_id"
-``
+```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 
 

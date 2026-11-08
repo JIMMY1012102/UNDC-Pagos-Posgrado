@@ -119,7 +119,7 @@ flowchart LR
   permissions --> model_has_permissions
   roles --> role_has_permissions
   permissions --> role_has_permissions
-``
+```
 
 > **Lectura:** las relaciones se basan en migraciones y en la documentación existente. `tm_rol` y otras columnas históricas no llevan FK inventadas. Las referencias polimórficas de Spatie no se dibujan como FK SQL a `users`. GitHub genera el diseño gráfico automáticamente y puede cruzar algunas líneas en una vista de 43 entidades.
 
