@@ -8,6 +8,31 @@
  */
 declare(strict_types=1);
 
+/**
+ * DDL fingerprint of the six original SISPAGOS tables.
+ * SHOW CREATE TABLE is read-only. Called before and after store migrations.
+ */
+function originalTreasurySchemaFingerprint(PDO $connection): string
+{
+    $tables = [
+        'tm_conceptos', 'tm_oficina', 'tm_recaudacion',
+        'tm_resultado', 'tm_rol', 'tm_usuario',
+    ];
+
+    $definitions = [];
+    foreach ($tables as $table) {
+        $definition = $connection->query("SHOW CREATE TABLE `{$table}`")->fetch(PDO::FETCH_ASSOC);
+        if (! isset($definition['Create Table'])) {
+            throw new RuntimeException("Missing SISPAGOS table: {$table}");
+        }
+        $definitions[$table] = $definition['Create Table'];
+    }
+
+    return hash('sha256', json_encode($definitions, JSON_THROW_ON_ERROR));
+}
+
+$legacyFingerprintFile = sys_get_temp_dir().'/undc_ci_legacy_schema_fingerprint.sha256';
+
 $mode = $argv[1] ?? '';
 if (! in_array($mode, ['setup', 'verify'], true)) {
     fwrite(STDERR, "Usage: php tests/Fixtures/mariadb_check.php setup|verify\n");
@@ -39,8 +64,30 @@ if ($mode === 'setup') {
         }
     }
 
+    $baseline = originalTreasurySchemaFingerprint($connection);
+    if (file_put_contents($legacyFingerprintFile, $baseline) === false) {
+        throw new RuntimeException('Could not record baseline SISPAGOS DDL fingerprint');
+    }
+
     echo "PASS: six sanitized legacy tables created in ephemeral MariaDB.\n";
     exit(0);
+}
+
+$baseline = @file_get_contents($legacyFingerprintFile);
+if ($baseline === false || $baseline !== originalTreasurySchemaFingerprint($connection)) {
+    throw new RuntimeException('SISPAGOS original DDL changed after store migrations');
+}
+
+$catalogLookupIndex = $connection->query(
+    "SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS indexed_columns
+     FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'store_catalog_items'
+       AND INDEX_NAME = 'idx_store_catalog_office_published'"
+)->fetchColumn();
+
+if ($catalogLookupIndex !== 'legacy_office_id,is_published') {
+    throw new RuntimeException('Missing or incorrect published catalog composite index');
 }
 
 $expected = [
@@ -101,4 +148,4 @@ try {
     }
 }
 
-echo 'PASS: '.count($expected)." real FKs, canonical catalog joins, invalid references rejected.\n";
+echo 'PASS: '.count($expected)." real FKs, original tm_* DDL unchanged, catalog index, canonical joins and invalid references.\n";

@@ -2,9 +2,9 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb, test/tienda-regresion-completa, feat/frontend-undc-sanmar-ket-v1, test/fullstack-browser-db-20261026]
+    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb, test/tienda-regresion-completa, feat/frontend-undc-sanmar-ket-v1, test/fullstack-browser-db-20261026, perf/modelo-relacional-seguro-20261108]
   pull_request:
-    branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth]
+    branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/undc-market-avance-local]
   workflow_dispatch:
 
 permissions:
