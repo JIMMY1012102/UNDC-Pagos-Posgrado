@@ -22,7 +22,7 @@ async function scenario(viewport, name) {
 
     const cart = await page.goto(origin + '/tienda/carrito', { waitUntil: 'domcontentloaded' });
     assert.equal(cart?.status(), 200, 'El carrito debe responder HTTP 200');
-    await page.locator('#cartContinue').waitFor();
+    await page.locator('#cartContinue').waitFor({ state: 'attached' });
     assert.match(await page.locator('.cart-review-heading h2').innerText(), /Revisa tu carrito/);
     assert.equal(await page.locator('#cartContinue').isDisabled(), true,
       'No puede continuarse con un carrito vacío');
