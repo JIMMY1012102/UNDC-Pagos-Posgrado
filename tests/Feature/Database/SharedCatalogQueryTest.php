@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Database;
 
-use App\Modules\Tienda\Queries\PublishedCatalogQuery;
+use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
