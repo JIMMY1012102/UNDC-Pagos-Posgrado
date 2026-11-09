@@ -111,10 +111,10 @@ if ($missing !== []) {
 // Prove valid legacy master references can be used without duplicating them.
 $connection->exec("INSERT INTO tm_oficina (oficina_id, oficina_nom, estado) VALUES (7, 'Oficina ficticia', 1)");
 $connection->exec("INSERT INTO tm_conceptos (id_concepto, codigo_concepto, concepto, costo) VALUES (1, 'TEST-01', 'Concepto ficticio', 10.00)");
-$connection->exec("INSERT INTO store_office_settings (legacy_office_id, slug) VALUES (7, 'prueba')");
-$connection->exec("INSERT INTO store_catalog_items (legacy_office_id, legacy_concept_id, slug) VALUES (7, 1, 'prueba')");
+$connection->exec("INSERT INTO tienda_configuracion_oficinas (legacy_office_id, slug) VALUES (7, 'prueba')");
+$connection->exec("INSERT INTO tienda_conceptos_catalogo (legacy_office_id, legacy_concept_id, slug) VALUES (7, 1, 'prueba')");
 $row = $connection->query(
-    "SELECT c.concepto FROM store_catalog_items AS i
+    "SELECT c.concepto FROM tienda_conceptos_catalogo AS i
      JOIN tm_conceptos AS c ON c.id_concepto = i.legacy_concept_id
      JOIN tm_oficina AS o ON o.oficina_id = i.legacy_office_id"
 )->fetch(PDO::FETCH_ASSOC);
@@ -124,7 +124,7 @@ if (($row['concepto'] ?? '') !== 'Concepto ficticio') {
 
 // Prove physically invalid office references are rejected by InnoDB.
 try {
-    $connection->exec("INSERT INTO store_office_settings (legacy_office_id, slug) VALUES (999999, 'invalido')");
+    $connection->exec("INSERT INTO tienda_configuracion_oficinas (legacy_office_id, slug) VALUES (999999, 'invalido')");
     throw new RuntimeException('Missing office was accepted despite mandatory FK');
 } catch (PDOException $e) {
     if ($e->getCode() !== '23000') {
@@ -132,7 +132,7 @@ try {
     }
 }
 try {
-    $connection->exec("INSERT INTO store_catalog_items (legacy_office_id, legacy_concept_id, slug) VALUES (7, 999999, 'invalido')");
+    $connection->exec("INSERT INTO tienda_conceptos_catalogo (legacy_office_id, legacy_concept_id, slug) VALUES (7, 999999, 'invalido')");
     throw new RuntimeException('Missing concept was accepted despite mandatory FK');
 } catch (PDOException $e) {
     if ($e->getCode() !== '23000') {

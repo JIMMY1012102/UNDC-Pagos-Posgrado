@@ -23,7 +23,7 @@ final class CartService
     public function create(): array
     {
         $token = bin2hex(random_bytes(32));
-        $id = DB::table('store_carts')->insertGetId([
+        $id = DB::table('tienda_carritos')->insertGetId([
             'token_hash' => hash('sha256', $token),
             'status' => 'active',
             'currency' => 'PEN',
@@ -52,7 +52,7 @@ final class CartService
                 return null;
             }
 
-            DB::table('store_carts')->where('id', $cart->id)->update([
+            DB::table('tienda_carritos')->where('id', $cart->id)->update([
                 'user_id' => $userId,
                 'token_hash' => null,
                 'updated_at' => now(),
@@ -65,7 +65,7 @@ final class CartService
     /** @return array<string,mixed>|null */
     public function forBuyer(int $userId): ?array
     {
-        $cart = DB::table('store_carts')->where('user_id', $userId)
+        $cart = DB::table('tienda_carritos')->where('user_id', $userId)
             ->where('status', 'active')
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->latest('id')->first();
@@ -89,7 +89,7 @@ final class CartService
                 throw new RuntimeException('CATALOG_ITEM_UNAVAILABLE');
             }
 
-            $line = DB::table('store_cart_items')
+            $line = DB::table('tienda_detalles_carrito')
                 ->where('cart_id', $cart->id)
                 ->where('catalog_item_id', $catalogId)
                 ->whereNull('beneficiary_id')
@@ -101,12 +101,12 @@ final class CartService
                     throw new RuntimeException('QUANTITY_LIMIT');
                 }
 
-                DB::table('store_cart_items')->where('id', $line->id)->update([
+                DB::table('tienda_detalles_carrito')->where('id', $line->id)->update([
                     'quantity' => (int) $line->quantity + $quantity,
                     'updated_at' => now(),
                 ]);
             } else {
-                DB::table('store_cart_items')->insert([
+                DB::table('tienda_detalles_carrito')->insert([
                     'cart_id' => $cart->id,
                     'catalog_item_id' => $catalogId,
                     'beneficiary_id' => null,
@@ -129,7 +129,7 @@ final class CartService
                 return null;
             }
 
-            DB::table('store_cart_items')
+            DB::table('tienda_detalles_carrito')
                 ->where('cart_id', $cart->id)
                 ->where('id', $lineId)
                 ->delete();
@@ -140,7 +140,7 @@ final class CartService
 
     private function activeCart(string $token, bool $lock = false): ?object
     {
-        $query = DB::table('store_carts')
+        $query = DB::table('tienda_carritos')
             ->where('token_hash', hash('sha256', $token))
             ->where('status', 'active')
             ->whereNull('user_id')
@@ -154,8 +154,8 @@ final class CartService
     /** @return array<string,mixed> */
     private function snapshot(int $id): array
     {
-        $lines = DB::table('store_cart_items as line')
-            ->join('store_catalog_items as catalog', 'catalog.id', '=', 'line.catalog_item_id')
+        $lines = DB::table('tienda_detalles_carrito as line')
+            ->join('tienda_conceptos_catalogo as catalog', 'catalog.id', '=', 'line.catalog_item_id')
             ->where('line.cart_id', $id)
             ->orderBy('line.id')
             ->get([

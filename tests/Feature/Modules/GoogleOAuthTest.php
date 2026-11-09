@@ -37,7 +37,7 @@ class GoogleOAuthTest extends TestCase
             $this->googleUser('subject-101', 'nuevo@example.test')
         );
 
-        $this->assertDatabaseHas('store_oauth_identities', [
+        $this->assertDatabaseHas('tienda_identidades_oauth', [
             'user_id' => $user->id,
             'provider' => 'google',
             'provider_subject' => 'subject-101',

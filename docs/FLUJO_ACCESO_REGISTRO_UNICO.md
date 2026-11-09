@@ -17,7 +17,7 @@ El prototipo observado en SanMarket permite autenticar con una cuenta Google per
 ## Contrato de backend implementado
 
 - `GET /api/v1/acceso/estado` requiere sesión autenticada, devuelve `authenticated=true`, `profile_complete`, `next_step` (`complete_profile` o `tienda`) y `profile` del usuario autenticado.
-- `PUT /api/v1/acceso/perfil` crea o actualiza una única fila para `user_id` en `store_customer_profiles`.
+- `PUT /api/v1/acceso/perfil` crea o actualiza una única fila para `user_id` en `tienda_perfiles_compradores`.
 - Se considera completo al contar con nombres, apellidos, tipo y número documental no vacíos. Correo de contacto y teléfono se almacenan cuando se suministran, pero no se usan como barrera porque no se definió obligatoriedad con Posgrado.
 - Después del callback Google se redirige provisionalmente al inicio con `registration=pending|complete`; esto **no es todavía una pantalla real de onboarding**.
 - El frontend debe consumir el estado JSON y decidir qué pantalla mostrar, evitando depender únicamente del parámetro URL.

@@ -35,11 +35,11 @@ class CatalogApiTest extends TestCase
             ['id_concepto' => 12, 'codigo_concepto' => 'DEMO-OTI-001', 'concepto' => 'Concepto ficticio', 'costo' => 10.00],
             ['id_concepto' => 13, 'codigo_concepto' => 'NO-PUBLICADO', 'concepto' => 'Concepto oculto', 'costo' => 25.00],
         ]);
-        DB::table('store_office_settings')->insert([
+        DB::table('tienda_configuracion_oficinas')->insert([
             ['legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalog_enabled' => 1],
             ['legacy_office_id' => 8, 'slug' => 'inactiva', 'catalog_enabled' => 1],
         ]);
-        DB::table('store_catalog_items')->insert([
+        DB::table('tienda_conceptos_catalogo')->insert([
             ['legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'demo', 'is_published' => 1],
             ['legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'is_published' => 0],
             ['legacy_office_id' => 8, 'legacy_concept_id' => 12, 'slug' => 'suspendido', 'is_published' => 1],

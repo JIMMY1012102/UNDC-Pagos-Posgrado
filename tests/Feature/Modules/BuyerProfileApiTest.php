@@ -26,10 +26,10 @@ class BuyerProfileApiTest extends TestCase
             'user_id' => $other->id, 'identity_verified' => true,
         ])->assertOk()->assertJsonPath('data.identity_verified', false);
 
-        $this->assertDatabaseHas('store_customer_profiles', [
+        $this->assertDatabaseHas('tienda_perfiles_compradores', [
             'user_id' => $buyer->id, 'document_number' => '00000000',
         ]);
-        $this->assertDatabaseMissing('store_customer_profiles', ['user_id' => $other->id]);
+        $this->assertDatabaseMissing('tienda_perfiles_compradores', ['user_id' => $other->id]);
 
         $this->actingAs($other)->getJson('/api/v1/acceso/perfil')
             ->assertOk()->assertJsonPath('data', null);
@@ -54,7 +54,7 @@ class BuyerProfileApiTest extends TestCase
             ])->assertOk();
         }
 
-        $this->assertDatabaseCount('store_customer_profiles', 1);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
         $this->getJson('/api/v1/acceso/perfil')->assertJsonPath('data.first_names', 'Segundo');
     }
 }

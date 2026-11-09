@@ -4,41 +4,41 @@ Carrito, líneas, órdenes y sus estados. Tablas del módulo en el esquema Maria
 
 ```mermaid
 erDiagram
-  store_carts {
+  tienda_carritos {
     BIGINT id PK
   }
-  store_cart_items {
+  tienda_detalles_carrito {
     BIGINT id PK
   }
-  store_orders {
+  tienda_pedidos {
     BIGINT id PK
   }
-  store_order_items {
+  tienda_detalles_pedido {
     BIGINT id PK
   }
-  store_order_status_history {
+  tienda_historial_estados_pedido {
     BIGINT id PK
   }
-  users ||--o{ store_carts : "user_id nullable"
-  store_carts ||--o{ store_cart_items : "cart_id"
-  store_catalog_items ||--o{ store_cart_items : "catalog_item_id"
-  store_beneficiaries ||--o{ store_cart_items : "beneficiary_id nullable"
-  users ||--o{ store_orders : "user_id"
-  store_carts ||--o{ store_orders : "cart_id nullable"
-  store_orders ||--o{ store_order_items : "order_id"
-  store_catalog_items ||--o{ store_order_items : "catalog_item_id"
-  store_beneficiaries ||--o{ store_order_items : "beneficiary_id nullable"
-  tm_oficina ||--o{ store_order_items : "legacy_office_id"
-  tm_conceptos ||--o{ store_order_items : "legacy_concept_id"
-  store_orders ||--o{ store_order_status_history : "order_id"
-  users ||--o{ store_order_status_history : "actor_user_id nullable"
-  store_orders ||--o{ store_payment_attempts : "order_id"
-  store_orders ||--o{ store_payment_transactions : "order_id"
-  store_orders ||--o| store_order_payment_claims : "order_id"
-  store_orders ||--o{ store_payment_incidents : "order_id"
-  store_orders ||--o{ store_external_system_links : "order_id nullable"
-  store_orders ||--o{ store_payment_validations : "order_id"
-  store_orders ||--o{ store_validation_certificates : "order_id"
+  users ||--o{ tienda_carritos : "user_id nullable"
+  tienda_carritos ||--o{ tienda_detalles_carrito : "cart_id"
+  tienda_conceptos_catalogo ||--o{ tienda_detalles_carrito : "catalog_item_id"
+  tienda_beneficiarios ||--o{ tienda_detalles_carrito : "beneficiary_id nullable"
+  users ||--o{ tienda_pedidos : "user_id"
+  tienda_carritos ||--o{ tienda_pedidos : "cart_id nullable"
+  tienda_pedidos ||--o{ tienda_detalles_pedido : "order_id"
+  tienda_conceptos_catalogo ||--o{ tienda_detalles_pedido : "catalog_item_id"
+  tienda_beneficiarios ||--o{ tienda_detalles_pedido : "beneficiary_id nullable"
+  tm_oficina ||--o{ tienda_detalles_pedido : "legacy_office_id"
+  tm_conceptos ||--o{ tienda_detalles_pedido : "legacy_concept_id"
+  tienda_pedidos ||--o{ tienda_historial_estados_pedido : "order_id"
+  users ||--o{ tienda_historial_estados_pedido : "actor_user_id nullable"
+  tienda_pedidos ||--o{ tienda_intentos_pago : "order_id"
+  tienda_pedidos ||--o{ tienda_transacciones_pago : "order_id"
+  tienda_pedidos ||--o| tienda_pagos_aplicados_pedidos : "order_id"
+  tienda_pedidos ||--o{ tienda_incidencias_pago : "order_id"
+  tienda_pedidos ||--o{ tienda_vinculos_sistemas_externos : "order_id nullable"
+  tienda_pedidos ||--o{ tienda_validaciones_pago : "order_id"
+  tienda_pedidos ||--o{ tienda_constancias_validacion : "order_id"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 

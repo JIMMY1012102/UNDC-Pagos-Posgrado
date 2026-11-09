@@ -39,11 +39,11 @@ class SharedCatalogQueryTest extends TestCase
             'concepto' => 'Concepto oficial ficticio',
             'costo' => 15.50,
         ]);
-        DB::table('store_office_settings')->insert([
+        DB::table('tienda_configuracion_oficinas')->insert([
             ['legacy_office_id' => 7, 'slug' => 'posgrado', 'catalog_enabled' => 1],
             ['legacy_office_id' => 8, 'slug' => 'otra', 'catalog_enabled' => 1],
         ]);
-        DB::table('store_catalog_items')->insert([
+        DB::table('tienda_conceptos_catalogo')->insert([
             ['legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'oficial', 'is_published' => 1],
             ['legacy_office_id' => 8, 'legacy_concept_id' => 12, 'slug' => 'no-visible', 'is_published' => 1],
         ]);

@@ -4,40 +4,40 @@ Conciliación, validación, certificados y auditoría. Tablas del módulo en el 
 
 ```mermaid
 erDiagram
-  store_reconciliation_batches {
+  tienda_lotes_conciliacion {
     BIGINT id PK
   }
-  store_reconciliation_entries {
+  tienda_detalles_conciliacion {
     BIGINT id PK
   }
-  store_payment_validations {
+  tienda_validaciones_pago {
     BIGINT id PK
   }
-  store_validation_certificates {
+  tienda_constancias_validacion {
     BIGINT id PK
   }
-  store_external_system_links {
+  tienda_vinculos_sistemas_externos {
     BIGINT id PK
   }
-  store_audit_events {
+  tienda_eventos_auditoria {
     BIGINT id PK
   }
-  tm_usuario ||--o{ store_reconciliation_batches : "legacy_importer_id nullable"
-  store_reconciliation_batches ||--o{ store_reconciliation_entries : "reconciliation_batch_id"
-  store_payment_transactions ||--o{ store_reconciliation_entries : "payment_transaction_id nullable"
-  tm_resultado ||--o{ store_reconciliation_entries : "legacy_result_id nullable"
-  tm_recaudacion ||--o{ store_reconciliation_entries : "legacy_recaudacion_id nullable"
-  store_orders ||--o{ store_external_system_links : "order_id nullable"
-  store_payment_transactions ||--o{ store_external_system_links : "payment_transaction_id nullable"
-  store_orders ||--o{ store_payment_validations : "order_id"
-  store_payment_transactions ||--o{ store_payment_validations : "payment_transaction_id"
-  tm_usuario ||--o{ store_payment_validations : "legacy_reviewer_id nullable"
-  store_payment_validations ||--o| store_validation_certificates : "payment_validation_id"
-  store_orders ||--o{ store_validation_certificates : "order_id"
-  tm_usuario ||--o{ store_validation_certificates : "legacy_issuer_id nullable"
-  tm_usuario ||--o{ store_validation_certificates : "legacy_revoker_id nullable"
-  users ||--o{ store_audit_events : "actor_buyer_user_id nullable"
-  tm_usuario ||--o{ store_audit_events : "legacy_staff_id nullable"
+  tm_usuario ||--o{ tienda_lotes_conciliacion : "legacy_importer_id nullable"
+  tienda_lotes_conciliacion ||--o{ tienda_detalles_conciliacion : "reconciliation_batch_id"
+  tienda_transacciones_pago ||--o{ tienda_detalles_conciliacion : "payment_transaction_id nullable"
+  tm_resultado ||--o{ tienda_detalles_conciliacion : "legacy_result_id nullable"
+  tm_recaudacion ||--o{ tienda_detalles_conciliacion : "legacy_recaudacion_id nullable"
+  tienda_pedidos ||--o{ tienda_vinculos_sistemas_externos : "order_id nullable"
+  tienda_transacciones_pago ||--o{ tienda_vinculos_sistemas_externos : "payment_transaction_id nullable"
+  tienda_pedidos ||--o{ tienda_validaciones_pago : "order_id"
+  tienda_transacciones_pago ||--o{ tienda_validaciones_pago : "payment_transaction_id"
+  tm_usuario ||--o{ tienda_validaciones_pago : "legacy_reviewer_id nullable"
+  tienda_validaciones_pago ||--o| tienda_constancias_validacion : "payment_validation_id"
+  tienda_pedidos ||--o{ tienda_constancias_validacion : "order_id"
+  tm_usuario ||--o{ tienda_constancias_validacion : "legacy_issuer_id nullable"
+  tm_usuario ||--o{ tienda_constancias_validacion : "legacy_revoker_id nullable"
+  users ||--o{ tienda_eventos_auditoria : "actor_buyer_user_id nullable"
+  tm_usuario ||--o{ tienda_eventos_auditoria : "legacy_staff_id nullable"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 

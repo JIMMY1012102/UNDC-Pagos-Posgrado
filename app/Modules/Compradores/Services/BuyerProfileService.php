@@ -9,7 +9,7 @@ final class BuyerProfileService
     /** @return array<string,mixed>|null */
     public function find(int $userId): ?array
     {
-        $profile = DB::table('store_customer_profiles')->where('user_id', $userId)->first();
+        $profile = DB::table('tienda_perfiles_compradores')->where('user_id', $userId)->first();
 
         return $profile === null ? null : $this->present($profile);
     }
@@ -30,7 +30,7 @@ final class BuyerProfileService
     {
         return DB::transaction(function () use ($userId, $input): array {
             // Never accept user_id, privilege flags or verified status from JSON.
-            $profile = DB::table('store_customer_profiles')
+            $profile = DB::table('tienda_perfiles_compradores')
                 ->where('user_id', $userId)->lockForUpdate()->first();
 
             $data = array_intersect_key($input, array_flip([
@@ -39,11 +39,11 @@ final class BuyerProfileService
             ]));
 
             if ($profile === null) {
-                DB::table('store_customer_profiles')->insert(array_merge($data, [
+                DB::table('tienda_perfiles_compradores')->insert(array_merge($data, [
                     'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(),
                 ]));
             } else {
-                DB::table('store_customer_profiles')->where('id', $profile->id)
+                DB::table('tienda_perfiles_compradores')->where('id', $profile->id)
                     ->update(array_merge($data, ['updated_at' => now()]));
             }
 

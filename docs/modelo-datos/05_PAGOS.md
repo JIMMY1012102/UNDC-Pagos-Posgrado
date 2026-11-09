@@ -4,38 +4,38 @@ Intentos, transacciones, cobro aplicado, webhooks e incidencias. Tablas del mód
 
 ```mermaid
 erDiagram
-  store_payment_attempts {
+  tienda_intentos_pago {
     BIGINT id PK
   }
-  store_payment_transactions {
+  tienda_transacciones_pago {
     BIGINT id PK
   }
-  store_order_payment_claims {
+  tienda_pagos_aplicados_pedidos {
     BIGINT id PK
   }
-  store_payment_webhook_events {
+  tienda_eventos_notificacion_pago {
     BIGINT id PK
   }
-  store_payment_incidents {
+  tienda_incidencias_pago {
     BIGINT id PK
   }
-  store_refunds {
+  tienda_reembolsos {
     BIGINT id PK
   }
-  store_orders ||--o{ store_payment_attempts : "order_id"
-  store_orders ||--o{ store_payment_transactions : "order_id"
-  store_payment_attempts ||--o{ store_payment_transactions : "payment_attempt_id nullable"
-  store_orders ||--o| store_order_payment_claims : "order_id"
-  store_payment_transactions ||--o| store_order_payment_claims : "payment_transaction_id"
-  store_payment_attempts ||--o{ store_payment_webhook_events : "payment_attempt_id nullable"
-  store_orders ||--o{ store_payment_incidents : "order_id"
-  store_payment_transactions ||--o{ store_payment_incidents : "payment_transaction_id nullable"
-  users ||--o{ store_payment_incidents : "resolved_by nullable"
-  store_payment_transactions ||--o{ store_refunds : "payment_transaction_id"
-  users ||--o{ store_refunds : "requested_by nullable"
-  store_payment_transactions ||--o{ store_reconciliation_entries : "payment_transaction_id nullable"
-  store_payment_transactions ||--o{ store_external_system_links : "payment_transaction_id nullable"
-  store_payment_transactions ||--o{ store_payment_validations : "payment_transaction_id"
+  tienda_pedidos ||--o{ tienda_intentos_pago : "order_id"
+  tienda_pedidos ||--o{ tienda_transacciones_pago : "order_id"
+  tienda_intentos_pago ||--o{ tienda_transacciones_pago : "payment_attempt_id nullable"
+  tienda_pedidos ||--o| tienda_pagos_aplicados_pedidos : "order_id"
+  tienda_transacciones_pago ||--o| tienda_pagos_aplicados_pedidos : "payment_transaction_id"
+  tienda_intentos_pago ||--o{ tienda_eventos_notificacion_pago : "payment_attempt_id nullable"
+  tienda_pedidos ||--o{ tienda_incidencias_pago : "order_id"
+  tienda_transacciones_pago ||--o{ tienda_incidencias_pago : "payment_transaction_id nullable"
+  users ||--o{ tienda_incidencias_pago : "resolved_by nullable"
+  tienda_transacciones_pago ||--o{ tienda_reembolsos : "payment_transaction_id"
+  users ||--o{ tienda_reembolsos : "requested_by nullable"
+  tienda_transacciones_pago ||--o{ tienda_detalles_conciliacion : "payment_transaction_id nullable"
+  tienda_transacciones_pago ||--o{ tienda_vinculos_sistemas_externos : "payment_transaction_id nullable"
+  tienda_transacciones_pago ||--o{ tienda_validaciones_pago : "payment_transaction_id"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 
