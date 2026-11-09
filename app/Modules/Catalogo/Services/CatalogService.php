@@ -9,6 +9,14 @@ final class CatalogService
 {
     public function __construct(private readonly PublishedCatalogQuery $catalog) {}
 
+    public function offices(): Collection
+    {
+        return $this->catalog->offices()->map(static fn (object $office): array => [
+            'id' => (int) $office->id,
+            'name' => (string) $office->name,
+        ]);
+    }
+
     /** @return Collection<int, array<string, mixed>> */
     public function forOffice(int $officeId): Collection
     {
@@ -20,6 +28,7 @@ final class CatalogService
                 'name' => (string) $item->name,
                 'description' => $item->description,
                 'requirements' => $item->requirements,
+                'category' => $item->category,
                 'requires_eligibility_check' => (bool) $item->requires_eligibility_check,
                 'office' => [
                     'id' => (int) $item->legacy_office_id,
@@ -33,3 +42,4 @@ final class CatalogService
         });
     }
 }
+

@@ -78,4 +78,30 @@ class CatalogApiTest extends TestCase
     {
         $this->postJson('/api/v1/tienda/catalogo', [])->assertStatus(405);
     }
+
+    public function test_office_selector_returns_only_offices_with_available_publications(): void
+    {
+        $this->prepareFixture();
+        $this->getJson('/api/v1/tienda/catalogo/oficinas')
+            ->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', 7)
+            ->assertJsonPath('data.0.name', 'Posgrado ficticio');
+
+        DB::table('tienda_configuracion_oficinas')->where('legacy_office_id', 7)
+            ->update(['catalog_enabled' => false]);
+        $this->getJson('/api/v1/tienda/catalogo/oficinas')
+            ->assertOk()->assertJsonCount(0, 'data');
+    }
+
+    public function test_category_is_read_from_publication_and_not_inferred_from_price(): void
+    {
+        $this->prepareFixture();
+        DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
+            ->update(['category' => 'admission']);
+        $this->getJson('/api/v1/tienda/catalogo?office_id=7')
+            ->assertOk()->assertJsonPath('data.0.category', 'admission')
+            ->assertJsonPath('data.0.checkout_enabled', false)
+            ->assertJsonMissingPath('data.0.amount');
+    }
 }
+

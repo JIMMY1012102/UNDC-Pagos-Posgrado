@@ -210,43 +210,16 @@ const tusneCategories=[
 {id:'transfers',name:'Traslados y convalidaciones',en:'Transfers and credit recognition',icon:'⇄',color:'#e6a93d',description:'Traslados internos, externos y convalidación de asignaturas.',descriptionEn:'Internal and external transfers and course recognition.',count:3},
 {id:'degrees',name:'Tesis y grados académicos',en:'Thesis and academic degrees',icon:'🏅',color:'#c95a68',description:'Tesis, jurados, sustentaciones y grados académicos.',descriptionEn:'Thesis, committees, defenses and academic degrees.',count:8}
 ];
-const tusneConcepts=[
-{id:'6.15',category:'admission',name:'Prospecto de admisión de Posgrado',en:'Graduate admission prospectus',price:'S/ 50.00'},
-{id:'6.10',category:'admission',name:'Derecho de inscripción al examen de admisión de Posgrado',en:'Graduate admission exam registration fee',price:'S/ 300.00'},
-{id:'6.7',category:'admission',name:'Constancia de ingreso de Posgrado',en:'Graduate admission record',price:'S/ 50.00'},
-{id:'6.12',category:'tuition',name:'Derecho de matrícula de Maestría',en:"Master's enrollment fee",price:'S/ 300.00'},
-{id:'6.11',category:'tuition',name:'Derecho de matrícula de Doctorado',en:'Doctoral enrollment fee',price:'S/ 500.00'},
-{id:'6.21',category:'tuition',name:'Pensión de enseñanza mensual de Maestría',en:"Monthly Master's tuition",price:'S/ 400.00',note:'El período correspondiente deberá identificarse antes de habilitar el pago.',noteEn:'The applicable period must be identified before payment is enabled.'},
-{id:'6.20',category:'tuition',name:'Pensión de enseñanza mensual de Doctorado',en:'Monthly Doctoral tuition',price:'S/ 600.00',note:'El período correspondiente deberá identificarse antes de habilitar el pago.',noteEn:'The applicable period must be identified before payment is enabled.'},
-{id:'6.17',category:'tuition',name:'Recargo por matrícula extemporánea de Maestría',en:"Late Master's enrollment surcharge",price:'S/ 50.00',note:'No disponible como concepto de libre compra hasta definir sus condiciones.',noteEn:'Not available for open purchase until its conditions are defined.'},
-{id:'6.16',category:'tuition',name:'Recargo por matrícula extemporánea de Doctorado',en:'Late Doctoral enrollment surcharge',price:'S/ 60.00',note:'No disponible como concepto de libre compra hasta definir sus condiciones.',noteEn:'Not available for open purchase until its conditions are defined.'},
-{id:'6.1',category:'certificates',name:'Derecho de trámite administrativo',en:'Administrative processing fee',price:'S/ 5.00'},
-{id:'6.2',category:'certificates',name:'Carné de biblioteca de Posgrado',en:'Graduate School library card',price:'S/ 10.00'},
-{id:'6.3',category:'certificates',name:'Certificado de estudios de Doctorado',en:'Doctoral transcript certificate',price:'S/ 91.00'},
-{id:'6.4',category:'certificates',name:'Certificado de estudios de Maestría',en:"Master's transcript certificate",price:'S/ 72.00'},
-{id:'6.5',category:'certificates',name:'Constancia de egresado de Posgrado',en:'Graduate completion record',price:'S/ 40.00'},
-{id:'6.6',category:'certificates',name:'Constancia de estudios de Posgrado',en:'Graduate enrollment record',price:'S/ 30.00'},
-{id:'6.8',category:'certificates',name:'Constancia de no adeudo de la Escuela de Posgrado',en:'Graduate School no-debt record',price:'S/ 50.00'},
-{id:'6.22',category:'certificates',name:'Constancia de similitud de Posgrado (Turnitin)',en:'Graduate similarity report (Turnitin)',price:'S/ 40.00'},
-{id:'6.27',category:'certificates',name:'Otras constancias',en:'Other records',price:'S/ 50.00',note:'El derecho de trámite administrativo de S/ 5.00 no se suma automáticamente. Su aplicación conjunta requiere confirmación de Posgrado y Tesorería.',noteEn:'The S/ 5.00 administrative processing fee is not added automatically. Its joint application requires confirmation from the Graduate School and Treasury.'},
-{id:'6.9',category:'transfers',name:'Convalidación de asignatura de Posgrado',en:'Graduate course recognition',price:'S/ 100.00',unit:'por asignatura',unitEn:'per course',note:'La cantidad de asignaturas requiere validación académica.',noteEn:'The number of courses requires academic validation.'},
-{id:'6.18',category:'transfers',name:'Traslado externo de Posgrado',en:'External Graduate School transfer',price:'S/ 300.00',note:'Sujeto a requisitos y evaluación de la Escuela de Posgrado.',noteEn:'Subject to requirements and evaluation by the Graduate School.'},
-{id:'6.19',category:'transfers',name:'Traslado interno de Posgrado',en:'Internal Graduate School transfer',price:'S/ 200.00',note:'Sujeto a requisitos y evaluación de la Escuela de Posgrado.',noteEn:'Subject to requirements and evaluation by the Graduate School.'},
-{id:'6.23-m',tusne:'6.23',category:'degrees',name:'Asesoramiento de tesis para Maestría',en:"Master's thesis advising",price:'S/ 600.00'},
-{id:'6.23-d',tusne:'6.23',category:'degrees',name:'Asesoramiento de tesis para Doctorado',en:'Doctoral thesis advising',price:'S/ 800.00'},
-{id:'6.24',category:'degrees',name:'Inscripción de proyecto de tesis para Maestría o Doctorado',en:"Master's or Doctoral thesis project registration",price:'S/ 200.00'},
-{id:'6.25',category:'degrees',name:'Nombramiento de jurado para Maestría o Doctorado',en:"Master's or Doctoral committee appointment",price:'S/ 150.00'},
-{id:'6.26-m',tusne:'6.26',category:'degrees',name:'Sustentación de tesis para Maestría',en:"Master's thesis defense",price:'S/ 700.00'},
-{id:'6.26-d',tusne:'6.26',category:'degrees',name:'Sustentación de tesis para Doctorado',en:'Doctoral thesis defense',price:'S/ 900.00'},
-{id:'6.14',category:'degrees',name:'Otorgamiento de grado académico de Maestro',en:"Awarding of Master's academic degree",price:'S/ 800.00'},
-{id:'6.13',category:'degrees',name:'Otorgamiento de grado académico de Doctor',en:'Awarding of Doctoral academic degree',price:'S/ 1,000.00'}
-];
-const referenceCartKey='undc_tusne_reference_cart';
-let referenceCart=[];
-try{const saved=JSON.parse(localStorage.getItem(referenceCartKey)||'[]');if(Array.isArray(saved))referenceCart=saved.filter(id=>tusneConcepts.some(item=>item.id===id))}catch{}
-let tusneCategory=tusneCategories[0].id;
+// Publications come exclusively from the API. Old reference selections are not purchases.
+let tusneConcepts=[];
+let tusneCategory='all';
+let catalogRequest=0;
+let cartRequest=null;
+const pendingItems=new Set();
 const localized=(es,en)=>currentLanguage==='en'?en:es;
-const categoryById=id=>tusneCategories.find(category=>category.id===id);
+const generalCategory={id:'general',name:'Otros conceptos',en:'Other services',icon:'▤',color:'#2697f3',description:'Concepto publicado en el catálogo institucional.',descriptionEn:'Service published in the institutional catalog.'};
+tusneCategories.push(generalCategory);
+const categoryById=id=>tusneCategories.find(category=>category.id===id)||generalCategory;
 function getCatalogVisual(item){
 const source=[item.name,item.en,item.category,item.code].filter(Boolean).join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
 const rules=[
@@ -276,9 +249,9 @@ return {id,...visuals[id],src:'/assets/catalogo/ilustraciones/'+imageFile};
 function conceptDescription(item,category=categoryById(item.category)){const description=currentLanguage==='en'?(item.descriptionEn||item.description):(item.description||item.descriptionEn);if(description)return description;if(category)return localized(category.description,category.descriptionEn);return localized('Concepto publicado en el catálogo institucional.','Service published in the institutional catalog.')}
 function catalogIllustration(visual){return '<div class="concept-illustration" style="--illustration-wash:'+visual.wash+'" aria-hidden="true"><img src="'+visual.src+'" alt="" loading="lazy" decoding="async"></div>'}
 function cartGlyph(){return '<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="19" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11l2-8H6"/></svg>'}
-function renderConceptCard(item,category){const name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',added=referenceCart.includes(item.id),visual=getCatalogVisual({...item,category:category.id});return '<article class="tusne-concept" style="--category-color:'+category.color+'"><div class="concept-card-main"><div class="concept-copy"><div class="concept-card-head"><span class="concept-icon" aria-hidden="true">'+visual.icon+'</span><div class="concept-heading"><span class="category-tag">'+esc(localized(category.name,category.en))+'</span><h4>'+esc(name)+'</h4></div></div><p class="concept-description">'+esc(conceptDescription(item,category))+'</p></div>'+catalogIllustration(visual)+'</div>'+(unit?'<div class="concept-facts"><span><b>'+esc(localized('Unidad','Unit'))+'</b> '+esc(unit)+'</span></div>':'')+'<div class="concept-meta"><span class="concept-price"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(item.price)+'</strong></span></div><div class="concept-actions"><button class="detail-button" type="button" data-concept-detail="'+esc(item.id)+'">'+esc(localized('Ver detalles','View details'))+'</button><button class="reference-add-button'+(added?' is-added':'')+'" type="button" data-reference-cart="'+esc(item.id)+'" aria-pressed="'+String(added)+'">'+cartGlyph()+'<span>'+esc(localized(added?'Agregado al carrito':'Agregar al carrito',added?'Added to cart':'Add to cart'))+'</span></button></div></article>'}
+function renderConceptCard(item,category){const name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',added=(state.cart?.items||[]).some(line=>String(line.catalog_item_id)===String(item.id)),visual=getCatalogVisual({...item,category:category.id});return '<article class="tusne-concept" style="--category-color:'+category.color+'"><div class="concept-card-main"><div class="concept-copy"><div class="concept-card-head"><span class="concept-icon" aria-hidden="true">'+visual.icon+'</span><div class="concept-heading"><span class="category-tag">'+esc(localized(category.name,category.en))+'</span><h4>'+esc(name)+'</h4></div></div><p class="concept-description">'+esc(conceptDescription(item,category))+'</p></div>'+catalogIllustration(visual)+'</div>'+(unit?'<div class="concept-facts"><span><b>'+esc(localized('Unidad','Unit'))+'</b> '+esc(unit)+'</span></div>':'')+'<div class="concept-meta"><span class="concept-price"><small>'+esc(localized('Importe','Amount'))+'</small><strong>'+esc(item.price)+'</strong></span></div><div class="concept-actions"><button class="detail-button" type="button" data-concept-detail="'+esc(item.id)+'">'+esc(localized('Ver detalles','View details'))+'</button><button class="reference-add-button'+(added?' is-added':'')+'" type="button" data-catalog-cart="'+esc(item.id)+'" aria-pressed="'+String(added)+'">'+cartGlyph()+'<span>'+esc(localized(added?'Agregado al carrito':'Agregar al carrito',added?'Added to cart':'Add to cart'))+'</span></button></div></article>'}
 const normalizeCatalogSearch=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
-function matchesCatalogSearch(item,query){const category=categoryById(item.category);const searchable=normalizeCatalogSearch([item.name,item.en,item.tusne||item.id,item.description,item.descriptionEn,category?.name,category?.en].join(' '));return normalizeCatalogSearch(query).split(/\s+/).filter(Boolean).every(word=>searchable.includes(word))}
+function matchesCatalogSearch(item,query){const category=categoryById(item.category);const searchable=normalizeCatalogSearch([item.name,item.en,item.code||item.id,item.description,item.descriptionEn,category?.name,category?.en].join(' '));return normalizeCatalogSearch(query).split(/\s+/).filter(Boolean).every(word=>searchable.includes(word))}
 function searchCatalog(reveal=false){
  if(marketPage!=='catalog'){window.location.assign('/tienda?q='+encodeURIComponent($('search')?.value.trim()||''));return}
  tusneCategory='all';renderTusneCatalog();
@@ -287,7 +260,7 @@ function searchCatalog(reveal=false){
 function renderTusneCatalog(){
 if(!$('catalogFilters'))return;
 const query=$('search')?.value.trim()||'';
-$('catalogFilters').innerHTML=tusneCategories.map(category=>'<button class="catalog-filter'+(tusneCategory===category.id?' active':'')+'" type="button" data-category-filter="'+category.id+'" aria-pressed="'+String(tusneCategory===category.id)+'">'+esc(localized(category.name,category.en))+'</button>').join('');
+$('catalogFilters').innerHTML=[{id:'all',name:'Todos',en:'All'},...tusneCategories.filter(category=>tusneConcepts.some(item=>item.category===category.id))].map(category=>'<button class="catalog-filter'+(tusneCategory===category.id?' active':'')+'" type="button" data-category-filter="'+category.id+'" aria-pressed="'+String(tusneCategory===category.id)+'">'+esc(localized(category.name,category.en))+'</button>').join('');
 const visible=tusneConcepts.filter(item=>(tusneCategory==='all'||item.category===tusneCategory)&&matchesCatalogSearch(item,query));
 const groups=(tusneCategory==='all'?tusneCategories:[categoryById(tusneCategory)]).map(category=>({category,items:visible.filter(item=>item.category===category.id)})).filter(group=>group.items.length);
 $('tusneResults').innerHTML=groups.map(({category,items})=>'<section class="category-result-group" style="--category-color:'+category.color+'"><div class="concept-grid">'+items.map(item=>renderConceptCard(item,category)).join('')+'</div></section>').join('');
@@ -295,30 +268,25 @@ $('tusneResults').hidden=!visible.length;$('tusneEmpty').hidden=!!visible.length
 $('visibleConceptCount').textContent=visible.length+' '+localized(visible.length===1?'opción visible':'opciones visibles',visible.length===1?'visible option':'visible options');
 const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalogResultsTitle').textContent=selected?localized(selected.name,selected.en):localized('Todos los conceptos','All services');
 }
-function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Referencia documental','Document reference'))+'</small><strong>TUSNE '+esc(item.tusne||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Precio referencial','Reference price'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(localized('Escuela de Posgrado','Graduate School'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
+function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Código del concepto','Service code'))+'</small><strong>'+esc(item.code||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Importe','Amount'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(item.office?.name||localized('Por confirmar','To be confirmed'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
 function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
-function badge(){const n=(state.cart?.items_count||0)+referenceCart.length;$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
-function referenceCartEstimate(referenceItems,hasInstitutionalItems){
- if(hasInstitutionalItems||referenceItems.some(item=>item.unit))return localized('Por confirmar','To be confirmed');
- const cents=referenceItems.reduce((total,item)=>{const match=item.price.match(/^S\/\s*([\d,]+)\.(\d{2})$/);return match?total+Number(match[1].replace(/,/g,''))*100+Number(match[2]):NaN},0);
- return Number.isFinite(cents)?'S/ '+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):localized('Por confirmar','To be confirmed');
-}
+function badge(){const n=(state.cart?.items_count||0);$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
 function renderCart(){
- const items=state.cart?.items||[],referenceItems=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);badge();
+ const items=state.cart?.items||[];badge();renderTusneCatalog();
  if(!$('cartRows')){updateCartAction();return}
- const count=items.length+referenceItems.length,cartIsEmpty=count===0;
+ const count=items.length,cartIsEmpty=count===0;
  $('cartEmptyState').hidden=!cartIsEmpty;
  document.querySelector('.cart-review-panel').classList.toggle('is-empty',cartIsEmpty);
  document.querySelector('.page-grid').classList.toggle('cart-has-items',!cartIsEmpty);
  $('cartListHeading').hidden=cartIsEmpty;$('cartEstimateRow').hidden=cartIsEmpty;
  $('cartPurchaseSummary').hidden=cartIsEmpty;
- const estimate=referenceCartEstimate(referenceItems,items.length>0);
+ const estimate=localized('Por confirmar','To be confirmed');
  $('cartEstimate').textContent=estimate;$('cartSummaryEstimate').textContent=estimate;
  $('cartSummaryCount').textContent=String(count);
  $('cartTotalCount').textContent=localized('Tu selección','Your selection')+' ('+count+')';
  const sideItems=$('sideCartItems');sideItems.replaceChildren();
- $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes referenciales, sujetos a validación.','Reference amounts, subject to validation.');
+ $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes pendientes de validación.','Reference amounts, subject to validation.');
  const list=$('cartRows');list.replaceChildren();
  const trash='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';
  function appendRow({name,detail,price,icon,remove}){
@@ -332,19 +300,75 @@ function renderCart(){
   if(remove){const button=document.createElement('button');button.type='button';button.className='mini cart-remove';button.innerHTML=trash;button.setAttribute('aria-label',localized('Quitar ','Remove ')+name);button.title=localized('Quitar','Remove');button.onclick=remove;row.append(button)}
   list.append(row);
  }
- for(const line of items)appendRow({name:line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Cantidad: ','Quantity: ')+line.quantity,price:localized('Por confirmar','To be confirmed'),icon:'▤',remove:state.owned?null:()=>removeItem(line.id)});
- for(const item of referenceItems){const category=categoryById(item.category);appendRow({name:localized(item.name,item.en),detail:'TUSNE '+(item.tusne||item.id)+' · '+localized(category.name,category.en)+' · '+localized('Referencial · no pagable','Reference · not payable'),price:item.price+(item.unit?' / '+localized(item.unit,item.unitEn):''),icon:category.icon||'▤',remove:()=>{referenceCart=referenceCart.filter(id=>id!==item.id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart()}})}
+ for(const line of items)appendRow({name:tusneConcepts.find(item=>item.id===String(line.catalog_item_id))?.name||line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Cantidad: ','Quantity: ')+line.quantity,price:localized('Por confirmar','To be confirmed'),icon:'▤',remove:state.owned?null:()=>removeItem(line.id)});
  updateCartAction();
 }
-function toggleReferenceCart(id){if(referenceCart.includes(id))referenceCart=referenceCart.filter(itemId=>itemId!==id);else referenceCart.push(id);localStorage.setItem(referenceCartKey,JSON.stringify(referenceCart));renderTusneCatalog();renderCart();const added=referenceCart.includes(id);toast(added?localized('Concepto agregado al carrito como selección referencial.','Service added as a reference selection.'):localized('Concepto retirado del carrito.','Service removed from cart.'));}
-async function ensureCart(){if(state.token){try{state.cart=await api('/api/v1/tienda/carritos/actual','GET',null,true);renderCart();return}catch(e){if(e.status!==404)throw e;sessionStorage.removeItem('undc_cart_token');state.token=null}}
+function catalogMessage(message,error=false){
+ const status=$('catalogStatus');if(status){status.textContent=message;status.setAttribute('role',error?'alert':'status')}
+ if($('catalogRetry'))$('catalogRetry').hidden=!error;
+}
+async function loadCatalog(){
+ const request=++catalogRequest;
+ tusneConcepts=[];tusneCategory='all';renderTusneCatalog();closeSearchSuggestions();
+ const office=state.office;
+ if(!office){catalogMessage(localized('Selecciona una oficina para ver sus conceptos.','Select an office to view its services.'));return}
+ catalogMessage(localized('Cargando catálogo…','Loading catalog…'));
+ try{
+  const data=await api('/api/v1/tienda/catalogo?office_id='+encodeURIComponent(office));
+  if(request!==catalogRequest)return;
+  if(!Array.isArray(data))throw new Error('Respuesta de catálogo no válida.');
+  tusneConcepts=data.filter(item=>Number.isSafeInteger(item.id)&&item.id>0).map(item=>({
+   ...item,id:String(item.id),en:item.name,category:categoryById(item.category).id,
+   descriptionEn:item.description,price:localized('Por confirmar','To be confirmed'),
+   note:item.requirements||localized('Importe pendiente de autorización. Pago no disponible.','Amount pending approval. Payment unavailable.'),
+   noteEn:item.requirements||'Amount pending approval. Payment unavailable.'
+  }));
+  renderTusneCatalog();renderCart();
+  catalogMessage(tusneConcepts.length?localized('Conceptos publicados. Los pagos aún no están disponibles.','Published services. Payments are not available yet.'):localized('Esta oficina no tiene conceptos publicados disponibles.','This office has no available published services.'));
+ }catch(e){if(request!==catalogRequest)return;catalogMessage(localized('No se pudo cargar el catálogo. Reintenta.','Could not load the catalog. Retry.'),true)}
+}
+async function loadOffices(){
+ if(!$('catalogOffice'))return;
+ catalogMessage(localized('Cargando oficinas…','Loading offices…'));
+ try{
+  const data=await api('/api/v1/tienda/catalogo/oficinas');
+  if(!Array.isArray(data))throw new Error('Respuesta de oficinas no válida.');
+  const select=$('catalogOffice');
+  const offices=data.filter(item=>Number.isSafeInteger(item.id)&&item.id>0);
+  select.innerHTML='<option value="">'+esc(localized('Selecciona una oficina','Select an office'))+'</option>'+offices.map(office=>'<option value="'+office.id+'">'+esc(office.name)+'</option>').join('');
+  const requested=new URLSearchParams(window.location.search).get('office_id');
+  const preferred=requested||state.office;
+  state.office=offices.some(office=>String(office.id)===String(preferred))?String(preferred):(offices.length===1?String(offices[0].id):'');
+  select.value=state.office;select.disabled=!offices.length;
+  if(state.office)sessionStorage.setItem('undc_office_id',state.office);else sessionStorage.removeItem('undc_office_id');
+  if(!offices.length){tusneConcepts=[];renderTusneCatalog();catalogMessage(localized('No hay oficinas con catálogo disponible.','No offices have an available catalog.'));return}
+  await loadCatalog();
+ }catch(e){catalogMessage(localized('No se pudieron cargar las oficinas. Reintenta.','Could not load offices. Retry.'),true)}
+}
+$('catalogOffice')?.addEventListener('change',()=>{state.office=$('catalogOffice').value;sessionStorage.setItem('undc_office_id',state.office);loadCatalog()});
+$('catalogRetry')?.addEventListener('click',loadOffices);
+function ensureCart(){
+ if(!cartRequest)cartRequest=loadAnonymousCart().finally(()=>{cartRequest=null});
+ return cartRequest;
+}
+async function loadAnonymousCart(){if(state.token){try{state.cart=await api('/api/v1/tienda/carritos/actual','GET',null,true);renderCart();return}catch(e){if(![401,404].includes(e.status))throw e;sessionStorage.removeItem('undc_cart_token');state.token=null}}
 const result=await api('/api/v1/tienda/carritos','POST');state.token=result.token;sessionStorage.setItem('undc_cart_token',state.token);state.cart=result.cart;state.owned=false;renderCart()}
-async function addItem(id){try{if(state.owned){toast('Tu precompra anterior ya está vinculada. La edición de carritos vinculados se habilitará en una versión posterior.',true);return}await ensureCart();state.cart=await api('/api/v1/tienda/carritos/actual/items','POST',{catalog_item_id:id,quantity:1},true);renderCart();toast('¡Concepto agregado al carrito!')}catch(e){toast(e.message,true)}}
-async function removeItem(id){try{state.cart=await api('/api/v1/tienda/carritos/actual/items/'+id,'DELETE',null,true);renderCart();toast('Concepto retirado.')}catch(e){toast(e.message,true)}}
-function cartHasConcepts(){return (state.cart?.items?.length||0)>0||referenceCart.some(id=>tusneConcepts.some(item=>item.id===id))}
+async function addItem(id){
+ if(pendingItems.has(id))return;
+ pendingItems.add(id);
+ try{
+  if(state.owned){toast('Tu precompra anterior ya está vinculada. La edición de carritos vinculados se habilitará en una versión posterior.',true);return}
+  if(!tusneConcepts.some(item=>item.id===String(id)))return;
+  await ensureCart();
+  state.cart=await api('/api/v1/tienda/carritos/actual/items','POST',{catalog_item_id:Number(id),quantity:1},true);
+  renderCart();renderTusneCatalog();toast('¡Concepto agregado al carrito!');
+ }catch(e){toast(e.message,true)}finally{pendingItems.delete(id)}
+}
+async function removeItem(id){try{state.cart=await api('/api/v1/tienda/carritos/actual/items/'+id,'DELETE',null,true);renderCart();renderTusneCatalog();toast('Concepto retirado.')}catch(e){toast(e.message,true)}}
+function cartHasConcepts(){return (state.cart?.items?.length||0)>0}
 function updateCartAction(){
  const hasItems=cartHasConcepts();
- const label=state.authenticated?localized('Realizar pago','Make payment'):localized('Iniciar sesión para continuar','Sign in to continue');
+ const label=state.authenticated?localized('Revisar mi precompra','Review my selection'):localized('Iniciar sesión para continuar','Sign in to continue');
  for(const id of ['cartContinue','sideContinue']){const button=$(id);if(!button)continue;button.disabled=!hasItems;button.textContent=label+' →'}
 }
 async function authState(){const res=await fetch('/api/v1/acceso/estado',{headers:{Accept:'application/json'},credentials:'same-origin'});if(res.status===401){state.authenticated=false;updateCartAction();return false}if(!res.ok)throw new Error('No se pudo verificar la sesión.');state.authenticated=true;const account=await res.json();state.profileComplete=account.data?.profile_complete!==false;if(!state.profileComplete&&!['profile','register'].includes(marketPage))window.location.assign('/tienda/perfil');updateCartAction();return true}
@@ -354,23 +378,21 @@ try{
  if(!cartHasConcepts()){toast(localized('Agrega al menos un concepto para continuar.','Add at least one service to continue.'),true);return}
  if(!(await authState())){sessionStorage.setItem('undc_resume_purchase','1');screen('login');$('marketLoginTitle')?.focus({preventScroll:true});return}
  if(state.profileComplete===false)return;
- if(referenceCart.length){await showPaymentPreview();return}
+ // Only the server cart can continue to pre-purchase review.
 
 if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tienda/precompra/vincular-carrito','POST',{cart_token:state.token});sessionStorage.removeItem('undc_cart_token');state.token=null;state.owned=true}
 await refreshReview()}catch(e){toast(e.message,true)}}
 
 async function showPaymentPreview(){
  const profile=await api('/api/v1/acceso/perfil');
- const references=referenceCart.map(id=>tusneConcepts.find(item=>item.id===id)).filter(Boolean);
  const institutional=state.cart?.items||[];
  $('paymentBuyerName').textContent=[profile?.first_names,profile?.last_names].filter(Boolean).join(' ');
  $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
  $('paymentBuyerEmail').textContent=profile?.contact_email||'';
  const box=$('paymentPreviewItems');box.replaceChildren();
- for(const item of references){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=localized(item.name,item.en);const price=document.createElement('span');price.textContent=item.price+(item.unit?' / '+localized(item.unit,item.unitEn):'');row.append(name,price);box.append(row)}
- for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
- $('paymentPreviewCount').textContent=String(references.length+institutional.length);
- $('paymentPreviewTotal').textContent=referenceCartEstimate(references,institutional.length>0);
+ for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
+ $('paymentPreviewCount').textContent=String(institutional.length);
+ $('paymentPreviewTotal').textContent=localized('Por confirmar','To be confirmed');
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
 }
 
@@ -429,7 +451,7 @@ document.addEventListener('focusin',event=>{if(!event.target.closest('.header-se
 
 $('search')?.addEventListener('input',()=>{searchCatalog();renderSearchSuggestions();});
 $('catalogFilters')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-filter]');if(!button)return;tusneCategory=button.dataset.categoryFilter;renderTusneCatalog()});
-$('tusneResults')?.addEventListener('click',event=>{const addButton=event.target.closest('[data-reference-cart]');if(addButton){toggleReferenceCart(addButton.dataset.referenceCart);return}const button=event.target.closest('[data-concept-detail]');if(button)openConceptDetail(button.dataset.conceptDetail)});
+$('tusneResults')?.addEventListener('click',event=>{const addButton=event.target.closest('[data-catalog-cart]');if(addButton){addItem(addButton.dataset.catalogCart);return}const button=event.target.closest('[data-concept-detail]');if(button)openConceptDetail(button.dataset.conceptDetail)});
 $('clearCatalogFilters')?.addEventListener('click',()=>{tusneCategory='all';$('search').value='';renderTusneCatalog();});
 $('conceptDialogClose')?.addEventListener('click',()=>$('conceptDialog').close());$('conceptDialog')?.addEventListener('click',event=>{if(event.target===$('conceptDialog'))$('conceptDialog').close()});
 const headerNav=$('headerNavPanel'),menuButton=$('headerMenuButton'),mobileDrawer=$('mobileDrawer');
@@ -441,14 +463,14 @@ mobileDrawer?.addEventListener('click',event=>{if(event.target!==mobileDrawer)re
 mobileDrawer?.querySelectorAll('[data-accessibility-toggle]').forEach(button=>button.addEventListener('click',closeHeaderMenu));
 window.addEventListener('resize',()=>{if(window.innerWidth>940)closeHeaderMenu()});
 document.querySelector('.header-search')?.addEventListener('submit',event=>{event.preventDefault();closeSearchSuggestions();searchCatalog(true);closeHeaderMenu()});
-document.querySelectorAll('.nav-links a, .drawer-links a').forEach(link=>link.addEventListener('click',event=>{const view=link.dataset.mainViewLink;if(view){event.preventDefault();if(marketPage!=='catalog'){window.location.assign('/tienda?view='+encodeURIComponent(view));return}if(view==='procedures'){tusneCategory=tusneCategories[0].id;renderTusneCatalog()}setMainView(view)}closeHeaderMenu()}));
+document.querySelectorAll('.nav-links a, .drawer-links a').forEach(link=>link.addEventListener('click',event=>{const view=link.dataset.mainViewLink;if(view){event.preventDefault();if(marketPage!=='catalog'){window.location.assign('/tienda?view='+encodeURIComponent(view));return}if(view==='procedures'){tusneCategory='all';renderTusneCatalog()}setMainView(view)}closeHeaderMenu()}));
 $('cartButton')?.addEventListener('click',()=>screen('cart'));$('mobileCartButton')?.addEventListener('click',()=>{screen('cart');closeHeaderMenu()});$('sideContinue')?.addEventListener('click',purchase);$('cartContinue')?.addEventListener('click',continuePurchase);
 document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>screen(el.dataset.go)));
 $('googleButton')?.addEventListener('click',()=>{sessionStorage.setItem('undc_resume_purchase','1');window.location.assign('/auth/google/redirect')});
 $('profileForm')?.addEventListener('submit',async event=>{event.preventDefault();const form=new FormData(event.currentTarget);
 try{await api('/api/v1/acceso/perfil','PUT',Object.fromEntries(form.entries()));await refreshReview();toast('Tus datos quedaron guardados para próximas compras.')}catch(e){let msg=e.message;if(e.errors){msg=Object.values(e.errors).flat().join(' ')}toast(msg,true)}});
 $('reviewBack')?.addEventListener('click',()=>screen('cart'));
-renderTusneCatalog();restore();
+renderTusneCatalog();loadOffices();restore();
 
 /* Accessibility panel: browser-native speech, local preferences, keyboard access. */
 const accessibilityPanel=$('accessibilityPanel');
@@ -600,3 +622,4 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+

@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 final class CatalogController extends Controller
 {
+    public function offices(CatalogService $service): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $service->offices()->values()->all(),
+            'message' => 'Oficinas con catálogo disponible.',
+        ])->header('Cache-Control', 'no-store');
+    }
+
     public function __invoke(Request $request, CatalogService $service): JsonResponse
     {
         // The public API is explicitly scoped to an enabled office. Until
@@ -31,3 +40,4 @@ final class CatalogController extends Controller
         ]);
     }
 }
+

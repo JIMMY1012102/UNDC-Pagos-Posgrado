@@ -10,7 +10,11 @@ class Element {
  querySelectorAll(){return []} querySelector(){return null}
  addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
-async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map()}={}){
+const fixture=[
+ {id:12,code:'6.15',name:'Prospecto de admisión',category:'admission',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
+ {id:13,code:'MAT',name:'Matrícula de Maestría',category:'tuition',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'}
+];
+async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0}}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
@@ -18,10 +22,28 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
  const storage=new Map(resume?[['undc_resume_purchase','1']]:[]);
  const store=m=>({getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)});
  const document={body,documentElement:new Element(),getElementById:id=>ids.get(id)||null,querySelector:s=>s.startsWith('meta')?new Element():s==='.page-grid'||s==='.cart-review-panel'?new Element():null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
- const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch:async url=>({status:url.endsWith('/estado')&&!authenticated?401:200,ok:!url.endsWith('/estado')||authenticated,json:async()=>({data:url.endsWith('/estado')?{profile_complete:complete}:url.endsWith('/resumen')?{cart:null}:{token:'test-token',cart:{items:[],items_count:0}}})})});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,toggleReferenceCart,tusneConcepts,catalogSuggestions,chooseSearchSuggestion};})();');
+ const calls=[];
+ const fetch=async(url,options={})=>{
+  calls.push({url,...options});
+  if(url.endsWith('/estado')&&!authenticated)return {status:401,ok:false,json:async()=>({})};
+  if(url.includes('/catalogo?')&&failCatalog)return {status:500,ok:false,json:async()=>({message:'Error de catálogo'})};
+  let data;
+  if(url.endsWith('/catalogo/oficinas'))data=officeList;
+  else if(url.includes('/catalogo?'))data=catalog;
+  else if(url.endsWith('/estado'))data={profile_complete:complete};
+  else if(url.endsWith('/resumen'))data={cart:null};
+  else if(url.endsWith('/carritos'))data={token:'a'.repeat(64),cart};
+  else if(url.endsWith('/items')&&options.method==='POST'){
+   const body=JSON.parse(options.body);const item=catalog.find(item=>item.id===body.catalog_item_id);
+   cart.items=[{id:99,catalog_item_id:body.catalog_item_id,quantity:body.quantity,slug:item?.name||'concepto'}];cart.items_count=body.quantity;data=cart;
+  }else if(options.method==='DELETE'){cart.items=[];cart.items_count=0;data=cart}
+  else data=cart;
+  return {status:200,ok:true,json:async()=>({success:true,data})};
+ };
+ const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
- return {ids,assigned,storage,context,html};
+ return {ids,assigned,storage,context,html,calls};
 }
 for(const page of ['catalog','cart','login'])test(page+' initializes with only its own page controls',async()=>{
  const app=await boot(page);assert.equal(app.ids.has('tusneCatalog'),page==='catalog');assert.equal(app.ids.has('cartRows'),page==='cart');assert.equal(app.ids.has('marketLoginEmail'),page==='login');
@@ -37,16 +59,45 @@ test('authenticated OAuth return takes pending purchase to cart',async()=>{
  const app=await boot('catalog',{authenticated:true,resume:true});assert.deepEqual(app.assigned,['/tienda/carrito']);assert.equal(app.storage.get('undc_resume_purchase'),'1');
 });
 
-test('selection survives catalog to login to cart through shared browser storage',async()=>{
- const local=new Map();const catalog=await boot('catalog',{local});
- const id=catalog.context.marketTest.tusneConcepts[0].id;
- catalog.context.marketTest.toggleReferenceCart(id);
- await boot('login',{local});
- const cart=await boot('cart',{local});
- assert.equal(cart.ids.get('cartSummaryCount').textContent,'1');
- assert.equal(cart.ids.get('cartContinue').disabled,false);
- assert.match(cart.ids.get('cartContinue').textContent,/Iniciar sesión/);
- assert.deepEqual(JSON.parse(local.get('undc_tusne_reference_cart')),[id]);
+test('published API concepts replace browser references and add uses numeric database ID',async()=>{
+ const local=new Map([['undc_tusne_reference_cart','["6.15"]']]);
+ const app=await boot('catalog',{local});
+ assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ assert.match(app.ids.get('tusneResults').innerHTML,/data-catalog-cart="12"/);
+ assert.match(app.ids.get('tusneResults').innerHTML,/Por confirmar/);
+ assert.ok(app.calls.some(call=>call.url==='/api/v1/tienda/catalogo?office_id=7'));
+ await app.context.marketTest.addItem('12');
+ const call=app.calls.find(call=>call.url.endsWith('/items')&&call.method==='POST');
+ assert.deepEqual(JSON.parse(call.body),{catalog_item_id:12,quantity:1});
+ assert.equal(call.headers.Authorization,'Bearer '+'a'.repeat(64));
+ assert.equal(app.ids.get('cartBadge').textContent,1);
+ assert.match(app.ids.get('tusneResults').innerHTML,/is-added/);
+ await app.context.marketTest.removeItem(99);
+ assert.equal(app.ids.get('cartBadge').textContent,0);
+ assert.equal(local.get('undc_tusne_reference_cart'),'["6.15"]','old references are ignored, never promoted to purchases');
+});
+test('empty or failed API never falls back to hardcoded products',async()=>{
+ const empty=await boot('catalog',{catalog:[]});
+ assert.equal(empty.ids.get('tusneResults').innerHTML,'');
+ assert.equal(empty.ids.get('tusneEmpty').hidden,false);
+ const failed=await boot('catalog',{failCatalog:true});
+ assert.equal(failed.ids.get('tusneResults').innerHTML,'');
+ assert.equal(failed.ids.get('catalogRetry').hidden,false);
+ assert.match(failed.ids.get('catalogStatus').textContent,/No se pudo/);
+});
+test('offices are explicit and an arbitrary office 1 is never assumed',async()=>{
+ const app=await boot('catalog',{officeList:[{id:7,name:'Primera'},{id:9,name:'Segunda'}]});
+ assert.ok(!app.calls.some(call=>call.url.includes('/catalogo?')));
+ app.ids.get('catalogOffice').value='9';
+ await app.ids.get('catalogOffice').listeners.change();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.ok(app.calls.some(call=>call.url.endsWith('office_id=9')));
+});
+test('API text is escaped before rendering cards',async()=>{
+ const app=await boot('catalog',{catalog:[{...fixture[0],name:'<img src=x onerror=alert(1)>',description:'<script>bad()</script>'}]});
+ const html=app.ids.get('tusneResults').innerHTML;
+ assert.ok(!html.includes('<img src=x'));
+ assert.match(html,/&lt;img/);assert.match(html,/&lt;script&gt;/);
 });
 
 test('authenticated incomplete profile goes to personal data before resuming cart',async()=>{
@@ -84,3 +135,4 @@ test('search suggestions rank exact names first, limit results and select a prod
  assert.equal(input.value,product.name);assert.equal(list.hidden,true);
  assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
 });
+

@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\DB;
  */
 final class PublishedCatalogQuery
 {
+    /** Offices with enabled, available publications; no institutional ID is assumed. */
+    public function offices(): Collection
+    {
+        return $this->availablePublications()
+            ->select('office.oficina_id as id', 'office.oficina_nom as name')
+            ->distinct()->orderBy('office.oficina_nom')->get();
+    }
+
     /** @return Collection<int, object> */
     public function forOffice(int $legacyOfficeId, int $limit = 50): Collection
     {
@@ -24,6 +32,7 @@ final class PublishedCatalogQuery
                 'publication.slug',
                 'publication.description',
                 'publication.requirements',
+                'publication.category',
                 'publication.requires_eligibility_check',
                 'office.oficina_id as legacy_office_id',
                 'office.oficina_nom as office_name',
@@ -52,3 +61,4 @@ final class PublishedCatalogQuery
             ->where('concept.costo', '>=', 0);
     }
 }
+
