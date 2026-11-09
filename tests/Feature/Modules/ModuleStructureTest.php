@@ -8,7 +8,7 @@ class ModuleStructureTest extends TestCase
 {
     public function test_each_business_module_has_an_independent_route_file(): void
     {
-        foreach (['Acceso', 'Tienda', 'Pagos', 'Tesoreria'] as $module) {
+        foreach (['Sispagos', 'Catalogo', 'Compradores', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
             $this->assertFileExists(app_path("Modules/{$module}/routes.php"));
         }
     }

@@ -2,9 +2,9 @@ name: CI · Laravel
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/acceso-onboarding-unica-vez, feat/tienda-precompra-continuidad, test/e2e-precompra-mariadb, test/tienda-regresion-completa, feat/frontend-undc-sanmar-ket-v1, test/fullstack-browser-db-20261026, feat/arquitectura-modular-ddd-ligero-20261108]
   pull_request:
-    branches: [main]
+    branches: [main, feat/base-datos-escalable-v1, feat/backend-catalogo-posgrado, feat/backend-carrito-precompra, feat/acceso-identidad-spatie-preparacion, feat/acceso-spatie-google-oauth, feat/undc-market-avance-local]
   workflow_dispatch:
 
 permissions:
@@ -54,3 +54,103 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm run build
+
+  maria-db-compartida:
+    name: Integración real SISPAGOS + tienda (MariaDB)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci_only_password
+          MARIADB_DATABASE: undc_tesoreria_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mariadb
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: undc_tesoreria_ci
+      DB_USERNAME: root
+      DB_PASSWORD: ci_only_password
+      UNDC_INTEGRATION_FIXTURE: '1'
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Preparar PHP 8.3 con MariaDB
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, curl, fileinfo, pdo_mysql, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Instalar dependencias y configuración de prueba
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Crear solo las seis tablas originales vacías de SISPAGOS
+        run: php tests/Fixtures/mariadb_check.php setup
+
+      - name: Verificar compatibilidad original
+        run: php artisan treasury:schema-check
+
+      - name: Aplicar migraciones de tienda en base compartida de prueba
+        run: php artisan migrate --force
+
+      - name: Comprobar llaves foráneas reales y uniones de catálogo
+        run: php tests/Fixtures/mariadb_check.php verify
+
+      - name: Probar recorrido HTTP completo con MariaDB real
+        run: php artisan test tests/Feature/Integration/CompletePurchaseJourneyTest.php --no-ansi
+
+  browser:
+    name: Navegador Chromium · escritorio y móvil
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+      - name: Preparar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, curl, fileinfo, pdo_sqlite, sqlite3, zip
+          coverage: none
+          tools: composer:v2
+      - name: Instalar Laravel y configurar entorno local efímero
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          echo 'SESSION_DRIVER=file' >> .env
+          echo 'CACHE_STORE=file' >> .env
+          echo 'DB_CONNECTION=sqlite' >> .env
+          touch database/database.sqlite
+      - name: Preparar Node y Chromium
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar navegador de prueba
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+      - name: Iniciar Laravel y comprobar pantallas en navegador
+        run: |
+          SESSION_DRIVER=file CACHE_STORE=file DB_CONNECTION=sqlite DB_DATABASE=database/database.sqlite php artisan serve --host=127.0.0.1 --port=8000 > /tmp/undc-serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/tienda >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/tienda >/dev/null || { cat /tmp/undc-serve.log; exit 1; }
+          node tests/browser/storefront.mjs

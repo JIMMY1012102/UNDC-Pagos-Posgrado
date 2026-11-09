@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="760" viewBox="0 0 1000 760">
+<defs>
+<linearGradient id="ribbon" x1="0%" y1="0%" x2="100%" y2="65%"><stop offset="0%" stop-color="#001A38" stop-opacity="0"/><stop offset=".37" stop-color="#003B76" stop-opacity=".28"/><stop offset=".78" stop-color="#0968C5" stop-opacity=".51"/><stop offset="100%" stop-color="#0C7EE3" stop-opacity=".68"/></linearGradient>
+<linearGradient id="stripe" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0086D8" stop-opacity="0"/><stop offset=".3" stop-color="#188DFF" stop-opacity=".23"/><stop offset=".72" stop-color="#1F9FFF" stop-opacity=".8"/><stop offset="1" stop-color="#20BAF5" stop-opacity="0"/></linearGradient>
+<linearGradient id="ribbon2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#209CFA" stop-opacity=".27"/><stop offset="1" stop-color="#0357B0" stop-opacity=".02"/></linearGradient>
+</defs>
+<path d="M60 493 C220 629 445 690 679 648 C835 620 943 510 1020 396 L1020 760 L74 760 Z" fill="url(#ribbon)"/>
+<path d="M62 510 C204 645 434 694 659 663 C812 642 936 539 1014 454 L1020 513 C915 622 806 715 639 724 C424 740 191 661 62 510Z" fill="url(#ribbon2)" opacity=".8"/>
+<path d="M82 540 C248 678 453 708 660 671 C793 651 910 580 996 485" stroke="url(#stripe)" fill="none" stroke-width="2"/>
+</svg>
