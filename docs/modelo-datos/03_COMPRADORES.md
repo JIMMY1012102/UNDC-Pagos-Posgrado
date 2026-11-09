@@ -7,26 +7,26 @@ erDiagram
   users {
     BIGINT id PK
   }
-  store_customer_profiles {
+  tienda_perfiles_compradores {
     BIGINT id PK
   }
-  store_oauth_identities {
+  tienda_identidades_oauth {
     BIGINT id PK
   }
-  store_beneficiaries {
+  tienda_beneficiarios {
     BIGINT id PK
   }
-  users ||--o| store_customer_profiles : "user_id"
-  users ||--o{ store_oauth_identities : "user_id"
-  store_customer_profiles ||--o{ store_beneficiaries : "customer_profile_id"
-  users ||--o{ store_carts : "user_id nullable"
-  store_beneficiaries ||--o{ store_cart_items : "beneficiary_id nullable"
-  users ||--o{ store_orders : "user_id"
-  store_beneficiaries ||--o{ store_order_items : "beneficiary_id nullable"
-  users ||--o{ store_order_status_history : "actor_user_id nullable"
-  users ||--o{ store_payment_incidents : "resolved_by nullable"
-  users ||--o{ store_refunds : "requested_by nullable"
-  users ||--o{ store_audit_events : "actor_buyer_user_id nullable"
+  users ||--o| tienda_perfiles_compradores : "user_id"
+  users ||--o{ tienda_identidades_oauth : "user_id"
+  tienda_perfiles_compradores ||--o{ tienda_beneficiarios : "customer_profile_id"
+  users ||--o{ tienda_carritos : "user_id nullable"
+  tienda_beneficiarios ||--o{ tienda_detalles_carrito : "beneficiary_id nullable"
+  users ||--o{ tienda_pedidos : "user_id"
+  tienda_beneficiarios ||--o{ tienda_detalles_pedido : "beneficiary_id nullable"
+  users ||--o{ tienda_historial_estados_pedido : "actor_user_id nullable"
+  users ||--o{ tienda_incidencias_pago : "resolved_by nullable"
+  users ||--o{ tienda_reembolsos : "requested_by nullable"
+  users ||--o{ tienda_eventos_auditoria : "actor_buyer_user_id nullable"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 

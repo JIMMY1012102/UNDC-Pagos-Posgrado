@@ -22,18 +22,18 @@ erDiagram
   tm_resultado {
     INT i_resultado PK
   }
-  tm_oficina ||--o| store_office_settings : "legacy_office_id"
-  tm_oficina ||--o{ store_catalog_items : "legacy_office_id"
-  tm_conceptos ||--o{ store_catalog_items : "legacy_concept_id"
-  tm_oficina ||--o{ store_order_items : "legacy_office_id"
-  tm_conceptos ||--o{ store_order_items : "legacy_concept_id"
-  tm_usuario ||--o{ store_reconciliation_batches : "legacy_importer_id nullable"
-  tm_resultado ||--o{ store_reconciliation_entries : "legacy_result_id nullable"
-  tm_recaudacion ||--o{ store_reconciliation_entries : "legacy_recaudacion_id nullable"
-  tm_usuario ||--o{ store_payment_validations : "legacy_reviewer_id nullable"
-  tm_usuario ||--o{ store_validation_certificates : "legacy_issuer_id nullable"
-  tm_usuario ||--o{ store_validation_certificates : "legacy_revoker_id nullable"
-  tm_usuario ||--o{ store_audit_events : "legacy_staff_id nullable"
+  tm_oficina ||--o| tienda_configuracion_oficinas : "legacy_office_id"
+  tm_oficina ||--o{ tienda_conceptos_catalogo : "legacy_office_id"
+  tm_conceptos ||--o{ tienda_conceptos_catalogo : "legacy_concept_id"
+  tm_oficina ||--o{ tienda_detalles_pedido : "legacy_office_id"
+  tm_conceptos ||--o{ tienda_detalles_pedido : "legacy_concept_id"
+  tm_usuario ||--o{ tienda_lotes_conciliacion : "legacy_importer_id nullable"
+  tm_resultado ||--o{ tienda_detalles_conciliacion : "legacy_result_id nullable"
+  tm_recaudacion ||--o{ tienda_detalles_conciliacion : "legacy_recaudacion_id nullable"
+  tm_usuario ||--o{ tienda_validaciones_pago : "legacy_reviewer_id nullable"
+  tm_usuario ||--o{ tienda_constancias_validacion : "legacy_issuer_id nullable"
+  tm_usuario ||--o{ tienda_constancias_validacion : "legacy_revoker_id nullable"
+  tm_usuario ||--o{ tienda_eventos_auditoria : "legacy_staff_id nullable"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 

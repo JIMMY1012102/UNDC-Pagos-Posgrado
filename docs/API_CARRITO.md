@@ -1,6 +1,6 @@
 # API JSON de carrito de precompra — fase 2
 
-Este módulo usa las tablas `store_carts` y `store_cart_items` existentes, sin modificar migraciones. Es un carrito **anónimo de preparación**, no una orden ni un cobro. Sigue separado en controlador, servicio y rutas del módulo Tienda.
+Este módulo usa las tablas `tienda_carritos` y `tienda_detalles_carrito` existentes, sin modificar migraciones. Es un carrito **anónimo de preparación**, no una orden ni un cobro. Sigue separado en controlador, servicio y rutas del módulo Tienda.
 
 ## Rutas
 
@@ -13,7 +13,7 @@ Este módulo usa las tablas `store_carts` y `store_cart_items` existentes, sin m
 
 ## Reglas de seguridad
 
-- El token de acceso contiene 256 bits aleatorios y se almacena únicamente como SHA-256 en `store_carts.token_hash`.
+- El token de acceso contiene 256 bits aleatorios y se almacena únicamente como SHA-256 en `tienda_carritos.token_hash`.
 - Los carritos se limitan a la sesión portadora del token, permanecen anónimos y expiran en 24 horas.
 - GET/POST/DELETE requieren un bearer token válido; el endpoint no admite un ID de carrito arbitrario.
 - Para añadir un concepto se comprueban catálogo habilitado, publicación vigente, oficina activa y costo maestro no negativo. Esto **no convierte ese costo en tarifa de cobro aprobada**.

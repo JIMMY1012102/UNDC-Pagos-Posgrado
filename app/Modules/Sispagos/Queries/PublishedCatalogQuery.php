@@ -41,8 +41,8 @@ final class PublishedCatalogQuery
 
     private function availablePublications(): Builder
     {
-        return DB::table('store_catalog_items as publication')
-            ->join('store_office_settings as settings', 'settings.legacy_office_id', '=', 'publication.legacy_office_id')
+        return DB::table('tienda_conceptos_catalogo as publication')
+            ->join('tienda_configuracion_oficinas as settings', 'settings.legacy_office_id', '=', 'publication.legacy_office_id')
             ->join('tm_oficina as office', 'office.oficina_id', '=', 'publication.legacy_office_id')
             ->join('tm_conceptos as concept', 'concept.id_concepto', '=', 'publication.legacy_concept_id')
             ->where('settings.catalog_enabled', true)

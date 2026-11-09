@@ -16,14 +16,14 @@ class PaymentsSchemaTest extends TestCase
     public function test_store_migrations_do_not_recreate_or_modify_treasury_master_tables(): void
     {
         foreach ([
-            'store_office_settings', 'store_catalog_items', 'store_catalog_price_versions',
-            'store_customer_profiles', 'store_oauth_identities', 'store_beneficiaries',
-            'store_carts', 'store_cart_items', 'store_orders', 'store_order_items',
-            'store_order_status_history', 'store_payment_attempts', 'store_payment_transactions',
-            'store_order_payment_claims', 'store_payment_webhook_events',
-            'store_payment_incidents', 'store_refunds', 'store_reconciliation_batches',
-            'store_reconciliation_entries', 'store_external_system_links',
-            'store_payment_validations', 'store_validation_certificates', 'store_audit_events',
+            'tienda_configuracion_oficinas', 'tienda_conceptos_catalogo', 'tienda_versiones_tarifas',
+            'tienda_perfiles_compradores', 'tienda_identidades_oauth', 'tienda_beneficiarios',
+            'tienda_carritos', 'tienda_detalles_carrito', 'tienda_pedidos', 'tienda_detalles_pedido',
+            'tienda_historial_estados_pedido', 'tienda_intentos_pago', 'tienda_transacciones_pago',
+            'tienda_pagos_aplicados_pedidos', 'tienda_eventos_notificacion_pago',
+            'tienda_incidencias_pago', 'tienda_reembolsos', 'tienda_lotes_conciliacion',
+            'tienda_detalles_conciliacion', 'tienda_vinculos_sistemas_externos',
+            'tienda_validaciones_pago', 'tienda_constancias_validacion', 'tienda_eventos_auditoria',
         ] as $table) {
             $this->assertTrue(Schema::hasTable($table), "Missing new table: {$table}");
         }
@@ -37,19 +37,19 @@ class PaymentsSchemaTest extends TestCase
 
     public function test_catalog_maps_explicit_legacy_office_and_concept_ids(): void
     {
-        DB::table('store_office_settings')->insert([
+        DB::table('tienda_configuracion_oficinas')->insert([
             'legacy_office_id' => 7, 'slug' => 'posgrado', 'catalog_enabled' => true,
         ]);
-        DB::table('store_catalog_items')->insert([
+        DB::table('tienda_conceptos_catalogo')->insert([
             'legacy_office_id' => 7, 'legacy_concept_id' => 1,
             'slug' => 'matricula-posgrado', 'is_published' => true,
         ]);
 
-        $this->assertSame(7, DB::table('store_catalog_items')->value('legacy_office_id'));
-        $this->assertSame(1, DB::table('store_catalog_items')->value('legacy_concept_id'));
+        $this->assertSame(7, DB::table('tienda_conceptos_catalogo')->value('legacy_office_id'));
+        $this->assertSame(1, DB::table('tienda_conceptos_catalogo')->value('legacy_concept_id'));
 
         $this->expectException(QueryException::class);
-        DB::table('store_catalog_items')->insert([
+        DB::table('tienda_conceptos_catalogo')->insert([
             'legacy_office_id' => 7, 'legacy_concept_id' => 1, 'slug' => 'duplicado',
         ]);
     }
@@ -57,12 +57,12 @@ class PaymentsSchemaTest extends TestCase
     public function test_buyer_profiles_do_not_enforce_document_uniqueness(): void
     {
         foreach ([User::factory()->create(), User::factory()->create()] as $user) {
-            DB::table('store_customer_profiles')->insert([
+            DB::table('tienda_perfiles_compradores')->insert([
                 'user_id' => $user->id, 'document_type' => 'DNI',
                 'document_number' => '00000000',
             ]);
         }
-        $this->assertSame(2, DB::table('store_customer_profiles')->count());
+        $this->assertSame(2, DB::table('tienda_perfiles_compradores')->count());
     }
 
     public function test_second_payment_must_not_be_applied_to_same_order(): void
@@ -70,13 +70,13 @@ class PaymentsSchemaTest extends TestCase
         $order = $this->createOrder();
         $first = $this->transaction($order, 'payme', 'TEST-A');
         $second = $this->transaction($order, 'interbank', 'TEST-B');
-        DB::table('store_order_payment_claims')->insert([
+        DB::table('tienda_pagos_aplicados_pedidos')->insert([
             'order_id' => $order, 'payment_transaction_id' => $first, 'claimed_at' => now(),
         ]);
 
-        $this->assertSame(2, DB::table('store_payment_transactions')->count());
+        $this->assertSame(2, DB::table('tienda_transacciones_pago')->count());
         $this->expectException(QueryException::class);
-        DB::table('store_order_payment_claims')->insert([
+        DB::table('tienda_pagos_aplicados_pedidos')->insert([
             'order_id' => $order, 'payment_transaction_id' => $second, 'claimed_at' => now(),
         ]);
     }
@@ -95,14 +95,14 @@ class PaymentsSchemaTest extends TestCase
             'provider' => 'payme', 'event_key' => 'evt-1',
             'payload_digest' => str_repeat('a', 64), 'received_at' => now(),
         ];
-        DB::table('store_payment_webhook_events')->insert($row);
+        DB::table('tienda_eventos_notificacion_pago')->insert($row);
         $this->expectException(QueryException::class);
-        DB::table('store_payment_webhook_events')->insert($row);
+        DB::table('tienda_eventos_notificacion_pago')->insert($row);
     }
 
     public function test_reconciliation_can_reference_legacy_bank_result_without_changing_it(): void
     {
-        $batch = DB::table('store_reconciliation_batches')->insertGetId([
+        $batch = DB::table('tienda_lotes_conciliacion')->insertGetId([
             'provider' => 'interbank', 'channel' => 'bank_import',
         ]);
         $entry = [
@@ -110,28 +110,28 @@ class PaymentsSchemaTest extends TestCase
             'legacy_result_id' => 26, 'legacy_recaudacion_id' => 1144,
             'gross_amount' => 100, 'net_amount' => 100,
         ];
-        DB::table('store_reconciliation_entries')->insert($entry);
-        $this->assertSame(26, DB::table('store_reconciliation_entries')->value('legacy_result_id'));
+        DB::table('tienda_detalles_conciliacion')->insert($entry);
+        $this->assertSame(26, DB::table('tienda_detalles_conciliacion')->value('legacy_result_id'));
 
         $this->expectException(QueryException::class);
-        DB::table('store_reconciliation_entries')->insert($entry);
+        DB::table('tienda_detalles_conciliacion')->insert($entry);
     }
 
     public function test_order_item_keeps_price_snapshot_after_catalog_changes(): void
     {
-        DB::table('store_office_settings')->insert([
+        DB::table('tienda_configuracion_oficinas')->insert([
             'legacy_office_id' => 7, 'slug' => 'posgrado',
         ]);
-        $item = DB::table('store_catalog_items')->insertGetId([
+        $item = DB::table('tienda_conceptos_catalogo')->insertGetId([
             'legacy_office_id' => 7, 'legacy_concept_id' => 1,
             'slug' => 'concepto-prueba',
         ]);
-        $price = DB::table('store_catalog_price_versions')->insertGetId([
+        $price = DB::table('tienda_versiones_tarifas')->insertGetId([
             'catalog_item_id' => $item, 'amount' => 100,
             'valid_from' => now(),
         ]);
         $order = $this->createOrder();
-        DB::table('store_order_items')->insert([
+        DB::table('tienda_detalles_pedido')->insert([
             'order_id' => $order, 'catalog_item_id' => $item,
             'legacy_concept_id' => 1, 'legacy_office_id' => 7,
             'concept_code' => 'EJEMPLO', 'concept_name' => 'Concepto ficticio',
@@ -141,15 +141,15 @@ class PaymentsSchemaTest extends TestCase
             'beneficiary_document_type' => 'DNI',
             'beneficiary_document_number' => '00000000',
         ]);
-        DB::table('store_catalog_price_versions')->where('id', $price)->update(['amount' => 120]);
-        $this->assertEquals(100, DB::table('store_order_items')->value('unit_amount'));
+        DB::table('tienda_versiones_tarifas')->where('id', $price)->update(['amount' => 120]);
+        $this->assertEquals(100, DB::table('tienda_detalles_pedido')->value('unit_amount'));
     }
 
     private function createOrder(): int
     {
         $user = User::factory()->create();
 
-        return DB::table('store_orders')->insertGetId([
+        return DB::table('tienda_pedidos')->insertGetId([
             'code' => 'TEST-'.uniqid(),
             'user_id' => $user->id, 'total_amount' => 100,
             'buyer_first_names' => 'Persona', 'buyer_last_names' => 'Ejemplo',
@@ -160,7 +160,7 @@ class PaymentsSchemaTest extends TestCase
 
     private function transaction(int $order, string $provider, string $ref): int
     {
-        return DB::table('store_payment_transactions')->insertGetId([
+        return DB::table('tienda_transacciones_pago')->insertGetId([
             'order_id' => $order, 'provider' => $provider,
             'provider_transaction_reference' => $ref,
             'amount' => 100, 'status' => 'confirmed',

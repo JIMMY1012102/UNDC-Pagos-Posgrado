@@ -12,4 +12,7 @@
 | 6 | Conciliación y Tesorería | 6 | [Abrir módulo](./06_TESORERIA.md) |
 | 7 | Seguridad y Laravel | 13 | [Abrir módulo](./07_SEGURIDAD.md) |
 
-**Importante:** los nombres y estructuras físicas de `tm_*`, `store_*` y tablas Laravel/Spatie no se alteran. En MariaDB `SCHEMA` y `DATABASE` son equivalentes: estos módulos son límites de dominio y código, no subesquemas independientes.
+**Importante:** las seis `tm_*` y las tablas de soporte Laravel/Spatie se conservan. Las 23 tablas propias pasan de `store_*` a `tienda_*` mediante una migración incremental; las columnas, datos y relaciones se conservan. En MariaDB `SCHEMA` y `DATABASE` son equivalentes: estos módulos son límites de dominio y código, no subesquemas independientes.
+
+
+[Equivalencias inglés → español](../NOMBRES_TABLAS_ESPANOL.md).

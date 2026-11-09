@@ -111,6 +111,9 @@ jobs:
       - name: Comprobar llaves foráneas reales y uniones de catálogo
         run: php tests/Fixtures/mariadb_check.php verify
 
+      - name: Verificar reversión de nombres sin pérdida de datos ni relaciones
+        run: php tests/Fixtures/spanish_table_names_check.php
+
       - name: Probar recorrido HTTP completo con MariaDB real
         run: php artisan test tests/Feature/Integration/CompletePurchaseJourneyTest.php --no-ansi
 
@@ -154,3 +157,4 @@ jobs:
           done
           curl -fsS http://127.0.0.1:8000/tienda >/dev/null || { cat /tmp/undc-serve.log; exit 1; }
           node tests/browser/storefront.mjs
+

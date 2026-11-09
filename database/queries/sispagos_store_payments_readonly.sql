@@ -1,5 +1,5 @@
 -- CONSULTA DE REFERENCIA PARA SISPAGOS (SOLO LECTURA).
--- Requiere en la MISMA BD: 6 tablas tm_* originales + migraciones store_*.
+-- Requiere en la MISMA BD: 6 tablas tm_* originales + migraciones originales y renombrado a tienda_*.
 -- No modifica datos, no reemplaza el módulo actual, no valida un pago por sí sola.
 -- La aplicación que ejecute la consulta DEBE verificar permisos internos por oficina.
 --
@@ -40,12 +40,12 @@ SELECT
         WHEN applied.payment_transaction_id IS NOT NULL THEN 'REVISAR_COBRO'
         ELSE 'SIN_COBRO_APLICADO'
     END AS estado_cobro_tienda
-FROM store_orders AS o
-INNER JOIN store_order_items AS oi ON oi.order_id = o.id
+FROM tienda_pedidos AS o
+INNER JOIN tienda_detalles_pedido AS oi ON oi.order_id = o.id
 LEFT JOIN tm_conceptos AS c ON c.id_concepto = oi.legacy_concept_id
 LEFT JOIN tm_oficina AS ofi ON ofi.oficina_id = oi.legacy_office_id
-LEFT JOIN store_order_payment_claims AS applied ON applied.order_id = o.id
-LEFT JOIN store_payment_transactions AS p
+LEFT JOIN tienda_pagos_aplicados_pedidos AS applied ON applied.order_id = o.id
+LEFT JOIN tienda_transacciones_pago AS p
        ON p.id = applied.payment_transaction_id
 -- Filtros de ejemplo (parametrizarlos en SISPAGOS; no concatenar desde navegador):
 -- WHERE oi.legacy_office_id = :office_id
@@ -55,7 +55,7 @@ ORDER BY o.created_at DESC, o.id DESC, oi.id ASC;
 
 -- Importante:
 -- 1. Un cobro aplicado NO significa dinero liquidado por el banco ni validado
---    por Tesorería. Consultar conciliación y store_payment_validations aparte.
+--    por Tesorería. Consultar conciliación y tienda_validaciones_pago aparte.
 -- 2. Comparar importe/moneda reales e idempotencia ANTES de crear applied.
 -- 3. No escribir automáticamente en tm_resultado: corresponde a resultados
 --    bancarios de otro canal, según el archivo entregado.

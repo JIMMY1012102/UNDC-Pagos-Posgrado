@@ -39,7 +39,7 @@ class AccountRegistrationTest extends TestCase
         $data['password_confirmation'] = 'different-password';
         $this->post('/tienda/registro', $data)->assertSessionHasErrors(['document_number', 'password']);
         $this->assertDatabaseCount('users', 0);
-        $this->assertDatabaseCount('store_customer_profiles', 0);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
     }
 
     public function test_duplicate_email_is_rejected(): void
@@ -75,13 +75,13 @@ class AccountRegistrationTest extends TestCase
             ->get('/tienda/perfil')->assertOk()->assertSee('value="Persona"', false)->assertSee('google@example.test');
         $this->post('/tienda/perfil', array_merge($this->input(), ['contact_email' => 'attacker@example.test']))
             ->assertRedirect('/tienda/carrito')->assertSessionMissing('market_google_profile');
-        $this->assertDatabaseHas('store_customer_profiles', ['user_id' => $user->id, 'contact_email' => $user->email]);
+        $this->assertDatabaseHas('tienda_perfiles_compradores', ['user_id' => $user->id, 'contact_email' => $user->email]);
     }
 
     public function test_guest_cannot_store_a_profile(): void
     {
         $this->post('/tienda/perfil', $this->input())->assertRedirect('/tienda/login');
-        $this->assertDatabaseCount('store_customer_profiles', 0);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
     }
     public function test_google_callback_opens_profile_before_cart(): void
     {
@@ -98,7 +98,7 @@ class AccountRegistrationTest extends TestCase
         $this->get('https://localhost/auth/google/callback')->assertRedirect('/tienda/perfil')
             ->assertSessionHas('market_google_profile.first_names', 'Persona');
         $this->assertAuthenticated();
-        $this->assertDatabaseCount('store_customer_profiles', 0);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
     }
 
 

@@ -23,7 +23,7 @@ final class GoogleIdentityService
         }
 
         return DB::transaction(function () use ($subject, $email, $google): User {
-            $identity = DB::table('store_oauth_identities')
+            $identity = DB::table('tienda_identidades_oauth')
                 ->where('provider', 'google')
                 ->where('provider_subject', $subject)
                 ->lockForUpdate()
@@ -51,7 +51,7 @@ final class GoogleIdentityService
                 'password' => Str::random(64),
             ]);
 
-            DB::table('store_oauth_identities')->insert([
+            DB::table('tienda_identidades_oauth')->insert([
                 'user_id' => $user->id,
                 'provider' => 'google',
                 'provider_subject' => $subject,

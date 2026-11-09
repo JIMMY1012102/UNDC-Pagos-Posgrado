@@ -38,14 +38,14 @@ class BuyerOnboardingFlowTest extends TestCase
             ->assertJsonPath('data.next_step', 'tienda')
             ->assertJsonPath('data.profile.document_number', '00000000')
             ->assertJsonPath('data.profile.identity_verified', false);
-        $this->assertDatabaseCount('store_customer_profiles', 1);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
 
         // New session for same account: no second registration is required.
         $this->flushSession();
         $this->actingAs($buyer->fresh())->getJson('/api/v1/acceso/estado')
             ->assertJsonPath('data.profile_complete', true)
             ->assertJsonPath('data.next_step', 'tienda');
-        $this->assertDatabaseCount('store_customer_profiles', 1);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
     }
 
     public function test_incomplete_legacy_profile_still_requires_registration(): void
@@ -56,7 +56,7 @@ class BuyerOnboardingFlowTest extends TestCase
             'document_type' => 'DNI', 'document_number' => '00000001',
         ])->assertOk();
 
-        \Illuminate\Support\Facades\DB::table('store_customer_profiles')
+        \Illuminate\Support\Facades\DB::table('tienda_perfiles_compradores')
             ->where('user_id', $buyer->id)->update(['document_number' => null]);
 
         $this->actingAs($buyer)->getJson('/api/v1/acceso/estado')

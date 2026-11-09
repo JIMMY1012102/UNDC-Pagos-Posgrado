@@ -30,10 +30,10 @@ class CartApiTest extends TestCase
             ['id_concepto' => 12, 'codigo_concepto' => 'DEMO', 'concepto' => 'Prueba', 'costo' => 10],
             ['id_concepto' => 13, 'codigo_concepto' => 'OCULTO', 'concepto' => 'No visible', 'costo' => 10],
         ]);
-        DB::table('store_office_settings')->insert([
+        DB::table('tienda_configuracion_oficinas')->insert([
             'legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalog_enabled' => 1,
         ]);
-        DB::table('store_catalog_items')->insert([
+        DB::table('tienda_conceptos_catalogo')->insert([
             ['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'publicado', 'is_published' => 1],
             ['id' => 102, 'legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'is_published' => 0],
         ]);
@@ -45,8 +45,8 @@ class CartApiTest extends TestCase
         $response->assertCreated()->assertJsonPath('data.cart.checkout_enabled', false);
         $token = $response->json('data.token');
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $token);
-        $this->assertDatabaseHas('store_carts', ['token_hash' => hash('sha256', $token)]);
-        $this->assertDatabaseMissing('store_carts', ['token_hash' => $token]);
+        $this->assertDatabaseHas('tienda_carritos', ['token_hash' => hash('sha256', $token)]);
+        $this->assertDatabaseMissing('tienda_carritos', ['token_hash' => $token]);
         $this->assertNull($response->json('data.cart.total_amount'));
     }
 
@@ -96,7 +96,7 @@ class CartApiTest extends TestCase
     public function test_expired_cart_is_unavailable(): void
     {
         $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
-        DB::table('store_carts')->where('token_hash', hash('sha256', $token))
+        DB::table('tienda_carritos')->where('token_hash', hash('sha256', $token))
             ->update(['expires_at' => now()->subMinute()]);
         $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
     }

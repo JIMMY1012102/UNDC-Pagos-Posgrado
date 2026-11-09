@@ -16,7 +16,7 @@
 
 `Frontend → controlador del módulo → servicio del módulo → tablas propias`.
 
-1. **Catalogo** muestra las publicaciones; usa un **adaptador de solo lectura Sispagos** que une `store_catalog_items` con los conceptos y oficinas maestros `tm_*`.
+1. **Catalogo** muestra las publicaciones; usa un **adaptador de solo lectura Sispagos** que une `tienda_conceptos_catalogo` con los conceptos y oficinas maestros `tm_*`.
 2. **Compradores** conserva cuentas y perfiles; las rutas originales `/tienda/login` y `/api/v1/acceso/*` no cambian.
 3. **Pedidos** mantiene carrito y precompra; para verificar disponibilidad de un producto consume `Catalogo/Contracts/CatalogItemLookup`, **sin consultar directamente `tm_*`**.
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
@@ -32,6 +32,7 @@ Las vistas existentes en `resources/views/modules/acceso` y `resources/views/mod
 - **No alterar ninguna de las seis `tm_*`**. Los módulos nuevos las consultan a través del adaptador Sispagos bajo permisos autorizados.
 - No mover, renombrar ni volver a ejecutar migraciones Laravel ya instaladas. Sus nombres están registrados en la tabla `migrations`.
 - Mantener las FK físicas que garantizan integridad relacional. Contratos de servicio no sustituyen relaciones SQL.
+- Las 23 tablas de negocio usan `tienda_*`; se conserva el historial original y se agrega una migración de renombrado. [Equivalencias y despliegue coordinado](./NOMBRES_TABLAS_ESPANOL.md).
 - Para funcionalidades futuras, agregar servicios y migraciones nuevas de forma incremental, no reestructurar todo.
 
 ## Pruebas y despliegue
