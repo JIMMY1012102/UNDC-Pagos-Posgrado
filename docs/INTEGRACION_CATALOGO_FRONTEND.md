@@ -4,7 +4,7 @@
 
 La pantalla `/tienda` carga las oficinas disponibles mediante `GET /api/v1/tienda/catalogo/oficinas`. Solo se ofrecen oficinas habilitadas, activas y con publicaciones disponibles según la consulta de SISPAGOS de solo lectura.
 
-Con una sola oficina se selecciona automáticamente. Con varias, el comprador elige. `?office_id=N` permite seleccionar una oficina de la lista; una selección anterior se conserva en `sessionStorage`. No se supone que la oficina 1 sea Posgrado.
+Con una sola oficina se selecciona automáticamente y se oculta el selector para la etapa de Posgrado. Con varias, el selector vuelve a mostrarse y el comprador elige. Al cargar conceptos se omite el mensaje de éxito; se mantienen los estados de carga, vacío y error, con Reintentar solo ante errores. `?office_id=N` permite seleccionar una oficina de la lista; una selección anterior se conserva en `sessionStorage`. No se supone que la oficina 1 sea Posgrado.
 
 La selección consulta `GET /api/v1/tienda/catalogo?office_id=N`. Las tarjetas muestran los nombres, descripciones, requisitos, códigos y oficina devueltos por la API. Las categorías conocidas son `admission`, `tuition`, `certificates`, `transfers` y `degrees`; una categoría vacía o no reconocida aparece en Otros conceptos. No se clasifican conceptos por su precio ni se inventa su vinculación institucional.
 

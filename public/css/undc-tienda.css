@@ -1389,3 +1389,6 @@ body.light-mode .account-dropdown{background:#fff}
 body.light-mode .account-dropdown button{color:#17324f}
 .account-menu-drawer .account-name{max-width:none;flex:1}
 .account-menu-drawer .account-dropdown{position:static;margin:0 10px 10px;min-width:0}
+
+/* Keep catalog controls out of the layout until needed. */
+#catalogOfficeControls[hidden], #catalogStatus[hidden], #catalogRetry[hidden] { display: none; }

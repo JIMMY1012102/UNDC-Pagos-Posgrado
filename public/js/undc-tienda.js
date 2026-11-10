@@ -304,7 +304,7 @@ function renderCart(){
  updateCartAction();
 }
 function catalogMessage(message,error=false){
- const status=$('catalogStatus');if(status){status.textContent=message;status.setAttribute('role',error?'alert':'status')}
+ const status=$('catalogStatus');if(status){status.textContent=message;status.hidden=!message;status.setAttribute('role',error?'alert':'status')}
  if($('catalogRetry'))$('catalogRetry').hidden=!error;
 }
 async function loadCatalog(){
@@ -324,7 +324,7 @@ async function loadCatalog(){
    noteEn:item.requirements||'Amount pending approval. Payment unavailable.'
   }));
   renderTusneCatalog();renderCart();
-  catalogMessage(tusneConcepts.length?localized('Conceptos publicados. Los pagos aún no están disponibles.','Published services. Payments are not available yet.'):localized('Esta oficina no tiene conceptos publicados disponibles.','This office has no available published services.'));
+  catalogMessage(tusneConcepts.length?'':localized('Esta oficina no tiene conceptos publicados disponibles.','This office has no available published services.'));
  }catch(e){if(request!==catalogRequest)return;catalogMessage(localized('No se pudo cargar el catálogo. Reintenta.','Could not load the catalog. Retry.'),true)}
 }
 async function loadOffices(){
@@ -335,6 +335,7 @@ async function loadOffices(){
   if(!Array.isArray(data))throw new Error('Respuesta de oficinas no válida.');
   const select=$('catalogOffice');
   const offices=data.filter(item=>Number.isSafeInteger(item.id)&&item.id>0);
+  if($('catalogOfficeControls'))$('catalogOfficeControls').hidden=offices.length<=1;
   select.innerHTML='<option value="">'+esc(localized('Selecciona una oficina','Select an office'))+'</option>'+offices.map(office=>'<option value="'+office.id+'">'+esc(office.name)+'</option>').join('');
   const requested=new URLSearchParams(window.location.search).get('office_id');
   const preferred=requested||state.office;

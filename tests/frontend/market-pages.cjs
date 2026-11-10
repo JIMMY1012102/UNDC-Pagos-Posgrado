@@ -63,6 +63,9 @@ test('published API concepts replace browser references and add uses numeric dat
  const local=new Map([['undc_tusne_reference_cart','["6.15"]']]);
  const app=await boot('catalog',{local});
  assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ assert.equal(app.ids.get('catalogOfficeControls').hidden,true);
+ assert.equal(app.ids.get('catalogStatus').hidden,true);
+ assert.equal(app.ids.get('catalogRetry').hidden,true);
  assert.match(app.ids.get('tusneResults').innerHTML,/data-catalog-cart="12"/);
  assert.match(app.ids.get('tusneResults').innerHTML,/Por confirmar/);
  assert.ok(app.calls.some(call=>call.url==='/api/v1/tienda/catalogo?office_id=7'));
@@ -84,10 +87,12 @@ test('empty or failed API never falls back to hardcoded products',async()=>{
  assert.equal(failed.ids.get('tusneResults').innerHTML,'');
  assert.equal(failed.ids.get('catalogRetry').hidden,false);
  assert.match(failed.ids.get('catalogStatus').textContent,/No se pudo/);
+ assert.equal(failed.ids.get('catalogStatus').hidden,false);
 });
 test('offices are explicit and an arbitrary office 1 is never assumed',async()=>{
  const app=await boot('catalog',{officeList:[{id:7,name:'Primera'},{id:9,name:'Segunda'}]});
  assert.ok(!app.calls.some(call=>call.url.includes('/catalogo?')));
+ assert.equal(app.ids.get('catalogOfficeControls').hidden,false);
  app.ids.get('catalogOffice').value='9';
  await app.ids.get('catalogOffice').listeners.change();
  await new Promise(resolve=>setImmediate(resolve));
