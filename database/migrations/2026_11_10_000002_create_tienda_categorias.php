@@ -47,7 +47,11 @@ return new class extends Migration
                 ->update(['category' => $categoria->codigo]);
         }
         Schema::table('tienda_conceptos_catalogo', function (Blueprint $table): void {
-            $table->dropForeign('fk_publicacion_categoria_oficina');
+            if (DB::getDriverName() === 'sqlite') {
+                $table->dropForeign(['categoria_id', 'legacy_office_id']);
+            } else {
+                $table->dropForeign('fk_publicacion_categoria_oficina');
+            }
             $table->dropConstrainedForeignId('categoria_id');
         });
         Schema::dropIfExists('tienda_categorias');
