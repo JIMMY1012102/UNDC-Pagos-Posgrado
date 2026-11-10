@@ -16,7 +16,7 @@ class PaymentsSchemaTest extends TestCase
     public function test_store_migrations_do_not_recreate_or_modify_treasury_master_tables(): void
     {
         foreach ([
-            'tienda_configuracion_oficinas', 'tienda_conceptos_catalogo', 'tienda_versiones_tarifas',
+            'tienda_categorias', 'tienda_configuracion_oficinas', 'tienda_conceptos_catalogo', 'tienda_versiones_tarifas',
             'tienda_perfiles_compradores', 'tienda_identidades_oauth', 'tienda_beneficiarios',
             'tienda_carritos', 'tienda_detalles_carrito', 'tienda_pedidos', 'tienda_detalles_pedido',
             'tienda_historial_estados_pedido', 'tienda_intentos_pago', 'tienda_transacciones_pago',

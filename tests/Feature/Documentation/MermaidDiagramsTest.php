@@ -31,6 +31,6 @@ class MermaidDiagramsTest extends TestCase
         $this->assertIsString($text);
         $this->assertSame(7, preg_match_all('/^\s*subgraph\s+\w+\[/m', $text));
         $this->assertSame(7, preg_match_all('/^\s*style\s+\w+\s+fill:#/m', $text));
-        $this->assertSame(43, preg_match_all('/^ {4}[\w]+\["[\w]+"\]$/m', $text));
+        $this->assertSame(44, preg_match_all('/^ {4}[\w]+\["[\w]+"\]$/m', $text));
     }
 }

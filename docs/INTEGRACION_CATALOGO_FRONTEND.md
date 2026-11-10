@@ -51,7 +51,7 @@ La barra superior y el menú móvil ofrecen Para ti y seis categorías: Admisió
 
 ## Actualización de categorías al español
 
-La columna continúa siendo `tienda_conceptos_catalogo.category`; no se crea otra tabla.
+La traducción inicial conservó `tienda_conceptos_catalogo.category`. La evolución posterior agrega `tienda_categorias` y `categoria_id` para seleccionar registros predefinidos; [ver guía](./CATEGORIAS_CATALOGO.md).
 
 | Código anterior | Código actual |
 |---|---|
