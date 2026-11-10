@@ -6,7 +6,7 @@ La pantalla `/tienda` carga las oficinas disponibles mediante `GET /api/v1/tiend
 
 Con una sola oficina se selecciona automáticamente y se oculta el selector para la etapa de Posgrado. Con varias, el selector vuelve a mostrarse y el comprador elige. Al cargar conceptos se omite el mensaje de éxito; se mantienen los estados de carga, vacío y error, con Reintentar solo ante errores. `?office_id=N` permite seleccionar una oficina de la lista; una selección anterior se conserva en `sessionStorage`. No se supone que la oficina 1 sea Posgrado.
 
-La selección consulta `GET /api/v1/tienda/catalogo?office_id=N`. Las tarjetas muestran los nombres, descripciones, requisitos, códigos y oficina devueltos por la API. Las categorías conocidas son `admission`, `tuition`, `certificates`, `transfers` y `degrees`; una categoría vacía o no reconocida aparece en Otros conceptos. No se clasifican conceptos por su precio ni se inventa su vinculación institucional.
+La selección consulta `GET /api/v1/tienda/catalogo?office_id=N`. Las tarjetas muestran los nombres, descripciones, requisitos, códigos y oficina devueltos por la API. Las categorías conocidas son `admission`, `tuition`, `certificates`, `transfers` , `degrees` y `administrative`; una categoría vacía o no reconocida aparece en Otros conceptos. No se clasifican conceptos por su precio ni se inventa su vinculación institucional.
 
 El botón Agregar utiliza el identificador numérico real de la publicación y llama a `POST /api/v1/tienda/carritos/actual/items`. La clave del carrito se envía como Bearer; el frontend incluye CSRF en las operaciones. El backend mantiene sus validaciones y contratos existentes.
 
@@ -43,3 +43,7 @@ No requiere migraciones ni modifica tablas `tm_*`. El cambio debe revisarse y de
 Se ejecutaron `node --check public/js/undc-tienda.js` y las 12 pruebas de `node --test tests/frontend/market-pages.cjs`, incluyendo carga desde API, ID numérico y Bearer al agregar, eliminación, catálogo vacío, error/reintento visible, selección explícita de oficina, escape de HTML y regresiones de login/búsqueda.
 
 Se añadieron pruebas PHP de filtrado de oficinas y categoría de publicación en `tests/Feature/Modules/CatalogApiTest.php`. No se ejecutaron aquí porque el entorno no dispone de PHP ni Composer. La suite Laravel y la prueba de navegador contra el servidor quedan pendientes de ejecución antes de integrar/desplegar.
+
+## Navegación de Posgrado
+
+La barra superior y el menú móvil ofrecen Para ti y seis categorías: Admisión (`admission`), Matrícula y pensiones (`tuition`), Trámites académicos (`transfers`), Certificados y constancias (`certificates`), Tesis y grados (`degrees`) y Servicios administrativos (`administrative`). Se conservan los identificadores existentes de las publicaciones. Seleccionar una categoría filtra los datos de la API; una categoría sin publicaciones muestra el estado vacío. Para ti restablece todos los conceptos y la portada. El buscador funciona sobre todo el catálogo y queda al costado en escritorio; en celular aparece debajo de las categorías desplazables. No se crean ni reclasifican conceptos en la base de datos.
