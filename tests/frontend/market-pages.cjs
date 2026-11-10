@@ -159,3 +159,16 @@ test('six top categories filter API concepts, survive reload and reset with Para
  assert.deepEqual(login.assigned,['/tienda?category=transfers']);
  for(const label of ['Para ti','Admisión','Matrícula y pensiones','Trámites académicos','Certificados y constancias','Tesis y grados','Servicios administrativos'])assert.ok(app.html.includes(label));
 });
+
+test('search stays collapsed until magnifier click and Escape closes it',async()=>{
+ const app=await boot('catalog');const form=app.ids.get('headerSearch'),toggle=app.ids.get('catalogSearchToggle');
+ assert.equal(form.hidden,true);
+ toggle.listeners.click();
+ assert.equal(form.hidden,false);assert.equal(toggle.attrs['aria-expanded'],'true');
+ app.ids.get('search').value='matricula';app.ids.get('search').listeners.input();
+ assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
+ form.listeners.keydown({key:'Escape',preventDefault(){}});
+ assert.equal(form.hidden,true);assert.equal(toggle.attrs['aria-expanded'],'false');
+ assert.equal(app.ids.get('searchSuggestions').hidden,true);
+ toggle.listeners.click();toggle.listeners.click();assert.equal(form.hidden,true);
+});
