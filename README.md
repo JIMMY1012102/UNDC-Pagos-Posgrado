@@ -10,7 +10,7 @@ Tienda virtual de pagos para Posgrado de la Universidad Nacional de Cañete (UND
 |---|---|---|
 | Sispagos | `app/Modules/Sispagos` | Adaptador de lectura de conceptos y oficinas históricos para el catálogo; integración institucional completa pendiente. |
 | Catalogo | `app/Modules/Catalogo` | Consulta de publicaciones del catálogo y contrato de disponibilidad; backend parcial con pruebas. |
-| Compradores | `app/Modules/Compradores` | Registro e inicio de sesión, perfiles e identidades Google OAuth; backend parcial con pruebas. |
+| Usuarios | `app/Modules/Usuarios` | Registro e inicio de sesión, perfiles e identidades Google OAuth; backend parcial con pruebas. |
 | Pedidos | `app/Modules/Pedidos` | Carrito y resumen de precompra; creación de pedidos pendiente. |
 | Pagos | `app/Modules/Pagos` | Estructura de datos para intentos, transacciones e incidencias; cobro real pendiente. |
 | Tesoreria | `app/Modules/Tesoreria` | Estructura de datos para conciliación, validación, constancias y auditoría; flujo institucional completo pendiente. |

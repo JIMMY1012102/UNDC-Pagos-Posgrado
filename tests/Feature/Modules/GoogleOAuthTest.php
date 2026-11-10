@@ -3,7 +3,7 @@
 namespace Tests\Feature\Modules;
 
 use App\Models\User;
-use App\Modules\Compradores\Services\GoogleIdentityService;
+use App\Modules\Usuarios\Services\GoogleIdentityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Two\User as GoogleUser;
 use RuntimeException;

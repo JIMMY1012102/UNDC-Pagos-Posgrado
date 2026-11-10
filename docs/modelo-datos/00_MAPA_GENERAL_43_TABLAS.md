@@ -19,13 +19,13 @@ flowchart LR
     tienda_versiones_tarifas["tienda_versiones_tarifas"]
   end
   style Catalogo fill:#DDF4E5,stroke:#64748b,stroke-width:2px,color:#111827
-  subgraph Compradores["Compradores · 4"]
+  subgraph Usuarios["Usuarios · 4"]
     users["users"]
     tienda_perfiles_compradores["tienda_perfiles_compradores"]
     tienda_identidades_oauth["tienda_identidades_oauth"]
     tienda_beneficiarios["tienda_beneficiarios"]
   end
-  style Compradores fill:#ECE2F9,stroke:#64748b,stroke-width:2px,color:#111827
+  style Usuarios fill:#ECE2F9,stroke:#64748b,stroke-width:2px,color:#111827
   subgraph Pedidos["Pedidos · 5"]
     tienda_carritos["tienda_carritos"]
     tienda_detalles_carrito["tienda_detalles_carrito"]
@@ -127,7 +127,7 @@ flowchart LR
 |---|---:|---|
 | SISPAGOS (legado) | 6 | Seis maestros históricos de SISPAGOS (sin cambios) |
 | Catálogo | 3 | Oficinas publicadas, conceptos y versiones de tarifa |
-| Compradores | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
+| Usuarios | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
 | Pedidos | 5 | Carrito, líneas, órdenes y sus estados |
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
 | Conciliación y Tesorería | 6 | Conciliación, validación, certificados y auditoría |

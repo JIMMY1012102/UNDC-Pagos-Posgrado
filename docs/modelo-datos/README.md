@@ -6,7 +6,7 @@
 |---:|---|---:|---|
 | 1 | SISPAGOS (legado) | 6 | [Abrir módulo](./01_SISPAGOS.md) |
 | 2 | Catálogo | 3 | [Abrir módulo](./02_CATALOGO.md) |
-| 3 | Compradores | 4 | [Abrir módulo](./03_COMPRADORES.md) |
+| 3 | Usuarios | 4 | [Abrir módulo](./03_USUARIOS.md) |
 | 4 | Pedidos | 5 | [Abrir módulo](./04_PEDIDOS.md) |
 | 5 | Pagos | 6 | [Abrir módulo](./05_PAGOS.md) |
 | 6 | Conciliación y Tesorería | 6 | [Abrir módulo](./06_TESORERIA.md) |

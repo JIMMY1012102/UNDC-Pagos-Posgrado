@@ -6,7 +6,7 @@ Trabajar en laptop, mediante Git y Pull Requests. No configurar Codespaces, desp
 **No instalar paquetes, ejecutar migraciones ni generar credenciales automáticamente.** Comprobar primero el entorno y solicitar autorización si se necesita modificar dependencias o esquema.
 
 ## Límites
-- `app/Modules/Acceso`: cuenta y perfil; inicio de sesión no acredita identidad académica.
+- `app/Modules/Usuarios`: cuenta y perfil; inicio de sesión no acredita identidad académica.
 - `app/Modules/Tienda`: catálogo, carrito, validación de precios en servidor y pedidos pendientes.
 - `app/Modules/Pagos`: intentos, verificación servidor-servidor, idempotencia, manejo de estados inciertos y trazabilidad.
 - `app/Modules/Tesoreria`: consultas internas solo con autenticación/autorización y datos permitidos.
