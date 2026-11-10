@@ -76,3 +76,10 @@ php artisan view:clear
 ```
 
 `git pull` solo descarga código; `migrate` aplica la traducción en la base configurada. El script público lleva una versión basada en su fecha de modificación para renovar la caché del navegador.
+
+
+## Tarjetas de producto simplificadas
+
+Las tarjetas muestran únicamente imagen superior, nombre e importe referencial en soles. Se conservan las imágenes locales existentes. No muestran categoría, icono adicional, descripción ni botones de acción. Toda la tarjeta es un botón accesible que abre el detalle; allí se conservan la descripción, requisitos y la opción de agregar al carrito. El encabezado y la navegación no se modifican.
+
+La API entrega `reference_amount` desde el costo del concepto para presentación. No equivale a tarifa de checkout aprobada: `pricing_status` continúa pendiente y `checkout_enabled` sigue en false. No se incorpora `amount` cobrable ni se cambia cómo calcula o valida pagos el backend. Un valor de referencia ausente o inválido se muestra como Por confirmar. Las tarjetas no contienen precios fijos del PDF.

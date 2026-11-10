@@ -19,8 +19,8 @@ async function scenario(viewport, name) {
     } }));
     await page.route('**/api/v1/tienda/catalogo?*', route => route.fulfill({ json: {
       success: true, data: [
-        { id: 12, name: 'Examen de prueba', category: 'admision' },
-        { id: 13, name: 'Biblioteca de prueba', category: 'servicios_administrativos' },
+        { id: 12, name: 'Examen de prueba', category: 'admision', reference_amount: '300.00' },
+        { id: 13, name: 'Biblioteca de prueba', category: 'servicios_administrativos', reference_amount: '10.00' },
       ],
     } }));
     const catalog = await page.goto(origin + '/tienda', { waitUntil: 'domcontentloaded' });
@@ -42,6 +42,22 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    const product = page.locator('.catalog-product').first();
+    assert.equal(await product.locator('img').count(), 1);
+    assert.equal(await product.locator('.catalog-product-name').innerText(), 'Examen de prueba');
+    assert.equal(await product.locator('.catalog-product-price').innerText(), 'S/ 300.00');
+    assert.equal(await product.locator('.category-tag, .concept-description, .concept-actions, [data-catalog-cart]').count(), 0);
+    const imageBox = await product.locator('.catalog-product-image').boundingBox();
+    const titleBox = await product.locator('.catalog-product-name').boundingBox();
+    const priceBox = await product.locator('.catalog-product-price').boundingBox();
+    assert.ok(imageBox.y + imageBox.height <= titleBox.y, 'La imagen debe ir encima del nombre');
+    assert.ok(titleBox.y + titleBox.height <= priceBox.y, 'El precio debe ir debajo del nombre');
+    await product.locator('.catalog-product-link').focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#conceptDialog').isVisible(), true);
+    assert.equal(await page.locator('#conceptDialogContent [data-catalog-cart]').count(), 1);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#conceptDialog').isVisible(), false);
     if (viewport.width >= 1200) {
       const menu = await page.locator('.posgrado-links').evaluate(el => ({
         font: parseFloat(getComputedStyle(el.querySelector('a')).fontSize),

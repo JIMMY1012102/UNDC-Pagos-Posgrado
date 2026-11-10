@@ -8,7 +8,7 @@ function expand(text){return text.replace(/@include\('([^']+)'\)/g,(_,name)=>exp
 class Element {
  constructor(){this.dataset={};this.listeners={};this.style={setProperty(){}};this.classList={toggle(){},remove(){},contains(){return false}};this.content='csrf';this.value='';this.hidden=true;this.children=[];this.attrs={};}
  querySelectorAll(){return []} querySelector(){return null}
- addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
+ addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} showModal(){this.open=true} close(){this.open=false} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
 const fixture=[
  {id:12,code:'6.15',name:'Prospecto de admisión',category:'admision',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
@@ -40,8 +40,8 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   else data=cart;
   return {status:200,ok:true,json:async()=>({success:true,data})};
  };
- const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
+ const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,Intl,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={openConceptDetail,selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html,calls};
 }
@@ -66,7 +66,7 @@ test('published API concepts replace browser references and add uses numeric dat
  assert.equal(app.ids.get('catalogOfficeControls').hidden,true);
  assert.equal(app.ids.get('catalogStatus').hidden,true);
  assert.equal(app.ids.get('catalogRetry').hidden,true);
- assert.match(app.ids.get('tusneResults').innerHTML,/data-catalog-cart="12"/);
+ assert.match(app.ids.get('tusneResults').innerHTML,/data-concept-detail="12"/);
  assert.match(app.ids.get('tusneResults').innerHTML,/Por confirmar/);
  assert.ok(app.calls.some(call=>call.url==='/api/v1/tienda/catalogo?office_id=7'));
  await app.context.marketTest.addItem('12');
@@ -74,7 +74,8 @@ test('published API concepts replace browser references and add uses numeric dat
  assert.deepEqual(JSON.parse(call.body),{catalog_item_id:12,quantity:1});
  assert.equal(call.headers.Authorization,'Bearer '+'a'.repeat(64));
  assert.equal(app.ids.get('cartBadge').textContent,1);
- assert.match(app.ids.get('tusneResults').innerHTML,/is-added/);
+ app.context.marketTest.openConceptDetail('12');
+ assert.match(app.ids.get('conceptDialogContent').innerHTML,/Agregado al carrito/);
  await app.context.marketTest.removeItem(99);
  assert.equal(app.ids.get('cartBadge').textContent,0);
  assert.equal(local.get('undc_tusne_reference_cart'),'["6.15"]','old references are ignored, never promoted to purchases');
@@ -102,7 +103,9 @@ test('API text is escaped before rendering cards',async()=>{
  const app=await boot('catalog',{catalog:[{...fixture[0],name:'<img src=x onerror=alert(1)>',description:'<script>bad()</script>'}]});
  const html=app.ids.get('tusneResults').innerHTML;
  assert.ok(!html.includes('<img src=x'));
- assert.match(html,/&lt;img/);assert.match(html,/&lt;script&gt;/);
+ assert.match(html,/&lt;img/);
+ app.context.marketTest.openConceptDetail('12');
+ assert.match(app.ids.get('conceptDialogContent').innerHTML,/&lt;script&gt;/);
 });
 
 test('authenticated incomplete profile goes to personal data before resuming cart',async()=>{
@@ -193,4 +196,29 @@ test('categorías personalizadas y vacías permanecen visibles en Otros concepto
  const app=await boot('catalog',{catalog:[{...fixture[0],category:'personalizada'},{...fixture[1],category:null}]});
  assert.ok(app.context.marketTest.tusneConcepts.every(item=>item.category==='general'));
  assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
+});
+
+
+test('product cards contain only image, name and formatted reference price',async()=>{
+ const app=await boot('catalog',{catalog:[{...fixture[0],reference_amount:'300.00'}]});
+ const html=app.ids.get('tusneResults').innerHTML;
+ assert.match(html,/catalog-product-image/);
+ assert.match(html,/catalog-product-name/);
+ assert.match(html,/S\/ 300\.00/);
+ for(const removed of ['category-tag','concept-description','concept-icon','concept-actions','data-catalog-cart','Ver detalles</','Importe</'])assert.ok(!html.includes(removed),removed);
+ app.context.marketTest.openConceptDetail('12');
+ assert.equal(app.ids.get('conceptDialog').open,true);
+ const detail=app.ids.get('conceptDialogContent').innerHTML;
+ assert.match(detail,/Concepto de prueba/);
+ assert.match(detail,/Importe referencial/);
+ assert.match(detail,/data-catalog-cart="12"/);
+});
+for(const amount of [null,undefined,'',-1,'-1.00','<script>','NaN',true])test('invalid reference amount stays pending: '+String(amount),async()=>{
+ const app=await boot('catalog',{catalog:[{...fixture[0],reference_amount:amount}]});
+ assert.match(app.ids.get('tusneResults').innerHTML,/Por confirmar/);
+});
+test('zero reference amount is displayed without enabling checkout',async()=>{
+ const app=await boot('catalog',{catalog:[{...fixture[0],reference_amount:'0.00',checkout_enabled:false}]});
+ assert.match(app.ids.get('tusneResults').innerHTML,/S\/ 0\.00/);
+ assert.ok(!app.calls.some(call=>call.url.includes('/pagos')));
 });
