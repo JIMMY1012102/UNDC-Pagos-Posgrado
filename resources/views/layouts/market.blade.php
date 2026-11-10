@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}">
+<link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}?v={{ filemtime(public_path('css/undc-tienda.css')) }}">
 </head><body class="@yield('bodyClass')" data-market-page="@yield('marketPage', 'catalog')">
 @include('modules.tienda.partials.header')
 @include('modules.tienda.partials.accessibility')

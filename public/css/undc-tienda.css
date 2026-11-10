@@ -1444,3 +1444,28 @@ html[data-accessibility-text] .posgrado-nav > .posgrado-links a { flex: 0 0 auto
 @media (max-width: 1199px) {
  .posgrado-nav .posgrado-links a { font-size: calc(14px * var(--a11y-text-scale, 1)); }
 }
+
+/* Product cards: image, name and reference price. Details open on the whole card. */
+.tusne-concept.catalog-product {
+  min-height: 0; display: block; gap: 0; padding: 0; overflow: hidden;
+  border: 0; border-radius: 2px; background: #082a49; box-shadow: none;
+  transition: transform 180ms ease;
+}
+.tusne-concept.catalog-product:hover { border: 0; box-shadow: none; transform: translateY(-2px); }
+.catalog-product-link {
+  width: 100%; height: 100%; display: flex; flex-direction: column; padding: 0;
+  border: 0; border-radius: inherit; background: transparent; color: inherit;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.catalog-product-link:focus-visible { outline: 3px solid #0784f8; outline-offset: -3px; }
+.catalog-product-image { width: 100%; aspect-ratio: 2 / 1; display: block; overflow: hidden; background: #eef4f8; }
+.catalog-product-image img { width: 100%; height: 100%; display: block; padding: 12px; object-fit: contain; }
+.catalog-product-copy { width: 100%; flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; }
+.catalog-product-name { display: block; color: #f4f8fc; font-size: calc(16px * var(--a11y-text-scale, 1)); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.catalog-product-price { display: block; margin-top: auto; color: #f4f8fc; font-size: calc(16px * var(--a11y-text-scale, 1)); font-weight: 450; line-height: 1.5; }
+.dialog-add-button { margin-top: 12px; }
+body.light-mode .tusne-concept.catalog-product,
+body.light-mode .tusne-concept.catalog-product:hover { background: #fff; border: 0; box-shadow: none; }
+body.light-mode .catalog-product-name,
+body.light-mode .catalog-product-price { color: #161d25; }
+@media (prefers-reduced-motion: reduce) { .tusne-concept.catalog-product { transition: none; transform: none; } }

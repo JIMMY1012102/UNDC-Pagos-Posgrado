@@ -46,6 +46,7 @@ final class CatalogService
                     'id' => (int) $item->legacy_office_id,
                     'name' => (string) $item->office_name,
                 ],
+                'reference_amount' => number_format((float) $item->legacy_base_amount, 2, '.', ''),
                 // A legacy cost is NOT an approved online checkout tariff.
                 // It must not be represented as a payable amount.
                 'pricing_status' => 'pending_institutional_approval',

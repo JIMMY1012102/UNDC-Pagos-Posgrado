@@ -62,6 +62,7 @@ class CatalogApiTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.code', 'DEMO-OTI-001')
             ->assertJsonPath('data.0.pricing_status', 'pending_institutional_approval')
+            ->assertJsonPath('data.0.reference_amount', '10.00')
             ->assertJsonPath('data.0.checkout_enabled', false)
             ->assertJsonMissingPath('data.0.amount')
             ->assertJsonMissingPath('data.0.legacy_base_amount');
