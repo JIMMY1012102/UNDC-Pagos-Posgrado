@@ -97,11 +97,37 @@ class CatalogApiTest extends TestCase
     {
         $this->prepareFixture();
         DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-            ->update(['category' => 'admission']);
+            ->update(['category' => 'admision']);
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')
-            ->assertOk()->assertJsonPath('data.0.category', 'admission')
+            ->assertOk()->assertJsonPath('data.0.category', 'admision')
             ->assertJsonPath('data.0.checkout_enabled', false)
             ->assertJsonMissingPath('data.0.amount');
+    }
+    public function test_api_returns_spanish_categories_before_and_after_data_migration(): void
+    {
+        $this->prepareFixture();
+        $categories = [
+            'admission' => 'admision',
+            'tuition' => 'matricula_pensiones',
+            'transfers' => 'tramites',
+            'certificates' => 'certificados_constancias',
+            'degrees' => 'tesis_grados',
+            'administrative' => 'servicios_administrativos',
+        ];
+        foreach ($categories as $old => $new) {
+            foreach ([$old, $new] as $stored) {
+                DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
+                    ->update(['category' => $stored]);
+                $this->getJson('/api/v1/tienda/catalogo?office_id=7')
+                    ->assertOk()->assertJsonPath('data.0.category', $new);
+            }
+        }
+        foreach ([null, '', 'personalizada'] as $category) {
+            DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
+                ->update(['category' => $category]);
+            $this->getJson('/api/v1/tienda/catalogo?office_id=7')
+                ->assertOk()->assertJsonPath('data.0.category', $category);
+        }
     }
 }
 

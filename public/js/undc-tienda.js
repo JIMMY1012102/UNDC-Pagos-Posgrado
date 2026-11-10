@@ -205,12 +205,12 @@ if(!res.ok){const error=new Error(json.message||'No se pudo completar la operaci
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tusneCategories=[
-{id:'admission',name:'Admisión',en:'Admission',icon:'🎓',color:'#28b8a4',description:'Ingreso y postulación a programas de Posgrado.',descriptionEn:'Entry and application to Graduate School programs.',count:3},
-{id:'tuition',name:'Matrícula y pensiones',en:'Enrollment and tuition',icon:'📚',color:'#2697f3',description:'Matrícula académica, pensiones mensuales y recargos.',descriptionEn:'Academic enrollment, monthly tuition and late fees.',count:6},
-{id:'administrative',name:'Servicios administrativos',en:'Administrative services',icon:'▤',color:'#52878f',description:'Derecho de trámite administrativo y carné de biblioteca.',descriptionEn:'Administrative processing and library card.'},
-{id:'certificates',name:'Certificados y constancias',en:'Certificates and records',icon:'📜',color:'#a879ed',description:'Documentos, certificados y constancias académicas.',descriptionEn:'Academic documents, certificates and records.',count:9},
-{id:'transfers',name:'Trámites académicos',en:'Academic procedures',icon:'⇄',color:'#e6a93d',description:'Traslados internos, externos y convalidación de asignaturas.',descriptionEn:'Internal and external transfers and course recognition.',count:3},
-{id:'degrees',name:'Tesis y grados',en:'Thesis and degrees',icon:'🏅',color:'#c95a68',description:'Tesis, jurados, sustentaciones y grados académicos.',descriptionEn:'Thesis, committees, defenses and academic degrees.',count:8}
+{id:'admision',name:'Admisión',en:'Admission',icon:'🎓',color:'#28b8a4',description:'Ingreso y postulación a programas de Posgrado.',descriptionEn:'Entry and application to Graduate School programs.',count:3},
+{id:'matricula_pensiones',name:'Matrícula y pensiones',en:'Enrollment and tuition',icon:'📚',color:'#2697f3',description:'Matrícula académica, pensiones mensuales y recargos.',descriptionEn:'Academic enrollment, monthly tuition and late fees.',count:6},
+{id:'servicios_administrativos',name:'Servicios administrativos',en:'Administrative services',icon:'▤',color:'#52878f',description:'Derecho de trámite administrativo y carné de biblioteca.',descriptionEn:'Administrative processing and library card.'},
+{id:'certificados_constancias',name:'Certificados y constancias',en:'Certificates and records',icon:'📜',color:'#a879ed',description:'Documentos, certificados y constancias académicas.',descriptionEn:'Academic documents, certificates and records.',count:9},
+{id:'tramites',name:'Trámites académicos',en:'Academic procedures',icon:'⇄',color:'#e6a93d',description:'Traslados internos, externos y convalidación de asignaturas.',descriptionEn:'Internal and external transfers and course recognition.',count:3},
+{id:'tesis_grados',name:'Tesis y grados',en:'Thesis and degrees',icon:'🏅',color:'#c95a68',description:'Tesis, jurados, sustentaciones y grados académicos.',descriptionEn:'Thesis, committees, defenses and academic degrees.',count:8}
 ];
 // Publications come exclusively from the API. Old reference selections are not purchases.
 let tusneConcepts=[];
@@ -221,7 +221,10 @@ const pendingItems=new Set();
 const localized=(es,en)=>currentLanguage==='en'?en:es;
 const generalCategory={id:'general',name:'Otros conceptos',en:'Other services',icon:'▤',color:'#2697f3',description:'Concepto publicado en el catálogo institucional.',descriptionEn:'Service published in the institutional catalog.'};
 tusneCategories.push(generalCategory);
-const categoryById=id=>tusneCategories.find(category=>category.id===id)||generalCategory;
+// Compatibilidad con publicaciones y enlaces anteriores durante la actualización.
+const categoriasAnteriores={admission:'admision',tuition:'matricula_pensiones',transfers:'tramites',certificates:'certificados_constancias',degrees:'tesis_grados',administrative:'servicios_administrativos'};
+const normalizarCategoria=id=>Object.hasOwn(categoriasAnteriores,id)?categoriasAnteriores[id]:id;
+const categoryById=id=>tusneCategories.find(category=>category.id===normalizarCategoria(id))||generalCategory;
 function getCatalogVisual(item){
 const source=[item.name,item.en,item.category,item.code].filter(Boolean).join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
 const rules=[
@@ -245,7 +248,7 @@ prospecto:{file:'prospecto.svg',wash:'#DFF2FF',icon:'📘'},
 'documento-academico':{file:'documento-academico.svg',wash:'#E5F2FB',icon:'📄'},
 'tramite-generico':{file:'tramite-generico.svg',wash:'#E8F3F8',icon:'🗂️'}
 };
-const imageFile=item.category==='admission'?'tarjet.png':visuals[id].file;
+const imageFile=item.category==='admision'?'tarjet.png':visuals[id].file;
 return {id,...visuals[id],src:'/assets/catalogo/ilustraciones/'+imageFile};
 }
 function conceptDescription(item,category=categoryById(item.category)){const description=currentLanguage==='en'?(item.descriptionEn||item.description):(item.description||item.descriptionEn);if(description)return description;if(category)return localized(category.description,category.descriptionEn);return localized('Concepto publicado en el catálogo institucional.','Service published in the institutional catalog.')}
@@ -281,6 +284,7 @@ function updateCategoryNavigation(){
  });
 }
 function selectCatalogCategory(category,reveal=true){
+ category=normalizarCategoria(category);
  if(category!=='all'&&!tusneCategories.some(item=>item.id===category))return;
  if(marketPage!=='catalog'){window.location.assign('/tienda?category='+encodeURIComponent(category));return}
  tusneCategory=category;if($('search'))$('search').value='';closeSearchSuggestions();

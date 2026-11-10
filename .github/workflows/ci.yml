@@ -50,6 +50,9 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Probar filtros y compatibilidad de categorías
+        run: node --test tests/frontend/market-pages.cjs
+
       - name: Compilar frontend
         run: |
           npm ci --no-audit --no-fund

@@ -11,10 +11,10 @@ class Element {
  addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
 const fixture=[
- {id:12,code:'6.15',name:'Prospecto de admisión',category:'admission',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
- {id:13,code:'MAT',name:'Matrícula de Maestría',category:'tuition',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'}
+ {id:12,code:'6.15',name:'Prospecto de admisión',category:'admision',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
+ {id:13,code:'MAT',name:'Matrícula de Maestría',category:'matricula_pensiones',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'}
 ];
-async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0}}={}){
+async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0},search=''}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
@@ -40,7 +40,7 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   else data=cart;
   return {status:200,ok:true,json:async()=>({success:true,data})};
  };
- const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
+ const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
  const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html,calls};
@@ -143,20 +143,20 @@ test('search suggestions rank exact names first, limit results and select a prod
 
 
 test('six top categories filter API concepts, survive reload and reset with Para ti',async()=>{
- const app=await boot('catalog',{catalog:[...fixture,{...fixture[0],id:14,name:'Carné de biblioteca',category:'administrative'}]});
+ const app=await boot('catalog',{catalog:[...fixture,{...fixture[0],id:14,name:'Carné de biblioteca',category:'servicios_administrativos'}]});
  const api=app.context.marketTest;
- api.selectCatalogCategory('administrative');
+ api.selectCatalogCategory('servicios_administrativos');
  assert.match(app.ids.get('tusneResults').innerHTML,/Carné de biblioteca/);
  assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
  assert.equal(app.ids.get('catalogResultsTitle').textContent,'Servicios administrativos');
  await api.loadCatalog();
  assert.equal(app.ids.get('catalogResultsTitle').textContent,'Servicios administrativos');
- api.selectCatalogCategory('degrees');
+ api.selectCatalogCategory('tesis_grados');
  assert.equal(app.ids.get('tusneEmpty').hidden,false);
  api.selectCatalogCategory('all');
  assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
- const login=await boot('login');login.context.marketTest.selectCatalogCategory('transfers');
- assert.deepEqual(login.assigned,['/tienda?category=transfers']);
+ const login=await boot('login');login.context.marketTest.selectCatalogCategory('tramites');
+ assert.deepEqual(login.assigned,['/tienda?category=tramites']);
  for(const label of ['Para ti','Admisión','Matrícula y pensiones','Trámites académicos','Certificados y constancias','Tesis y grados','Servicios administrativos'])assert.ok(app.html.includes(label));
 });
 
@@ -171,4 +171,26 @@ test('search stays collapsed until magnifier click and Escape closes it',async()
  assert.equal(form.hidden,true);assert.equal(toggle.attrs['aria-expanded'],'false');
  assert.equal(app.ids.get('searchSuggestions').hidden,true);
  toggle.listeners.click();toggle.listeners.click();assert.equal(form.hidden,true);
+});
+
+
+const categoriasEspanol={admission:'admision',tuition:'matricula_pensiones',transfers:'tramites',certificates:'certificados_constancias',degrees:'tesis_grados',administrative:'servicios_administrativos'};
+for(const [anterior,actual] of Object.entries(categoriasEspanol))test('categoría '+actual+' filtra y conserva enlaces anteriores',async()=>{
+ const catalog=[{...fixture[0],category:actual},{...fixture[1],category:'categoria_personalizada'}];
+ const app=await boot('catalog',{catalog,search:'?category='+actual});
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'1 opción visible');
+ assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Matrícula de Maestría/);
+ const legacy=await boot('catalog',{catalog:[{...fixture[0],category:anterior}],search:'?category='+anterior});
+ assert.equal(legacy.context.marketTest.tusneConcepts[0].category,actual);
+ assert.equal(legacy.ids.get('visibleConceptCount').textContent,'1 opción visible');
+ const login=await boot('login');login.context.marketTest.selectCatalogCategory(anterior);
+ assert.deepEqual(login.assigned,['/tienda?category='+actual]);
+ assert.ok(app.html.includes('data-category-nav="'+actual+'"'));
+ assert.ok(!app.html.includes('category='+anterior+'#'));
+});
+test('categorías personalizadas y vacías permanecen visibles en Otros conceptos',async()=>{
+ const app=await boot('catalog',{catalog:[{...fixture[0],category:'personalizada'},{...fixture[1],category:null}]});
+ assert.ok(app.context.marketTest.tusneConcepts.every(item=>item.category==='general'));
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
 });

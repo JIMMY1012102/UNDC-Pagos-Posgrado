@@ -6,7 +6,7 @@ La pantalla `/tienda` carga las oficinas disponibles mediante `GET /api/v1/tiend
 
 Con una sola oficina se selecciona automáticamente y se oculta el selector para la etapa de Posgrado. Con varias, el selector vuelve a mostrarse y el comprador elige. Al cargar conceptos se omite el mensaje de éxito; se mantienen los estados de carga, vacío y error, con Reintentar solo ante errores. `?office_id=N` permite seleccionar una oficina de la lista; una selección anterior se conserva en `sessionStorage`. No se supone que la oficina 1 sea Posgrado.
 
-La selección consulta `GET /api/v1/tienda/catalogo?office_id=N`. Las tarjetas muestran los nombres, descripciones, requisitos, códigos y oficina devueltos por la API. Las categorías conocidas son `admission`, `tuition`, `certificates`, `transfers` , `degrees` y `administrative`; una categoría vacía o no reconocida aparece en Otros conceptos. No se clasifican conceptos por su precio ni se inventa su vinculación institucional.
+La selección consulta `GET /api/v1/tienda/catalogo?office_id=N`. Las tarjetas muestran los nombres, descripciones, requisitos, códigos y oficina devueltos por la API. Las categorías conocidas son `admision`, `matricula_pensiones`, `certificados_constancias`, `tramites` , `tesis_grados` y `servicios_administrativos`; una categoría vacía o no reconocida aparece en Otros conceptos. No se clasifican conceptos por su precio ni se inventa su vinculación institucional.
 
 El botón Agregar utiliza el identificador numérico real de la publicación y llama a `POST /api/v1/tienda/carritos/actual/items`. La clave del carrito se envía como Bearer; el frontend incluye CSRF en las operaciones. El backend mantiene sus validaciones y contratos existentes.
 
@@ -46,4 +46,33 @@ Se añadieron pruebas PHP de filtrado de oficinas y categoría de publicación e
 
 ## Navegación de Posgrado
 
-La barra superior y el menú móvil ofrecen Para ti y seis categorías: Admisión (`admission`), Matrícula y pensiones (`tuition`), Trámites académicos (`transfers`), Certificados y constancias (`certificates`), Tesis y grados (`degrees`) y Servicios administrativos (`administrative`). Se conservan los identificadores existentes de las publicaciones. Seleccionar una categoría filtra los datos de la API; una categoría sin publicaciones muestra el estado vacío. Para ti restablece todos los conceptos y la portada. Una lupa junto a Servicios administrativos abre el buscador bajo las categorías y enfoca el campo. La búsqueda abarca todo el catálogo. Pulsar otra vez la lupa o Escape cierra el campo y devuelve el foco a la lupa. Funciona en escritorio y celular; los enlaces con `?q=` abren el buscador con la consulta. No se crean ni reclasifican conceptos en la base de datos.
+La barra superior y el menú móvil ofrecen Para ti y seis categorías: Admisión (`admision`), Matrícula y pensiones (`matricula_pensiones`), Trámites académicos (`tramites`), Certificados y constancias (`certificados_constancias`), Tesis y grados (`tesis_grados`) y Servicios administrativos (`servicios_administrativos`). Se conservan los ID de las publicaciones; los códigos de categoría se traducen al español. Seleccionar una categoría filtra los datos de la API; una categoría sin publicaciones muestra el estado vacío. Para ti restablece todos los conceptos y la portada. Una lupa junto a Servicios administrativos abre el buscador bajo las categorías y enfoca el campo. La búsqueda abarca todo el catálogo. Pulsar otra vez la lupa o Escape cierra el campo y devuelve el foco a la lupa. Funciona en escritorio y celular; los enlaces con `?q=` abren el buscador con la consulta. No se crean conceptos ni se cambia su agrupación; una migración traduce los códigos existentes.
+
+
+## Actualización de categorías al español
+
+La columna continúa siendo `tienda_conceptos_catalogo.category`; no se crea otra tabla.
+
+| Código anterior | Código actual |
+|---|---|
+| `admission` | `admision` |
+| `tuition` | `matricula_pensiones` |
+| `transfers` | `tramites` |
+| `certificates` | `certificados_constancias` |
+| `degrees` | `tesis_grados` |
+| `administrative` | `servicios_administrativos` |
+
+La migración `2026_11_10_000001_translate_catalog_categories_to_spanish.php` actualiza únicamente los seis valores conocidos en todas las oficinas. Conserva categorías personalizadas, valores vacíos, ID, relaciones y publicación. No asigna categorías a conceptos sin clasificar ni inserta los 27 conceptos del PDF. `down()` devuelve los seis códigos al inglés, incluyendo publicaciones creadas después de migrar.
+
+La API normaliza valores antiguos durante la transición y el frontend acepta enlaces anteriores. Los enlaces nuevos usan español. Los textos de la interfaz y su traducción al inglés se conservan.
+
+En Oracle, después de descargar el código y revisar las migraciones pendientes:
+
+```bash
+git pull --ff-only origin main
+php artisan migrate:status
+php artisan migrate --force
+php artisan view:clear
+```
+
+`git pull` solo descarga código; `migrate` aplica la traducción en la base configurada. El script público lleva una versión basada en su fecha de modificación para renovar la caché del navegador.

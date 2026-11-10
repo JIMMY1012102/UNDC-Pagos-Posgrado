@@ -7,6 +7,16 @@ use Illuminate\Support\Collection;
 
 final class CatalogService
 {
+    // Mantiene la lectura de datos antiguos hasta ejecutar la migración en cada entorno.
+    private const CATEGORIAS_ANTERIORES = [
+        'admission' => 'admision',
+        'tuition' => 'matricula_pensiones',
+        'transfers' => 'tramites',
+        'certificates' => 'certificados_constancias',
+        'degrees' => 'tesis_grados',
+        'administrative' => 'servicios_administrativos',
+    ];
+
     public function __construct(private readonly PublishedCatalogQuery $catalog) {}
 
     public function offices(): Collection
@@ -28,7 +38,7 @@ final class CatalogService
                 'name' => (string) $item->name,
                 'description' => $item->description,
                 'requirements' => $item->requirements,
-                'category' => $item->category,
+                'category' => self::CATEGORIAS_ANTERIORES[$item->category] ?? $item->category,
                 'requires_eligibility_check' => (bool) $item->requires_eligibility_check,
                 'office' => [
                     'id' => (int) $item->legacy_office_id,
