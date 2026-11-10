@@ -42,6 +42,21 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    // Enlarged accessibility text must not move the magnifier below the categories.
+    await page.evaluate(() => {
+      document.documentElement.setAttribute('data-accessibility-text', '');
+      document.documentElement.style.setProperty('--a11y-text-scale', '1.2');
+    });
+    const linksBox = await page.locator('.posgrado-links').boundingBox();
+    const searchBox = await page.locator('#catalogSearchToggle').boundingBox();
+    assert.ok(searchBox.x >= linksBox.x + linksBox.width - 2, 'La lupa debe quedar a la derecha');
+    assert.ok(Math.abs((searchBox.y + searchBox.height / 2) - (linksBox.y + linksBox.height / 2)) < 3,
+      'La lupa y las categorías deben compartir la fila con texto ampliado');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
+    await page.evaluate(() => {
+      document.documentElement.removeAttribute('data-accessibility-text');
+      document.documentElement.style.removeProperty('--a11y-text-scale');
+    });
     assert.equal(await page.locator('#search').isVisible(), false);
     await page.locator('#catalogSearchToggle').click();
     assert.equal(await page.locator('#search').isVisible(), true);
