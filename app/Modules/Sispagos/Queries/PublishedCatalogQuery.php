@@ -32,7 +32,9 @@ final class PublishedCatalogQuery
                 'publication.slug',
                 'publication.description',
                 'publication.requirements',
-                'publication.category',
+                DB::raw('COALESCE(category.codigo, publication.category) as category'),
+                'publication.categoria_id',
+                'category.nombre as category_name',
                 'publication.requires_eligibility_check',
                 'office.oficina_id as legacy_office_id',
                 'office.oficina_nom as office_name',
@@ -51,6 +53,10 @@ final class PublishedCatalogQuery
     private function availablePublications(): Builder
     {
         return DB::table('tienda_conceptos_catalogo as publication')
+            ->leftJoin('tienda_categorias as category', function ($join): void {
+                $join->on('category.id', '=', 'publication.categoria_id')
+                    ->on('category.legacy_office_id', '=', 'publication.legacy_office_id');
+            })
             ->join('tienda_configuracion_oficinas as settings', 'settings.legacy_office_id', '=', 'publication.legacy_office_id')
             ->join('tm_oficina as office', 'office.oficina_id', '=', 'publication.legacy_office_id')
             ->join('tm_conceptos as concept', 'concept.id_concepto', '=', 'publication.legacy_concept_id')

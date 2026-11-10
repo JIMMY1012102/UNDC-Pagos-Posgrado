@@ -73,16 +73,17 @@ if ($baseline === false || $baseline !== legacyFingerprint($connection)) {
     throw new RuntimeException('A migration changed the original SISPAGOS schema');
 }
 
-// 6 legacy + 23 store + 9 Laravel core + 5 Spatie permissions = 43.
+// 6 legacy + 24 store + 9 Laravel core + 5 Spatie permissions = 44.
 $numberOfTables = (int) $connection->query(
     "SELECT COUNT(*) FROM information_schema.TABLES
      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
 )->fetchColumn();
-if ($numberOfTables !== 43) {
-    throw new RuntimeException("The expected 43 tables were not created (found {$numberOfTables})");
+if ($numberOfTables !== 44) {
+    throw new RuntimeException("The expected 44 tables were not created (found {$numberOfTables})");
 }
 
 $expected = [
+    'fk_categoria_oficina_tm',
     'fk_store_office_tm',
     'fk_store_catalog_office_tm',
     'fk_store_catalog_concept_tm',
@@ -134,6 +135,30 @@ try {
 try {
     $connection->exec("INSERT INTO tienda_conceptos_catalogo (legacy_office_id, legacy_concept_id, slug) VALUES (7, 999999, 'invalido')");
     throw new RuntimeException('Missing concept was accepted despite mandatory FK');
+} catch (PDOException $e) {
+    if ($e->getCode() !== '23000') {
+        throw $e;
+    }
+}
+
+// El selector usa una FK simple; la FK compuesta protege el ámbito de oficina.
+$connection->exec("INSERT INTO tm_oficina (oficina_id, oficina_nom, estado) VALUES (9, 'Otra oficina ficticia', 1)");
+$connection->exec("INSERT INTO tienda_categorias (legacy_office_id, codigo, nombre) VALUES (7, 'certificados_constancias', 'Certificados y constancias')");
+$categoryId = (int) $connection->lastInsertId();
+$connection->exec("UPDATE tienda_conceptos_catalogo SET categoria_id = {$categoryId} WHERE slug = 'prueba'");
+$connection->exec("INSERT INTO tienda_categorias (legacy_office_id, codigo, nombre) VALUES (9, 'certificados_constancias', 'Certificados de otra oficina')");
+$otherCategoryId = (int) $connection->lastInsertId();
+try {
+    $connection->exec("UPDATE tienda_conceptos_catalogo SET categoria_id = {$otherCategoryId} WHERE slug = 'prueba'");
+    throw new RuntimeException('Una publicación aceptó una categoría de otra oficina');
+} catch (PDOException $e) {
+    if ($e->getCode() !== '23000') {
+        throw $e;
+    }
+}
+try {
+    $connection->exec("DELETE FROM tienda_categorias WHERE id = {$categoryId}");
+    throw new RuntimeException('Se eliminó una categoría referenciada');
 } catch (PDOException $e) {
     if ($e->getCode() !== '23000') {
         throw $e;

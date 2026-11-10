@@ -39,6 +39,8 @@ final class CatalogService
                 'description' => $item->description,
                 'requirements' => $item->requirements,
                 'category' => self::CATEGORIAS_ANTERIORES[$item->category] ?? $item->category,
+                'categoria_id' => $item->categoria_id === null ? null : (int) $item->categoria_id,
+                'category_name' => $item->category_name,
                 'requires_eligibility_check' => (bool) $item->requires_eligibility_check,
                 'office' => [
                     'id' => (int) $item->legacy_office_id,

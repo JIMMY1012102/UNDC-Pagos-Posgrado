@@ -1,11 +1,11 @@
 # Siete módulos de UNDC Market
 
-Los módulos **reales** están en `app/Modules/`, con nombres alineados al [mapa de 43 tablas](./modelo-datos/00_MAPA_GENERAL_43_TABLAS.md).
+Los módulos **reales** están en `app/Modules/`, con nombres alineados al [mapa de 44 tablas](./modelo-datos/00_MAPA_GENERAL_43_TABLAS.md).
 
 | Módulo | Tablas | Estado |
 |---|---:|---|
 | Sispagos | 6 | Módulo de integración, seguridad o funcionalidad aún pendiente |
-| Catalogo | 3 | Backend parcial con pruebas |
+| Catalogo | 4 | Backend parcial con pruebas |
 | Usuarios | 4 | Backend parcial con pruebas |
 | Pedidos | 5 | Backend parcial con pruebas |
 | Pagos | 6 | Módulo de integración, seguridad o funcionalidad aún pendiente |

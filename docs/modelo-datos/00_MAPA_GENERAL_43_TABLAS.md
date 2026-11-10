@@ -1,4 +1,4 @@
-# Diagrama general por siete módulos — 43 tablas
+# Diagrama general por siete módulos — 44 tablas
 
 **Monolito modular + DDD ligero.** Un único esquema MariaDB y siete propietarios lógicos. Cada bloque representa un límite de responsabilidad; los colores no representan bases independientes. Las flechas representan claves foráneas documentadas, no mensajes JSON.
 
@@ -13,7 +13,8 @@ flowchart LR
     tm_resultado["tm_resultado"]
   end
   style Sispagos fill:#E1E6ED,stroke:#64748b,stroke-width:2px,color:#111827
-  subgraph Catalogo["Catálogo · 3"]
+  subgraph Catalogo["Catálogo · 4"]
+    tienda_categorias["tienda_categorias"]
     tienda_configuracion_oficinas["tienda_configuracion_oficinas"]
     tienda_conceptos_catalogo["tienda_conceptos_catalogo"]
     tienda_versiones_tarifas["tienda_versiones_tarifas"]
@@ -72,6 +73,8 @@ flowchart LR
   users --> tienda_identidades_oauth
   tienda_perfiles_compradores --> tienda_beneficiarios
   tm_oficina --> tienda_configuracion_oficinas
+  tm_oficina --> tienda_categorias
+  tienda_categorias --> tienda_conceptos_catalogo
   tm_oficina --> tienda_conceptos_catalogo
   tm_conceptos --> tienda_conceptos_catalogo
   tienda_conceptos_catalogo --> tienda_versiones_tarifas
@@ -121,12 +124,12 @@ flowchart LR
   permissions --> role_has_permissions
 ```
 
-> **Lectura:** las relaciones se basan en migraciones y en la documentación existente. `tm_rol` y otras columnas históricas no llevan FK inventadas. Las referencias polimórficas de Spatie no se dibujan como FK SQL a `users`. GitHub genera el diseño gráfico automáticamente y puede cruzar algunas líneas en una vista de 43 entidades.
+> **Lectura:** las relaciones se basan en migraciones y en la documentación existente. `tm_rol` y otras columnas históricas no llevan FK inventadas. Las referencias polimórficas de Spatie no se dibujan como FK SQL a `users`. GitHub genera el diseño gráfico automáticamente y puede cruzar algunas líneas en una vista de 44 entidades.
 
 | Módulo | Tablas | Responsabilidad |
 |---|---:|---|
 | SISPAGOS (legado) | 6 | Seis maestros históricos de SISPAGOS (sin cambios) |
-| Catálogo | 3 | Oficinas publicadas, conceptos y versiones de tarifa |
+| Catálogo | 4 | Oficinas publicadas, conceptos y versiones de tarifa |
 | Usuarios | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
 | Pedidos | 5 | Carrito, líneas, órdenes y sus estados |
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
