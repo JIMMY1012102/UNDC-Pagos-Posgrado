@@ -6,7 +6,7 @@ Los módulos **reales** están en `app/Modules/`, con nombres alineados al [mapa
 |---|---:|---|
 | Sispagos | 6 | Módulo de integración, seguridad o funcionalidad aún pendiente |
 | Catalogo | 3 | Backend parcial con pruebas |
-| Compradores | 4 | Backend parcial con pruebas |
+| Usuarios | 4 | Backend parcial con pruebas |
 | Pedidos | 5 | Backend parcial con pruebas |
 | Pagos | 6 | Módulo de integración, seguridad o funcionalidad aún pendiente |
 | Tesoreria | 6 | Módulo de integración, seguridad o funcionalidad aún pendiente |

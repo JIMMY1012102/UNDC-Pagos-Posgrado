@@ -15,7 +15,7 @@ class SevenModuleBoundariesTest extends TestCase
 
     public function test_all_seven_modules_are_real_and_catalog_contract_is_resolvable(): void
     {
-        foreach (['Sispagos', 'Catalogo', 'Compradores', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
+        foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
             $this->assertFileExists(app_path("Modules/{$module}/routes.php"));
         }
 

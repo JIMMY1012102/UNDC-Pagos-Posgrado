@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\Compradores\Http\Controllers;
+namespace App\Modules\Usuarios\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Compradores\Services\GoogleIdentityService;
-use App\Modules\Compradores\Services\BuyerProfileService;
+use App\Modules\Usuarios\Services\GoogleIdentityService;
+use App\Modules\Usuarios\Services\BuyerProfileService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

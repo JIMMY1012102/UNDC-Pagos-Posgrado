@@ -1,4 +1,4 @@
-# 3. Compradores
+# 3. Usuarios
 
 Cuentas web, perfiles, identidades OAuth y beneficiarios. Tablas del módulo en el esquema MariaDB compartido.
 

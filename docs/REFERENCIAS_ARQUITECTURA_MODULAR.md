@@ -23,7 +23,7 @@
 ## Decisión de diseño para UNDC Market
 
 **Monolito modular con DDD ligero: una aplicación Laravel, una MariaDB, siete módulos.**
-`Sispagos` (6 tablas heredadas, sin alteraciones), `Catalogo` (3), `Compradores` (4), `Pedidos` (5), `Pagos` (6), `Tesoreria` (6), `Seguridad` (13). Total **43 tablas**.
+`Sispagos` (6 tablas heredadas, sin alteraciones), `Catalogo` (3), `Usuarios` (4), `Pedidos` (5), `Pagos` (6), `Tesoreria` (6), `Seguridad` (13). Total **43 tablas**.
 
 - `Pedidos` solicita disponibilidad por `Catalogo\\Contracts\\CatalogItemLookup`, implementado por `CatalogItemLookupService`.
 - `Catalogo` obtiene conceptos históricos desde el adaptador de lectura `Sispagos\\Queries\\PublishedCatalogQuery`.

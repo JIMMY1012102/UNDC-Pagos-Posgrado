@@ -6,7 +6,7 @@
 |---|---:|---|
 | Sispagos | 6 | Seis maestros históricos de SISPAGOS (sin cambios) |
 | Catalogo | 3 | Oficinas publicadas, conceptos y versiones de tarifa |
-| Compradores | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
+| Usuarios | 4 | Cuentas web, perfiles, identidades OAuth y beneficiarios |
 | Pedidos | 5 | Carrito, líneas, órdenes y sus estados |
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
 | Tesoreria | 6 | Conciliación, validación, certificados y auditoría |
@@ -17,7 +17,7 @@
 `Frontend → controlador del módulo → servicio del módulo → tablas propias`.
 
 1. **Catalogo** muestra las publicaciones; usa un **adaptador de solo lectura Sispagos** que une `tienda_conceptos_catalogo` con los conceptos y oficinas maestros `tm_*`.
-2. **Compradores** conserva cuentas y perfiles; las rutas originales `/tienda/login` y `/api/v1/acceso/*` no cambian.
+2. **Usuarios** conserva cuentas y perfiles; las rutas originales `/tienda/login` y `/api/v1/acceso/*` no cambian.
 3. **Pedidos** mantiene carrito y precompra; para verificar disponibilidad de un producto consume `Catalogo/Contracts/CatalogItemLookup`, **sin consultar directamente `tm_*`**.
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
 5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
