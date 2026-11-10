@@ -19,8 +19,8 @@ async function scenario(viewport, name) {
     } }));
     await page.route('**/api/v1/tienda/catalogo?*', route => route.fulfill({ json: {
       success: true, data: [
-        { id: 12, name: 'Examen de prueba', category: 'admission' },
-        { id: 13, name: 'Biblioteca de prueba', category: 'administrative' },
+        { id: 12, name: 'Examen de prueba', category: 'admision' },
+        { id: 13, name: 'Biblioteca de prueba', category: 'servicios_administrativos' },
       ],
     } }));
     const catalog = await page.goto(origin + '/tienda', { waitUntil: 'domcontentloaded' });
@@ -35,10 +35,10 @@ async function scenario(viewport, name) {
       'Certificados y constancias', 'Tesis y grados', 'Servicios administrativos',
     ]);
     await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
-    await page.locator('.posgrado-links [data-category-nav="administrative"]').click();
+    await page.locator('.posgrado-links [data-category-nav="servicios_administrativos"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
     assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
-    await page.locator('.posgrado-links [data-category-nav="degrees"]').click();
+    await page.locator('.posgrado-links [data-category-nav="tesis_grados"]').click();
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
