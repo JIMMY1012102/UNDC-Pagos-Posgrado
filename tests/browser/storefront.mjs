@@ -42,7 +42,17 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    assert.equal(await page.locator('#search').isVisible(), false);
+    await page.locator('#catalogSearchToggle').click();
     assert.equal(await page.locator('#search').isVisible(), true);
+    assert.equal(await page.locator('#search').evaluate(el => document.activeElement === el), true);
+    await page.locator('#search').fill('Biblioteca');
+    assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
+    assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    await page.locator('#search').press('Escape');
+    assert.equal(await page.locator('#search').isVisible(), false);
+    assert.equal(await page.locator('#catalogSearchToggle').getAttribute('aria-expanded'), 'false');
+    assert.equal(await page.locator('#catalogSearchToggle').evaluate(el => document.activeElement === el), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
       'El catálogo y sus siete enlaces no deben desbordar la pantalla');
 

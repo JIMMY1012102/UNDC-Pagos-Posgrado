@@ -183,7 +183,7 @@ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
 while((node=walker.nextNode()))if(!node.parentElement?.closest('[data-no-translate],script,style')){const next=translatedValue(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}
 if(root.querySelectorAll)root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(element=>['placeholder','aria-label','title'].forEach(attribute=>{if(element.hasAttribute(attribute)&&!element.closest('[data-no-translate]')){const current=element.getAttribute(attribute),next=translatedValue(current);if(next!==current)element.setAttribute(attribute,next)}}));
 }
-Object.assign(languagePairs,{'Admisión':'Admission','Matrícula y pensiones':'Enrollment and tuition','Trámites académicos':'Academic procedures','Certificados y constancias':'Certificates and records','Tesis y grados':'Thesis and degrees','Servicios administrativos':'Administrative services','Buscar conceptos...':'Search services...'});
+Object.assign(languagePairs,{'Admisión':'Admission','Matrícula y pensiones':'Enrollment and tuition','Trámites académicos':'Academic procedures','Certificados y constancias':'Certificates and records','Tesis y grados':'Thesis and degrees','Servicios administrativos':'Administrative services','Buscar conceptos...':'Search services...','Abrir buscador':'Open search','Cerrar buscador':'Close search'});
 function updateLanguageControls(){
 document.querySelectorAll('[data-language-picker]').forEach(picker=>{const flag=picker.querySelector('.language-flag'),label=picker.querySelector('.language-label');flag.classList.toggle('peru-flag',currentLanguage==='es');flag.classList.toggle('usa-flag',currentLanguage==='en');label.textContent=currentLanguage==='en'?'ENGLISH':'ESPAÑOL'});
 }
@@ -434,6 +434,14 @@ if(state.authenticated&&sessionStorage.getItem('undc_resume_purchase')==='1'){if
 const searchInput=$('search'),searchSuggestions=$('searchSuggestions');
 let suggestedProducts=[],activeSuggestion=-1;
 function closeSearchSuggestions(){if(searchSuggestions)searchSuggestions.hidden=true;searchInput?.setAttribute('aria-expanded','false');searchInput?.removeAttribute('aria-activedescendant');activeSuggestion=-1}
+function setHeaderSearchOpen(open,focus=true){
+ const form=$('headerSearch'),toggle=$('catalogSearchToggle');if(!form||!toggle)return;
+ form.hidden=!open;toggle.setAttribute('aria-expanded',String(open));
+ toggle.setAttribute('aria-label',localized(open?'Cerrar buscador':'Abrir buscador',open?'Close search':'Open search'));
+ if(open){if(focus)searchInput?.focus()}else{closeSearchSuggestions();if(focus)toggle.focus()}
+}
+$('catalogSearchToggle')?.addEventListener('click',()=>setHeaderSearchOpen($('headerSearch').hidden));
+$('headerSearch')?.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();setHeaderSearchOpen(false)}});
 function catalogSuggestions(query){
  const normalized=normalizeCatalogSearch(query);if(!normalized)return [];
  return tusneConcepts.filter(item=>matchesCatalogSearch(item,query)).sort((a,b)=>{
@@ -636,7 +644,7 @@ const requestedView=new URLSearchParams(window.location.search).get('view');
 if(marketPage==='catalog'&&['procedures','catalogs','categories'].includes(requestedView))setMainView(requestedView);
 
 const requestedSearch=new URLSearchParams(window.location.search).get('q');
-if(marketPage==='catalog'&&requestedSearch!==null&&$('search')){$('search').value=requestedSearch;searchCatalog(true)}
+if(marketPage==='catalog'&&requestedSearch!==null&&$('search')){setHeaderSearchOpen(true,false);$('search').value=requestedSearch;searchCatalog(true)}
 
 document.addEventListener('click',event=>{document.querySelectorAll('.account-menu[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false})});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.account-menu[open]').forEach(menu=>{menu.open=false;menu.querySelector('summary')?.focus()})});
