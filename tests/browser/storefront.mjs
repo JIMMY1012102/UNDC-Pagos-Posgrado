@@ -13,12 +13,38 @@ async function scenario(viewport, name) {
   page.on('pageerror', (error) => exceptions.push(error.message));
 
   try {
+    // Deterministic publications keep navigation checks independent of DB setup.
+    await page.route('**/api/v1/tienda/catalogo/oficinas', route => route.fulfill({ json: {
+      success: true, data: [{ id: 7, name: 'Posgrado de prueba' }],
+    } }));
+    await page.route('**/api/v1/tienda/catalogo?*', route => route.fulfill({ json: {
+      success: true, data: [
+        { id: 12, name: 'Examen de prueba', category: 'admission' },
+        { id: 13, name: 'Biblioteca de prueba', category: 'administrative' },
+      ],
+    } }));
     const catalog = await page.goto(origin + '/tienda', { waitUntil: 'domcontentloaded' });
     assert.equal(catalog?.status(), 200, 'El catálogo debe responder HTTP 200');
     await page.locator('#tusneTitle').waitFor();
     assert.match(await page.locator('#tusneTitle').innerText(), /Nuestros trámites/);
     assert.equal(await page.locator('link[href*="css/undc-tienda.css"]').count(), 1);
     assert.equal(await page.locator('script[src*="js/undc-tienda.js"]').count(), 1);
+
+    assert.deepEqual(await page.locator('.posgrado-links a').allTextContents(), [
+      'Para ti', 'Admisión', 'Matrícula y pensiones', 'Trámites académicos',
+      'Certificados y constancias', 'Tesis y grados', 'Servicios administrativos',
+    ]);
+    await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
+    await page.locator('.posgrado-links [data-category-nav="administrative"]').click();
+    assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
+    assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    await page.locator('.posgrado-links [data-category-nav="degrees"]').click();
+    assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
+    await page.locator('.posgrado-links [data-category-nav="all"]').click();
+    assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    assert.equal(await page.locator('#search').isVisible(), true);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
+      'El catálogo y sus siete enlaces no deben desbordar la pantalla');
 
     const cart = await page.goto(origin + '/tienda/carrito', { waitUntil: 'domcontentloaded' });
     assert.equal(cart?.status(), 200, 'El carrito debe responder HTTP 200');

@@ -41,7 +41,7 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   return {status:200,ok:true,json:async()=>({success:true,data})};
  };
  const context=vm.createContext({document,window:{addEventListener(){},location:{search:'',assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html,calls};
 }
@@ -141,3 +141,21 @@ test('search suggestions rank exact names first, limit results and select a prod
  assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
 });
 
+
+test('six top categories filter API concepts, survive reload and reset with Para ti',async()=>{
+ const app=await boot('catalog',{catalog:[...fixture,{...fixture[0],id:14,name:'Carné de biblioteca',category:'administrative'}]});
+ const api=app.context.marketTest;
+ api.selectCatalogCategory('administrative');
+ assert.match(app.ids.get('tusneResults').innerHTML,/Carné de biblioteca/);
+ assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ assert.equal(app.ids.get('catalogResultsTitle').textContent,'Servicios administrativos');
+ await api.loadCatalog();
+ assert.equal(app.ids.get('catalogResultsTitle').textContent,'Servicios administrativos');
+ api.selectCatalogCategory('degrees');
+ assert.equal(app.ids.get('tusneEmpty').hidden,false);
+ api.selectCatalogCategory('all');
+ assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ const login=await boot('login');login.context.marketTest.selectCatalogCategory('transfers');
+ assert.deepEqual(login.assigned,['/tienda?category=transfers']);
+ for(const label of ['Para ti','Admisión','Matrícula y pensiones','Trámites académicos','Certificados y constancias','Tesis y grados','Servicios administrativos'])assert.ok(app.html.includes(label));
+});

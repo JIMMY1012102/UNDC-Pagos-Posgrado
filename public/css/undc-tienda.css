@@ -1392,3 +1392,24 @@ body.light-mode .account-dropdown button{color:#17324f}
 
 /* Keep catalog controls out of the layout until needed. */
 #catalogOfficeControls[hidden], #catalogStatus[hidden], #catalogRetry[hidden] { display: none; }
+
+/* Posgrado: seven text links with search alongside on desktop. */
+.posgrado-nav { grid-template-columns: minmax(0, 1fr) minmax(210px, .26fr); gap: 18px; padding: 0 20px; height: 82px; }
+.posgrado-links { min-width: 0; gap: 14px; justify-content: space-between; }
+.posgrado-links a { min-width: 0; min-height: 44px; font-size: calc(12px * var(--a11y-text-scale, 1)); line-height: 1.45; text-align: center; }
+.posgrado-links a span { display: inline; }
+.posgrado-nav .header-search { height: 48px; gap: 8px; padding-left: 12px; }
+.posgrado-nav .header-search input { font-size: calc(13px * var(--a11y-text-scale, 1)); }
+.posgrado-nav .header-search button { width: 36px; height: 36px; flex-basis: 36px; }
+@media (max-width: 1100px) and (min-width: 941px) {
+ .posgrado-nav { height: auto; grid-template-columns: minmax(0, 1fr) 210px; padding: 10px 16px; gap: 12px; }
+ .posgrado-links { flex-wrap: wrap; height: auto; justify-content: flex-start; gap: 4px 16px; }
+ .posgrado-links a { flex: 0 1 auto; min-height: 38px; }
+}
+@media (max-width: 940px) {
+ .site-header .subheader { display: block; height: auto; }
+ .posgrado-nav { display: flex; flex-wrap: wrap; height: auto; padding: 10px 14px; }
+ .posgrado-links { width: 100%; height: auto; overflow-x: auto; justify-content: flex-start; gap: 20px; padding-bottom: 6px; }
+ .posgrado-links a { flex: 0 0 auto; min-width: max-content; flex-direction: row; font-size: calc(12px * var(--a11y-text-scale, 1)); }
+ .posgrado-nav .header-search { width: 100%; }
+}

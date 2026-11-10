@@ -11,7 +11,8 @@ class StorefrontUiTest extends TestCase
         $response = $this->get('/tienda');
         $response->assertOk()
             ->assertSee('Universidad Nacional de Cañete')
-            ->assertSee('Catálogo')
+            ->assertSee('Admisión')
+            ->assertSee('Servicios administrativos')
             ->assertSee('Carrito')
             ->assertSee('Tus trámites, mucho más cerca de ti.')
             ->assertSee('Nuestros trámites')

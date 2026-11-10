@@ -183,6 +183,7 @@ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
 while((node=walker.nextNode()))if(!node.parentElement?.closest('[data-no-translate],script,style')){const next=translatedValue(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}
 if(root.querySelectorAll)root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(element=>['placeholder','aria-label','title'].forEach(attribute=>{if(element.hasAttribute(attribute)&&!element.closest('[data-no-translate]')){const current=element.getAttribute(attribute),next=translatedValue(current);if(next!==current)element.setAttribute(attribute,next)}}));
 }
+Object.assign(languagePairs,{'Admisión':'Admission','Matrícula y pensiones':'Enrollment and tuition','Trámites académicos':'Academic procedures','Certificados y constancias':'Certificates and records','Tesis y grados':'Thesis and degrees','Servicios administrativos':'Administrative services','Buscar conceptos...':'Search services...'});
 function updateLanguageControls(){
 document.querySelectorAll('[data-language-picker]').forEach(picker=>{const flag=picker.querySelector('.language-flag'),label=picker.querySelector('.language-label');flag.classList.toggle('peru-flag',currentLanguage==='es');flag.classList.toggle('usa-flag',currentLanguage==='en');label.textContent=currentLanguage==='en'?'ENGLISH':'ESPAÑOL'});
 }
@@ -206,9 +207,10 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const tusneCategories=[
 {id:'admission',name:'Admisión',en:'Admission',icon:'🎓',color:'#28b8a4',description:'Ingreso y postulación a programas de Posgrado.',descriptionEn:'Entry and application to Graduate School programs.',count:3},
 {id:'tuition',name:'Matrícula y pensiones',en:'Enrollment and tuition',icon:'📚',color:'#2697f3',description:'Matrícula académica, pensiones mensuales y recargos.',descriptionEn:'Academic enrollment, monthly tuition and late fees.',count:6},
+{id:'administrative',name:'Servicios administrativos',en:'Administrative services',icon:'▤',color:'#52878f',description:'Derecho de trámite administrativo y carné de biblioteca.',descriptionEn:'Administrative processing and library card.'},
 {id:'certificates',name:'Certificados y constancias',en:'Certificates and records',icon:'📜',color:'#a879ed',description:'Documentos, certificados y constancias académicas.',descriptionEn:'Academic documents, certificates and records.',count:9},
-{id:'transfers',name:'Traslados y convalidaciones',en:'Transfers and credit recognition',icon:'⇄',color:'#e6a93d',description:'Traslados internos, externos y convalidación de asignaturas.',descriptionEn:'Internal and external transfers and course recognition.',count:3},
-{id:'degrees',name:'Tesis y grados académicos',en:'Thesis and academic degrees',icon:'🏅',color:'#c95a68',description:'Tesis, jurados, sustentaciones y grados académicos.',descriptionEn:'Thesis, committees, defenses and academic degrees.',count:8}
+{id:'transfers',name:'Trámites académicos',en:'Academic procedures',icon:'⇄',color:'#e6a93d',description:'Traslados internos, externos y convalidación de asignaturas.',descriptionEn:'Internal and external transfers and course recognition.',count:3},
+{id:'degrees',name:'Tesis y grados',en:'Thesis and degrees',icon:'🏅',color:'#c95a68',description:'Tesis, jurados, sustentaciones y grados académicos.',descriptionEn:'Thesis, committees, defenses and academic degrees.',count:8}
 ];
 // Publications come exclusively from the API. Old reference selections are not purchases.
 let tusneConcepts=[];
@@ -258,6 +260,7 @@ function searchCatalog(reveal=false){
  if(reveal){setMainView('catalogs');const results=$('tusneCatalog');results?.scrollIntoView({behavior:'smooth',block:'start'});const title=$('catalogResultsTitle');title?.setAttribute('tabindex','-1');title?.focus({preventScroll:true})}
 }
 function renderTusneCatalog(){
+updateCategoryNavigation();
 if(!$('catalogFilters'))return;
 const query=$('search')?.value.trim()||'';
 $('catalogFilters').innerHTML=[{id:'all',name:'Todos',en:'All'},...tusneCategories.filter(category=>tusneConcepts.some(item=>item.category===category.id))].map(category=>'<button class="catalog-filter'+(tusneCategory===category.id?' active':'')+'" type="button" data-category-filter="'+category.id+'" aria-pressed="'+String(tusneCategory===category.id)+'">'+esc(localized(category.name,category.en))+'</button>').join('');
@@ -270,6 +273,20 @@ const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalog
 }
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Código del concepto','Service code'))+'</small><strong>'+esc(item.code||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Importe','Amount'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(item.office?.name||localized('Por confirmar','To be confirmed'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
 function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
+function updateCategoryNavigation(){
+ document.querySelectorAll('[data-category-nav]').forEach(link=>{
+  const active=link.dataset.categoryNav===tusneCategory;
+  link.classList.toggle('active',active);
+  if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+ });
+}
+function selectCatalogCategory(category,reveal=true){
+ if(category!=='all'&&!tusneCategories.some(item=>item.id===category))return;
+ if(marketPage!=='catalog'){window.location.assign('/tienda?category='+encodeURIComponent(category));return}
+ tusneCategory=category;if($('search'))$('search').value='';closeSearchSuggestions();
+ setMainView(category==='all'?'procedures':'catalogs');renderTusneCatalog();
+ if(reveal){if(category==='all')window.scrollTo({top:0,behavior:'smooth'});else $('tusneCatalog')?.scrollIntoView({behavior:'smooth',block:'start'})}
+}
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0);$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
 function renderCart(){
@@ -309,7 +326,7 @@ function catalogMessage(message,error=false){
 }
 async function loadCatalog(){
  const request=++catalogRequest;
- tusneConcepts=[];tusneCategory='all';renderTusneCatalog();closeSearchSuggestions();
+ tusneConcepts=[];renderTusneCatalog();closeSearchSuggestions();
  const office=state.office;
  if(!office){catalogMessage(localized('Selecciona una oficina para ver sus conceptos.','Select an office to view its services.'));return}
  catalogMessage(localized('Cargando catálogo…','Loading catalog…'));
@@ -612,6 +629,9 @@ document.querySelectorAll('[data-login-trigger]').forEach(link=>link.addEventLis
  event.preventDefault();closeHeaderMenu();screen('login');$('marketLoginTitle')?.focus({preventScroll:true});
 }));
 $('marketLoginGoogle')?.addEventListener('click',()=>{if(cartHasConcepts())sessionStorage.setItem('undc_resume_purchase','1')});
+document.querySelectorAll('[data-category-nav]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();selectCatalogCategory(link.dataset.categoryNav);closeHeaderMenu()}));
+const requestedCategory=new URLSearchParams(window.location.search).get('category');
+if(requestedCategory)selectCatalogCategory(requestedCategory,false);
 const requestedView=new URLSearchParams(window.location.search).get('view');
 if(marketPage==='catalog'&&['procedures','catalogs','categories'].includes(requestedView))setMainView(requestedView);
 
