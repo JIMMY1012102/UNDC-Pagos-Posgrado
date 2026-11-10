@@ -222,3 +222,17 @@ test('zero reference amount is displayed without enabling checkout',async()=>{
  assert.match(app.ids.get('tusneResults').innerHTML,/S\/ 0\.00/);
  assert.ok(!app.calls.some(call=>call.url.includes('/pagos')));
 });
+
+
+test('the top navigation is the only category menu and filtering still renders products',async()=>{
+ const app=await boot('catalog');
+ assert.equal(app.ids.has('catalogFilters'),false);
+ assert.ok(!app.html.includes('data-category-filter='));
+ assert.ok(app.html.includes('data-category-nav="matricula_pensiones"'));
+ app.context.marketTest.selectCatalogCategory('matricula_pensiones');
+ assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula de Maestría/);
+ assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
+ assert.equal(app.ids.get('catalogResultsTitle').textContent,'Matrícula y pensiones');
+ app.context.marketTest.selectCatalogCategory('all');
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
+});

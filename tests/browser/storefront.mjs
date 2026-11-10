@@ -42,6 +42,7 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    assert.equal(await page.locator('#catalogFilters, [data-category-filter]').count(), 0, 'Solo debe existir el menú superior de categorías');
     const product = page.locator('.catalog-product').first();
     assert.equal(await product.locator('img').count(), 1);
     assert.equal(await product.locator('.catalog-product-name').innerText(), 'Examen de prueba');
