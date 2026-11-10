@@ -273,9 +273,8 @@ function searchCatalog(reveal=false){
 }
 function renderTusneCatalog(){
 updateCategoryNavigation();
-if(!$('catalogFilters'))return;
+if(!$('tusneResults'))return;
 const query=$('search')?.value.trim()||'';
-$('catalogFilters').innerHTML=[{id:'all',name:'Todos',en:'All'},...tusneCategories.filter(category=>tusneConcepts.some(item=>item.category===category.id))].map(category=>'<button class="catalog-filter'+(tusneCategory===category.id?' active':'')+'" type="button" data-category-filter="'+category.id+'" aria-pressed="'+String(tusneCategory===category.id)+'">'+esc(localized(category.name,category.en))+'</button>').join('');
 const visible=tusneConcepts.filter(item=>(tusneCategory==='all'||item.category===tusneCategory)&&matchesCatalogSearch(item,query));
 const groups=(tusneCategory==='all'?tusneCategories:[categoryById(tusneCategory)]).map(category=>({category,items:visible.filter(item=>item.category===category.id)})).filter(group=>group.items.length);
 $('tusneResults').innerHTML=groups.map(({category,items})=>'<section class="category-result-group" style="--category-color:'+category.color+'"><div class="concept-grid">'+items.map(item=>renderConceptCard(item,category)).join('')+'</div></section>').join('');
@@ -489,7 +488,6 @@ document.addEventListener('click',event=>{if(!event.target.closest('.header-sear
 document.addEventListener('focusin',event=>{if(!event.target.closest('.header-search'))closeSearchSuggestions()});
 
 $('search')?.addEventListener('input',()=>{searchCatalog();renderSearchSuggestions();});
-$('catalogFilters')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-filter]');if(!button)return;tusneCategory=button.dataset.categoryFilter;renderTusneCatalog()});
 $('tusneResults')?.addEventListener('click',event=>{const button=event.target.closest('[data-concept-detail]');if(button)openConceptDetail(button.dataset.conceptDetail)});
 $('conceptDialogContent')?.addEventListener('click',async event=>{const button=event.target.closest('[data-catalog-cart]');if(!button)return;button.disabled=true;try{await addItem(button.dataset.catalogCart);if((state.cart?.items||[]).some(line=>String(line.catalog_item_id)===String(button.dataset.catalogCart)))$('conceptDialog')?.close()}finally{button.disabled=false}});
 $('clearCatalogFilters')?.addEventListener('click',()=>{tusneCategory='all';$('search').value='';renderTusneCatalog();});
