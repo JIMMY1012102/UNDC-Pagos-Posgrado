@@ -42,6 +42,16 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    if (viewport.width >= 1200) {
+      const menu = await page.locator('.posgrado-links').evaluate(el => ({
+        font: parseFloat(getComputedStyle(el.querySelector('a')).fontSize),
+        fits: el.scrollWidth <= el.clientWidth + 2,
+        tops: [...el.querySelectorAll('a')].map(link => link.getBoundingClientRect().top),
+      }));
+      assert.ok(menu.font >= 15, 'Las categorías deben tener letra legible de al menos 15px');
+      assert.equal(menu.fits, true, 'Las siete opciones deben caber al 100% sin desplazamiento');
+      assert.ok(menu.tops.every(top => Math.abs(top - menu.tops[0]) < 2), 'Las siete opciones deben compartir fila');
+    }
     // Enlarged accessibility text must not move the magnifier below the categories.
     await page.evaluate(() => {
       document.documentElement.setAttribute('data-accessibility-text', '');
@@ -104,6 +114,7 @@ async function scenario(viewport, name) {
 }
 
 await scenario({ width: 1440, height: 900 }, 'desktop');
+await scenario({ width: 1366, height: 768 }, 'laptop');
 await scenario({ width: 390, height: 844 }, 'mobile');
 await browser.close();
 if (failures > 0) process.exit(1);
