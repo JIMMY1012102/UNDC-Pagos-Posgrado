@@ -1437,3 +1437,10 @@ body.light-mode .catalog-search-toggle:hover, body.light-mode .catalog-search-to
 html[data-accessibility-text] .nav.posgrado-nav { grid-template-columns: minmax(0, 1fr) 44px; }
 html[data-accessibility-text] .posgrado-nav > .posgrado-links { flex-wrap: nowrap; overflow-x: auto; }
 html[data-accessibility-text] .posgrado-nav > .posgrado-links a { flex: 0 0 auto; min-width: max-content; }
+
+/* Readable desktop category labels without adding another navigation row. */
+.posgrado-nav .posgrado-links { flex-wrap: nowrap; gap: 12px; overflow-x: auto; }
+.posgrado-nav .posgrado-links a { flex: 0 0 auto; min-width: max-content; white-space: nowrap; font-size: calc(15px * var(--a11y-text-scale, 1)); }
+@media (max-width: 1199px) {
+ .posgrado-nav .posgrado-links a { font-size: calc(14px * var(--a11y-text-scale, 1)); }
+}
