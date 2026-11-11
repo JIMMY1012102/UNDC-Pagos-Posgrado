@@ -1,4 +1,4 @@
-{{-- Cuentas publicadas por la Oficina de Comunicaciones: https://web.undc.edu.pe/oficina/comunicaciones/ --}}
+{{-- Redes de la UNDC. Instagram actualizado al enlace indicado por el responsable del proyecto. --}}
 <nav class="market-social-rail" aria-label="Redes sociales de la UNDC">
     <div class="market-social-links">
         <a href="https://www.facebook.com/Unicanete.peru" target="_blank" rel="noopener noreferrer" aria-label="Facebook de la UNDC (abre en otra pestaña)" title="Facebook de la UNDC">
@@ -7,7 +7,7 @@
         <a href="https://x.com/Unicanete" target="_blank" rel="noopener noreferrer" aria-label="X de la UNDC (abre en otra pestaña)" title="X de la UNDC">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l8.2-9.4L.8 2h6.5l4.5 6.8L18.9 2ZM17.6 20h1.8L6.2 4H4.3z"/></svg>
         </a>
-        <a href="https://www.instagram.com/undc2025/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de la UNDC (abre en otra pestaña)" title="Instagram de la UNDC">
+        <a href="https://www.instagram.com/undc2026/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de la UNDC (abre en otra pestaña)" title="Instagram de la UNDC">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         </a>
         <a href="https://www.youtube.com/@Unicanete" target="_blank" rel="noopener noreferrer" aria-label="YouTube de la UNDC (abre en otra pestaña)" title="YouTube de la UNDC">
