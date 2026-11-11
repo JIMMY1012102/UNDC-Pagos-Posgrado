@@ -258,7 +258,11 @@ const photos=[
 {id:'constancia-estudios-posgrado',match:/^constancia de estudios de posgrado$/,file:'constancia-estudios-posgrado.webp'},
 {id:'constancia-ingreso-posgrado',match:/^constancia de ingreso de posgrado$/,file:'constancia-ingreso-posgrado.webp'},
 {id:'constancia-no-adeudo-posgrado',match:/^constancia de no adeudo de la escuela de posgrado$/,file:'constancia-no-adeudo-posgrado.webp'},
-{id:'constancia-similitud-posgrado',match:/^constancia de similitud de posgrado(?:\s*\(turnitin\))?$/,file:'constancia-similitud-posgrado.webp'}
+{id:'constancia-similitud-posgrado',match:/^constancia de similitud de posgrado(?:\s*\(turnitin\))?$/,file:'constancia-similitud-posgrado.webp'},
+{id:'inscripcion-proyecto-tesis',match:/^inscripcion de proyecto de tesis para maestria o doctorado$/,file:'inscripcion-proyecto-tesis.webp'},
+{id:'nombramiento-jurado',match:/^nombramiento de jurado para maestria o doctorado$/,file:'nombramiento-jurado.webp'},
+{id:'grado-academico-doctor',match:/^otorgamiento de grado academico de doctor$/,file:'grado-academico-doctor.webp'},
+{id:'grado-academico-maestro',match:/^otorgamiento de grado academico de maestro$/,file:'grado-academico-maestro.webp'}
 ];
 const photo=photos.find(visual=>visual.match.test(name));
 if(photo)return {id:photo.id,photo:true,src:'/assets/catalogo/fotografias/'+photo.file};
@@ -714,6 +718,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
 
 
