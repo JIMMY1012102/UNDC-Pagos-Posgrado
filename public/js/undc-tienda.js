@@ -240,6 +240,15 @@ const categoriasAnteriores={admission:'admision',tuition:'matricula_pensiones',t
 const normalizarCategoria=id=>Object.hasOwn(categoriasAnteriores,id)?categoriasAnteriores[id]:id;
 const categoryById=id=>tusneCategories.find(category=>category.id===normalizarCategoria(id))||generalCategory;
 function getCatalogVisual(item){
+// Fotografías por concepto; no dependen del orden ni de los IDs de la base.
+const name=String(item.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/\s+/g,' ').trim();
+const photos=[
+{id:'matricula-doctorado',match:/^derecho de matricula (?:de )?doctorado$/,file:'matricula-doctorado.webp'},
+{id:'matricula-maestria',match:/^derecho de matricula (?:de )?maestria$/,file:'matricula-maestria.webp'},
+{id:'pension-mensual-doctorado',match:/^pension de ensenanza mensual (?:de )?doctorado$/,file:'pension-mensual-doctorado.webp'}
+];
+const photo=photos.find(visual=>visual.match.test(name));
+if(photo)return {id:photo.id,photo:true,src:'/assets/catalogo/fotografias/'+photo.file};
 const source=[item.name,item.en,item.category,item.code].filter(Boolean).join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
 const rules=[
 {id:'prospecto',match:/prospect/},
@@ -276,7 +285,7 @@ function catalogReferencePrice(item){
 }
 function renderConceptCard(item,category){
  const name=localized(item.name,item.en),visual=getCatalogVisual({...item,category:category.id});
- return '<article class="tusne-concept catalog-product"><button class="catalog-product-link" type="button" data-concept-detail="'+esc(item.id)+'" aria-haspopup="dialog" aria-label="'+esc(localized('Ver detalles de ','View details for ')+name)+'"><span class="catalog-product-image"><img src="'+esc(visual.src)+'" alt="" loading="lazy" decoding="async"></span><span class="catalog-product-copy"><span class="catalog-product-name">'+esc(name)+'</span><span class="catalog-product-price">'+esc(item.price)+'</span></span></button></article>';
+ return '<article class="tusne-concept catalog-product"><button class="catalog-product-link" type="button" data-concept-detail="'+esc(item.id)+'" aria-haspopup="dialog" aria-label="'+esc(localized('Ver detalles de ','View details for ')+name)+'"><span class="catalog-product-image'+(visual.photo?' catalog-product-photo':'')+'"><img src="'+esc(visual.src)+'" alt="" loading="lazy" decoding="async"></span><span class="catalog-product-copy"><span class="catalog-product-name">'+esc(name)+'</span><span class="catalog-product-price">'+esc(item.price)+'</span></span></button></article>';
 }
 const normalizeCatalogSearch=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
 function matchesCatalogSearch(item,query){const category=categoryById(item.category);const searchable=normalizeCatalogSearch([item.name,item.en,item.code||item.id,item.description,item.descriptionEn,category?.name,category?.en].join(' '));return normalizeCatalogSearch(query).split(/\s+/).filter(Boolean).every(word=>searchable.includes(word))}
@@ -692,4 +701,5 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
