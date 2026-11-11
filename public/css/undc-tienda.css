@@ -1487,8 +1487,8 @@ body.light-mode .catalog-product-price { color: #161d25; }
 .market-hero-slides { max-width: 720px; }
 .hero.market-hero [data-hero-slide] h1, .hero.market-hero [data-hero-slide] h2 { color: #fff; font-size: calc(clamp(36px, 4.1vw, 66px) * var(--a11y-text-scale, 1)); line-height: 1.12; letter-spacing: -.035em; margin: 0 0 22px; font-weight: 700; overflow-wrap: break-word; }
 .hero.market-hero article > p { color: #fff; font-size: calc(clamp(17px, 1.6vw, 23px) * var(--a11y-text-scale, 1)); line-height: 1.5; max-width: 580px; margin: 0 0 32px; }
-.market-hero-cta { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 26px; min-height: 52px; max-width: 100%; border-radius: 4px; background: #0071fe; color: #fff; font-weight: 650; font-size: calc(18px * var(--a11y-text-scale, 1)); }
-.market-hero-cta:hover { background: #0059ce; }
+.market-hero-cta { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 26px; min-height: 52px; max-width: 100%; border-radius: 4px; background: var(--market-brand-blue); color: #fff; font-weight: 650; font-size: calc(18px * var(--a11y-text-scale, 1)); }
+.market-hero-cta:hover { background: var(--market-brand-blue); }
 .market-hero-cta span { font-size: 28px; line-height: 1; }
 .market-hero-controls { position: absolute; bottom: 30px; inset-inline: clamp(24px, 4vw, 80px); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .market-hero-controls[hidden], .market-hero [hidden] { display: none; }
@@ -1563,9 +1563,13 @@ body .market-hero-cta:hover {
   background: var(--market-brand-blue);
   border-color: var(--market-brand-blue);
   color: #fff;
-  filter: brightness(.92);
+  filter: none;
 }
 body .site-header :is(.login-button, .mobile-login, .catalog-search-toggle) svg { color: inherit; stroke: currentColor; }
 @media (max-width: 760px) {
   body .site-header .login-button { padding-inline: 12px; gap: 8px; }
 }
+
+/* Conservar el azul exacto también cuando el puntero está sobre el botón. */
+body .market-hero-cta,
+body .site-header .login-button { background-image: none; filter: none; opacity: 1; }
