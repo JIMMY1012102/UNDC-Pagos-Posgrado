@@ -15,7 +15,8 @@ class StorefrontUiTest extends TestCase
             ->assertSee('Servicios administrativos')
             ->assertSee('Carrito')
             ->assertSee('Tus trámites, mucho más cerca de ti.')
-            ->assertSee('Nuestros trámites')
+            ->assertDontSee('id="tusneTitle"', false)
+            ->assertSee('aria-labelledby="catalogResultsTitle"', false)
             ->assertSee('css/undc-tienda.css')
             ->assertSee('js/undc-tienda.js');
 

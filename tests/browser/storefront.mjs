@@ -25,8 +25,9 @@ async function scenario(viewport, name) {
     } }));
     const catalog = await page.goto(origin + '/tienda', { waitUntil: 'domcontentloaded' });
     assert.equal(catalog?.status(), 200, 'El catálogo debe responder HTTP 200');
-    await page.locator('#tusneTitle').waitFor();
-    assert.match(await page.locator('#tusneTitle').innerText(), /Nuestros trámites/);
+    await page.locator('#catalogResultsTitle').waitFor();
+    assert.equal(await page.locator('#tusneTitle').count(), 0, 'El título Nuestros trámites se eliminó del catálogo');
+    assert.equal(await page.locator('#tusneCatalog').getAttribute('aria-labelledby'), 'catalogResultsTitle');
     assert.equal(await page.locator('link[href*="css/undc-tienda.css"]').count(), 1);
     assert.equal(await page.locator('script[src*="js/undc-tienda.js"]').count(), 1);
 
