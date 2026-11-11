@@ -31,6 +31,17 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('link[href*="css/undc-tienda.css"]').count(), 1);
     assert.equal(await page.locator('script[src*="js/undc-tienda.js"]').count(), 1);
 
+    const floatingA11y = page.locator('#accessibilityFloatingButton');
+    await floatingA11y.waitFor();
+    const a11yBox = await floatingA11y.boundingBox();
+    assert.ok(a11yBox.x > viewport.width - 90 && a11yBox.y > viewport.height - 90, 'Accesibilidad debe estar fija abajo a la derecha');
+    assert.equal(await page.locator('.utility-controls [data-accessibility-toggle]').count(), 0);
+    await floatingA11y.click();
+    assert.equal(await page.locator('#accessibilityPanel').isVisible(), true);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#accessibilityPanel').isVisible(), false);
+    assert.equal(await floatingA11y.evaluate(el => el === document.activeElement), true);
+
     const hero = page.locator('[data-market-carousel]');
     await hero.locator('[data-hero-next]').waitFor();
     assert.equal(await hero.locator('[data-hero-pause]').getAttribute('aria-pressed'), 'true', 'Respetar movimiento reducido');

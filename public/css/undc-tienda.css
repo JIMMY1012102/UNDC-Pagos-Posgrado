@@ -1575,3 +1575,24 @@ body .site-header :is(.login-button, .mobile-login, .catalog-search-toggle) svg 
 body .market-hero-cta,
 body .site-header .login-button { background-image: none; filter: none; opacity: 1; }
 
+
+/* Acceso de accesibilidad permanente, fuera de la cabecera. */
+.accessibility-floating {
+  position: fixed; right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom)); z-index: 111;
+  width: 48px; height: 48px; display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 50%;
+  background: #176fff; color: #fff; cursor: pointer;
+}
+.accessibility-floating svg { display: block; width: 42px; height: 42px; }
+.accessibility-floating:hover { background: #095ce6; }
+.accessibility-floating:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px #123a61; }
+body .accessibility-panel {
+  top: auto; right: max(20px, env(safe-area-inset-right));
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 108px - env(safe-area-inset-bottom));
+}
+@media (max-width: 640px) {
+  .accessibility-floating { right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); }
+  body .accessibility-panel { right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 92px - env(safe-area-inset-bottom)); }
+}
