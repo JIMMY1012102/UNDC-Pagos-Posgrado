@@ -1520,3 +1520,25 @@ body[data-market-page="catalog"] .login-button { border-radius: 4px; }
   .market-hero-controls { padding-inline: 12px; }
   .market-hero-pagination button { width: 28px; min-width: 28px; }
 }
+
+/* Submenú continuo: misma línea de borde a borde, sin tarjeta flotante. */
+.site-header .subheader { padding-inline: 0; }
+.site-header .nav.posgrado-nav {
+  width: 100%; max-width: none; margin: 0; border: 0; border-radius: 0;
+  padding: 8px clamp(16px, 3vw, 60px); box-shadow: none;
+  gap: 12px 24px;
+}
+.site-header .posgrado-nav .posgrado-links { align-items: stretch; justify-content: space-between; }
+.site-header .posgrado-nav .posgrado-links a { font-size: calc(clamp(15px, 1.03vw, 17px) * var(--a11y-text-scale, 1)); }
+.site-header .catalog-search-toggle {
+  border: 0; border-radius: 5px; background: #0065ce; color: #fff;
+}
+.site-header .catalog-search-toggle:hover,
+.site-header .catalog-search-toggle[aria-expanded="true"] { background: #004caa; color: #fff; }
+body.light-mode .site-header .subheader { background: #fff; }
+body.light-mode .site-header .nav.posgrado-nav { box-shadow: none; }
+@media (max-width: 1199px) {
+  .site-header .nav.posgrado-nav { padding-inline: 16px; gap: 10px; }
+  .site-header .posgrado-nav .posgrado-links { justify-content: flex-start; gap: 20px; }
+  .site-header .posgrado-nav .posgrado-links a { font-size: calc(14px * var(--a11y-text-scale, 1)); }
+}
