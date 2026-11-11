@@ -38,6 +38,12 @@ async function scenario(viewport, name) {
     await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
     await page.locator('.posgrado-links [data-category-nav="servicios_administrativos"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
+    await page.waitForFunction(() => {
+      const header = document.querySelector('.site-header').getBoundingClientRect();
+      const results = document.querySelector('.catalog-results-heading').getBoundingClientRect();
+      return Math.abs(results.top - header.bottom - 12) < 3;
+    });
+
     assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
     await page.locator('.posgrado-links [data-category-nav="tesis_grados"]').click();
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
@@ -81,6 +87,12 @@ async function scenario(viewport, name) {
     assert.ok(Math.abs((searchBox.y + searchBox.height / 2) - (linksBox.y + linksBox.height / 2)) < 3,
       'La lupa y las categorías deben compartir la fila con texto ampliado');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
+    await page.locator('.posgrado-links [data-category-nav="admision"]').click();
+    await page.waitForFunction(() => Math.abs(
+      document.querySelector('.catalog-results-heading').getBoundingClientRect().top -
+      document.querySelector('.site-header').getBoundingClientRect().bottom - 12
+    ) < 3);
+
     await page.evaluate(() => {
       document.documentElement.removeAttribute('data-accessibility-text');
       document.documentElement.style.removeProperty('--a11y-text-scale');
