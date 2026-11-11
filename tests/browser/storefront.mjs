@@ -62,6 +62,7 @@ async function scenario(viewport, name) {
     await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
     await page.locator('.posgrado-links [data-category-nav="servicios_administrativos"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
+    assert.equal(await hero.isVisible(), false, 'Las categorías no deben mostrar el carrusel');
     await page.waitForFunction(() => {
       const header = document.querySelector('.site-header').getBoundingClientRect();
       const results = document.querySelector('.catalog-results-heading').getBoundingClientRect();
@@ -73,6 +74,7 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await page.locator('.posgrado-links [data-category-nav="all"]').click();
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    assert.equal(await hero.isVisible(), true, 'Para ti debe recuperar el carrusel');
     assert.equal(await page.locator('#catalogFilters, [data-category-filter]').count(), 0, 'Solo debe existir el menú superior de categorías');
     const product = page.locator('.catalog-product').first();
     assert.equal(await product.locator('img').count(), 1);
