@@ -19,7 +19,7 @@ async function scenario(viewport, name) {
       await page.locator('#mobileDrawer [data-category-nav="' + category + '"]').click();
       assert.equal(await page.locator('#mobileDrawer').isVisible(), false);
     } else {
-      await selectCategory('' + category + '');
+      await page.locator(`.posgrado-links [data-category-nav="${category}"]`).click();
     }
   }
 
