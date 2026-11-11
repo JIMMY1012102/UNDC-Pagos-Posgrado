@@ -1599,3 +1599,9 @@ body .accessibility-panel {
 
 /* La selección de categoría oculta el carrusel incluso si usa display:flex. */
 .hero[data-main-view][hidden] { display: none !important; }
+
+/* En móvil, las categorías se consultan solo desde el menú hamburguesa. */
+@media (max-width: 940px) {
+  .site-header .subheader,
+  .site-header .subheader.is-open { display: none; }
+}

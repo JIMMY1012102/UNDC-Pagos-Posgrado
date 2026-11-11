@@ -12,6 +12,17 @@ async function scenario(viewport, name) {
   const exceptions = [];
   page.on('pageerror', (error) => exceptions.push(error.message));
 
+  const mobile = viewport.width <= 940;
+  async function selectCategory(category) {
+    if (mobile) {
+      await page.locator('#headerMenuButton').click();
+      await page.locator('#mobileDrawer [data-category-nav="' + category + '"]').click();
+      assert.equal(await page.locator('#mobileDrawer').isVisible(), false);
+    } else {
+      await page.locator(`.posgrado-links [data-category-nav="${category}"]`).click();
+    }
+  }
+
   try {
     // Deterministic publications keep navigation checks independent of DB setup.
     await page.route('**/api/v1/tienda/catalogo/oficinas', route => route.fulfill({ json: {
@@ -60,7 +71,7 @@ async function scenario(viewport, name) {
       'Certificados y constancias', 'Tesis y grados', 'Servicios administrativos',
     ]);
     await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
-    await page.locator('.posgrado-links [data-category-nav="servicios_administrativos"]').click();
+    await selectCategory('servicios_administrativos');
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
     assert.equal(await hero.isVisible(), false, 'Las categorías no deben mostrar el carrusel');
     await page.waitForFunction(() => {
@@ -70,9 +81,9 @@ async function scenario(viewport, name) {
     });
 
     assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
-    await page.locator('.posgrado-links [data-category-nav="tesis_grados"]').click();
+    await selectCategory('tesis_grados');
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
-    await page.locator('.posgrado-links [data-category-nav="all"]').click();
+    await selectCategory('all');
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
     assert.equal(await hero.isVisible(), true, 'Para ti debe recuperar el carrusel');
     assert.equal(await page.locator('#catalogFilters, [data-category-filter]').count(), 0, 'Solo debe existir el menú superior de categorías');
@@ -102,6 +113,7 @@ async function scenario(viewport, name) {
       assert.equal(menu.fits, true, 'Las siete opciones deben caber al 100% sin desplazamiento');
       assert.ok(menu.tops.every(top => Math.abs(top - menu.tops[0]) < 2), 'Las siete opciones deben compartir fila');
     }
+    if (!mobile) {
     const submenu = await page.locator('.nav.posgrado-nav').boundingBox();
     assert.ok(Math.abs(submenu.x) < 1 && Math.abs(submenu.width - viewport.width) < 2,
       'El submenú debe cubrir el ancho completo sin márgenes laterales');
@@ -122,7 +134,7 @@ async function scenario(viewport, name) {
     assert.ok(Math.abs((searchBox.y + searchBox.height / 2) - (linksBox.y + linksBox.height / 2)) < 3,
       'La lupa y las categorías deben compartir la fila con texto ampliado');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
-    await page.locator('.posgrado-links [data-category-nav="admision"]').click();
+    await selectCategory('admision');
     await page.waitForFunction(() => Math.abs(
       document.querySelector('.catalog-results-heading').getBoundingClientRect().top -
       document.querySelector('.site-header').getBoundingClientRect().bottom - 12
@@ -145,6 +157,13 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#catalogSearchToggle').evaluate(el => document.activeElement === el), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
       'El catálogo y sus siete enlaces no deben desbordar la pantalla');
+
+    } else {
+      assert.equal(await page.locator('#headerNavPanel').isVisible(), false,
+        'En móvil no debe aparecer el submenú duplicado');
+      await selectCategory('admision');
+      assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
+    }
 
     const cart = await page.goto(origin + '/tienda/carrito', { waitUntil: 'domcontentloaded' });
     assert.equal(cart?.status(), 200, 'El carrito debe responder HTTP 200');
