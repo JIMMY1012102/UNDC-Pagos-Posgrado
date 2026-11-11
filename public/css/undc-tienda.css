@@ -1,4 +1,5 @@
 :root {
+  --market-social-rail-width: 40px;
   color-scheme: dark;
   font-family: Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -33,6 +34,33 @@
   --header-shadow: 0 10px 28px rgb(0 9 24 / 28%);
   color: var(--undc-text);
   background: var(--undc-bg);
+}
+
+/* Franja institucional: reserva su espacio y conserva el azul de MARKET. */
+.market-social-rail {
+  position: fixed; inset: 0 auto 0 0; z-index: 25;
+  width: var(--market-social-rail-width); height: 100dvh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding-block: 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--market-brand-blue); color: #fff;
+  overflow-y: auto; scrollbar-width: none;
+}
+.market-social-links { display: flex; flex-direction: column; flex: 0 0 auto; }
+.market-social-rail a {
+  width: 100%; min-height: 44px; display: grid; place-items: center;
+  color: #fff; background: transparent; transition: background 160ms ease;
+}
+.market-social-rail svg { width: 18px; height: 18px; display: block; }
+.market-social-rail a:hover { background: rgb(0 0 0 / 16%); }
+.market-social-rail a:focus-visible { outline: 2px solid #fff; outline-offset: -4px; background: rgb(0 0 0 / 20%); }
+@media (min-width: 941px) {
+  body.market-with-social-rail { padding-left: var(--market-social-rail-width); }
+}
+@media (max-width: 940px) {
+  .market-social-rail { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .market-social-rail a { transition: none; }
 }
 
 * { box-sizing: border-box; }
@@ -1605,3 +1633,4 @@ body .accessibility-panel {
   .site-header .subheader,
   .site-header .subheader.is-open { display: none; }
 }
+
