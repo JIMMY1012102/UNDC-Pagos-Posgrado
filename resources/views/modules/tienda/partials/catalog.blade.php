@@ -1,5 +1,4 @@
-<section class="tusne-catalog" id="tusneCatalog" aria-labelledby="tusneTitle">
-<div class="tusne-heading"><div><h2 id="tusneTitle">Nuestros trámites</h2></div></div>
+<section class="tusne-catalog" id="tusneCatalog" aria-labelledby="catalogResultsTitle">
 <div class="catalog-office" id="catalogOfficeControls" hidden><label for="catalogOffice">Oficina responsable</label> <select id="catalogOffice" disabled><option value="">Cargando oficinas…</option></select></div>
 <button class="detail-button" id="catalogRetry" type="button" hidden>Reintentar</button>
 <p id="catalogStatus" role="status" aria-live="polite">Cargando catálogo…</p>
