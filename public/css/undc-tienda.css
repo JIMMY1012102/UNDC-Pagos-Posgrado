@@ -10,6 +10,7 @@
   --undc-card-hover: #0d2f52;
   --undc-card-border: #07518f;
   --undc-pill: #042749;
+  --market-brand-blue: #0877d1;
   --undc-primary: #0071fe;
   --undc-primary-deep: #0066ed;
   --undc-title-blue: #0c92fd;
@@ -50,7 +51,7 @@ a { color: inherit; text-decoration: none; }
 .brand-copy { min-width: 0; display: block; }
 .brand-title { display: block; color: var(--header-text); font-size: calc(38px * var(--a11y-text-scale, 1)); font-weight: 700; line-height: 1.05; letter-spacing: -.035em; white-space: nowrap; }
 .brand-title b { font-weight: 700; }
-.brand-title em { color: #0877d1; font-style: normal; }
+.brand-title em { color: var(--market-brand-blue); font-style: normal; }
 .brand-subtitle { display: block; margin-top: 5px; color: var(--header-muted); font-size: calc(16px * var(--a11y-text-scale, 1)); font-weight: 400; white-space: nowrap; }
 .utility-controls { min-width: 0; display: flex; align-items: center; justify-content: flex-end; margin-left: auto; }
 .utility-control { min-height: 42px; display: inline-flex; align-items: center; gap: 9px; border: 0; background: transparent; color: var(--header-muted); padding: 0 24px; font-size: calc(14px * var(--a11y-text-scale, 1)); white-space: nowrap; }
@@ -1541,4 +1542,30 @@ body.light-mode .site-header .nav.posgrado-nav { box-shadow: none; }
   .site-header .nav.posgrado-nav { padding-inline: 16px; gap: 10px; }
   .site-header .posgrado-nav .posgrado-links { justify-content: flex-start; gap: 20px; }
   .site-header .posgrado-nav .posgrado-links a { font-size: calc(14px * var(--a11y-text-scale, 1)); }
+}
+
+/* Identidad institucional: azul de MARKET en los botones principales. */
+body .site-header .login-button,
+body .site-header .mobile-login,
+body .site-header .catalog-search-toggle,
+body .market-hero-cta {
+  background: var(--market-brand-blue);
+  border-color: var(--market-brand-blue);
+  border-radius: 4px;
+  color: #fff;
+}
+body .site-header .login-button { font-weight: 650; padding-inline: 26px; gap: 14px; }
+body .site-header .login-button:hover,
+body .site-header .mobile-login:hover,
+body .site-header .catalog-search-toggle:hover,
+body .site-header .catalog-search-toggle[aria-expanded="true"],
+body .market-hero-cta:hover {
+  background: var(--market-brand-blue);
+  border-color: var(--market-brand-blue);
+  color: #fff;
+  filter: brightness(.92);
+}
+body .site-header :is(.login-button, .mobile-login, .catalog-search-toggle) svg { color: inherit; stroke: currentColor; }
+@media (max-width: 760px) {
+  body .site-header .login-button { padding-inline: 12px; gap: 8px; }
 }
