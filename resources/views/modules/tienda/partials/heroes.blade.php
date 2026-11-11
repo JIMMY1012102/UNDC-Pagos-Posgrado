@@ -1,5 +1,5 @@
 <section class="hero market-hero" data-main-view="procedures" data-market-carousel role="region" aria-roledescription="carrusel" aria-label="Destacados de Posgrado">
-    <img class="market-hero-photo" src="{{ asset('assets/hero-undc/posgrado-campus.webp') }}" alt="Comunidad de Posgrado frente al campus de la Universidad Nacional de Cañete" width="1672" height="940" fetchpriority="high">
+    <img class="market-hero-photo" src="{{ asset('assets/hero-undc/posgrado-comunidad.webp') }}" alt="Comunidad de Posgrado frente al campus de la Universidad Nacional de Cañete" width="1672" height="941" fetchpriority="high">
     <div class="market-hero-shade" aria-hidden="true"></div>
     <div class="market-hero-content">
         <p class="market-hero-eyebrow">POSGRADO · UNDC</p>
