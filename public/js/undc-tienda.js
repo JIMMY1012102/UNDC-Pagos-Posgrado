@@ -251,7 +251,14 @@ const photos=[
 {id:'recargo-matricula-maestria',match:/^recargo por matricula extemporane[ao] (?:de )?maestria$/,file:'recargo-matricula-maestria.webp'},
 {id:'convalidacion-asignatura',match:/^convalidacion de asignatura(?:\s*\(por asignatura\))?$/,file:'convalidacion-asignatura.webp'},
 {id:'traslado-externo-posgrado',match:/^traslado externo de posgrado$/,file:'traslado-externo-posgrado.webp'},
-{id:'traslado-interno-posgrado',match:/^traslado interno de posgrado$/,file:'traslado-interno-posgrado.webp'}
+{id:'traslado-interno-posgrado',match:/^traslado interno de posgrado$/,file:'traslado-interno-posgrado.webp'},
+{id:'certificado-estudios-doctorado',match:/^certificado de estudios (?:de )?doctorado$/,file:'certificado-estudios-doctorado.webp'},
+{id:'certificado-estudios-maestria',match:/^certificado de estudios (?:de )?maestria$/,file:'certificado-estudios-maestria.webp'},
+{id:'constancia-egresado-posgrado',match:/^constancia de egresado de posgrado$/,file:'constancia-egresado-posgrado.webp'},
+{id:'constancia-estudios-posgrado',match:/^constancia de estudios de posgrado$/,file:'constancia-estudios-posgrado.webp'},
+{id:'constancia-ingreso-posgrado',match:/^constancia de ingreso de posgrado$/,file:'constancia-ingreso-posgrado.webp'},
+{id:'constancia-no-adeudo-posgrado',match:/^constancia de no adeudo de la escuela de posgrado$/,file:'constancia-no-adeudo-posgrado.webp'},
+{id:'constancia-similitud-posgrado',match:/^constancia de similitud de posgrado(?:\s*\(turnitin\))?$/,file:'constancia-similitud-posgrado.webp'}
 ];
 const photo=photos.find(visual=>visual.match.test(name));
 if(photo)return {id:photo.id,photo:true,src:'/assets/catalogo/fotografias/'+photo.file};
@@ -707,6 +714,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
 
 
