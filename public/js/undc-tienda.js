@@ -264,7 +264,9 @@ const photos=[
 {id:'grado-academico-doctor',match:/^otorgamiento de grado academico de doctor$/,file:'grado-academico-doctor.webp'},
 {id:'grado-academico-maestro',match:/^otorgamiento de grado academico de maestro$/,file:'grado-academico-maestro.webp'},
 {id:'carne-biblioteca-posgrado',match:/^carne de biblioteca de posgrado$/,file:'carne-biblioteca-posgrado.webp'},
-{id:'derecho-tramite-administrativo',match:/^derecho de tramite administrativo$/,file:'derecho-tramite-administrativo.webp'}
+{id:'derecho-tramite-administrativo',match:/^derecho de tramite administrativo$/,file:'derecho-tramite-administrativo.webp'},
+{id:'inscripcion-examen-admision-posgrado',match:/^derecho de inscripcion al examen de admision de posgrado$/,file:'inscripcion-examen-admision-posgrado.webp'},
+{id:'prospecto-admision-posgrado',match:/^prospecto de admision de posgrado$/,file:'prospecto-admision-posgrado.webp'}
 ];
 const photo=photos.find(visual=>visual.match.test(name));
 if(photo)return {id:photo.id,photo:true,src:'/assets/catalogo/fotografias/'+photo.file};
@@ -720,6 +722,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
 
 
