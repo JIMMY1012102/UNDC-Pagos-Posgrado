@@ -1596,3 +1596,6 @@ body .accessibility-panel {
   .accessibility-floating { right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); }
   body .accessibility-panel { right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 92px - env(safe-area-inset-bottom)); }
 }
+
+/* La selección de categoría oculta el carrusel incluso si usa display:flex. */
+.hero[data-main-view][hidden] { display: none !important; }
