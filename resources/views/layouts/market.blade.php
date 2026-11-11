@@ -16,5 +16,6 @@
 <footer class="footer">Universidad Nacional de Cañete · Oficina de Tecnologías de la Información · Versión de desarrollo de la tienda de Posgrado</footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="{{ asset('js/undc-tienda.js') }}?v={{ filemtime(public_path('js/undc-tienda.js')) }}" defer></script>
+<script src="{{ asset('js/undc-hero.js') }}?v={{ filemtime(public_path('js/undc-hero.js')) }}" defer></script>
 </body></html>
 

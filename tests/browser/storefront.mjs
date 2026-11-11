@@ -31,6 +31,19 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('link[href*="css/undc-tienda.css"]').count(), 1);
     assert.equal(await page.locator('script[src*="js/undc-tienda.js"]').count(), 1);
 
+    const hero = page.locator('[data-market-carousel]');
+    await hero.locator('[data-hero-next]').waitFor();
+    assert.equal(await hero.locator('[data-hero-pause]').getAttribute('aria-pressed'), 'true', 'Respetar movimiento reducido');
+    await hero.locator('[data-hero-next]').click();
+    assert.equal(await hero.locator('[data-hero-count]').innerText(), '02 / 03');
+    assert.equal(await hero.locator('[data-hero-slide]:not([hidden])').count(), 1);
+    await hero.locator('[data-hero-prev]').click();
+    assert.equal(await hero.locator('[data-hero-count]').innerText(), '01 / 03');
+    const photo = hero.locator('.market-hero-photo');
+    await photo.evaluate(img => img.decode());
+    const photoInfo = await photo.evaluate(img => ({ width: img.clientWidth, height: img.clientHeight, ratio: img.naturalWidth / img.naturalHeight }));
+    if (viewport.width <= 900) assert.ok(Math.abs(photoInfo.width / photoInfo.height - photoInfo.ratio) < .02, 'Foto móvil completa sin deformación');
+
     assert.deepEqual(await page.locator('.posgrado-links a').allTextContents(), [
       'Para ti', 'Admisión', 'Matrícula y pensiones', 'Trámites académicos',
       'Certificados y constancias', 'Tesis y grados', 'Servicios administrativos',

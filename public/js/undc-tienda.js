@@ -5,6 +5,20 @@ const marketRoutes={catalog:'/tienda',cart:'/tienda/carrito',login:'/tienda/logi
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:marketPage,authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
+"Tus metas avanzan.":"Your goals move forward.",
+"Tus trámites también.":"So do your procedures.",
+"Descubre novedades y realiza tus pagos académicos en un solo lugar.":"Discover updates and make your academic payments in one place.",
+"Explorar trámites":"Explore services",
+"Continúa tu camino.":"Continue your journey.",
+"Organiza tus trámites.":"Organize your procedures.",
+"Consulta los conceptos de matrícula y pensiones de Posgrado.":"Browse postgraduate enrollment and tuition services.",
+"Cada logro cuenta.":"Every achievement matters.",
+"Da el siguiente paso.":"Take the next step.",
+"Encuentra los conceptos de certificados y constancias en nuestro catálogo.":"Find certificates and attestations in our catalog.",
+"Anterior diapositiva":"Previous slide",
+"Siguiente diapositiva":"Next slide",
+"Pausar carrusel":"Pause carousel",
+"Reanudar carrusel":"Resume carousel",
 "Estándar":"Standard","Cálido":"Warm","Azul oscuro":"Dark blue","Alto contraste":"High contrast","Invertido":"Inverted","Pausar":"Pause","Reanudar":"Resume","Restablecer ajustes":"Reset settings",
 
 "Volver a la tienda":"Back to the store",
