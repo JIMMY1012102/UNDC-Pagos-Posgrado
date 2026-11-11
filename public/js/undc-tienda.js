@@ -248,7 +248,10 @@ const photos=[
 {id:'pension-mensual-doctorado',match:/^pension de ensenanza mensual (?:de )?doctorado$/,file:'pension-mensual-doctorado.webp'},
 {id:'pension-mensual-maestria',match:/^pension de ensenanza mensual (?:de )?maestria$/,file:'pension-mensual-maestria.webp'},
 {id:'recargo-matricula-doctorado',match:/^recargo por matricula extemporane[ao] (?:de )?doctorado$/,file:'recargo-matricula-doctorado.webp'},
-{id:'recargo-matricula-maestria',match:/^recargo por matricula extemporane[ao] (?:de )?maestria$/,file:'recargo-matricula-maestria.webp'}
+{id:'recargo-matricula-maestria',match:/^recargo por matricula extemporane[ao] (?:de )?maestria$/,file:'recargo-matricula-maestria.webp'},
+{id:'convalidacion-asignatura',match:/^convalidacion de asignatura(?:\s*\(por asignatura\))?$/,file:'convalidacion-asignatura.webp'},
+{id:'traslado-externo-posgrado',match:/^traslado externo de posgrado$/,file:'traslado-externo-posgrado.webp'},
+{id:'traslado-interno-posgrado',match:/^traslado interno de posgrado$/,file:'traslado-interno-posgrado.webp'}
 ];
 const photo=photos.find(visual=>visual.match.test(name));
 if(photo)return {id:photo.id,photo:true,src:'/assets/catalogo/fotografias/'+photo.file};
@@ -704,6 +707,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
 
 
