@@ -236,3 +236,21 @@ test('the top navigation is the only category menu and filtering still renders p
  app.context.marketTest.selectCatalogCategory('all');
  assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
 });
+
+
+test('category title is positioned below the measured sticky header',async()=>{
+ const app=await boot('catalog'),scrolled=[];
+ app.context.window.innerHeight=768;
+ app.context.window.scrollY=200;
+ app.context.window.scrollTo=options=>scrolled.push(options);
+ app.context.window.matchMedia=()=>({matches:true});
+ const query=app.context.document.querySelector;
+ app.context.document.querySelector=s=>s==='.catalog-results-heading'?{getBoundingClientRect:()=>({top:500})}:s==='.site-header'?{getBoundingClientRect:()=>({height:144})}:query(s);
+ app.context.marketTest.selectCatalogCategory('matricula_pensiones');
+ assert.equal(scrolled.at(-1).top,544);
+ assert.equal(scrolled.at(-1).behavior,'instant');
+ assert.equal(app.ids.get('tusneCatalog').style.minHeight,'612px');
+ app.context.marketTest.selectCatalogCategory('all');
+ assert.equal(scrolled.at(-1).top,0);
+ assert.equal(app.ids.get('tusneCatalog').style.minHeight,'');
+});

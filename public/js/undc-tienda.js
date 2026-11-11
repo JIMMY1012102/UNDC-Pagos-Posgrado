@@ -305,13 +305,28 @@ function updateCategoryNavigation(){
   if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
  });
 }
+function scrollCatalogBelowHeader(){
+ const results=document.querySelector('.catalog-results-heading'),catalog=$('tusneCatalog');
+ if(!results||!catalog)return;
+ const headerHeight=document.querySelector('.site-header')?.getBoundingClientRect().height||0;
+ const gap=12;
+ // Deja recorrido suficiente incluso cuando la categoría tiene una sola tarjeta.
+ catalog.style.minHeight=Math.max(0,window.innerHeight-headerHeight-gap)+'px';
+ const top=window.scrollY+results.getBoundingClientRect().top-headerHeight-gap;
+ const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ window.scrollTo({top:Math.max(0,top),behavior:reducedMotion?'instant':'smooth'});
+}
 function selectCatalogCategory(category,reveal=true){
  category=normalizarCategoria(category);
  if(category!=='all'&&!tusneCategories.some(item=>item.id===category))return;
  if(marketPage!=='catalog'){window.location.assign('/tienda?category='+encodeURIComponent(category));return}
  tusneCategory=category;if($('search'))$('search').value='';closeSearchSuggestions();
  setMainView(category==='all'?'procedures':'catalogs');renderTusneCatalog();
- if(reveal){if(category==='all')window.scrollTo({top:0,behavior:'smooth'});else $('tusneCatalog')?.scrollIntoView({behavior:'smooth',block:'start'})}
+ if(reveal){
+  if(category==='all'){if($('tusneCatalog'))$('tusneCatalog').style.minHeight='';window.scrollTo({top:0,behavior:'smooth'})}
+  else if(window.requestAnimationFrame)window.requestAnimationFrame(scrollCatalogBelowHeader);
+  else scrollCatalogBelowHeader();
+ }
 }
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0);$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
@@ -663,7 +678,7 @@ document.querySelectorAll('[data-login-trigger]').forEach(link=>link.addEventLis
  event.preventDefault();closeHeaderMenu();screen('login');$('marketLoginTitle')?.focus({preventScroll:true});
 }));
 $('marketLoginGoogle')?.addEventListener('click',()=>{if(cartHasConcepts())sessionStorage.setItem('undc_resume_purchase','1')});
-document.querySelectorAll('[data-category-nav]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();selectCatalogCategory(link.dataset.categoryNav);closeHeaderMenu()}));
+document.querySelectorAll('[data-category-nav]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();closeHeaderMenu();selectCatalogCategory(link.dataset.categoryNav)}));
 const requestedCategory=new URLSearchParams(window.location.search).get('category');
 if(requestedCategory)selectCatalogCategory(requestedCategory,false);
 const requestedView=new URLSearchParams(window.location.search).get('view');

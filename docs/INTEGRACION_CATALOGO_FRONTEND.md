@@ -86,3 +86,5 @@ La API entrega `reference_amount` desde el costo del concepto para presentación
 
 
 La navegación de categorías se presenta solo en el menú superior (y su versión móvil). Se elimina la fila duplicada de botones redondeados debajo del menú. Se mantienen el título de resultados, el contador, la búsqueda y el filtrado por categoría. Para ti restablece todos los conceptos.
+
+Al elegir una categoría, el encabezado de resultados queda 12 px por debajo del menú fijo. El desplazamiento mide la altura real del encabezado después de cerrar el menú móvil, incluyendo texto ampliado. Se reserva la altura necesaria en categorías cortas para permitir esa alineación. Para ti restablece la portada y libera esa altura mínima.
