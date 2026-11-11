@@ -89,6 +89,15 @@ async function scenario(viewport, name) {
       assert.equal(menu.fits, true, 'Las siete opciones deben caber al 100% sin desplazamiento');
       assert.ok(menu.tops.every(top => Math.abs(top - menu.tops[0]) < 2), 'Las siete opciones deben compartir fila');
     }
+    const submenu = await page.locator('.nav.posgrado-nav').boundingBox();
+    assert.ok(Math.abs(submenu.x) < 1 && Math.abs(submenu.width - viewport.width) < 2,
+      'El submenú debe cubrir el ancho completo sin márgenes laterales');
+    const searchStyle = await page.locator('#catalogSearchToggle').evaluate(el => ({
+      radius: parseFloat(getComputedStyle(el).borderRadius),
+      color: getComputedStyle(el).color,
+    }));
+    assert.ok(searchStyle.radius <= 5, 'La lupa debe ser un botón cuadrado con esquinas suaves');
+    assert.equal(searchStyle.color, 'rgb(255, 255, 255)');
     // Enlarged accessibility text must not move the magnifier below the categories.
     await page.evaluate(() => {
       document.documentElement.setAttribute('data-accessibility-text', '');
