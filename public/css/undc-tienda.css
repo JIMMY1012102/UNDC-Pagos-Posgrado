@@ -1461,6 +1461,7 @@ html[data-accessibility-text] .posgrado-nav > .posgrado-links a { flex: 0 0 auto
 .catalog-product-link:focus-visible { outline: 3px solid #0784f8; outline-offset: -3px; }
 .catalog-product-image { width: 100%; aspect-ratio: 2 / 1; display: block; overflow: hidden; background: #eef4f8; }
 .catalog-product-image img { width: 100%; height: 100%; display: block; padding: 12px; object-fit: contain; }
+.catalog-product-image.catalog-product-photo img { padding: 0; object-fit: contain; }
 .catalog-product-copy { width: 100%; flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; }
 .catalog-product-name { display: block; color: #f4f8fc; font-size: calc(16px * var(--a11y-text-scale, 1)); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
 .catalog-product-price { display: block; margin-top: auto; color: #f4f8fc; font-size: calc(16px * var(--a11y-text-scale, 1)); font-weight: 450; line-height: 1.5; }
@@ -1573,3 +1574,4 @@ body .site-header :is(.login-button, .mobile-login, .catalog-search-toggle) svg 
 /* Conservar el azul exacto también cuando el puntero está sobre el botón. */
 body .market-hero-cta,
 body .site-header .login-button { background-image: none; filter: none; opacity: 1; }
+
