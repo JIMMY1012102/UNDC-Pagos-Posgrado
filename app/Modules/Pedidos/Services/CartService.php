@@ -3,6 +3,7 @@
 namespace App\Modules\Pedidos\Services;
 
 use App\Modules\Catalogo\Contracts\CatalogItemLookup;
+use App\Modules\Catalogo\Services\CatalogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -11,7 +12,7 @@ final class CartService
 {
     private const MAX_QUANTITY = 20;
 
-    public function __construct(private readonly CatalogItemLookup $catalog) {}
+    public function __construct(private readonly CatalogItemLookup $catalog, private readonly CatalogService $references) {}
 
 
     /**
@@ -170,6 +171,13 @@ final class CartService
                 'slug' => (string) $item->slug,
                 'quantity' => (int) $item->quantity,
             ])->all();
+
+        if ($lines !== []) {
+            $references = $this->references->referencesFor(array_column($lines, 'catalog_item_id'));
+            $lines = array_map(static fn (array $line): array => $line + (
+                $references->get($line['catalog_item_id']) ?? ['name' => null, 'reference_amount' => null]
+            ), $lines);
+        }
 
         return [
             'id' => $id,

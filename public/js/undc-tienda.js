@@ -369,7 +369,17 @@ function renderCart(){
  document.querySelector('.page-grid').classList.toggle('cart-has-items',!cartIsEmpty);
  $('cartListHeading').hidden=cartIsEmpty;$('cartEstimateRow').hidden=cartIsEmpty;
  $('cartPurchaseSummary').hidden=cartIsEmpty;
- const estimate=localized('Por confirmar','To be confirmed');
+ const referenceCents=line=>{
+  const value=line.reference_amount;
+  if(typeof value!=='string'||!/^\d+(?:\.\d{1,2})?$/.test(value))return null;
+  const [whole,fraction='']=value.split('.');
+  const cents=Number(whole)*100+Number(fraction.padEnd(2,'0'));
+  const total=cents*line.quantity;
+  return Number.isSafeInteger(total)&&Number.isInteger(line.quantity)&&line.quantity>0?total:null;
+ };
+ const formatCents=cents=>catalogReferencePrice({reference_amount:(cents/100).toFixed(2)});
+ const amounts=items.map(referenceCents),total=amounts.reduce((sum,value)=>sum+(value??0),0);
+ const estimate=items.length&&amounts.every(value=>value!==null)&&Number.isSafeInteger(total)?formatCents(total):localized('Por confirmar','To be confirmed');
  $('cartEstimate').textContent=estimate;$('cartSummaryEstimate').textContent=estimate;
  $('cartSummaryCount').textContent=String(count);
  $('cartTotalCount').textContent=localized('Tu selección','Your selection')+' ('+count+')';
@@ -388,7 +398,7 @@ function renderCart(){
   if(remove){const button=document.createElement('button');button.type='button';button.className='mini cart-remove';button.innerHTML=trash;button.setAttribute('aria-label',localized('Quitar ','Remove ')+name);button.title=localized('Quitar','Remove');button.onclick=remove;row.append(button)}
   list.append(row);
  }
- for(const line of items)appendRow({name:tusneConcepts.find(item=>item.id===String(line.catalog_item_id))?.name||line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Cantidad: ','Quantity: ')+line.quantity,price:localized('Por confirmar','To be confirmed'),icon:'▤',remove:state.owned?null:()=>removeItem(line.id)});
+ for(const line of items)appendRow({name:line.name||tusneConcepts.find(item=>item.id===String(line.catalog_item_id))?.name||line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Cantidad: ','Quantity: ')+line.quantity,price:referenceCents(line)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(line)),icon:'▤',remove:state.owned?null:()=>removeItem(line.id)});
  updateCartAction();
 }
 function catalogMessage(message,error=false){
@@ -479,7 +489,7 @@ async function showPaymentPreview(){
  $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
  $('paymentBuyerEmail').textContent=profile?.contact_email||'';
  const box=$('paymentPreviewItems');box.replaceChildren();
- for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
+ for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
  $('paymentPreviewCount').textContent=String(institutional.length);
  $('paymentPreviewTotal').textContent=localized('Por confirmar','To be confirmed');
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
@@ -723,12 +733,3 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
-
-
-
-
-
-
-
-
-

@@ -69,6 +69,9 @@ class CartApiTest extends TestCase
         ]);
         $response->assertOk()
             ->assertJsonPath('data.items_count', 2)
+            ->assertJsonPath('data.items.0.name', 'Prueba')
+            ->assertJsonPath('data.items.0.reference_amount', '10.00')
+            ->assertJsonPath('data.total_amount', null)
             ->assertJsonPath('data.checkout_enabled', false)
             ->assertJsonPath('data.pricing_status', 'pending_institutional_approval')
             ->assertJsonCount(1, 'data.items')
@@ -100,4 +103,20 @@ class CartApiTest extends TestCase
             ->update(['expires_at' => now()->subMinute()]);
         $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
     }
+    public function test_withdrawn_concept_keeps_cart_line_without_a_stale_reference_price(): void
+    {
+        $this->makeCatalog();
+        $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
+        $this->withToken($token)->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 101, 'quantity' => 1,
+        ])->assertOk();
+        DB::table('tienda_conceptos_catalogo')->where('id', 101)->update(['is_published' => false]);
+        $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')
+            ->assertOk()->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.name', null)
+            ->assertJsonPath('data.items.0.reference_amount', null)
+            ->assertJsonPath('data.total_amount', null)
+            ->assertJsonPath('data.checkout_enabled', false);
+    }
+
 }
