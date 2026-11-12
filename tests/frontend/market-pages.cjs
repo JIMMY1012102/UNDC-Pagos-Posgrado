@@ -254,3 +254,22 @@ test('category title is positioned below the measured sticky header',async()=>{
  assert.equal(scrolled.at(-1).top,0);
  assert.equal(app.ids.get('tusneCatalog').style.minHeight,'');
 });
+
+
+test('cart displays API names and reference totals without loading the catalog page',async()=>{
+ const cart={items:[{id:1,catalog_item_id:101,slug:'posgrado-6-15',name:'Matrícula de Doctorado',reference_amount:'125.10',quantity:2},{id:2,catalog_item_id:102,name:'Prospecto',reference_amount:'10.25',quantity:1}],items_count:3,checkout_enabled:false,total_amount:null};
+ const app=await boot('cart',{cart});
+ const rows=app.ids.get('cartRows').children;
+ assert.equal(rows[0].children[1].children[0].textContent,'Matrícula de Doctorado');
+ assert.match(rows[0].children[2].textContent,/250[,.]20/);
+ assert.match(app.ids.get('cartSummaryEstimate').textContent,/260[,.]45/);
+ assert.ok(!app.calls.some(call=>call.url.includes('/catalogo?')));
+ assert.equal(cart.total_amount,null);assert.equal(cart.checkout_enabled,false);
+});
+test('cart never invents a total when a reference amount is missing or invalid',async()=>{
+ for(const amount of [null,undefined,'-1.00','<script>','',true]){
+  const app=await boot('cart',{cart:{items:[{id:1,catalog_item_id:101,name:'Concepto',reference_amount:amount,quantity:1}],items_count:1}});
+  assert.equal(app.ids.get('cartSummaryEstimate').textContent,'Por confirmar');
+  assert.equal(app.ids.get('cartRows').children[0].children[2].textContent,'Por confirmar');
+ }
+});

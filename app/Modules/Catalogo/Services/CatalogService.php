@@ -19,6 +19,17 @@ final class CatalogService
 
     public function __construct(private readonly PublishedCatalogQuery $catalog) {}
 
+    /** Resolve all cart concepts in one query, independently of catalog pagination. */
+    public function referencesFor(array $ids): Collection
+    {
+        return $this->catalog->referencesFor($ids)->mapWithKeys(static fn (object $item): array => [
+            (int) $item->catalog_item_id => [
+                'name' => (string) $item->name,
+                'reference_amount' => number_format((float) $item->reference_amount, 2, '.', ''),
+            ],
+        ]);
+    }
+
     public function offices(): Collection
     {
         return $this->catalog->offices()->map(static fn (object $office): array => [
@@ -55,4 +66,3 @@ final class CatalogService
         });
     }
 }
-

@@ -45,6 +45,15 @@ final class PublishedCatalogQuery
             ]);
     }
 
+    /** Public reference data for cart lines, without approving checkout tariffs. */
+    public function referencesFor(array $ids): Collection
+    {
+        return $this->availablePublications()->whereIn('publication.id', $ids)->get([
+            'publication.id as catalog_item_id', 'concept.concepto as name',
+            'concept.costo as reference_amount',
+        ]);
+    }
+
     public function isAvailable(int $catalogItemId): bool
     {
         return $this->availablePublications()->where('publication.id', $catalogItemId)->exists();
@@ -76,4 +85,3 @@ final class PublishedCatalogQuery
             ->where('concept.costo', '>=', 0);
     }
 }
-
