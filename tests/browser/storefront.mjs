@@ -115,8 +115,11 @@ async function scenario(viewport, name) {
     }
     if (!mobile) {
     const submenu = await page.locator('.nav.posgrado-nav').boundingBox();
-    assert.ok(Math.abs(submenu.x) < 1 && Math.abs(submenu.width - viewport.width) < 2,
-      'El submenú debe cubrir el ancho completo sin márgenes laterales');
+    const rail = await page.locator('.market-social-rail').boundingBox();
+    assert.ok(rail && Math.abs(rail.width - 40) < 1, 'La franja social debe reservar 40px');
+    assert.equal(await page.locator('.market-social-rail a').count(), 4);
+    assert.ok(Math.abs(submenu.x - rail.width) < 1 && Math.abs(submenu.width + rail.width - viewport.width) < 2,
+      'El submenú debe cubrir el espacio disponible junto a la franja social, sin solaparse');
     const searchStyle = await page.locator('#catalogSearchToggle').evaluate(el => ({
       radius: parseFloat(getComputedStyle(el).borderRadius),
       color: getComputedStyle(el).color,
@@ -202,3 +205,4 @@ await scenario({ width: 1366, height: 768 }, 'laptop');
 await scenario({ width: 390, height: 844 }, 'mobile');
 await browser.close();
 if (failures > 0) process.exit(1);
+
