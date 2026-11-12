@@ -106,6 +106,12 @@ class OrderFlowTest extends TestCase
         $this->assertDatabaseCount('tienda_pedidos', 0);
     }
 
+    public function test_history_page_renders_for_an_authenticated_buyer(): void
+    {
+        $this->actingAs(User::factory()->create())->get('/tienda/mis-pedidos')
+            ->assertOk()->assertSee('id="ordersList"', false)->assertSee('js/undc-orders.js');
+    }
+
     public function test_guest_cannot_query_or_create_orders(): void
     {
         $this->getJson('/api/v1/tienda/pedidos')->assertUnauthorized();

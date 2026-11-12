@@ -31,5 +31,4 @@
 @media(max-width:760px){.payment-preview-grid{grid-template-columns:minmax(0,1fr)}.payment-preview-heading{flex-wrap:wrap}.payment-preview-heading>.chip{margin-left:0}.payment-preview-line{flex-wrap:wrap}}
 </style>
 
-<link rel="stylesheet" href="{{ asset('css/undc-orders.css') }}?v={{ filemtime(public_path('css/undc-orders.css')) }}">
 <script src="{{ asset('js/undc-orders.js') }}?v={{ filemtime(public_path('js/undc-orders.js')) }}" defer></script>
