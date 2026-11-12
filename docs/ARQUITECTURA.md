@@ -18,7 +18,7 @@
 
 1. **Catalogo** muestra las publicaciones; usa un **adaptador de solo lectura Sispagos** que une `tienda_conceptos_catalogo` con los conceptos y oficinas maestros `tm_*`.
 2. **Usuarios** conserva cuentas y perfiles; las rutas originales `/tienda/login` y `/api/v1/acceso/*` no cambian.
-3. **Pedidos** mantiene carrito y precompra; para verificar disponibilidad de un producto consume `Catalogo/Contracts/CatalogItemLookup`, **sin consultar directamente `tm_*`**.
+3. **Pedidos** mantiene carrito, precompra y pedidos pendientes con tarifas aprobadas e historial por propietario (ver [flujo de pedidos](./PEDIDOS_Y_PAGO_POSGRADO.md)); para verificar disponibilidad de un producto consume `Catalogo/Contracts/CatalogItemLookup`, **sin consultar directamente `tm_*`**.
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
 5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
 6. **Seguridad** soporta permisos, sesiones, caché y colas sin introducir endpoints administrativos.
