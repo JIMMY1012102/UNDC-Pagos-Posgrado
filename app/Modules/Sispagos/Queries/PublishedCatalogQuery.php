@@ -50,6 +50,15 @@ final class PublishedCatalogQuery
         return $this->availablePublications()->where('publication.id', $catalogItemId)->exists();
     }
 
+    /** Datos canónicos para la cotización interna de Catalogo; solo lectura. */
+    public function findAvailable(int $id): ?object
+    {
+        return $this->availablePublications()->where('publication.id', $id)->first([
+            'publication.requires_eligibility_check', 'publication.legacy_concept_id',
+            'publication.legacy_office_id', 'concept.codigo_concepto', 'concept.concepto as name',
+        ]);
+    }
+
     private function availablePublications(): Builder
     {
         return DB::table('tienda_conceptos_catalogo as publication')

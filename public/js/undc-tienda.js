@@ -483,6 +483,7 @@ async function showPaymentPreview(){
  $('paymentPreviewCount').textContent=String(institutional.length);
  $('paymentPreviewTotal').textContent=localized('Por confirmar','To be confirmed');
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
+ document.dispatchEvent(new CustomEvent('undc:payment-review',{detail:{cartId:state.cart?.id}}));
 }
 
 async function refreshReview(){
@@ -496,7 +497,7 @@ $('buyerContact').textContent=data.profile.contact_email||data.profile.phone||'N
 const box=$('reviewList');box.replaceChildren();for(const item of data.cart?.items||[]){const row=document.createElement('div');row.className='cart-row';const strong=document.createElement('b');strong.textContent=item.slug;const amount=document.createElement('small');amount.textContent='Cantidad: '+item.quantity;row.append(strong,amount);box.append(row);}
 $('reviewCount').textContent=data.cart.items_count+' conceptos';await showPaymentPreview();}
 async function restore(){
-if(['profile','register'].includes(marketPage))return;
+if(['profile','register','orders'].includes(marketPage))return;
 try{if(await authState()){if(state.profileComplete===false)return;const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart?.items_count>0){state.owned=true;state.cart=owned.cart;renderCart()}}
 if(!state.owned)await ensureCart();
 if(state.authenticated&&sessionStorage.getItem('undc_resume_purchase')==='1'){if(marketPage!=='cart'){screen('cart');return}sessionStorage.removeItem('undc_resume_purchase');await continuePurchase();}
@@ -722,6 +723,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
 
 
 

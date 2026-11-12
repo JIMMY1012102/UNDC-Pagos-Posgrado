@@ -51,7 +51,7 @@ jobs:
           cache: npm
 
       - name: Probar filtros y compatibilidad de categorías
-        run: node --test tests/frontend/market-pages.cjs
+        run: node --test tests/frontend/*.cjs
 
       - name: Compilar frontend
         run: |
