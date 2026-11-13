@@ -12,9 +12,3 @@
 <div class="field"><label for="email">Correo de contacto</label><input id="email" name="contact_email" type="email" autocomplete="email" maxlength="254"></div>
 </div><button type="submit" class="btn block" style="margin-top:24px">Guardar y continuar →</button></form></div></div>
 </section>
-<section class="screen" data-screen="review"><div class="panel"><button class="back" type="button" id="reviewBack">← Volver</button><span class="chip">Último paso de precompra</span><h2 style="margin-top:15px">Revisa tu información</h2><p class="subtle">Estos datos y conceptos se usarían para el futuro pedido cuando se habilite el pago.</p>
-<div class="summary-block"><h3>👤 Datos del comprador</h3><p><strong id="buyerName"></strong><br><span id="buyerDocument"></span><br><span id="buyerContact"></span></p></div>
-<div class="summary-block"><h3>🧾 Conceptos seleccionados</h3><div id="reviewList"></div><p><b id="reviewCount">0 conceptos</b></p></div>
-<div class="warning">Los precios aún no están aprobados. Por seguridad, el sistema no genera órdenes ni procesa pagos.</div>
-<button class="btn block" type="button" disabled>Confirmar y pagar · Próximamente</button>
-</div></section>
