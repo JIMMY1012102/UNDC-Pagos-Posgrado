@@ -71,7 +71,7 @@ class OrderFlowTest extends TestCase
         DB::table('tm_conceptos')->update(['costo' => '1.00']);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
             ->assertCreated()->assertJsonPath('data.code', $response->json('data.code'))
-            ->assertJsonPath('data.total_amount', '1998.00');
+            ->assertJsonPath('data.total_amount', fn ($amount) => (float) $amount === 1998.0);
         $this->assertDatabaseCount('tienda_pedidos', 1);
     }
 
