@@ -29,3 +29,8 @@ Los importes publicados en el catálogo son oficiales, según confirmación del 
 
 ## Validación
 Pruebas HTTP nuevas: importe adulterado, precio legado distinto, tarifas faltantes/ambiguas, perfil incompleto, elegibilidad pendiente, publicación retirada, carrito vencido, aislamiento de usuarios, reintentos, instantáneas y vencimiento sin marcar pagado. Pruebas JavaScript: cotización del servidor, texto sin HTML, doble clic y bloqueo sin tarifas.
+
+## Modificar desde el paso Pago
+El propietario puede usar «Modificar pedido» mientras esté pendiente, vigente, sin confirmación y sin registros de intentos, transacciones ni pagos aplicados. `POST /api/v1/tienda/pedidos/{code}/modificar` conserva las instantáneas del pedido anterior, lo anula con motivo y crea un carrito vinculado con sus conceptos y cantidades. La confirmación posterior vuelve a calcular importes en servidor y genera otro código de pedido. No altera pedidos pagados ni elimina historial; no cambia el esquema.
+
+La operación es transaccional y los reintentos devuelven el mismo carrito mientras siga activo. Si ya hay otra selección activa con conceptos, devuelve 409 sin reemplazarla. El frontend informa la anulación antes de usar el botón. Pagos expone el bloqueo a través de `OrderPaymentGuard`; una futura integración deberá serializar el inicio de pago sobre el mismo pedido y comprobar que siga pendiente antes de crear una sesión bancaria.

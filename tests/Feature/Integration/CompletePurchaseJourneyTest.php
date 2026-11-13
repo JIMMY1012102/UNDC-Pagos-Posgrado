@@ -154,4 +154,34 @@ class CompletePurchaseJourneyTest extends TestCase
         $this->actingAs($second)->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $token])
             ->assertNotFound();
     }
+    public function test_pending_order_can_be_replaced_and_modified_with_real_mariadb(): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000002',
+        ])->assertOk();
+        $itemId = DB::table('tienda_conceptos_catalogo')->where('slug', 'e2e-test')->value('id');
+        $source = DB::table('tienda_carritos')->insertGetId([
+            'user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay(),
+        ]);
+        DB::table('tienda_detalles_carrito')->insert(['cart_id' => $source, 'catalog_item_id' => $itemId, 'quantity' => 2]);
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $source])->assertCreated()->json('data.code');
+        $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
+        $cartId = $this->postJson($url)->assertOk()->json('data.cart_id');
+        $this->postJson($url)->assertOk()->assertJsonPath('data.cart_id', $cartId);
+        $cart = $this->getJson('/api/v1/tienda/carritos/actual')->assertOk()->json('data');
+        $this->assertSame($cartId, $cart['id']);
+        $this->deleteJson('/api/v1/tienda/carritos/actual/items/'.$cart['items'][0]['id'])
+            ->assertOk()->assertJsonCount(0, 'data.items');
+        $this->postJson('/api/v1/tienda/carritos/actual/items', ['catalog_item_id' => $itemId, 'quantity' => 3])
+            ->assertOk()->assertJsonPath('data.items_count', 3);
+        $replacement = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cartId])->assertCreated()->json('data');
+        $this->assertNotSame($code, $replacement['code']);
+        $this->assertEquals(45.00, $replacement['total_amount']);
+        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'cancelled', 'total_amount' => '30.00']);
+        $this->assertDatabaseCount('tienda_pedidos', 2);
+        $this->assertDatabaseCount('tienda_transacciones_pago', 0);
+    }
+
 }

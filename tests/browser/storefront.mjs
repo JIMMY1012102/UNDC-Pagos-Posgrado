@@ -227,7 +227,7 @@ async function scenario(viewport, name) {
     // Authenticated page shell and API responses are intercepted for browser-only QA.
     await page.locator('[data-screen="identity"] [data-go="cart"]').click();
     await page.unroute('**/api/v1/tienda/pedidos/cotizar');
-    const order={code:'UNDC-01ABCDEFGHIJKLMNOPQRSTUVWX',status:'pending',currency:'PEN',total_amount:'420.00',created_at:'2026-11-13 12:00:00',expires_at:'2026-11-14 12:00:00',paid_at:null,buyer_name:'Ana Torres',buyer_email:'ana@example.test',payment_enabled:false,items:reviewCart.items.map(item=>({concept_name:item.name,concept_code:'TEST',quantity:item.quantity,unit_amount:item.reference_amount,total_amount:item.reference_amount})),history:[{to_status:'pending',reason:'Pedido generado con importes oficiales verificados.',occurred_at:'2026-11-13 12:00:00'}]};
+    const order={code:'UNDC-01ABCDEFGHIJKLMNOPQRSTUVWX',status:'pending',currency:'PEN',total_amount:'420.00',created_at:'2026-11-13 12:00:00',expires_at:'2026-11-14 12:00:00',paid_at:null,can_modify:true,buyer_name:'Ana Torres',buyer_email:'ana@example.test',payment_enabled:false,items:reviewCart.items.map(item=>({concept_name:item.name,concept_code:'TEST',quantity:item.quantity,unit_amount:item.reference_amount,total_amount:item.reference_amount})),history:[{to_status:'pending',reason:'Pedido generado con importes oficiales verificados.',occurred_at:'2026-11-13 12:00:00'}]};
     await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({json:{data:{items:reviewCart.items.map(item=>({name:item.name,quantity:item.quantity,total_amount:item.reference_amount})),total_amount:'420.00'}}}));
     await page.route('**/api/v1/tienda/pedidos',route=>route.fulfill({json:{data:route.request().method()==='POST'?order:{items:[order],page:1,has_more:false}}}));
     await page.route('**/api/v1/tienda/pedidos?*',route=>route.fulfill({json:{data:{items:[order],page:1,has_more:false}}}));
@@ -244,10 +244,16 @@ async function scenario(viewport, name) {
     assert.match(await page.locator('#orderDetail').innerText(),/420[,.]00/);
     assert.equal(await page.locator('.order-concepts .payment-preview-line').count(),3);
     assert.equal(await page.locator('.order-pay-button').isDisabled(),true);
+    assert.equal(await page.getByRole('button',{name:'Modificar pedido',exact:true}).isVisible(),true);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'El detalle del pedido no debe desbordarse horizontalmente');
     await page.locator('#closeOrderDialog').click();
     assert.equal(await page.locator('#ordersListPanel').isVisible(),true);
     assert.equal(await page.locator('#ordersList .order-row').count(),1);
+    await page.getByRole('button',{name:'Ver detalle →',exact:true}).click();
+    await page.route('**/api/v1/tienda/pedidos/UNDC-*/modificar',route=>route.fulfill({json:{data:{cart_id:77}}}));
+    await page.getByRole('button',{name:'Modificar pedido',exact:true}).click();
+    await page.waitForURL('**/tienda/carrito');
+    await page.unroute('**/api/v1/tienda/pedidos/UNDC-*/modificar');
     await page.unroute('**/tienda/mis-pedidos*');
     await page.unroute('**/api/v1/tienda/pedidos');
     await page.unroute('**/api/v1/tienda/pedidos/UNDC-*');
