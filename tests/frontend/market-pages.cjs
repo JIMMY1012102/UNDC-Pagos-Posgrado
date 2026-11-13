@@ -14,7 +14,7 @@ const fixture=[
  {id:12,code:'6.15',name:'Prospecto de admisión',category:'admision',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
  {id:13,code:'MAT',name:'Matrícula de Maestría',category:'matricula_pensiones',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'}
 ];
-async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0},search='',profile={first_names:'Ana',last_names:'Torres',document_type:'DNI',document_number:'12345678',contact_email:'ana@example.test'}}={}){
+async function boot(page,{owned=false,authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0},search='',profile={first_names:'Ana',last_names:'Torres',document_type:'DNI',document_number:'12345678',contact_email:'ana@example.test'}}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
@@ -31,12 +31,12 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   if(url.endsWith('/catalogo/oficinas'))data=officeList;
   else if(url.includes('/catalogo?'))data=catalog;
   else if(url.endsWith('/estado'))data={profile_complete:complete};
-  else if(url.endsWith('/resumen'))data={cart:null};
+  else if(url.endsWith('/resumen'))data={cart:owned?cart:null};
   else if(url.endsWith('/perfil'))data=profile;
   else if(url.endsWith('/carritos'))data={token:'a'.repeat(64),cart};
   else if(url.endsWith('/items')&&options.method==='POST'){
    const body=JSON.parse(options.body);const item=catalog.find(item=>item.id===body.catalog_item_id);
-   cart.items=[{id:99,catalog_item_id:body.catalog_item_id,quantity:body.quantity,slug:item?.name||'concepto'}];cart.items_count=body.quantity;data=cart;
+   const existing=cart.items.find(line=>line.catalog_item_id===body.catalog_item_id);if(existing)existing.quantity+=body.quantity;else cart.items.push({id:99,catalog_item_id:body.catalog_item_id,quantity:body.quantity,slug:item?.name||'concepto'});cart.items_count=cart.items.reduce((sum,line)=>sum+line.quantity,0);data=cart;
   }else if(options.method==='DELETE'){cart.items=[];cart.items_count=0;data=cart}
   else data=cart;
   return {status:200,ok:true,json:async()=>({success:true,data})};
@@ -307,4 +307,26 @@ test('payment review keeps unknown totals pending instead of showing a partial s
   assert.equal(app.ids.get('paymentPreviewItems').children[1].children[1].textContent,'Por confirmar');
   assert.equal(app.ids.get('paymentPreviewTotal').textContent,'Por confirmar');
  }
+});
+
+
+test('linked cart accepts another concept from catalog using the owner session',async()=>{
+ const cart={id:55,items:[{id:1,catalog_item_id:12,quantity:1}],items_count:1};
+ const app=await boot('catalog',{authenticated:true,owned:true,cart});
+ await app.context.marketTest.addItem('13');
+ const call=app.calls.find(call=>call.url.endsWith('/items')&&call.method==='POST');
+ assert.ok(call);assert.equal(call.headers.Authorization,undefined);
+ assert.equal(call.credentials,'same-origin');assert.equal(call.headers['X-CSRF-TOKEN'],'csrf');
+ assert.equal(cart.items.length,2);assert.equal(cart.items_count,2);
+ assert.equal(app.calls.filter(call=>call.url.endsWith('/carritos')&&call.method==='POST').length,0);
+});
+test('empty linked cart is reused and its remove action stays available',async()=>{
+ const cart={id:55,items:[],items_count:0};
+ const app=await boot('cart',{authenticated:true,owned:true,cart});
+ assert.equal(app.calls.filter(call=>call.url.endsWith('/carritos')&&call.method==='POST').length,0);
+ // Removing from a restored linked cart uses session identity as well.
+ await app.context.marketTest.removeItem(1);
+ const call=app.calls.find(call=>call.method==='DELETE');
+ assert.equal(call.headers.Authorization,undefined);
+ assert.equal(call.credentials,'same-origin');
 });

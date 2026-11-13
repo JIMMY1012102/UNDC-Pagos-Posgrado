@@ -151,7 +151,6 @@ const languagePairs={
 '＋ Agregar al carrito':'＋ Add to cart',
 'Indica un ID de oficina habilitado por Tesorería.':'Enter an office ID enabled by Treasury.',
 'Todavía no hay conceptos publicados para esa oficina.':'There are no published services for that office yet.',
-'Tu precompra anterior ya está vinculada. La edición de carritos vinculados se habilitará en una versión posterior.':'Your previous pre-purchase is already linked. Editing linked carts will be enabled in a future version.',
 '¡Concepto agregado al carrito!':'Service added to cart!',
 'Concepto retirado.':'Service removed.',
 'No se pudo verificar la sesión.':'The session could not be verified.',
@@ -400,7 +399,7 @@ function renderCart(){
   if(remove){const button=document.createElement('button');button.type='button';button.className='mini cart-remove';button.innerHTML=trash;button.setAttribute('aria-label',localized('Quitar ','Remove ')+name);button.title=localized('Quitar','Remove');button.onclick=remove;row.append(button)}
   list.append(row);
  }
- for(const [index,line] of items.entries())appendRow({name:line.name||tusneConcepts.find(item=>item.id===String(line.catalog_item_id))?.name||line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Posgrado · Cantidad ','Graduate School · Quantity ')+line.quantity,price:referenceCents(line)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(line)),icon:String(index+1).padStart(2,'0'),remove:state.owned?null:()=>removeItem(line.id)});
+ for(const [index,line] of items.entries())appendRow({name:line.name||tusneConcepts.find(item=>item.id===String(line.catalog_item_id))?.name||line.slug||localized('Concepto ','Service ')+line.catalog_item_id,detail:localized('Posgrado · Cantidad ','Graduate School · Quantity ')+line.quantity,price:referenceCents(line)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(line)),icon:String(index+1).padStart(2,'0'),remove:()=>removeItem(line.id)});
  updateCartAction();
 }
 function catalogMessage(message,error=false){
@@ -458,14 +457,13 @@ async function addItem(id){
  if(pendingItems.has(id))return;
  pendingItems.add(id);
  try{
-  if(state.owned){toast('Tu precompra anterior ya está vinculada. La edición de carritos vinculados se habilitará en una versión posterior.',true);return}
   if(!tusneConcepts.some(item=>item.id===String(id)))return;
-  await ensureCart();
-  state.cart=await api('/api/v1/tienda/carritos/actual/items','POST',{catalog_item_id:Number(id),quantity:1},true);
+  if(!state.owned)await ensureCart();
+  state.cart=await api('/api/v1/tienda/carritos/actual/items','POST',{catalog_item_id:Number(id),quantity:1},!state.owned);
   renderCart();renderTusneCatalog();toast('¡Concepto agregado al carrito!');
  }catch(e){toast(e.message,true)}finally{pendingItems.delete(id)}
 }
-async function removeItem(id){try{state.cart=await api('/api/v1/tienda/carritos/actual/items/'+id,'DELETE',null,true);renderCart();renderTusneCatalog();toast('Concepto retirado.')}catch(e){toast(e.message,true)}}
+async function removeItem(id){try{state.cart=await api('/api/v1/tienda/carritos/actual/items/'+id,'DELETE',null,!state.owned);renderCart();renderTusneCatalog();toast('Concepto retirado.')}catch(e){toast(e.message,true)}}
 function cartHasConcepts(){return (state.cart?.items?.length||0)>0}
 function updateCartAction(){
  const hasItems=cartHasConcepts();
@@ -513,7 +511,7 @@ const box=$('reviewList');box.replaceChildren();for(const item of data.cart?.ite
 $('reviewCount').textContent=data.cart.items_count+' conceptos';await showPaymentPreview();}
 async function restore(){
 if(['profile','register','orders'].includes(marketPage))return;
-try{if(await authState()){if(state.profileComplete===false)return;const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart?.items_count>0){state.owned=true;state.cart=owned.cart;renderCart()}}
+try{if(await authState()){if(state.profileComplete===false)return;const owned=await api('/api/v1/tienda/precompra/resumen');if(owned.cart){state.owned=true;state.cart=owned.cart;state.token=null;sessionStorage.removeItem('undc_cart_token');renderCart()}}
 if(!state.owned)await ensureCart();
 if(state.authenticated&&sessionStorage.getItem('undc_resume_purchase')==='1'){if(marketPage!=='cart'){screen('cart');return}sessionStorage.removeItem('undc_resume_purchase');await continuePurchase();}
 }catch(e){toast(e.message,true)}}

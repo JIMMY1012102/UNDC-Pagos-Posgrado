@@ -12,6 +12,7 @@ Se reutilizan `tienda_pedidos`, `tienda_detalles_pedido`, `tienda_historial_esta
 - Mis pedidos muestra 10 pedidos por página. Los detalles y cotizaciones se sirven con `Cache-Control: no-store`.
 
 ## Rutas
+- El carrito activo vinculado permite agregar y quitar conceptos mediante las mismas rutas de carrito, usando la sesión del propietario sin token anónimo. Un token consumido no vuelve a ser válido. Se conserva el límite de 20 unidades y el bloqueo transaccional; carritos vencidos o convertidos no se editan.
 - `POST /api/v1/tienda/pedidos/cotizar`: `{cart_id}`; valida carrito activo propio y cotiza.
 - `POST /api/v1/tienda/pedidos`: `{cart_id}`; vuelve a verificar tarifas y perfil dentro de la transacción.
 - `GET /api/v1/tienda/pedidos?page=1`: historial del propietario.
