@@ -210,11 +210,11 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('.market-social-rail').count(),0);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'La revisión no debe desbordarse horizontalmente');
     if(!mobile){
-      const fit=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
+      const fit=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
       assert.equal(fit,true,'Tres conceptos y las acciones deben caber en una pantalla de escritorio');
       if(viewport.width===1366){
         await page.setViewportSize({width:1366,height:648});
-        const bottom=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
+        const bottom=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
         assert.ok(bottom<=648,'La revisión debe caber también en el área útil de una laptop: pie en '+bottom+'px');
         await page.setViewportSize(viewport);
       }
