@@ -13,7 +13,7 @@
 </section>
 <div class="payment-summary-column"><aside class="payment-preview-summary" aria-labelledby="paymentSummaryTitle">
 <h2 id="paymentSummaryTitle">Resumen del pedido</h2><p class="payment-summary-count"><strong id="paymentPreviewCount"></strong> conceptos seleccionados</p>
-<div class="payment-total-block"><p id="paymentTotalLabel">Total referencial</p><strong class="payment-preview-total" id="paymentPreviewTotal"></strong><p class="payment-total-note">Sujeto a validación institucional.</p></div>
+<div class="payment-total-block"><p id="paymentTotalLabel">Total del pedido</p><strong class="payment-preview-total" id="paymentPreviewTotal"></strong><p class="payment-total-note">Importes del catálogo oficial.</p></div>
 <p id="orderQuoteMessage" class="payment-quote-message" role="status" aria-live="polite">Verificando las tarifas vigentes…</p>
 <button class="btn block" id="generateOrder" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Generar pedido</button>
 <button class="payment-text-button payment-modify" type="button" data-go="cart">Modificar selección</button>

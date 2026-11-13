@@ -5,7 +5,7 @@ Carrito identificado → revisión de tarifas aprobadas → confirmación explí
 
 Se reutilizan `tienda_pedidos`, `tienda_detalles_pedido`, `tienda_historial_estados_pedido` y las tablas de carrito existentes. No hay migraciones nuevas ni cambios a `tm_*`.
 
-- Catalogo cotiza leyendo los datos canónicos mediante el adaptador Sispagos. Exige una sola versión PEN vigente, positiva, aprobada y con referencia de aprobación en `tienda_versiones_tarifas`. Nunca usa el costo legado o importes del navegador como tarifa pagable. Conceptos que requieren elegibilidad siguen bloqueados hasta implementar esa validación.
+- Catalogo cotiza leyendo los importes oficiales publicados mediante el adaptador Sispagos. Si existe una versión PEN aprobada y vigente en `tienda_versiones_tarifas`, la aplica; si no existe, utiliza el importe oficial de `tm_conceptos.costo`, confirmado como fuente institucional del catálogo. No exige registrar una segunda aprobación para ese precio. Bloquea versiones aprobadas ambiguas e importes inválidos o no positivos. Nunca usa montos del navegador. Conceptos que requieren elegibilidad siguen bloqueados hasta implementar esa validación.
 - Pedidos autentica y filtra por propietario; no consulta directamente las tablas históricas. Guarda una instantánea del comprador, conceptos, cantidades e importes calculados en centavos. No admite beneficiarios distintos al comprador en esta etapa.
 - Generar el pedido convierte el carrito. Una transacción y bloqueo de ese carrito serializan reintentos: el mismo carrito devuelve el mismo pedido, aunque el perfil o las tarifas cambien después.
 - Vencimiento inicial: 24 horas. Se materializa el estado `expired` al consultar el pedido o su página de historial; un cambio condicional registra la transición una sola vez. No hay tarea programada nueva. No se expira un pedido ya pagado.
@@ -25,7 +25,7 @@ La selección de tarjeta y billetera electrónica es una preparación visual. `p
 
 Para habilitar cobros se requiere el contrato y credenciales de la pasarela autorizada, documentación técnica, tarifas aprobadas y validación académica donde corresponda. El siguiente incremento en Pagos debe implementar un adaptador de proveedor, creación idempotente de intento, vencimiento coordinado con la sesión bancaria, notificaciones autenticadas y verificación servidor-servidor de referencia, monto y moneda, registro de cobros inciertos/tardíos y una sola aplicación al pedido. Una redirección o captura del cliente nunca confirma un pago.
 
-La aprobación de tarifas es institucional; este cambio no aprueba ni inserta tarifas por su cuenta. Si no existen versiones aprobadas, el comprador ve el motivo y no puede generar el pedido.
+Los importes publicados en el catálogo son oficiales, según confirmación del responsable del proyecto. Este flujo los utiliza sin insertar aprobaciones ni modificar los maestros. Generar el pedido conserva el estado pendiente de pago y no habilita la pasarela. Mis pedidos y el detalle comparten el diseño del carrito y la revisión; el pedido generado abre su detalle en la misma página, con código, conceptos, total, vencimiento e historial.
 
 ## Validación
 Pruebas HTTP nuevas: importe adulterado, precio legado distinto, tarifas faltantes/ambiguas, perfil incompleto, elegibilidad pendiente, publicación retirada, carrito vencido, aislamiento de usuarios, reintentos, instantáneas y vencimiento sin marcar pagado. Pruebas JavaScript: cotización del servidor, texto sin HTML, doble clic y bloqueo sin tarifas.

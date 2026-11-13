@@ -19,7 +19,7 @@ class OrderFlowTest extends TestCase
             $t->integer('oficina_id')->primary(); $t->string('oficina_nom'); $t->integer('estado');
         });
         Schema::create('tm_conceptos', function (Blueprint $t): void {
-            $t->integer('id_concepto')->primary(); $t->string('codigo_concepto'); $t->string('concepto'); $t->decimal('costo', 10, 2);
+            $t->integer('id_concepto')->primary(); $t->string('codigo_concepto'); $t->string('concepto'); $t->decimal('costo', 10, 2)->nullable();
         });
         DB::table('tm_oficina')->insert(['oficina_id' => 7, 'oficina_nom' => 'Posgrado prueba', 'estado' => 1]);
         DB::table('tm_conceptos')->insert(['id_concepto' => 12, 'codigo_concepto' => 'DEMO', 'concepto' => 'Concepto prueba', 'costo' => '999.00']);
@@ -58,13 +58,33 @@ class OrderFlowTest extends TestCase
         $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'total_amount' => '50.20']);
     }
 
-    public function test_missing_or_ambiguous_approval_cannot_generate_order(): void
+    public function test_official_catalog_price_generates_order_without_duplicate_approval(): void
     {
-        [, $cart] = $this->buyerCart(false);
-        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
-        DB::table('tienda_versiones_tarifas')->update(['is_approved' => true]);
+        [$buyer, $cart] = $this->buyerCart(false);
+        $this->postJson('/api/v1/tienda/pedidos/cotizar', ['cart_id' => $cart])
+            ->assertOk()->assertJsonPath('data.total_amount', '1998.00');
+        $response = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart, 'total_amount' => '0.01', 'status' => 'paid']);
+        $response->assertCreated()->assertJsonPath('data.status', 'pending')->assertJsonPath('data.payment_enabled', false);
+        $this->assertDatabaseHas('tienda_pedidos', ['user_id' => $buyer->id, 'total_amount' => '1998.00', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_versiones_tarifas', ['catalog_item_id' => 101, 'is_approved' => false]);
+        $this->assertDatabaseCount('tienda_intentos_pago', 0);
+        DB::table('tm_conceptos')->update(['costo' => '1.00']);
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
+            ->assertCreated()->assertJsonPath('data.code', $response->json('data.code'))
+            ->assertJsonPath('data.total_amount', '1998.00');
+        $this->assertDatabaseCount('tienda_pedidos', 1);
+    }
+
+    public function test_ambiguous_tariffs_and_invalid_catalog_prices_are_blocked(): void
+    {
+        [, $cart] = $this->buyerCart();
         DB::table('tienda_versiones_tarifas')->insert(['catalog_item_id' => 101, 'amount' => '30.00', 'currency' => 'PEN', 'valid_from' => now()->subDay(), 'is_approved' => true, 'approval_reference' => 'OTRA-PRUEBA']);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
+        DB::table('tienda_versiones_tarifas')->delete();
+        foreach (['0.00', '-10.00', null] as $amount) {
+            DB::table('tm_conceptos')->update(['costo' => $amount]);
+            $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
+        }
         $this->assertDatabaseCount('tienda_pedidos', 0);
         $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'status' => 'active']);
     }

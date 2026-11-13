@@ -2,3 +2,28 @@
 .account-orders-link{display:block;padding:12px 16px;color:inherit}.account-orders-link:hover,.account-orders-link:focus-visible{background:var(--undc-pill);text-decoration:underline}
 
 body.light-mode .account-orders-link{color:#17324f}
+
+/* Mis pedidos y detalle comparten las tarjetas del carrito y la revisión. */
+.orders-workspace{padding-bottom:0}
+.orders-workspace [hidden]{display:none!important}
+.orders-list{display:grid;gap:14px}
+.orders-workspace .order-row{padding:20px 26px;border:1px solid var(--review-border);border-radius:16px;background:#fff;box-shadow:0 6px 20px #1c315207}
+.orders-workspace .order-row strong{color:var(--review-ink);font-size:calc(14px * var(--a11y-text-scale,1))}
+.orders-workspace .order-row p{color:var(--review-muted);font-size:calc(12px * var(--a11y-text-scale,1))}
+.orders-workspace .order-row>div{min-width:0}
+.orders-workspace .order-status{background:#e7f0ff;color:#0754bc;font-size:calc(12px * var(--a11y-text-scale,1));margin-top:6px;padding:6px 10px;font-weight:500}
+.orders-workspace .order-code{font-size:calc(12px * var(--a11y-text-scale,1));line-height:1.5;color:var(--review-muted);margin:10px 0 4px;overflow-wrap:anywhere}
+.order-concepts{counter-reset:review-item}
+.order-dates{display:flex;flex-wrap:wrap;gap:6px 24px;padding-top:12px;color:var(--review-muted);font-size:calc(11px * var(--a11y-text-scale,1))}
+.order-dates p{margin:4px 0}
+.order-tracking{margin-top:12px;border-top:1px solid var(--review-border);padding-top:10px;color:var(--review-muted);font-size:calc(12px * var(--a11y-text-scale,1))}
+.order-tracking summary{cursor:pointer;min-height:32px;padding:5px 0}
+.order-tracking summary:focus-visible{outline:3px solid #347bff;outline-offset:4px}
+.order-tracking .order-timeline{font-size:calc(12px * var(--a11y-text-scale,1))}
+.order-payment-options{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;color:var(--review-muted);font-size:calc(11px * var(--a11y-text-scale,1))}
+.order-payment-options>span{padding:8px 10px;border:1px solid var(--review-border);border-radius:8px}
+.orders-workspace .order-pay-button{min-height:44px;border:0;border-radius:10px;background:#e4e9f2;color:#677590;opacity:1;font-size:calc(14px * var(--a11y-text-scale,1));margin-top:12px}
+.orders-footer{justify-content:space-between;gap:20px}
+.orders-footer>span{border:0;padding:0}
+body:not(.light-mode) .orders-workspace .order-row{background:#192a42}
+@media(max-width:760px){.orders-workspace .order-row{padding:18px}.order-row .payment-text-button{width:100%;text-align:left}.order-dates{flex-direction:column;gap:2px}}

@@ -385,7 +385,7 @@ function renderCart(){
  $('cartSummaryEstimate').textContent=estimate;
  $('cartSummaryCount').textContent=String(count);
  $('cartTotalCount').textContent=localized(count===1?'1 concepto':count+' conceptos',count===1?'1 service':count+' services');
- $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes pendientes de validación.','Reference amounts, subject to validation.');
+ $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes del catálogo oficial.','Official catalog amounts.');
  const list=$('cartRows');list.replaceChildren();
  const trash='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';
  function appendRow({name,detail,price,icon,remove}){
@@ -419,8 +419,8 @@ async function loadCatalog(){
   tusneConcepts=data.filter(item=>Number.isSafeInteger(item.id)&&item.id>0).map(item=>({
    ...item,id:String(item.id),en:item.name,category:categoryById(item.category).id,
    descriptionEn:item.description,price:catalogReferencePrice(item),
-   note:item.requirements||localized('Importe pendiente de autorización. Pago no disponible.','Amount pending approval. Payment unavailable.'),
-   noteEn:item.requirements||'Amount pending approval. Payment unavailable.'
+   note:item.requirements||localized('Importe oficial. Pago aún no disponible.','Official amount. Payment unavailable.'),
+   noteEn:item.requirements||'Official amount. Payment unavailable.'
   }));
   renderTusneCatalog();renderCart();
   catalogMessage(tusneConcepts.length?'':localized('Esta oficina no tiene conceptos publicados disponibles.','This office has no available published services.'));
@@ -493,7 +493,7 @@ async function showPaymentPreview(profile=null){
  for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto';const meta=document.createElement('small');meta.textContent=localized('Posgrado · Cantidad ','Graduate School · Quantity ')+item.quantity;name.append(meta);const price=document.createElement('span');price.className=referenceCents(item)===null?'is-pending':'';price.textContent=referenceCents(item)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(item));row.append(name,price);box.append(row)}
  $('paymentPreviewCount').textContent=String(institutional.length);
  $('paymentSelectionCount').textContent=localized(institutional.length===1?'1 concepto':institutional.length+' conceptos',institutional.length===1?'1 service':institutional.length+' services');
- $('paymentTotalLabel').textContent=localized('Total referencial','Reference total');
+ $('paymentTotalLabel').textContent=localized('Total del pedido','Order total');
  $('paymentPreviewTotal').textContent=referenceEstimate(institutional);
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
  document.dispatchEvent(new CustomEvent('undc:payment-review',{detail:{cartId:state.cart?.id}}));

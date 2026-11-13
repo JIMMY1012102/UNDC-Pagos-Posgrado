@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 
 // Browser smoke test of the current three-page frontend.
 // Backend + MariaDB journey is independently tested in PHP CI.
@@ -202,7 +203,7 @@ async function scenario(viewport, name) {
     await page.locator('#sideContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
     assert.equal(await page.locator('[data-screen="review"]').count(),0,'No debe existir una pantalla antigua intermedia de revisión');
-    await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('pendientes de validación'));
+    await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('No se generó'));
     assert.equal(await page.locator('#paymentBuyerName').innerText(),'Ana Torres');
     assert.equal(await page.locator('#paymentBuyerDocument').innerText(),'DNI •••• 5678');
     assert.match(await page.locator('#paymentPreviewTotal').innerText(),/420[,.]00/);
@@ -223,6 +224,32 @@ async function scenario(viewport, name) {
     await page.locator('#editPaymentBuyer').click();
     assert.equal(await page.locator('#firstNames').inputValue(),'Ana');
     assert.equal(await page.locator('#docNumber').inputValue(),'12345678');
+    // Authenticated page shell and API responses are intercepted for browser-only QA.
+    await page.locator('[data-screen="identity"] [data-go="cart"]').click();
+    await page.unroute('**/api/v1/tienda/pedidos/cotizar');
+    const order={code:'UNDC-01ABCDEFGHIJKLMNOPQRSTUVWX',status:'pending',currency:'PEN',total_amount:'420.00',created_at:'2026-11-13 12:00:00',expires_at:'2026-11-14 12:00:00',paid_at:null,buyer_name:'Ana Torres',buyer_email:'ana@example.test',payment_enabled:false,items:reviewCart.items.map(item=>({concept_name:item.name,concept_code:'TEST',quantity:item.quantity,unit_amount:item.reference_amount,total_amount:item.reference_amount})),history:[{to_status:'pending',reason:'Pedido generado con importes oficiales verificados.',occurred_at:'2026-11-13 12:00:00'}]};
+    await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({json:{data:{items:reviewCart.items.map(item=>({name:item.name,quantity:item.quantity,total_amount:item.reference_amount})),total_amount:'420.00'}}}));
+    await page.route('**/api/v1/tienda/pedidos',route=>route.fulfill({json:{data:route.request().method()==='POST'?order:{items:[order],page:1,has_more:false}}}));
+    await page.route('**/api/v1/tienda/pedidos/UNDC-*',route=>route.fulfill({json:{data:order}}));
+    const template=readFileSync(new URL('../../resources/views/modules/tienda/orders.blade.php',import.meta.url),'utf8');
+    const content=template.split("@section('content')")[1].split('@endsection')[0].replace(/\{\{ asset\('([^']+)'\) \}\}/g,(_,file)=>'/'+file).replace(/\?v=\{\{[^}]+\}\}/g,'');
+    const shell=(await page.content()).replace(/<main\b[^>]*>[\s\S]*?<\/main>/,'<main class="wrap" id="catalogo">'+content+'</main>').replace('data-market-page="cart"','data-market-page="orders"').replace(/<body class="[^"]*"/,'<body class="commerce-view market-cart-view market-orders-view light-mode"');
+    await page.route('**/tienda/mis-pedidos*',route=>route.fulfill({contentType:'text/html',body:shell}));
+    await page.locator('#sideContinue').click();
+    await page.waitForFunction(()=>!document.getElementById('generateOrder').disabled);
+    assert.match(await page.locator('#orderQuoteMessage').innerText(),/oficiales verificados/);
+    await page.locator('#generateOrder').click();
+    await page.locator('#orderDetailPanel').waitFor({state:'visible'});
+    assert.match(await page.locator('#orderDetail').innerText(),/420[,.]00/);
+    assert.equal(await page.locator('.order-concepts .payment-preview-line').count(),3);
+    assert.equal(await page.locator('.order-pay-button').isDisabled(),true);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'El detalle del pedido no debe desbordarse horizontalmente');
+    await page.locator('#closeOrderDialog').click();
+    assert.equal(await page.locator('#ordersListPanel').isVisible(),true);
+    assert.equal(await page.locator('#ordersList .order-row').count(),1);
+    await page.unroute('**/tienda/mis-pedidos*');
+    await page.unroute('**/api/v1/tienda/pedidos');
+    await page.unroute('**/api/v1/tienda/pedidos/UNDC-*');
     await page.unroute('**/api/v1/acceso/estado');
     await page.unroute('**/api/v1/acceso/perfil');
     await page.unroute('**/api/v1/tienda/precompra/resumen');
