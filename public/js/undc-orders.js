@@ -41,8 +41,17 @@ async function detail(code){
  summary.append(node('h2','Resumen del pedido'),node('p',order.code,'order-code'),node('span',labels[order.status]||order.status,'order-status'));
  const total=node('div',undefined,'payment-total-block');total.append(node('p','Total del pedido'),node('strong',money(order.total_amount),'payment-preview-total'),node('p','Importes oficiales guardados en tu pedido.','payment-total-note'));summary.append(total);
  if(order.status==='pending'){
-  summary.append(node('p','Tu pedido fue generado. El pago estará disponible cuando se habilite la pasarela.','payment-quote-message'));
-  const methods=node('div',undefined,'order-payment-options');methods.append(node('span','Tarjeta Visa / Mastercard'),node('span','Billetera electrónica / Yape'));summary.append(methods);
+  const methods=node('section',undefined,'order-payment-options');methods.setAttribute('aria-label','Opciones de pago');methods.append(node('h3','Opciones de pago'));
+  const methodGrid=node('div',undefined,'order-payment-grid');
+  for(const [provider,description,kind,shape] of [
+   ['Interbank','Pago bancario','bank','<path d="M3 10h18L12 3 3 10Zm2 10h14M7 10v7m5-7v7m5-7v7M3 21h18"/>'],
+   ['Pay-Me','Yape y Visa','gateway','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-5 5h2"/>']
+  ]){
+   const method=node('div',undefined,'order-payment-method'),icon=node('span',undefined,'order-payment-icon order-payment-icon--'+kind),copy=node('div');
+   icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+shape+'</svg>';
+   copy.append(node('strong',provider),node('span',description));method.append(icon,copy);methodGrid.append(method);
+  }
+  methods.append(methodGrid);summary.append(methods);
   const pay=node('button','Pago aún no disponible','btn block order-pay-button');pay.type='button';pay.disabled=true;summary.append(pay);
  }else summary.append(node('p',order.status==='expired'?'Este pedido venció. Puedes volver al catálogo para realizar una nueva selección.':'Consulta el seguimiento para conocer el estado de tu pedido.','payment-quote-message'));
  const catalog=node('a','Seguir explorando','payment-text-button payment-modify');catalog.href='/tienda';summary.append(catalog);column.append(summary,node('p','El código identifica tu pedido; no acredita un pago.','payment-gateway-note'));grid.append(selection,column);box.append(grid);
@@ -63,3 +72,4 @@ $('moreOrders')?.addEventListener('click',async()=>{$('moreOrders').disabled=tru
 $('closeOrderDialog')?.addEventListener('click',()=>{$('orderDetailPanel').hidden=true;$('ordersListPanel').hidden=false;$('ordersTitle').focus({preventScroll:true});window.history?.replaceState(null,'','/tienda/mis-pedidos');});
 if($('ordersList')){list().then(()=>{const code=new URLSearchParams(window.location.search).get('pedido');if(code)detail(code).catch(error=>$('ordersMessage').textContent=error.message);});}
 })();
+
