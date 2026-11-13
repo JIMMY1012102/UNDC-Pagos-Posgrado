@@ -187,7 +187,7 @@ async function scenario(viewport, name) {
     await page.route('**/api/v1/tienda/precompra/resumen',route=>route.fulfill({json:{data:{cart:reviewCart,profile,profile_complete:true,next_step:'review'}}}));
     await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({status:422,json:{message:'Uno o más conceptos requieren una tarifa vigente aprobada o la tarifa encontrada no es válida. No se generó el pedido.'}}));
     await page.goto(origin+'/tienda/carrito',{waitUntil:'domcontentloaded'});
-    await page.locator('#cartContinue').click();
+    await page.locator('#sideContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
     await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('pendientes de validación'));
     assert.equal(await page.locator('#paymentBuyerName').innerText(),'Ana Torres');
