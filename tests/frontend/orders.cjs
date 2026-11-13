@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 function boot({fail=false}={}){
  const callbacks={},calls=[],redirects=[],els=new Map();
- class El{constructor(){this.disabled=false;this.children=[];this.textContent='';this.listeners={};}addEventListener(k,f){this.listeners[k]=f;}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}}
+ class El{constructor(){this.classList={add(){},remove(){}};this.disabled=false;this.children=[];this.textContent='';this.listeners={};}addEventListener(k,f){this.listeners[k]=f;}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}}
  for(const id of ['generateOrder','orderQuoteMessage','paymentPreviewItems','paymentPreviewTotal'])els.set(id,new El());
  const document={getElementById:id=>els.get(id)||null,querySelector:()=>({content:'csrf'}),createElement:()=>new El(),addEventListener:(k,f)=>callbacks[k]=f};
  let release;const response=new Promise(r=>release=r);
@@ -11,7 +11,7 @@ function boot({fail=false}={}){
 }
 test('approved quote renders server amount as text and double click creates once',async()=>{
  const b=boot();await b.callbacks['undc:payment-review']({detail:{cartId:7}});assert.equal(b.els.get('generateOrder').disabled,false);assert.match(b.els.get('paymentPreviewTotal').textContent,/50[,.]20/);
- assert.equal(b.els.get('paymentPreviewItems').children[0].children[0].textContent,'<script>texto</script> × 2');
+ assert.equal(b.els.get('paymentPreviewItems').children[0].children[0].textContent,'<script>texto</script>');
  const first=b.els.get('generateOrder').listeners.click();await b.els.get('generateOrder').listeners.click();assert.equal(b.calls.filter(c=>c.url.endsWith('/pedidos')).length,1);
  const body=JSON.parse(b.calls.at(-1).options.body);assert.equal(body.cart_id,7);assert.equal(body.total_amount,undefined);
  b.release();await first;assert.equal(b.redirects[0],'/tienda/mis-pedidos?pedido=UNDC-TEST');

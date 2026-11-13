@@ -14,7 +14,7 @@ const fixture=[
  {id:12,code:'6.15',name:'Prospecto de admisión',category:'admision',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'},
  {id:13,code:'MAT',name:'Matrícula de Maestría',category:'matricula_pensiones',office:{id:7,name:'Oficina de prueba'},description:'Concepto de prueba'}
 ];
-async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0},search=''}={}){
+async function boot(page,{authenticated=false,complete=true,resume=false,local=new Map(),catalog=fixture,failCatalog=false,officeList=[{id:7,name:'Oficina de prueba'}],cart={items:[],items_count:0},search='',profile={first_names:'Ana',last_names:'Torres',document_type:'DNI',document_number:'12345678',contact_email:'ana@example.test'}}={}){
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
@@ -32,6 +32,7 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   else if(url.includes('/catalogo?'))data=catalog;
   else if(url.endsWith('/estado'))data={profile_complete:complete};
   else if(url.endsWith('/resumen'))data={cart:null};
+  else if(url.endsWith('/perfil'))data=profile;
   else if(url.endsWith('/carritos'))data={token:'a'.repeat(64),cart};
   else if(url.endsWith('/items')&&options.method==='POST'){
    const body=JSON.parse(options.body);const item=catalog.find(item=>item.id===body.catalog_item_id);
@@ -280,12 +281,16 @@ test('payment review retains cart reference amounts and quantities before the ap
  const app=await boot('cart',{cart});
  await app.context.marketTest.showPaymentPreview();
  const rows=app.ids.get('paymentPreviewItems').children;
- assert.equal(rows[0].children[0].textContent,'<script>Concepto</script> × 2');
+ assert.equal(rows[0].children[0].textContent,'<script>Concepto</script>');
+ assert.equal(rows[0].children[0].children[0].textContent,'Posgrado · Cantidad 2');
  assert.equal(rows[0].children[1].textContent,app.ids.get('cartRows').children[0].children[2].textContent);
  assert.match(rows[0].children[1].textContent,/250[,.]20/);
  assert.equal(app.ids.get('paymentPreviewTotal').textContent,app.ids.get('cartSummaryEstimate').textContent);
  assert.match(app.ids.get('paymentPreviewTotal').textContent,/260[,.]45/);
  assert.equal(cart.total_amount,null);assert.equal(cart.checkout_enabled,false);
+ assert.equal(app.ids.get('paymentBuyerInitials').textContent,'AT');
+ assert.equal(app.ids.get('paymentBuyerDocument').textContent,'DNI •••• 5678');
+ assert.equal(app.ids.get('paymentSelectionCount').textContent,'2 conceptos');
 });
 test('payment review keeps unknown totals pending instead of showing a partial sum',async()=>{
  for(const amount of [null,undefined,'-1.00','<script>','',true]){
