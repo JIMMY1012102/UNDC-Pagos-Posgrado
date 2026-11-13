@@ -9,8 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}?v={{ filemtime(public_path('css/undc-tienda.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/undc-orders.css') }}?v={{ filemtime(public_path('css/undc-orders.css')) }}">
-</head><body class="market-with-social-rail @yield('bodyClass')" data-market-page="@yield('marketPage', 'catalog')">
+</head>
+@php($showSocialRail = trim($__env->yieldContent('marketPage', 'catalog')) === 'catalog')
+<body class="{{ $showSocialRail ? 'market-with-social-rail' : '' }} @yield('bodyClass')" data-market-page="@yield('marketPage', 'catalog')">
+@if($showSocialRail)
 @include('modules.tienda.partials.social-rail')
+@endif
 @include('modules.tienda.partials.header')
 @include('modules.tienda.partials.accessibility')
 @yield('heroes')
