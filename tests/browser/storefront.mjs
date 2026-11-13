@@ -189,7 +189,7 @@ async function scenario(viewport, name) {
     await page.goto(origin+'/tienda/carrito',{waitUntil:'domcontentloaded'});
     await page.locator('#cartContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
-    await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('No se generó'));
+    await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('pendientes de validación'));
     assert.equal(await page.locator('#paymentBuyerName').innerText(),'Ana Torres');
     assert.equal(await page.locator('#paymentBuyerDocument').innerText(),'DNI •••• 5678');
     assert.match(await page.locator('#paymentPreviewTotal').innerText(),/420[,.]00/);
@@ -200,6 +200,12 @@ async function scenario(viewport, name) {
     if(!mobile){
       const fit=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
       assert.equal(fit,true,'Tres conceptos y las acciones deben caber en una pantalla de escritorio');
+      if(viewport.width===1366){
+        await page.setViewportSize({width:1366,height:648});
+        const bottom=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
+        assert.ok(bottom<=648,'La revisión debe caber también en el área útil de una laptop: pie en '+bottom+'px');
+        await page.setViewportSize(viewport);
+      }
     }
     await page.locator('#editPaymentBuyer').click();
     assert.equal(await page.locator('#firstNames').inputValue(),'Ana');
