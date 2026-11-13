@@ -11,7 +11,7 @@
 <div id="ordersList" class="orders-list"></div><button class="payment-text-button" id="moreOrders" type="button" hidden>Ver más pedidos</button>
 </section>
 <section id="orderDetailPanel" aria-labelledby="orderDialogTitle" hidden>
-<header class="payment-preview-heading"><div><h1 id="orderDialogTitle" tabindex="-1">Tu pedido está listo.</h1><p>Consulta el detalle y los siguientes pasos.</p></div><button class="payment-text-button" id="closeOrderDialog" type="button">← Mis pedidos</button></header>
+<header class="payment-preview-heading"><div><h1 id="orderDialogTitle" tabindex="-1">Tu pedido está listo.</h1><p>Consulta el detalle y los siguientes pasos.</p></div><div class="order-progress-actions"><ol class="payment-progress" aria-label="Etapas de la compra"><li><span aria-hidden="true">✓</span>01 Carrito</li><li><span aria-hidden="true">✓</span>02 Revisión</li><li aria-current="step"><span>03</span>Pago</li></ol><button class="payment-text-button" id="closeOrderDialog" type="button">← Mis pedidos</button></div></header>
 <p id="orderDetailMessage" role="status" aria-live="polite"></p><div id="orderDetail"></div>
 </section>
 <div class="payment-review-footer orders-footer"><span>Universidad Nacional de Cañete · Oficina de Tecnologías de la Información</span><span>Generar un pedido no realiza un cobro ni inicia un trámite académico.</span></div>

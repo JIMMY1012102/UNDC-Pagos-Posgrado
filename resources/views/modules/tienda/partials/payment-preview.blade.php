@@ -2,7 +2,7 @@
 <nav class="payment-breadcrumb" aria-label="Ruta de compra"><a href="/tienda">Catálogo</a><span aria-hidden="true">/</span><button type="button" data-go="cart">Carrito</button><span aria-hidden="true">/</span><span aria-current="page">Revisión</span></nav>
 <div class="payment-preview-heading">
 <div><h1 id="paymentPreviewTitle" tabindex="-1">Todo listo para revisar.</h1><p>Comprueba tus datos antes de generar tu pedido.</p></div>
-<ol class="payment-progress" aria-label="Etapas de la compra"><li><span aria-hidden="true">✓</span>01 Carrito</li><li aria-current="step"><span>02</span>Revisión</li></ol>
+<ol class="payment-progress" aria-label="Etapas de la compra"><li><span aria-hidden="true">✓</span>01 Carrito</li><li aria-current="step"><span>02</span>Revisión</li><li class="is-upcoming"><span>03</span>Pago</li></ol>
 </div>
 <div class="payment-preview-grid">
 <section class="payment-selection-card" aria-label="Comprador y conceptos seleccionados">
