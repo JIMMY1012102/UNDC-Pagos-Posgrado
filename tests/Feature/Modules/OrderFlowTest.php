@@ -137,4 +137,87 @@ class OrderFlowTest extends TestCase
         $this->getJson('/api/v1/tienda/pedidos')->assertUnauthorized();
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => 1])->assertUnauthorized();
     }
+    public function test_pending_order_returns_to_cart_once_and_reconfirmation_creates_new_snapshot(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $order = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated()->json('data');
+        $this->assertTrue($order['can_modify']);
+        $url = '/api/v1/tienda/pedidos/'.$order['code'].'/modificar';
+        $newCart = $this->postJson($url)->assertOk()->json('data.cart_id');
+        $this->assertNotEquals($cart, $newCart);
+        $this->postJson($url)->assertOk()->assertJsonPath('data.cart_id', $newCart);
+        $this->assertDatabaseCount('tienda_carritos', 2);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 2);
+        $this->getJson('/api/v1/tienda/pedidos/'.$order['code'])->assertOk()
+            ->assertJsonPath('data.status', 'cancelled')->assertJsonPath('data.can_modify', false)
+            ->assertJsonPath('data.total_amount', fn ($amount) => (float) $amount === 50.20);
+        $this->getJson('/api/v1/tienda/carritos/actual')->assertOk()
+            ->assertJsonPath('data.id', $newCart)->assertJsonPath('data.items_count', 2);
+        $this->postJson('/api/v1/tienda/carritos/actual/items', ['catalog_item_id' => 101, 'quantity' => 1])->assertOk();
+        $updated = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $newCart])->assertCreated()
+            ->assertJsonPath('data.total_amount', '75.30')->json('data');
+        $this->assertNotSame($order['code'], $updated['code']);
+        $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 2, 'total_amount' => '50.20']);
+        $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 3, 'total_amount' => '75.30']);
+        $this->postJson($url)->assertStatus(409);
+        $this->assertDatabaseCount('tienda_pedidos', 2);
+    }
+
+    public function test_modification_does_not_overwrite_other_carts_or_bypass_ownership(): void
+    {
+        [$buyer, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
+        $this->actingAs(User::factory()->create())->postJson($url)->assertNotFound();
+        $this->actingAs($buyer);
+        $active = DB::table('tienda_carritos')->insertGetId(['user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN']);
+        DB::table('tienda_detalles_carrito')->insert(['cart_id' => $active, 'catalog_item_id' => 101, 'quantity' => 1]);
+        $this->postJson($url)->assertStatus(409);
+        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['cart_id' => $active, 'quantity' => 1]);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
+    }
+
+    public function test_paid_expired_and_payment_in_progress_orders_cannot_be_modified(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $query = DB::table('tienda_pedidos')->where('code', $code);
+        $id = (int) $query->value('id');
+        $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
+        foreach ([['status' => 'paid'], ['status' => 'cancelled'], ['status' => 'confirmed'],
+            ['status' => 'pending', 'paid_at' => now()],
+            ['status' => 'pending', 'paid_at' => null, 'confirmed_at' => now()],
+            ['status' => 'pending', 'confirmed_at' => null, 'expires_at' => now()->subMinute()]] as $state) {
+            (clone $query)->update($state);
+            $this->postJson($url)->assertStatus(409);
+        }
+        (clone $query)->update(['status' => 'pending', 'expires_at' => now()->addDay()]);
+        DB::table('tienda_intentos_pago')->insert([
+            'order_id' => $id, 'channel' => 'gateway', 'provider' => 'demo', 'status' => 'initiated',
+            'idempotency_key' => 'test-only', 'requested_amount' => '50.20', 'currency' => 'PEN', 'started_at' => now(),
+        ]);
+        $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonPath('data.can_modify', false);
+        $this->postJson($url)->assertStatus(409);
+        DB::table('tienda_intentos_pago')->delete();
+        DB::table('tienda_transacciones_pago')->insert([
+            'order_id' => $id, 'provider' => 'demo', 'status' => 'pending_verification',
+            'amount' => '50.20', 'currency' => 'PEN', 'observed_at' => now(),
+        ]);
+        $this->postJson($url)->assertStatus(409);
+        $this->assertDatabaseCount('tienda_carritos', 1);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
+    }
+
+    public function test_anonymous_selection_is_not_lost_when_modifying_an_order(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $created = app(\App\Modules\Pedidos\Services\CartService::class)->create();
+        app(\App\Modules\Pedidos\Services\CartService::class)->add($created['token'], 101, 1);
+        $this->postJson('/api/v1/tienda/pedidos/'.$code.'/modificar', ['cart_token' => $created['token']])->assertStatus(409);
+        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['cart_id' => $created['cart']['id'], 'quantity' => 1]);
+    }
+
 }

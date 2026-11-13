@@ -54,6 +54,15 @@ async function detail(code){
   methods.append(methodGrid);summary.append(methods);
   const pay=node('button','Pago aún no disponible','btn block order-pay-button');pay.type='button';pay.disabled=true;summary.append(pay);
  }else summary.append(node('p',order.status==='expired'?'Este pedido venció. Puedes volver al catálogo para realizar una nueva selección.':'Consulta el seguimiento para conocer el estado de tu pedido.','payment-quote-message'));
+ if(order.can_modify){
+  const edit=node('button','Modificar pedido','payment-text-button payment-modify');edit.type='button';
+  edit.addEventListener('click',async()=>{
+   if(edit.disabled)return;edit.disabled=true;$('orderDetailMessage').textContent='Preparando tu carrito…';
+   try{const token=sessionStorage.getItem('undc_cart_token');await api('pedidos/'+encodeURIComponent(code)+'/modificar','POST',token?{cart_token:token}:{});sessionStorage.removeItem('undc_cart_token');sessionStorage.removeItem('undc_resume_purchase');window.location.assign('/tienda/carrito');}
+   catch(error){$('orderDetailMessage').textContent=error.message;edit.disabled=false;}
+  });
+  summary.append(edit,node('p','Volverás al carrito para agregar o quitar conceptos. Este pedido se anulará y al confirmar se generará uno nuevo.','payment-total-note'));
+ }
  const catalog=node('a','Seguir explorando','payment-text-button payment-modify');catalog.href='/tienda';summary.append(catalog);column.append(summary,node('p','El código identifica tu pedido; no acredita un pago.','payment-gateway-note'));grid.append(selection,column);box.append(grid);
  $('ordersListPanel').hidden=true;$('orderDetailPanel').hidden=false;$('orderDetailMessage').textContent='';
  $('orderDialogTitle').textContent=order.status==='pending'?'Tu pedido está listo.':'Detalle de tu pedido.';
