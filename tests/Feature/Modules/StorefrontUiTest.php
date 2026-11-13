@@ -25,7 +25,8 @@ class StorefrontUiTest extends TestCase
         // Since the UI was split into separate pages, checkout belongs in cart.
         $this->get('/tienda/carrito')->assertOk()
             ->assertSee('Revisa tu carrito')
-            ->assertSee('Continuar con mi compra');
+            ->assertSee('Iniciar sesión para continuar')
+            ->assertSee('id="sideContinue"', false);
         $this->get('/tienda/login')->assertOk();
     }
 
