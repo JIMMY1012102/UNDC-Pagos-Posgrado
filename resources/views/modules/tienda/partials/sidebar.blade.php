@@ -1,4 +1,8 @@
-<aside class="side cart-sidebar"><div class="panel cart-selection-panel"><h3 class="cart-purchase-summary-title">▤ Resumen de tu selección</h3><div id="cartPurchaseSummary" class="cart-purchase-summary" hidden><p><span>Conceptos seleccionados</span><strong id="cartSummaryCount">0</strong></p><p><span>Total referencial</span><strong id="cartSummaryEstimate"></strong></p></div><div class="title-row cart-empty-summary-title"><h3><span aria-hidden="true">🛍️</span> Tu selección</h3><span class="chip">Precompra</span></div>
-<p class="subtle" id="sideCartSummary">Organiza tus conceptos antes de continuar.</p><div class="cart-selection-status"><span class="cart-status-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 2 2 3-3m-5 8 2 2 3-3m-5 8 2 2 3-3M11 6h10M11 13h10M11 20h10"/></svg></span><strong id="emptyBadge">Aún no has agregado conceptos</strong></div><div id="sideCartItems" class="side-cart-items"></div>
-<button id="sideContinue" class="btn block" disabled type="button">Ir a comprar →</button></div>
-</aside>
+<div class="payment-summary-column"><aside class="payment-preview-summary cart-modern-summary" aria-labelledby="cartSummaryTitle">
+<h2 id="cartSummaryTitle">Resumen de tu selección</h2>
+<div id="cartPurchaseSummary" class="cart-modern-count" hidden><span>Conceptos seleccionados</span><strong id="cartSummaryCount">0</strong></div>
+<div class="payment-total-block"><p>Total referencial</p><strong class="payment-preview-total" id="cartSummaryEstimate"></strong><p class="payment-total-note">Sujeto a validación institucional.</p></div>
+<p class="payment-quote-message" id="sideCartSummary" role="status">Organiza tus conceptos antes de continuar.</p>
+<button id="sideContinue" class="btn block" disabled type="button">Iniciar sesión para continuar →</button>
+<a class="payment-text-button payment-modify" href="/tienda">Seguir explorando</a>
+</aside><p class="payment-gateway-note"><span aria-hidden="true">ⓘ</span> Continuar no realiza ningún cobro.</p></div>

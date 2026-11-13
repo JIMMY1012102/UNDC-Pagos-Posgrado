@@ -170,9 +170,9 @@ async function scenario(viewport, name) {
 
     const cart = await page.goto(origin + '/tienda/carrito', { waitUntil: 'domcontentloaded' });
     assert.equal(cart?.status(), 200, 'El carrito debe responder HTTP 200');
-    await page.locator('#cartContinue').waitFor({ state: 'attached' });
-    assert.match(await page.locator('.cart-review-heading h2').innerText(), /Revisa tu carrito/);
-    assert.equal(await page.locator('#cartContinue').isDisabled(), true,
+    await page.locator('#sideContinue').waitFor({ state: 'attached' });
+    assert.match(await page.locator('.cart-modern-heading h1').innerText(), /Revisa tu carrito/);
+    assert.equal(await page.locator('#sideContinue').isDisabled(), true,
       'No puede continuarse con un carrito vacío');
 
     // Review uses intercepted API data; no institutional data or real order is created.
@@ -187,6 +187,18 @@ async function scenario(viewport, name) {
     await page.route('**/api/v1/tienda/precompra/resumen',route=>route.fulfill({json:{data:{cart:reviewCart,profile,profile_complete:true,next_step:'review'}}}));
     await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({status:422,json:{message:'Uno o más conceptos requieren una tarifa vigente aprobada o la tarifa encontrada no es válida. No se generó el pedido.'}}));
     await page.goto(origin+'/tienda/carrito',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>document.getElementById('cartSummaryCount').textContent==='3');
+    assert.match(await page.locator('#cartSummaryEstimate').innerText(),/420[,.]00/);
+    assert.equal(await page.locator('#cartRows .cart-service-row').count(),3);
+    assert.equal(await page.locator('#cartRows .cart-service-icon').first().innerText(),'01');
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'El carrito no debe desbordarse horizontalmente');
+    if(!mobile){
+      const original=page.viewportSize();
+      if(viewport.width===1366)await page.setViewportSize({width:1366,height:648});
+      const fit=await page.locator('.cart-modern-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
+      assert.equal(fit,true,'Carrito de tres conceptos y acciones visibles sin scroll en escritorio');
+      await page.setViewportSize(original);
+    }
     await page.locator('#sideContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
     await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('pendientes de validación'));
@@ -198,11 +210,11 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('.market-social-rail').count(),0);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'La revisión no debe desbordarse horizontalmente');
     if(!mobile){
-      const fit=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
+      const fit=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
       assert.equal(fit,true,'Tres conceptos y las acciones deben caber en una pantalla de escritorio');
       if(viewport.width===1366){
         await page.setViewportSize({width:1366,height:648});
-        const bottom=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
+        const bottom=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
         assert.ok(bottom<=648,'La revisión debe caber también en el área útil de una laptop: pie en '+bottom+'px');
         await page.setViewportSize(viewport);
       }

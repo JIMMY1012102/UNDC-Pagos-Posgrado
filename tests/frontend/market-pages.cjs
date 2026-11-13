@@ -262,10 +262,17 @@ test('cart displays API names and reference totals without loading the catalog p
  const app=await boot('cart',{cart});
  const rows=app.ids.get('cartRows').children;
  assert.equal(rows[0].children[1].children[0].textContent,'Matrícula de Doctorado');
+ assert.equal(rows[0].children[0].textContent,'01');
+ assert.equal(rows[0].children[1].children[1].textContent,'Posgrado · Cantidad 2');
+ assert.equal(app.ids.get('cartTotalCount').textContent,'2 conceptos');
  assert.match(rows[0].children[2].textContent,/250[,.]20/);
  assert.match(app.ids.get('cartSummaryEstimate').textContent,/260[,.]45/);
  assert.ok(!app.calls.some(call=>call.url.includes('/catalogo?')));
  assert.equal(cart.total_amount,null);assert.equal(cart.checkout_enabled,false);
+ await app.context.marketTest.removeItem(1);
+ assert.equal(app.ids.get('cartRows').children.length,0);
+ assert.equal(app.ids.get('sideContinue').disabled,true);
+ assert.match(app.ids.get('cartSummaryEstimate').textContent,/0[,.]00/);
 });
 test('cart never invents a total when a reference amount is missing or invalid',async()=>{
  for(const amount of [null,undefined,'-1.00','<script>','',true]){
