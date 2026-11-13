@@ -22,7 +22,7 @@ final class OrderService
         foreach ($lines as $line) {
             $item = $line->beneficiary_id === null ? $this->prices->line((int) $line->catalog_item_id, (int) $line->quantity) : null;
             if (! $item) {
-                throw ValidationException::withMessages(['tariff' => 'Uno o más conceptos requieren una tarifa vigente aprobada o validación académica. No se generó el pedido.']);
+                throw ValidationException::withMessages(['tariff' => 'Uno o más conceptos no tienen un importe oficial válido o requieren validación académica. No se generó el pedido.']);
             }
             $total += $item['total_cents'];
             $items[] = $item;
@@ -77,7 +77,7 @@ final class OrderService
             }
             DB::table('tienda_historial_estados_pedido')->insert([
                 'order_id' => $id, 'actor_user_id' => $userId, 'to_status' => 'pending',
-                'reason' => 'Pedido generado con tarifas aprobadas. No acredita pago ni inicia trámite académico.', 'occurred_at' => $now,
+                'reason' => 'Pedido generado con importes oficiales verificados. No acredita pago ni inicia trámite académico.', 'occurred_at' => $now,
             ]);
             DB::table('tienda_carritos')->where('id', $cartId)->update(['status' => 'converted', 'updated_at' => $now]);
             return $this->show($userId, $code);

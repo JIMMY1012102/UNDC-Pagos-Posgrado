@@ -5,7 +5,7 @@ namespace App\Modules\Catalogo\Services;
 use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
 use Illuminate\Support\Facades\DB;
 
-/** Tarifas aprobadas, nunca importes enviados por el navegador. */
+/** Importes oficiales publicados, nunca importes enviados por el navegador. */
 final class OrderQuoteService
 {
     public function __construct(private readonly PublishedCatalogQuery $catalog) {}
@@ -22,11 +22,14 @@ final class OrderQuoteService
             ->where('valid_from', '<=', now())
             ->where(fn ($q) => $q->whereNull('valid_until')->orWhere('valid_until', '>', now()))->get();
         // Una tarifa vigente inequívoca; no escoger arbitrariamente entre aprobaciones.
-        if ($prices->count() !== 1) {
+        if ($prices->count() > 1) {
             return null;
         }
-        $price = $prices->first();
-        $amount = (string) $price->amount;
+        // El catálogo institucional ya contiene importes oficiales. Una versión
+        // aprobada vigente puede sustituirlos; no se exige duplicar su aprobación.
+        $amount = $prices->isNotEmpty()
+            ? (string) $prices->first()->amount
+            : (string) ($this->catalog->referencesFor([$id])->first()?->reference_amount ?? '');
         if (! preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amount)) {
             return null;
         }
