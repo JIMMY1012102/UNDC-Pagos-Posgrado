@@ -20,7 +20,9 @@ Route::middleware('throttle:15,1')->group(function (): void {
     Route::get('/auth/google/redirect', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
     Route::get('/auth/google/callback', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
-Route::post('/auth/logout', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'logout'])->middleware(['auth', 'throttle:15,1'])->name('auth.logout');
+// Logout must remain available even when browsing exhausts an API rate limit.
+// POST, the web CSRF middleware and the authenticated session still protect it.
+Route::post('/auth/logout', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'logout'])->middleware('auth')->name('auth.logout');
 
 
 // Account and profile web forms use Laravel CSRF and session protection.
