@@ -20,10 +20,21 @@ body.light-mode .account-orders-link{color:#17324f}
 .order-tracking summary{cursor:pointer;min-height:32px;padding:5px 0}
 .order-tracking summary:focus-visible{outline:3px solid #347bff;outline-offset:4px}
 .order-tracking .order-timeline{font-size:calc(12px * var(--a11y-text-scale,1))}
-.order-payment-options{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;color:var(--review-muted);font-size:calc(11px * var(--a11y-text-scale,1))}
-.order-payment-options>span{padding:8px 10px;border:1px solid var(--review-border);border-radius:8px}
+.order-payment-options{margin:14px 0 0;color:var(--review-muted);font-size:calc(12px * var(--a11y-text-scale,1))}
+.order-payment-options h3{margin:0 0 10px;color:var(--review-ink);font-size:calc(15px * var(--a11y-text-scale,1));font-weight:650}
+.order-payment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.order-payment-method{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 12px;border:1px solid var(--review-border);border-radius:12px;background:#ffffffb3}
+.order-payment-method>div{min-width:0}
+.order-payment-method strong,.order-payment-method>div>span{display:block;overflow-wrap:anywhere}
+.order-payment-method strong{color:var(--review-ink);font-size:calc(14px * var(--a11y-text-scale,1));font-weight:650;margin-bottom:2px}
+.order-payment-icon{display:flex;flex:0 0 28px;color:#065bff}
+.order-payment-icon svg{width:28px;height:28px}
+.order-payment-icon--bank{color:#079b4b}
+body:not(.light-mode) .order-payment-method{background:#192a42}
+@media(max-width:400px){.order-payment-grid{grid-template-columns:1fr}}
 .orders-workspace .order-pay-button{min-height:44px;border:0;border-radius:10px;background:#e4e9f2;color:#677590;opacity:1;font-size:calc(14px * var(--a11y-text-scale,1));margin-top:12px}
 .orders-footer{justify-content:space-between;gap:20px}
 .orders-footer>span{border:0;padding:0}
 body:not(.light-mode) .orders-workspace .order-row{background:#192a42}
 @media(max-width:760px){.orders-workspace .order-row{padding:18px}.order-row .payment-text-button{width:100%;text-align:left}.order-dates{flex-direction:column;gap:2px}}
+
