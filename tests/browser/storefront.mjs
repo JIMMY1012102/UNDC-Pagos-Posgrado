@@ -175,6 +175,40 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#cartContinue').isDisabled(), true,
       'No puede continuarse con un carrito vacío');
 
+    // Review uses intercepted API data; no institutional data or real order is created.
+    const profile={first_names:'Ana',last_names:'Torres',document_type:'DNI',document_number:'12345678',contact_email:'ana@example.test'};
+    const reviewCart={id:7,items_count:3,items:[
+      {id:1,catalog_item_id:12,name:'DERECHO DE MATRICULA MAESTRIA',quantity:1,reference_amount:'300.00'},
+      {id:2,catalog_item_id:13,name:'RECARGO POR MATRICULA EXTEMPORANEA DOCTORADO',quantity:1,reference_amount:'60.00'},
+      {id:3,catalog_item_id:14,name:'RECARGO POR MATRICULA EXTEMPORANEA MAESTRIA',quantity:1,reference_amount:'60.00'},
+    ]};
+    await page.route('**/api/v1/acceso/estado',route=>route.fulfill({json:{data:{profile_complete:true}}}));
+    await page.route('**/api/v1/acceso/perfil',route=>route.fulfill({json:{data:profile}}));
+    await page.route('**/api/v1/tienda/precompra/resumen',route=>route.fulfill({json:{data:{cart:reviewCart,profile,profile_complete:true,next_step:'review'}}}));
+    await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({status:422,json:{message:'Uno o más conceptos requieren una tarifa vigente aprobada o la tarifa encontrada no es válida. No se generó el pedido.'}}));
+    await page.goto(origin+'/tienda/carrito',{waitUntil:'domcontentloaded'});
+    await page.locator('#cartContinue').click();
+    await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
+    await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('No se generó'));
+    assert.equal(await page.locator('#paymentBuyerName').innerText(),'Ana Torres');
+    assert.equal(await page.locator('#paymentBuyerDocument').innerText(),'DNI •••• 5678');
+    assert.match(await page.locator('#paymentPreviewTotal').innerText(),/420[,.]00/);
+    assert.equal(await page.locator('#paymentPreviewItems .payment-preview-line').count(),3);
+    assert.equal(await page.locator('#generateOrder').isDisabled(),true);
+    assert.equal(await page.locator('.market-social-rail').count(),0);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'La revisión no debe desbordarse horizontalmente');
+    if(!mobile){
+      const fit=await page.locator('.payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
+      assert.equal(fit,true,'Tres conceptos y las acciones deben caber en una pantalla de escritorio');
+    }
+    await page.locator('#editPaymentBuyer').click();
+    assert.equal(await page.locator('#firstNames').inputValue(),'Ana');
+    assert.equal(await page.locator('#docNumber').inputValue(),'12345678');
+    await page.unroute('**/api/v1/acceso/estado');
+    await page.unroute('**/api/v1/acceso/perfil');
+    await page.unroute('**/api/v1/tienda/precompra/resumen');
+    await page.unroute('**/api/v1/tienda/pedidos/cotizar');
+
     const login = await page.goto(origin + '/tienda/login', { waitUntil: 'domcontentloaded' });
     assert.equal(login?.status(), 200, 'El login debe responder HTTP 200');
     await page.locator('#marketLoginTitle').waitFor();

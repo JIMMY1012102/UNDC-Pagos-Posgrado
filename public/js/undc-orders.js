@@ -14,10 +14,10 @@ async function api(path,method='GET',body){
 let cartId=null,quoteGeneration=0,creating=false,page=1;
 document.addEventListener('undc:payment-review',async event=>{
  cartId=event.detail.cartId;const generation=++quoteGeneration,button=$('generateOrder');if(!button)return;
- button.disabled=true;$('orderQuoteMessage').textContent='Verificando las tarifas vigentes…';
+ button.disabled=true;$('orderQuoteMessage').classList.remove('is-approved');$('orderQuoteMessage').textContent='Verificando las tarifas vigentes…';
  try{const quote=await api('pedidos/cotizar','POST',{cart_id:cartId});if(generation!==quoteGeneration)return;
- $('paymentPreviewItems').replaceChildren(...quote.items.map(item=>{const row=node('div',undefined,'payment-preview-line');row.append(node('strong',item.name+' × '+item.quantity),node('span',money(item.total_amount)));return row;}));
- $('paymentPreviewTotal').textContent=money(quote.total_amount);$('orderQuoteMessage').textContent='Tarifas aprobadas verificadas. Puedes generar tu pedido pendiente.';button.disabled=false;
+ $('paymentPreviewItems').replaceChildren(...quote.items.map(item=>{const row=node('div',undefined,'payment-preview-line');const name=node('strong',item.name);name.append(node('small','Posgrado · Cantidad '+item.quantity));row.append(name,node('span',money(item.total_amount)));return row;}));
+ $('paymentPreviewTotal').textContent=money(quote.total_amount);if($('paymentTotalLabel'))$('paymentTotalLabel').textContent='Total del pedido';$('orderQuoteMessage').classList.add('is-approved');$('orderQuoteMessage').textContent='Tarifas aprobadas verificadas. Puedes generar tu pedido pendiente.';button.disabled=false;
  }catch(error){if(generation===quoteGeneration)$('orderQuoteMessage').textContent=error.message;}
 });
 $('generateOrder')?.addEventListener('click',async()=>{

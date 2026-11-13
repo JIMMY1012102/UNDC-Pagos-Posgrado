@@ -327,7 +327,7 @@ $('visibleConceptCount').textContent=visible.length+' '+localized(visible.length
 const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalogResultsTitle').textContent=selected?localized(selected.name,selected.en):localized('Todos los conceptos','All services');
 }
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');const added=(state.cart?.items||[]).some(line=>String(line.catalog_item_id)===String(item.id));$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Código del concepto','Service code'))+'</small><strong>'+esc(item.code||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Importe referencial','Reference amount'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(item.office?.name||localized('Por confirmar','To be confirmed'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p><button class="reference-add-button dialog-add-button" type="button" data-catalog-cart="'+esc(item.id)+'" aria-pressed="'+String(added)+'">'+cartGlyph()+'<span>'+esc(localized(added?'Agregado al carrito':'Agregar al carrito',added?'Added to cart':'Add to cart'))+'</span></button>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
-function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
+function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-payment-view',name==='payment');document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function updateCategoryNavigation(){
  document.querySelectorAll('[data-category-nav]').forEach(link=>{
   const active=link.dataset.categoryNav===tusneCategory;
@@ -486,14 +486,17 @@ if(state.token&&state.cart?.items_count>0&&!state.owned){await api('/api/v1/tien
 await refreshReview()}catch(e){toast(e.message,true)}}
 
 async function showPaymentPreview(){
- const profile=await api('/api/v1/acceso/perfil');
+ const profile=await api('/api/v1/acceso/perfil');state.profile=profile;
  const institutional=state.cart?.items||[];
  $('paymentBuyerName').textContent=[profile?.first_names,profile?.last_names].filter(Boolean).join(' ');
- $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
+ $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number?'•••• '+String(profile.document_number).slice(-4):''].filter(Boolean).join(' ');
+ $('paymentBuyerInitials').textContent=[profile?.first_names,profile?.last_names].filter(Boolean).map(name=>Array.from(name.trim())[0]||'').join('').toLocaleUpperCase();
  $('paymentBuyerEmail').textContent=profile?.contact_email||'';
  const box=$('paymentPreviewItems');box.replaceChildren();
- for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=referenceCents(item)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(item));row.append(name,price);box.append(row)}
+ for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto';const meta=document.createElement('small');meta.textContent=localized('Posgrado · Cantidad ','Graduate School · Quantity ')+item.quantity;name.append(meta);const price=document.createElement('span');price.className=referenceCents(item)===null?'is-pending':'';price.textContent=referenceCents(item)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(item));row.append(name,price);box.append(row)}
  $('paymentPreviewCount').textContent=String(institutional.length);
+ $('paymentSelectionCount').textContent=localized(institutional.length===1?'1 concepto':institutional.length+' conceptos',institutional.length===1?'1 service':institutional.length+' services');
+ $('paymentTotalLabel').textContent=localized('Total referencial','Reference total');
  $('paymentPreviewTotal').textContent=referenceEstimate(institutional);
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
  document.dispatchEvent(new CustomEvent('undc:payment-review',{detail:{cartId:state.cart?.id}}));
@@ -578,6 +581,11 @@ document.querySelectorAll('.nav-links a, .drawer-links a').forEach(link=>link.ad
 $('cartButton')?.addEventListener('click',()=>screen('cart'));$('mobileCartButton')?.addEventListener('click',()=>{screen('cart');closeHeaderMenu()});$('sideContinue')?.addEventListener('click',purchase);$('cartContinue')?.addEventListener('click',continuePurchase);
 document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>screen(el.dataset.go)));
 $('googleButton')?.addEventListener('click',()=>{sessionStorage.setItem('undc_resume_purchase','1');window.location.assign('/auth/google/redirect')});
+$('editPaymentBuyer')?.addEventListener('click',()=>{
+ screen('identity');$('loginBox').hidden=true;$('profileBox').hidden=false;
+ for(const [key,value] of Object.entries(state.profile||{})){const el=$('profileForm').elements.namedItem(key);if(el&&typeof value==='string')el.value=value}
+ $('firstNames').focus({preventScroll:true});
+});
 $('profileForm')?.addEventListener('submit',async event=>{event.preventDefault();const form=new FormData(event.currentTarget);
 try{await api('/api/v1/acceso/perfil','PUT',Object.fromEntries(form.entries()));await refreshReview();toast('Tus datos quedaron guardados para próximas compras.')}catch(e){let msg=e.message;if(e.errors){msg=Object.values(e.errors).flat().join(' ')}toast(msg,true)}});
 $('reviewBack')?.addEventListener('click',()=>screen('cart'));
