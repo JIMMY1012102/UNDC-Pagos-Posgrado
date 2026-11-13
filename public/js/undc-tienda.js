@@ -360,6 +360,19 @@ function selectCatalogCategory(category,reveal=true){
 }
 function setMainView(name){document.querySelectorAll('[data-main-view]').forEach(view=>{view.hidden=view.dataset.mainView!==name});document.querySelectorAll('[data-main-view-link]').forEach(link=>{const active=link.dataset.mainViewLink===name;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')})}
 function badge(){const n=(state.cart?.items_count||0);$('cartBadge').textContent=n;if($('drawerCartBadge'))$('drawerCartBadge').textContent=n;const mobileBadge=$('mobileCartBadge');if(mobileBadge)mobileBadge.textContent=n;if($('emptyBadge'))$('emptyBadge').textContent=n?localized(n===1?'1 concepto seleccionado':'{n} conceptos seleccionados',n===1?'1 service selected':'{n} services selected').replace('{n}',n):localized('Aún no has agregado conceptos','You have not added any services yet');}
+function referenceCents(line){
+  const value=line.reference_amount;
+  if(typeof value!=='string'||!/^\d+(?:\.\d{1,2})?$/.test(value))return null;
+  const [whole,fraction='']=value.split('.');
+  const cents=Number(whole)*100+Number(fraction.padEnd(2,'0'));
+  const total=cents*line.quantity;
+  return Number.isSafeInteger(total)&&Number.isInteger(line.quantity)&&line.quantity>0?total:null;
+}
+const formatCents=cents=>catalogReferencePrice({reference_amount:(cents/100).toFixed(2)});
+function referenceEstimate(items){
+ const amounts=items.map(referenceCents),total=amounts.reduce((sum,value)=>sum+(value??0),0);
+ return items.length&&amounts.every(value=>value!==null)&&Number.isSafeInteger(total)?formatCents(total):localized('Por confirmar','To be confirmed');
+}
 function renderCart(){
  const items=state.cart?.items||[];badge();renderTusneCatalog();
  if(!$('cartRows')){updateCartAction();return}
@@ -369,17 +382,7 @@ function renderCart(){
  document.querySelector('.page-grid').classList.toggle('cart-has-items',!cartIsEmpty);
  $('cartListHeading').hidden=cartIsEmpty;$('cartEstimateRow').hidden=cartIsEmpty;
  $('cartPurchaseSummary').hidden=cartIsEmpty;
- const referenceCents=line=>{
-  const value=line.reference_amount;
-  if(typeof value!=='string'||!/^\d+(?:\.\d{1,2})?$/.test(value))return null;
-  const [whole,fraction='']=value.split('.');
-  const cents=Number(whole)*100+Number(fraction.padEnd(2,'0'));
-  const total=cents*line.quantity;
-  return Number.isSafeInteger(total)&&Number.isInteger(line.quantity)&&line.quantity>0?total:null;
- };
- const formatCents=cents=>catalogReferencePrice({reference_amount:(cents/100).toFixed(2)});
- const amounts=items.map(referenceCents),total=amounts.reduce((sum,value)=>sum+(value??0),0);
- const estimate=items.length&&amounts.every(value=>value!==null)&&Number.isSafeInteger(total)?formatCents(total):localized('Por confirmar','To be confirmed');
+ const estimate=referenceEstimate(items);
  $('cartEstimate').textContent=estimate;$('cartSummaryEstimate').textContent=estimate;
  $('cartSummaryCount').textContent=String(count);
  $('cartTotalCount').textContent=localized('Tu selección','Your selection')+' ('+count+')';
@@ -489,9 +492,9 @@ async function showPaymentPreview(){
  $('paymentBuyerDocument').textContent=[profile?.document_type,profile?.document_number].filter(Boolean).join(' ');
  $('paymentBuyerEmail').textContent=profile?.contact_email||'';
  const box=$('paymentPreviewItems');box.replaceChildren();
- for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=localized('Por confirmar','To be confirmed');row.append(name,price);box.append(row)}
+ for(const item of institutional){const row=document.createElement('div');row.className='payment-preview-line';const name=document.createElement('strong');name.textContent=(item.name||tusneConcepts.find(concept=>concept.id===String(item.catalog_item_id))?.name||item.slug||'Concepto')+' × '+item.quantity;const price=document.createElement('span');price.textContent=referenceCents(item)===null?localized('Por confirmar','To be confirmed'):formatCents(referenceCents(item));row.append(name,price);box.append(row)}
  $('paymentPreviewCount').textContent=String(institutional.length);
- $('paymentPreviewTotal').textContent=localized('Por confirmar','To be confirmed');
+ $('paymentPreviewTotal').textContent=referenceEstimate(institutional);
  screen('payment');$('paymentPreviewTitle').focus({preventScroll:true});
  document.dispatchEvent(new CustomEvent('undc:payment-review',{detail:{cartId:state.cart?.id}}));
 }

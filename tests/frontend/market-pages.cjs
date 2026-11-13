@@ -21,7 +21,7 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
  const body=new Element();body.dataset.marketPage=page;const assigned=[];
  const storage=new Map(resume?[['undc_resume_purchase','1']]:[]);
  const store=m=>({getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)});
- const document={body,documentElement:new Element(),getElementById:id=>ids.get(id)||null,querySelector:s=>s.startsWith('meta')?new Element():s==='.page-grid'||s==='.cart-review-panel'?new Element():null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
+ const document={body,documentElement:new Element(),dispatchEvent(){},getElementById:id=>ids.get(id)||null,querySelector:s=>s.startsWith('meta')?new Element():s==='.page-grid'||s==='.cart-review-panel'?new Element():null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
  const calls=[];
  const fetch=async(url,options={})=>{
   calls.push({url,...options});
@@ -40,8 +40,8 @@ async function boot(page,{authenticated=false,complete=true,resume=false,local=n
   else data=cart;
   return {status:200,ok:true,json:async()=>({success:true,data})};
  };
- const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),URLSearchParams,Intl,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={openConceptDetail,selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
+ const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}},URLSearchParams,Intl,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
+ const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={openConceptDetail,selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,showPaymentPreview,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html,calls};
 }
@@ -271,5 +271,28 @@ test('cart never invents a total when a reference amount is missing or invalid',
   const app=await boot('cart',{cart:{items:[{id:1,catalog_item_id:101,name:'Concepto',reference_amount:amount,quantity:1}],items_count:1}});
   assert.equal(app.ids.get('cartSummaryEstimate').textContent,'Por confirmar');
   assert.equal(app.ids.get('cartRows').children[0].children[2].textContent,'Por confirmar');
+ }
+});
+
+
+test('payment review retains cart reference amounts and quantities before the approved quote',async()=>{
+ const cart={id:7,items:[{id:1,catalog_item_id:101,name:'<script>Concepto</script>',reference_amount:'125.10',quantity:2},{id:2,catalog_item_id:102,name:'Prospecto',reference_amount:'10.25',quantity:1}],items_count:3,checkout_enabled:false,total_amount:null};
+ const app=await boot('cart',{cart});
+ await app.context.marketTest.showPaymentPreview();
+ const rows=app.ids.get('paymentPreviewItems').children;
+ assert.equal(rows[0].children[0].textContent,'<script>Concepto</script> × 2');
+ assert.equal(rows[0].children[1].textContent,app.ids.get('cartRows').children[0].children[2].textContent);
+ assert.match(rows[0].children[1].textContent,/250[,.]20/);
+ assert.equal(app.ids.get('paymentPreviewTotal').textContent,app.ids.get('cartSummaryEstimate').textContent);
+ assert.match(app.ids.get('paymentPreviewTotal').textContent,/260[,.]45/);
+ assert.equal(cart.total_amount,null);assert.equal(cart.checkout_enabled,false);
+});
+test('payment review keeps unknown totals pending instead of showing a partial sum',async()=>{
+ for(const amount of [null,undefined,'-1.00','<script>','',true]){
+  const app=await boot('cart',{cart:{items:[{id:1,catalog_item_id:101,name:'Disponible',reference_amount:'10.25',quantity:1},{id:2,catalog_item_id:102,name:'Pendiente',reference_amount:amount,quantity:1}],items_count:2}});
+  await app.context.marketTest.showPaymentPreview();
+  assert.match(app.ids.get('paymentPreviewItems').children[0].children[1].textContent,/10[,.]25/);
+  assert.equal(app.ids.get('paymentPreviewItems').children[1].children[1].textContent,'Por confirmar');
+  assert.equal(app.ids.get('paymentPreviewTotal').textContent,'Por confirmar');
  }
 });

@@ -17,5 +17,5 @@ test('approved quote renders server amount as text and double click creates once
  b.release();await first;assert.equal(b.redirects[0],'/tienda/mis-pedidos?pedido=UNDC-TEST');
 });
 test('unapproved quote keeps order button disabled and shows server reason',async()=>{
- const b=boot({fail:true});await b.callbacks['undc:payment-review']({detail:{cartId:7}});assert.equal(b.els.get('generateOrder').disabled,true);assert.equal(b.els.get('orderQuoteMessage').textContent,'Tarifa pendiente');
+ const b=boot({fail:true});b.els.get('paymentPreviewTotal').textContent='S/ 260.45';const row={textContent:'Referencia del carrito'};b.els.get('paymentPreviewItems').append(row);await b.callbacks['undc:payment-review']({detail:{cartId:7}});assert.equal(b.els.get('generateOrder').disabled,true);assert.equal(b.els.get('orderQuoteMessage').textContent,'Tarifa pendiente');assert.equal(b.els.get('paymentPreviewTotal').textContent,'S/ 260.45');assert.equal(b.els.get('paymentPreviewItems').children[0],row);
 });
