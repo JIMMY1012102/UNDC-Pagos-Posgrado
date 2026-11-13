@@ -37,9 +37,9 @@ final class CartService
     }
 
     /** @return array<string,mixed>|null */
-    public function find(string $token): ?array
+    public function find(?string $token, ?int $userId = null): ?array
     {
-        $cart = $this->activeCart($token);
+        $cart = $this->activeCart($token, false, $userId);
 
         return $cart ? $this->snapshot((int) $cart->id) : null;
     }
@@ -75,10 +75,10 @@ final class CartService
     }
 
     /** @return array<string,mixed>|null */
-    public function add(string $token, int $catalogId, int $quantity): ?array
+    public function add(?string $token, int $catalogId, int $quantity, ?int $userId = null): ?array
     {
-        return DB::transaction(function () use ($token, $catalogId, $quantity): ?array {
-            $cart = $this->activeCart($token, true);
+        return DB::transaction(function () use ($token, $catalogId, $quantity, $userId): ?array {
+            $cart = $this->activeCart($token, true, $userId);
             if ($cart === null) {
                 return null;
             }
@@ -122,10 +122,10 @@ final class CartService
     }
 
     /** @return array<string,mixed>|null */
-    public function remove(string $token, int $lineId): ?array
+    public function remove(?string $token, int $lineId, ?int $userId = null): ?array
     {
-        return DB::transaction(function () use ($token, $lineId): ?array {
-            $cart = $this->activeCart($token, true);
+        return DB::transaction(function () use ($token, $lineId, $userId): ?array {
+            $cart = $this->activeCart($token, true, $userId);
             if ($cart === null) {
                 return null;
             }
@@ -139,17 +139,22 @@ final class CartService
         });
     }
 
-    private function activeCart(string $token, bool $lock = false): ?object
+    private function activeCart(?string $token, bool $lock = false, ?int $userId = null): ?object
     {
+        if ($token === null && $userId === null) {
+            return null;
+        }
+
         $query = DB::table('tienda_carritos')
-            ->where('token_hash', hash('sha256', $token))
+            ->when($token !== null,
+                fn ($q) => $q->where('token_hash', hash('sha256', $token))->whereNull('user_id'),
+                fn ($q) => $q->where('user_id', $userId))
             ->where('status', 'active')
-            ->whereNull('user_id')
             ->where(function ($query): void {
                 $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
             });
 
-        return ($lock ? $query->lockForUpdate() : $query)->first();
+        return ($lock ? $query->lockForUpdate() : $query)->latest('id')->first();
     }
 
     /** @return array<string,mixed> */

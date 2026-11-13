@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Modules;
 
+use App\Models\User;
+use App\Modules\Pedidos\Services\CartService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -117,6 +119,75 @@ class CartApiTest extends TestCase
             ->assertJsonPath('data.items.0.reference_amount', null)
             ->assertJsonPath('data.total_amount', null)
             ->assertJsonPath('data.checkout_enabled', false);
+    }
+
+    private function ownedCart(User $buyer): array
+    {
+        $created = app(CartService::class)->create();
+        app(CartService::class)->add($created['token'], 101, 1);
+        app(CartService::class)->claim($created['token'], $buyer->id);
+
+        return $created;
+    }
+
+    public function test_owner_can_add_and_remove_after_claim_without_reusing_token(): void
+    {
+        $this->makeCatalog();
+        $buyer = User::factory()->create();
+        $created = $this->ownedCart($buyer);
+        $this->actingAs($buyer);
+        $response = $this->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 101, 'quantity' => 2, 'user_id' => 999999,
+        ])->assertOk()->assertJsonPath('data.id', $created['cart']['id'])
+            ->assertJsonPath('data.items_count', 3);
+        $this->getJson('/api/v1/tienda/carritos/actual')->assertOk()->assertJsonPath('data.items_count', 3);
+        $this->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 101, 'quantity' => 18,
+        ])->assertUnprocessable();
+        $this->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 102, 'quantity' => 1,
+        ])->assertStatus(409);
+        $this->deleteJson('/api/v1/tienda/carritos/actual/items/'.$response->json('data.items.0.id'))
+            ->assertOk()->assertJsonCount(0, 'data.items');
+        $this->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 101, 'quantity' => 1,
+        ])->assertOk()->assertJsonPath('data.id', $created['cart']['id']);
+        $this->withToken($created['token'])->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $created['cart']['id'], 'token_hash' => null]);
+    }
+
+    public function test_session_cannot_modify_another_buyers_cart_or_lines(): void
+    {
+        $this->makeCatalog();
+        $first = User::factory()->create();
+        $second = User::factory()->create();
+        $firstCart = $this->ownedCart($first);
+        $line = DB::table('tienda_detalles_carrito')->where('cart_id', $firstCart['cart']['id'])->value('id');
+        $this->actingAs($second)->postJson('/api/v1/tienda/carritos/actual/items', [
+            'catalog_item_id' => 101, 'quantity' => 1, 'user_id' => $first->id,
+            'cart_id' => $firstCart['cart']['id'],
+        ])->assertNotFound();
+        $this->ownedCart($second);
+        $this->deleteJson('/api/v1/tienda/carritos/actual/items/'.$line)->assertOk();
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['id' => $line, 'quantity' => 1]);
+    }
+
+    public function test_owner_cannot_edit_expired_or_converted_cart(): void
+    {
+        $this->makeCatalog();
+        $buyer = User::factory()->create();
+        $created = $this->ownedCart($buyer);
+        $this->actingAs($buyer);
+        foreach (['expired', 'converted'] as $status) {
+            DB::table('tienda_carritos')->where('id', $created['cart']['id'])->update(['status' => $status]);
+            $this->postJson('/api/v1/tienda/carritos/actual/items', [
+                'catalog_item_id' => 101, 'quantity' => 1,
+            ])->assertNotFound();
+        }
+        DB::table('tienda_carritos')->where('id', $created['cart']['id'])
+            ->update(['status' => 'active', 'expires_at' => now()->subMinute()]);
+        $this->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
+        $this->deleteJson('/api/v1/tienda/carritos/actual/items/1')->assertNotFound();
     }
 
 }

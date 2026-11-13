@@ -25,11 +25,11 @@ final class CartController extends Controller
     public function show(Request $request, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null) {
+        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
             return $this->invalidToken();
         }
 
-        $cart = $service->find($token);
+        $cart = $service->find($token, $request->user()?->id);
 
         return $cart === null ? $this->notFound() : response()->json([
             'success' => true,
@@ -41,7 +41,7 @@ final class CartController extends Controller
     public function add(Request $request, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null) {
+        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
             return $this->invalidToken();
         }
 
@@ -60,7 +60,7 @@ final class CartController extends Controller
         }
 
         try {
-            $cart = $service->add($token, (int) $validator->validated()['catalog_item_id'], (int) $validator->validated()['quantity']);
+            $cart = $service->add($token, (int) $validator->validated()['catalog_item_id'], (int) $validator->validated()['quantity'], $request->user()?->id);
         } catch (RuntimeException $e) {
             if (! in_array($e->getMessage(), ['CATALOG_ITEM_UNAVAILABLE', 'QUANTITY_LIMIT'], true)) {
                 throw $e;
@@ -85,11 +85,11 @@ final class CartController extends Controller
     public function remove(Request $request, int $line, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null) {
+        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
             return $this->invalidToken();
         }
 
-        $cart = $service->remove($token, $line);
+        $cart = $service->remove($token, $line, $request->user()?->id);
 
         return $cart === null ? $this->notFound() : response()->json([
             'success' => true,
