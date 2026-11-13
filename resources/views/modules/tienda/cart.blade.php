@@ -7,7 +7,7 @@
 <section class="screen visible cart-modern payment-preview" data-screen="cart" aria-labelledby="cartPageTitle">
 <nav class="payment-breadcrumb" aria-label="Ruta de compra"><a href="/tienda">Catálogo</a><span aria-hidden="true">/</span><span aria-current="page">Carrito</span></nav>
 <div class="payment-preview-heading cart-modern-heading"><div><h1 id="cartPageTitle">Revisa tu carrito.</h1><p>Confirma los conceptos que seleccionaste antes de continuar.</p></div>
-<ol class="payment-progress cart-progress" aria-label="Etapas de la compra"><li aria-current="step"><span>01</span>Carrito</li><li><span>02</span>Datos</li><li><span>03</span>Revisión</li></ol></div>
+<ol class="payment-progress cart-progress" aria-label="Etapas de la compra"><li aria-current="step"><span>01</span>Carrito</li><li><span>02</span>Revisión</li></ol></div>
 <div class="payment-preview-grid">
 <section class="payment-selection-card cart-review-panel" aria-label="Conceptos del carrito">
 <div class="payment-selection-heading cart-list-heading" id="cartListHeading" hidden><h2>Tu selección</h2><span id="cartTotalCount">0 conceptos</span></div>
