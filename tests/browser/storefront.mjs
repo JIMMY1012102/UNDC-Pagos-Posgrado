@@ -201,6 +201,7 @@ async function scenario(viewport, name) {
     }
     await page.locator('#sideContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
+    assert.equal(await page.locator('[data-screen="review"]').count(),0,'No debe existir una pantalla antigua intermedia de revisión');
     await page.waitForFunction(()=>document.getElementById('orderQuoteMessage').textContent.includes('pendientes de validación'));
     assert.equal(await page.locator('#paymentBuyerName').innerText(),'Ana Torres');
     assert.equal(await page.locator('#paymentBuyerDocument').innerText(),'DNI •••• 5678');
