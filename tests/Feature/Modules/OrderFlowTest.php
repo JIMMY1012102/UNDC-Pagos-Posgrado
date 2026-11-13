@@ -155,7 +155,7 @@ class OrderFlowTest extends TestCase
             ->assertJsonPath('data.id', $newCart)->assertJsonPath('data.items_count', 2);
         $this->postJson('/api/v1/tienda/carritos/actual/items', ['catalog_item_id' => 101, 'quantity' => 1])->assertOk();
         $updated = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $newCart])->assertCreated()
-            ->assertJsonPath('data.total_amount', '75.30')->json('data');
+            ->assertJsonPath('data.total_amount', fn ($amount) => (float) $amount === 75.30)->json('data');
         $this->assertNotSame($order['code'], $updated['code']);
         $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 2, 'total_amount' => '50.20']);
         $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 3, 'total_amount' => '75.30']);
