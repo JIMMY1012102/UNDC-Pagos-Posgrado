@@ -230,6 +230,7 @@ async function scenario(viewport, name) {
     const order={code:'UNDC-01ABCDEFGHIJKLMNOPQRSTUVWX',status:'pending',currency:'PEN',total_amount:'420.00',created_at:'2026-11-13 12:00:00',expires_at:'2026-11-14 12:00:00',paid_at:null,buyer_name:'Ana Torres',buyer_email:'ana@example.test',payment_enabled:false,items:reviewCart.items.map(item=>({concept_name:item.name,concept_code:'TEST',quantity:item.quantity,unit_amount:item.reference_amount,total_amount:item.reference_amount})),history:[{to_status:'pending',reason:'Pedido generado con importes oficiales verificados.',occurred_at:'2026-11-13 12:00:00'}]};
     await page.route('**/api/v1/tienda/pedidos/cotizar',route=>route.fulfill({json:{data:{items:reviewCart.items.map(item=>({name:item.name,quantity:item.quantity,total_amount:item.reference_amount})),total_amount:'420.00'}}}));
     await page.route('**/api/v1/tienda/pedidos',route=>route.fulfill({json:{data:route.request().method()==='POST'?order:{items:[order],page:1,has_more:false}}}));
+    await page.route('**/api/v1/tienda/pedidos?*',route=>route.fulfill({json:{data:{items:[order],page:1,has_more:false}}}));
     await page.route('**/api/v1/tienda/pedidos/UNDC-*',route=>route.fulfill({json:{data:order}}));
     const template=readFileSync(new URL('../../resources/views/modules/tienda/orders.blade.php',import.meta.url),'utf8');
     const content=template.split("@section('content')")[1].split('@endsection')[0].replace(/\{\{ asset\('([^']+)'\) \}\}/g,(_,file)=>'/'+file).replace(/\?v=\{\{[^}]+\}\}/g,'');
@@ -250,6 +251,7 @@ async function scenario(viewport, name) {
     await page.unroute('**/tienda/mis-pedidos*');
     await page.unroute('**/api/v1/tienda/pedidos');
     await page.unroute('**/api/v1/tienda/pedidos/UNDC-*');
+    await page.unroute('**/api/v1/tienda/pedidos?*');
     await page.unroute('**/api/v1/acceso/estado');
     await page.unroute('**/api/v1/acceso/perfil');
     await page.unroute('**/api/v1/tienda/precompra/resumen');
