@@ -128,7 +128,49 @@ body.market-cart-stage .cart-modern .cart-review-panel #cartRows .cart-service-r
 body.market-cart-stage .cart-modern #cartRows .cart-service-icon{width:44px;height:44px}
 }
 
+
+/* Motion from the supplied prototype, using the existing palette. */
+@keyframes cmRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes cmItem{from{opacity:0;transform:translateX(-24px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes cmLeave{to{opacity:0;transform:translateX(30px) scale(.97)}}
+@keyframes cmDrift{50%{transform:translate(60px,40px) scale(1.12)}}
+@keyframes cmOrbit{to{transform:rotate(360deg)}}
+@keyframes cmTwinkle{0%,100%{opacity:.25;scale:.7}50%{opacity:1;scale:1.15}}
+@keyframes cmShadow{50%{scale:.72 1;opacity:.14}}
+@keyframes cmRing{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--cart-accent) 40%,transparent)}to{box-shadow:0 0 0 14px transparent}}
+@keyframes cmFlow{to{background-position:-48px 0}}
+@keyframes cmShine{0%{transform:translateX(-150%) skewX(-18deg)}60%,100%{transform:translateX(400%) skewX(-18deg)}}
+.market-cart-stage .cart-modern-heading{animation:cmRise .7s .05s both}
+.market-cart-stage .cart-review-panel{animation:cmRise .7s .25s both}
+.market-cart-stage .payment-summary-column{animation:cmRise .7s .35s both}
+.market-cart-stage .cart-progress{animation:cmRise .7s .15s both}
+.market-cart-stage .cart-progress li[aria-current] span{animation:cmRing 1.9s infinite}
+.market-cart-stage .cart-progress li+li::before{background-image:repeating-linear-gradient(90deg,var(--cart-accent) 0 24px,var(--cart-line) 24px 48px);background-size:48px 100%;animation:cmFlow 1.4s linear infinite}
+.market-cart-stage .cart-service-row{animation:cmItem .5s both;animation-delay:calc(var(--cart-item-index,0) * 60ms);transition:transform .2s,box-shadow .2s}
+.market-cart-stage .cart-service-row.cm-leaving{animation:cmLeave .28s both}
+.market-cart-stage .cart-review-panel,.market-cart-stage .cart-modern-summary{transition:translate .35s,box-shadow .35s}
+@media(hover:hover){.market-cart-stage .cart-review-panel:hover,.market-cart-stage .cart-modern-summary:hover{translate:0 -4px}.market-cart-stage .cart-service-row:hover{translate:0 -2px;box-shadow:0 12px 28px -14px rgb(6 46 34 / 28%)}}
+.market-cart-stage :is(.cart-remove,.cart-clear-all,.payment-add-concept,#cartButton,.cart-explore-button,#sideContinue){transition:translate .2s,scale .2s,box-shadow .2s}
+.market-cart-stage :is(.cart-remove,.cart-clear-all,.payment-add-concept,#cartButton):hover{translate:0 -2px}
+.market-cart-stage .cart-remove:active{scale:.92}
+.market-cart-stage :is(.cart-explore-button,#sideContinue){position:relative;overflow:hidden}
+.market-cart-stage :is(.cart-explore-button,#sideContinue:not(:disabled))::after{content:"";position:absolute;inset:0 auto 0 0;width:35%;background:linear-gradient(90deg,transparent,rgb(255 255 255 / 26%),transparent);pointer-events:none;animation:cmShine 3.2s infinite}
+.market-cart-stage :is(.cart-explore-button,#sideContinue):not(:disabled):hover{translate:0 -2px;box-shadow:0 18px 34px -12px rgb(10 122 79 / 35%)}
+.market-cart-stage .cart-motion-art{position:relative;display:grid;place-items:center;width:190px;height:170px;flex-shrink:0}
+.market-cart-stage .cart-motion-orbit{position:absolute;inset:0;animation:cmOrbit 14s linear infinite;pointer-events:none}
+.market-cart-stage .cart-motion-orbit::after{content:"";position:absolute;top:8px;left:50%;width:9px;height:9px;border-radius:50%;background:var(--cart-accent)}
+.market-cart-stage .cart-motion-orbit.second{inset:18px;animation-duration:22s;animation-direction:reverse}
+.market-cart-stage .cart-motion-spark{position:absolute;right:10px;top:20px;color:var(--cart-accent);animation:cmTwinkle 2.6s infinite}
+.market-cart-stage .cart-motion-shadow{position:absolute;bottom:0;width:100px;height:10px;border-radius:50%;background:var(--cart-accent);opacity:.28;filter:blur(6px);animation:cmShadow 4.6s infinite}
+.market-cart-stage .cart-motion-glow{position:fixed;z-index:0;pointer-events:none;border-radius:50%;width:45vw;height:45vw;filter:blur(90px);background:var(--cart-accent);opacity:.07;animation:cmDrift 16s infinite;top:-20vw;left:-15vw}
+.market-cart-stage .cart-motion-glow.second{left:auto;right:-20vw;top:15vh;animation-duration:20s;animation-direction:reverse}
+body[data-accessibility-color] .cart-motion-glow{display:none}
+@media(min-width:801px){body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-motion-art{width:145px;height:125px}}
+@media(prefers-reduced-motion:reduce){body.market-cart-stage *,body.market-cart-stage *::before,body.market-cart-stage *::after{animation:none!important;transition:none!important}}
+
+.market-cart-stage main.wrap,.market-cart-stage .site-header{position:relative;z-index:1}
 </style>
+<div class="cart-motion-glow" aria-hidden="true"></div><div class="cart-motion-glow second" aria-hidden="true"></div>
 <div class="page-grid cart-view"><div>
 <section class="screen visible cart-modern payment-preview" data-screen="cart" aria-labelledby="cartPageTitle">
 <nav class="payment-breadcrumb" aria-label="Ruta de compra"><a href="/tienda">Catálogo</a><span aria-hidden="true">/</span><span aria-current="page">Carrito</span></nav>
@@ -137,7 +179,7 @@ body.market-cart-stage .cart-modern #cartRows .cart-service-icon{width:44px;heig
 <div class="payment-preview-grid">
 <section class="payment-selection-card cart-review-panel" aria-label="Conceptos del carrito">
 <div class="payment-selection-heading cart-list-heading" id="cartListHeading" hidden><div class="cart-products-title"><h2>Tus conceptos</h2><span id="cartTotalCount">0 conceptos</span></div><button type="button" id="cartClearAll" class="cart-clear-all">Vaciar carrito</button></div>
-<div id="cartEmptyState" class="cart-empty-state" hidden><svg class="cart-empty-art" viewBox="0 0 210 190" width="210" height="190" aria-hidden="true" >
+<div id="cartEmptyState" class="cart-empty-state" hidden><div class="cart-motion-art"><span class="cart-motion-orbit" aria-hidden="true"></span><span class="cart-motion-orbit second" aria-hidden="true"></span><span class="cart-motion-spark" aria-hidden="true">✦</span><span class="cart-motion-shadow" aria-hidden="true"></span><svg class="cart-empty-art" viewBox="0 0 210 190" width="210" height="190" aria-hidden="true" >
                   <circle cx="105" cy="92" r="70" fill="#e1f2ea"></circle>
                   <path d="M52 62h20l14 62a8 8 0 0 0 8 6h56a8 8 0 0 0 8-6l10-42H80" fill="#fff" stroke="#0a7a4f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path>
                   <rect x="96" y="88" width="9" height="22" rx="4.5" fill="#0a7a4f" opacity=".85"></rect>
@@ -145,7 +187,7 @@ body.market-cart-stage .cart-modern #cartRows .cart-service-icon{width:44px;heig
                   <rect x="130" y="88" width="9" height="22" rx="4.5" fill="#0a7a4f" opacity=".35"></rect>
                   <circle cx="98" cy="150" r="8" fill="#062e22"></circle>
                   <circle cx="144" cy="150" r="8" fill="#062e22"></circle>
-                </svg><h3>Tu carrito está vacío</h3><p>Selecciona un concepto de nuestros catálogos o trámites para comenzar tu compra.</p><button type="button" class="btn cart-explore-button" data-go="catalog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Explorar conceptos y agregar al carrito</span><span aria-hidden="true">→</span></button></div>
+                </svg></div><h3>Tu carrito está vacío</h3><p>Selecciona un concepto de nuestros catálogos o trámites para comenzar tu compra.</p><button type="button" class="btn cart-explore-button" data-go="catalog"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Explorar conceptos y agregar al carrito</span><span aria-hidden="true">→</span></button></div>
 <div id="cartRows"></div>
 <a class="payment-add-concept" href="/tienda"><span aria-hidden="true">＋</span> Agregar otro concepto</a>
 </section>
@@ -156,4 +198,34 @@ body.market-cart-stage .cart-modern #cartRows .cart-service-icon{width:44px;heig
 @include('modules.tienda.partials.checkout')
 @include('modules.tienda.partials.payment-preview')
 </div></div>
+
+<script>
+(() => {
+ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+ const list = document.getElementById('cartRows');
+ function stagger() { list.querySelectorAll('.cart-service-row').forEach((row,index) => row.style.setProperty('--cart-item-index',Math.min(index,8))); }
+ new MutationObserver(stagger).observe(list,{childList:true});
+ list.addEventListener('click',event => {
+  const button=event.target.closest('.cart-remove');
+  if(button && !reduced.matches) {
+   const row=button.closest('.cart-service-row');row.classList.add('cm-leaving');
+   // Restore the row if the server rejects removal.
+   window.setTimeout(()=>row.classList.remove('cm-leaving'),300);
+  }
+ });
+ function pulseOnChange(id,keyframes) {
+  const element=document.getElementById(id);if(!element)return;
+  let previous=element.textContent;
+  new MutationObserver(()=>{
+   const next=element.textContent;if(next===previous)return;previous=next;
+   if(!reduced.matches && document.body.classList.contains('market-cart-stage'))element.animate(keyframes,{duration:450,easing:'cubic-bezier(.3,1.6,.5,1)'});
+  }).observe(element,{childList:true,subtree:true,characterData:true});
+ }
+ pulseOnChange('cartBadge',[{transform:'scale(1)'},{transform:'scale(1.55)'},{transform:'scale(1)'}]);
+ pulseOnChange('cartSummaryEstimate',[{opacity:.4,transform:'translateY(6px)'},{opacity:1,transform:'none'}]);
+ pulseOnChange('sideCartSummary',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}]);
+ stagger();
+})();
+</script>
+
 @endsection
