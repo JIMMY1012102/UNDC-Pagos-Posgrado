@@ -63,6 +63,33 @@ body.light-mode.market-cart-stage{--cart-surface:rgb(255 255 255 / 88%);--cart-r
 @media(max-width:800px){.market-cart-stage .payment-preview-grid{grid-template-columns:minmax(0,1fr)}.market-cart-stage .site-header{padding:12px 12px 0}.market-cart-stage .top-inner{border-radius:24px;padding:12px}.market-cart-stage main.wrap{width:calc(100% - 24px);padding-top:24px}.market-cart-stage .cart-review-panel{padding:18px}.market-cart-stage .cart-progress{gap:14px;padding:12px}.market-cart-stage .cart-progress li{font-size:12px}.market-cart-stage .cart-service-row{grid-template-columns:42px minmax(0,1fr) 36px;gap:10px;padding:14px}.market-cart-stage .cart-service-icon{width:42px;height:42px}.market-cart-stage .cart-service-price{grid-column:2;grid-row:2}.market-cart-stage .cart-remove{grid-column:3;grid-row:1 / span 2}.market-cart-stage .cart-explore-button{white-space:normal;padding:12px 20px}.market-cart-stage .cart-modern-footer{flex-wrap:wrap;gap:10px}}
 @media(prefers-reduced-motion:reduce){.market-cart-stage .cart-empty-art{animation:none}}
 
+
+/* Only the pill paints the header; its outer strip stays transparent. */
+body.market-cart-stage .site-header,
+body.market-cart-stage .site-header .top{background:transparent;border:0;box-shadow:none}
+/* Compact the empty state without locking scrolling or clipping content. */
+@media(min-width:801px){
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) main.wrap{padding-top:14px;padding-bottom:14px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-breadcrumb{margin-bottom:8px;font-size:12px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-heading{margin-bottom:18px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-heading h1{font-size:36px;margin-bottom:8px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-review-panel{min-height:0;padding:18px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-empty-state{min-height:0;padding:8px 16px 12px;gap:10px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-empty-art{width:145px;height:125px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-empty-state h3{font-size:23px;margin:0}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-empty-state>p{margin:0 0 6px;font-size:13px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-add-concept{display:none}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-summary{padding:20px 24px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-summary h2{font-size:17px;margin:0 0 12px;letter-spacing:.06em}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-total-block{margin-top:10px;padding:12px 0}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-preview-total{font-size:32px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-quote-message{margin:10px 0;padding:8px 10px;font-size:12px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) #sideContinue{min-height:46px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-modify{min-height:30px;margin-top:8px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-gateway-note{margin:8px 0 0;font-size:11px}
+body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-footer{margin-top:14px;padding-top:10px;font-size:11px}
+}
+
 </style>
 <div class="page-grid cart-view"><div>
 <section class="screen visible cart-modern payment-preview" data-screen="cart" aria-labelledby="cartPageTitle">
