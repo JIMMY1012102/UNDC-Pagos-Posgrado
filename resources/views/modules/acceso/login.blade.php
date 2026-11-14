@@ -200,6 +200,25 @@ body.light-mode .emerald-login .market-login-divider::before,body.light-mode .em
 body.light-mode .emerald-login .market-login-google{background:#fff;color:#214e38;border-color:#a7d1ba;box-shadow:none}
 body.light-mode .emerald-login .market-login-register a{color:#08764e}
 
+
+/* Reference composition: stationary cards around the robot and centered caption. */
+.emerald-university-emblem{width:64px;height:76px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 5px 8px rgb(0 70 45 / 12%))}
+.emerald-intro>h1{text-align:center;align-self:center;width:100%}
+.emerald-login .float{animation:none;transform:none;max-width:190px;padding:14px 16px}
+.emerald-login .float>div{gap:12px!important}
+.emerald-login .float>div>span:first-child{flex-shrink:0}
+.emerald-login .float>div>span:last-child{font-size:16px!important;line-height:1.25;white-space:normal}
+.emerald-login .fa{left:-28px;top:60px}
+.emerald-login .fb{right:-28px;top:225px}
+.emerald-login .fc{left:-28px;bottom:55px}
+@media(min-width:761px) and (max-width:1000px){
+.emerald-login .fa,.emerald-login .fc{left:0}
+.emerald-login .fb{right:0}
+.emerald-login .float{max-width:155px;padding:12px}
+.emerald-login .float>div>span:last-child{font-size:14px!important}
+}
+@media(max-width:760px){.emerald-university-emblem{width:48px;height:58px}}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -207,7 +226,7 @@ body.light-mode .emerald-login .market-login-register a{color:#08764e}
 
 <section class="emerald-intro" style="flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:space-between">
 <div class="in1" style="display:flex;align-items:center;gap:16px;padding-top:8px">
-<span style="width:56px;height:56px;border-radius:17px;background:linear-gradient(135deg,#34d399,#0b7a4f);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:26px;box-shadow:0 12px 28px rgba(16,185,129,.5);transform:rotate(-6deg)">U</span>
+<img class="emerald-university-emblem" src="{{ asset('Logo_UNDC_OF.png') }}" alt="Emblema de la Universidad Nacional de Cañete" width="64" height="76">
 <span><span class="sora" style="display:block;font-weight:800;font-size:30px;letter-spacing:.5px">UNDC <span style="color:#6ee7b7">MARKET</span></span><span style="display:block;margin-top:2px;color:#cfeee0;font-size:15px">Tienda virtual de pagos de la UNDC</span></span>
 </div>
 
