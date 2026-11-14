@@ -169,6 +169,37 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 .emerald-login .market-login-register{margin-top:12px}
 }
 
+
+/* Keep autofill and text consistent with the active login palette. */
+.emerald-login .market-login-input input{flex:1;width:0;-webkit-text-fill-color:currentColor}
+.emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #103f2e inset;-webkit-text-fill-color:#fff;border-radius:8px}
+body.light-mode .emerald-login{background:linear-gradient(125deg,#d6f5e5 0%,#ebfaf2 52%,#c3ead4 100%);color:#124e39}
+body.light-mode .emerald-login .aur{opacity:.1}
+body.light-mode .emerald-login .gridbg{background-image:linear-gradient(rgb(13 105 70 / 6%) 1px,transparent 1px),linear-gradient(90deg,rgb(13 105 70 / 6%) 1px,transparent 1px)}
+body.light-mode .emerald-intro>.in1{color:#124e39}
+body.light-mode .emerald-intro>.in1>span:last-child>span:last-child{color:#376751!important}
+body.light-mode .emerald-intro .sora span{color:#07835a!important}
+body.light-mode .emerald-intro>h1{color:#124e39}
+body.light-mode .emerald-intro>h1 span{background:none!important;color:#087b53!important}
+body.light-mode .emerald-login .float{background:rgb(255 255 255 / 88%);border-color:#91cdb0;color:#174f3b;box-shadow:0 12px 28px rgb(23 92 60 / 12%)}
+body.light-mode .emerald-toolbar a,body.light-mode .emerald-toolbar button{background:#f2fcf6;color:#155c40;border-color:#7fbea0}
+body.light-mode .emerald-login .gb{background:#b8dfcb;box-shadow:0 20px 55px rgb(23 92 60 / 15%)}
+body.light-mode .emerald-login .gb::before{display:none}
+body.light-mode .emerald-login .market-login-card{background:#fff;color:#174f3b}
+body.light-mode .emerald-login .market-login-heading h1{color:#124e39}
+body.light-mode .emerald-login .market-login-heading p,body.light-mode .emerald-login .market-login-register{color:#4b6f5f}
+body.light-mode .emerald-login .market-login-input{background:#f3faf6;border-color:#a7d1ba;box-shadow:none}
+body.light-mode .emerald-login .market-login-input input{background:transparent;color:#163e2e;-webkit-text-fill-color:#163e2e}
+body.light-mode .emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #f3faf6 inset;-webkit-text-fill-color:#163e2e}
+body.light-mode .emerald-login .market-login-input input::placeholder{color:#547562;-webkit-text-fill-color:#547562}
+body.light-mode .emerald-login .market-login-input svg,body.light-mode .emerald-login .eye{color:#197950}
+body.light-mode .emerald-login .market-login-forgot{color:#466c58;opacity:1}
+body.light-mode .emerald-login .market-login-submit{background:#087c53;color:#fff;box-shadow:0 8px 20px rgb(8 124 83 / 18%)}
+body.light-mode .emerald-login .market-login-divider,body.light-mode .emerald-login .market-login-divider span{background:transparent;color:#52705f}
+body.light-mode .emerald-login .market-login-divider::before,body.light-mode .emerald-login .market-login-divider::after{background:#d1e5d9}
+body.light-mode .emerald-login .market-login-google{background:#fff;color:#214e38;border-color:#a7d1ba;box-shadow:none}
+body.light-mode .emerald-login .market-login-register a{color:#08764e}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
