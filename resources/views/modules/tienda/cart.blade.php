@@ -90,6 +90,30 @@ body.market-cart-stage:has(#cartEmptyState:not([hidden])) .payment-gateway-note{
 body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-footer{margin-top:14px;padding-top:10px;font-size:11px}
 }
 
+
+/* Product-card composition only; keep the current palette and empty state. */
+.market-cart-stage .cart-has-items .cart-review-panel{padding:26px}
+.market-cart-stage .cart-products-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px}
+.market-cart-stage .cart-products-title h2{margin:0}
+.market-cart-stage .cart-clear-all{min-height:44px;padding:0 18px;border:1px solid var(--cart-line);border-radius:999px;background:transparent;color:var(--cart-ink);font:600 14px inherit;cursor:pointer}
+.market-cart-stage .cart-clear-all:disabled{opacity:.6;cursor:wait}
+.market-cart-stage .cart-has-items .cart-service-row{grid-template-columns:56px minmax(0,1fr) minmax(110px,auto) 44px;gap:18px;padding:20px;margin-bottom:14px;border-radius:22px}
+.market-cart-stage .cart-has-items .cart-service-icon{width:56px;height:56px;border-radius:18px;font:700 17px Sora,system-ui,sans-serif}
+.market-cart-stage .cart-has-items .cart-service-info b{font-size:16px}
+.market-cart-stage .cart-service-amount{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.market-cart-stage .cart-has-items .cart-service-price{font:700 22px Sora,system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.market-cart-stage .cart-official-rate{font-size:12px;font-weight:600;border:1px solid var(--cart-line);border-radius:999px;padding:3px 10px;color:var(--cart-accent)}
+.market-cart-stage .cart-has-items .cart-remove{width:44px;height:44px}
+.market-cart-stage .cart-has-items .payment-add-concept{min-height:56px;display:flex;justify-content:center;align-items:center;gap:10px;border-width:2px;border-radius:22px;margin-top:4px}
+@media(max-width:800px){
+.market-cart-stage .cart-has-items .cart-review-panel{padding:16px}
+.market-cart-stage .cart-list-heading{flex-wrap:wrap;gap:12px}
+.market-cart-stage .cart-has-items .cart-service-row{grid-template-columns:44px minmax(0,1fr) 44px;gap:12px;padding:16px}
+.market-cart-stage .cart-has-items .cart-service-icon{width:44px;height:44px}
+.market-cart-stage .cart-service-amount{grid-column:2;grid-row:2;align-items:flex-start}
+.market-cart-stage .cart-has-items .cart-service-price{font-size:20px}
+}
+
 </style>
 <div class="page-grid cart-view"><div>
 <section class="screen visible cart-modern payment-preview" data-screen="cart" aria-labelledby="cartPageTitle">
@@ -98,7 +122,7 @@ body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-footer{ma
 <ol class="payment-progress cart-progress" aria-label="Etapas de la compra"><li aria-current="step"><span>01</span>Carrito</li><li><span>02</span>Revisión</li><li><span>03</span>Pago</li></ol></div>
 <div class="payment-preview-grid">
 <section class="payment-selection-card cart-review-panel" aria-label="Conceptos del carrito">
-<div class="payment-selection-heading cart-list-heading" id="cartListHeading" hidden><h2>Tu selección</h2><span id="cartTotalCount">0 conceptos</span></div>
+<div class="payment-selection-heading cart-list-heading" id="cartListHeading" hidden><div class="cart-products-title"><h2>Tus conceptos</h2><span id="cartTotalCount">0 conceptos</span></div><button type="button" id="cartClearAll" class="cart-clear-all">Vaciar carrito</button></div>
 <div id="cartEmptyState" class="cart-empty-state" hidden><svg class="cart-empty-art" viewBox="0 0 210 190" width="210" height="190" aria-hidden="true" >
                   <circle cx="105" cy="92" r="70" fill="#e1f2ea"></circle>
                   <path d="M52 62h20l14 62a8 8 0 0 0 8 6h56a8 8 0 0 0 8-6l10-42H80" fill="#fff" stroke="#0a7a4f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path>
