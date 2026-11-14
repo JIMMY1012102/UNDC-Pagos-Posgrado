@@ -208,7 +208,7 @@ body.light-mode .emerald-login .market-login-register a{color:#08764e}
 .emerald-login .float>div{gap:12px!important}
 .emerald-login .float>div>span:first-child{flex-shrink:0}
 .emerald-login .float>div>span:last-child{font-size:16px!important;line-height:1.25;white-space:normal}
-.emerald-login .fa{left:-28px;top:60px}
+.emerald-login .fa{left:-28px;top:0}
 .emerald-login .fb{right:-28px;top:225px}
 .emerald-login .fc{left:-28px;bottom:55px}
 @media(min-width:761px) and (max-width:1000px){
