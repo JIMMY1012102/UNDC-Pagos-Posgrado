@@ -130,6 +130,45 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 @media(max-width:1000px){.emerald-layout{gap:28px}.emerald-intro .stage{transform:scale(.8);margin:-40px -50px}.emerald-intro h1{font-size:40px!important}.emerald-intro .float{padding:10px}.emerald-intro .sora{font-size:24px!important}}
 @media(max-width:760px){.emerald-layout{flex-direction:column;padding:24px 16px;gap:28px}.emerald-intro{flex:auto!important;width:100%;gap:20px!important}.emerald-intro .stage{display:none}.emerald-intro h1{font-size:30px!important}.emerald-intro h1 br{display:none}.emerald-panel{flex:auto;max-width:520px}.emerald-login .market-login-card{padding:28px 22px}.emerald-intro .sora{font-size:24px!important}.gb{border-radius:30px}}
 
+
+/* Compact viewport layout: shrink the content instead of clipping the form. */
+@media(min-width:761px){
+.emerald-layout{max-width:1200px;min-height:100svh;padding:16px 28px;gap:40px}
+.emerald-intro{align-self:center!important;justify-content:center!important;gap:12px!important}
+.emerald-intro .stage{height:340px!important;transform:none;margin:0}
+.emerald-intro .rig{inset:-55px -40px;transform:scale(.72) rotateX(16deg) rotateY(-6deg)!important}
+.emerald-intro h1{font-size:38px!important;line-height:1.1!important}
+.emerald-panel{max-width:440px}
+.emerald-toolbar{margin-bottom:12px}
+.emerald-toolbar a,.emerald-toolbar button{padding:8px 14px;min-height:40px}
+.emerald-login .market-login-card{padding:24px 28px;border-radius:28px}
+.emerald-login .gb{border-radius:30px}
+.emerald-login .market-login-heading{margin-bottom:16px}
+.emerald-login .market-login-symbol{width:48px;height:48px;border-radius:16px}
+.emerald-login .market-login-symbol svg{width:26px;height:26px}
+.emerald-login h1{font-size:28px;margin:12px 0 6px}
+.emerald-login .market-login-heading p{font-size:14px}
+.emerald-login .market-login-password label{margin:12px 0 6px}
+.emerald-login .market-login-input{height:48px;border-radius:14px}
+.emerald-login .market-login-forgot{margin:8px 0 12px;min-height:24px}
+.emerald-login .market-login-submit{height:48px;border-radius:14px;font-size:16px}
+.emerald-login .market-login-divider{margin:16px 0}
+.emerald-login .market-login-google{height:46px;border-radius:14px;font-size:15px}
+.emerald-login .market-login-register{margin:16px 0 0;font-size:14px}
+}
+@media(min-width:761px) and (max-height:700px){
+.emerald-layout{padding-top:10px;padding-bottom:10px}
+.emerald-intro .stage{height:290px!important}
+.emerald-intro .rig{inset:-75px -50px;transform:scale(.62) rotateX(16deg) rotateY(-6deg)!important}
+.emerald-intro h1{font-size:32px!important}
+.emerald-login .market-login-card{padding:18px 24px}
+.emerald-login .market-login-heading{margin-bottom:10px}
+.emerald-login .market-login-symbol{width:40px;height:40px}
+.emerald-login h1{font-size:26px;margin-top:8px}
+.emerald-login .market-login-divider{margin:12px 0}
+.emerald-login .market-login-register{margin-top:12px}
+}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
