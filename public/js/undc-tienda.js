@@ -386,6 +386,15 @@ function renderCart(){
  $('cartSummaryCount').textContent=String(count);
  $('cartTotalCount').textContent=localized(count===1?'1 concepto':count+' conceptos',count===1?'1 service':count+' services');
  $('sideCartSummary').textContent=cartIsEmpty?localized('Organiza tus conceptos antes de continuar.','Organize your services before continuing.'):localized('Importes del catálogo oficial.','Official catalog amounts.');
+ const clearButton=$('cartClearAll');
+ if(clearButton)clearButton.onclick=async()=>{
+  clearButton.disabled=true;
+  try{
+   for(const line of [...(state.cart?.items||[])])state.cart=await api('/api/v1/tienda/carritos/actual/items/'+line.id,'DELETE',null,!state.owned);
+   toast(localized('Carrito vaciado.','Cart cleared.'));
+  }catch(error){toast(error.message,true)}
+  finally{clearButton.disabled=false;renderCart()}
+ };
  const list=$('cartRows');list.replaceChildren();
  const trash='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';
  function appendRow({name,detail,price,icon,remove}){
@@ -395,7 +404,9 @@ function renderCart(){
   const title=document.createElement('b');title.textContent=name;
   const meta=document.createElement('small');meta.textContent=detail;info.append(title,meta);
   const amount=document.createElement('strong');amount.className='cart-service-price'+(price.startsWith('S/ ')?'':' is-pending');amount.textContent=price;
-  row.append(visual,info,amount);
+  const amountBox=document.createElement('div');amountBox.className='cart-service-amount';amountBox.append(amount);
+  if(price.startsWith('S/ ')){const rate=document.createElement('span');rate.className='cart-official-rate';rate.textContent=localized('Tarifa oficial','Official rate');amountBox.append(rate)}
+  row.append(visual,info,amountBox);
   if(remove){const button=document.createElement('button');button.type='button';button.className='mini cart-remove';button.innerHTML=trash;button.setAttribute('aria-label',localized('Quitar ','Remove ')+name);button.title=localized('Quitar','Remove');button.onclick=remove;row.append(button)}
   list.append(row);
  }
