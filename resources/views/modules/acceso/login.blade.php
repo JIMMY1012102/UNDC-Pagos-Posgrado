@@ -278,6 +278,10 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 .emerald-intro>h1{font-size:36px!important}
 }
 
+
+@media(min-width:761px){
+.emerald-intro>.in1{position:relative;top:-24px}
+}
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
