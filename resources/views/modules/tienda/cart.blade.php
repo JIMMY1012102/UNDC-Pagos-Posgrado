@@ -114,6 +114,20 @@ body.market-cart-stage:has(#cartEmptyState:not([hidden])) .cart-modern-footer{ma
 .market-cart-stage .cart-has-items .cart-service-price{font-size:20px}
 }
 
+
+/* Override legacy compact rows so the number fits its own grid track. */
+body.market-cart-stage .cart-modern .cart-review-panel #cartRows .cart-service-row{
+grid-template-columns:56px minmax(0,1fr) minmax(110px,auto) 44px;gap:18px;padding:20px;margin:0 0 14px;border:1px solid var(--cart-line);border-radius:22px;background:var(--cart-row);
+}
+body.market-cart-stage .cart-modern #cartRows .cart-service-icon{
+display:grid;place-items:center;align-self:center;justify-self:center;box-sizing:border-box;width:56px;height:56px;padding:0;margin:0;line-height:1;text-align:center;flex-shrink:0;
+}
+body.market-cart-stage .cart-modern #cartRows .cart-service-price::after{content:none}
+@media(max-width:800px){
+body.market-cart-stage .cart-modern .cart-review-panel #cartRows .cart-service-row{grid-template-columns:44px minmax(0,1fr) 44px;gap:12px;padding:16px}
+body.market-cart-stage .cart-modern #cartRows .cart-service-icon{width:44px;height:44px}
+}
+
 </style>
 <div class="page-grid cart-view"><div>
 <section class="screen visible cart-modern payment-preview" data-screen="cart" aria-labelledby="cartPageTitle">
