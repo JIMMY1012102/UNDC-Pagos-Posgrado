@@ -252,6 +252,32 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 body[data-accessibility-color] .emerald-login .market-login-divider::before,
 body[data-accessibility-color] .emerald-login .market-login-divider::after{background:var(--a11y-border)!important}
 
+
+/* Larger left composition, with a height-aware compact variant. */
+@media(min-width:1001px){
+.emerald-layout{max-width:1280px;gap:48px}
+.emerald-university-emblem{width:76px;height:88px}
+.emerald-intro>.in1 .sora{font-size:34px!important}
+.emerald-intro>.in1>span:last-child>span:last-child{font-size:17px!important}
+.emerald-intro{gap:16px!important}
+.emerald-intro .stage{height:380px!important}
+.emerald-intro .rig{inset:-20px 0;transform:scale(.84)!important}
+.emerald-intro>h1{font-size:40px!important}
+.emerald-login .float{max-width:185px;padding:15px 17px}
+.emerald-login .float>div>span:last-child{font-size:17px!important}
+.emerald-login .fa{left:0;top:65px}
+.emerald-login .fc{left:0;bottom:90px}
+.emerald-login .fb{right:0;top:180px}
+}
+@media(min-width:1001px) and (max-height:700px){
+.emerald-intro{gap:12px!important}
+.emerald-university-emblem{width:68px;height:78px}
+.emerald-intro>.in1 .sora{font-size:32px!important}
+.emerald-intro .stage{height:330px!important}
+.emerald-intro .rig{inset:-40px 0;transform:scale(.76)!important}
+.emerald-intro>h1{font-size:36px!important}
+}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
