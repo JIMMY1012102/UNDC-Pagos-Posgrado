@@ -219,6 +219,39 @@ body.light-mode .emerald-login .market-login-register a{color:#08764e}
 }
 @media(max-width:760px){.emerald-university-emblem{width:48px;height:58px}}
 
+
+/* Accessibility palettes must not fill the transparent SVG scene layers. */
+body[data-accessibility-color] .emerald-login .stage,
+body[data-accessibility-color] .emerald-login .stage div:not(.float),
+body[data-accessibility-color] .emerald-login .stage .float div,
+body[data-accessibility-color] .emerald-login .stage .float span{
+background:transparent!important;box-shadow:none!important;
+}
+body[data-accessibility-color] .emerald-login .aur,
+body[data-accessibility-color] .emerald-login .gridbg,
+body[data-accessibility-color] .emerald-login .plate,
+body[data-accessibility-color] .emerald-login .pl2,
+body[data-accessibility-color] .emerald-login .orb{display:none}
+body[data-accessibility-color] .emerald-login .gb::before{display:none}
+body[data-accessibility-color] .emerald-login .gb{overflow:visible;border:1px solid var(--a11y-border);padding:1px}
+body[data-accessibility-color] .emerald-login .float{background:var(--a11y-surface)!important;border:1px solid var(--a11y-border)!important}
+body[data-accessibility-color] .emerald-login .float svg,
+body[data-accessibility-color] .emerald-login .market-login-input svg,
+body[data-accessibility-color] .emerald-login .market-login-symbol svg{color:var(--a11y-ink)!important}
+body[data-accessibility-color] .emerald-login .market-login-input input,
+body[data-accessibility-color] .emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){
+color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;
+box-shadow:0 0 0 1000px var(--a11y-surface) inset!important;caret-color:var(--a11y-ink);
+}
+body[data-accessibility-color] .emerald-login .market-login-input input::placeholder{color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;opacity:.75}
+body[data-accessibility-color] .emerald-login .market-login-heading h1,
+body[data-accessibility-color] .emerald-login .emerald-intro h1,
+body[data-accessibility-color] .emerald-login .emerald-intro h1 span{
+color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;background:none!important;
+}
+body[data-accessibility-color] .emerald-login .market-login-divider::before,
+body[data-accessibility-color] .emerald-login .market-login-divider::after{background:var(--a11y-border)!important}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -318,7 +351,7 @@ body.light-mode .emerald-login .market-login-register a{color:#08764e}
 </section>
 
 <section class="emerald-panel">
-<div class="emerald-toolbar"><a href="/tienda">← Regresar</a><button type="button" data-accessibility-toggle aria-expanded="false" aria-controls="accessibilityPanel">Accesibilidad ⌄</button></div>
+<div class="emerald-toolbar"><a href="/tienda">← Regresar</a></div>
 <div class="gb in3"><div class="market-login-card">
 <div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Bienvenido</h1><p>Inicia sesión para continuar con tus pagos.</p></div></div>
 @include('modules.acceso.partials.errors')
