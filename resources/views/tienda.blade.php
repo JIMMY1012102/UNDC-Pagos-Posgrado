@@ -198,6 +198,12 @@ body[data-market-page="catalog"] #storeCartContinue{font-size:15px;opacity:1}
 @media(max-width:1050px){body[data-market-page="catalog"] .site-header .brand{min-width:0;width:auto}body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:56%}}
 @media(max-width:760px){body[data-market-page="catalog"] .institutional-hero .market-hero-photo{display:none}body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:100%}body[data-market-page="catalog"] .institutional-hero .market-hero-content{padding:26px 20px}body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font-size:30px}}
 
+
+/* Enlarge only the right photo inside the existing hero dimensions. */
+@media(min-width:761px){
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{width:58%;object-position:center 88%}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
