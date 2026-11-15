@@ -2,23 +2,33 @@
 const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name="csrf-token"]').content;
 const marketPage=document.body.dataset.marketPage||'catalog';
 if(marketPage==='catalog'){
- const searchForm=$('headerSearch'),top=document.querySelector('.top-inner'),categories=document.querySelector('.nav-links'),chipSlot=$('storeCategoryTiles')||$('storeCategoryChips');
+ const headerTop=document.querySelector('.top-inner');
+ const categoryMenu=document.createElement('details');categoryMenu.className='store-posgrado-menu';
+ const menuSummary=document.createElement('summary');menuSummary.textContent='Posgrado';menuSummary.setAttribute('aria-expanded','false');
+ const menuPanel=document.createElement('nav');menuPanel.id='storeHeaderCategories';menuPanel.setAttribute('aria-label','Categorías de Posgrado');
+ const menuTitle=document.createElement('p');menuTitle.className='store-menu-title';menuTitle.textContent='Categorías de Posgrado';menuPanel.append(menuTitle);
+ categoryMenu.append(menuSummary,menuPanel);headerTop?.insertBefore(categoryMenu,headerTop.querySelector('.utility-controls'));
+ categoryMenu.addEventListener('toggle',()=>menuSummary.setAttribute('aria-expanded',String(categoryMenu.open)));
+ categoryMenu.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryMenu.open=false;menuSummary.focus();}});
+ document.addEventListener('click',event=>{if(!categoryMenu.contains(event.target))categoryMenu.open=false;});
+ menuPanel.addEventListener('click',event=>{if(event.target.closest('[data-category-nav]'))categoryMenu.open=false;});
+ const searchForm=$('headerSearch'),top=document.querySelector('.top-inner'),categories=document.querySelector('.nav-links'),chipSlot=$('storeHeaderCategories')||$('storeCategoryTiles')||$('storeCategoryChips');
  if(searchForm&&top){searchForm.hidden=false;const slot=$('storeHeroSearch');if(slot)slot.append(searchForm);else top.insertBefore(searchForm,top.querySelector('.utility-controls'));}
  if(categories&&chipSlot)chipSlot.append(categories);
- if(chipSlot?.id==='storeCategoryTiles'){
-  chipSlot.querySelector('[data-category-nav="all"]')?.remove();
-  const icons=['M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6','M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5','M9 4h6v3H9zM7 5.5H5.5V21h13V5.5H17M9 12h6M9 16h4','M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM8.5 12.5L7 21l5-3 5 3-1.5-8.5','M4 5.5C4 4.7 4.7 4 5.5 4H20v14H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H20','M4 21V8l8-5 8 5v13zM9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01'];
+ if(chipSlot?.id==='storeCategoryTiles'||chipSlot?.id==='storeHeaderCategories'){
+  const allLink=chipSlot.querySelector('[data-category-nav="all"]');if(allLink)allLink.querySelector('span').textContent='Todos los conceptos';
+  const icons=['M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z','M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6','M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5','M9 4h6v3H9zM7 5.5H5.5V21h13V5.5H17M9 12h6M9 16h4','M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM8.5 12.5L7 21l5-3 5 3-1.5-8.5','M4 5.5C4 4.7 4.7 4 5.5 4H20v14H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H20','M4 21V8l8-5 8 5v13zM9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01'];
   chipSlot.querySelectorAll('[data-category-nav]').forEach((link,index)=>{const icon=document.createElement('span');icon.className='store-tile-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+icons[index]+'"/></svg>';link.prepend(icon);});
  }
 
- const all=chipSlot?.querySelector('[data-category-nav="all"] span');if(all)all.textContent='Todos';
+ const all=chipSlot?.querySelector('[data-category-nav="all"] span');if(all)all.textContent=chipSlot.id==='storeHeaderCategories'?'Todos los conceptos':'Todos';
  const footer=document.querySelector('body>.footer'),social=document.querySelector('.market-social-rail');
  if(footer){const inner=document.createElement('div');inner.className='store-footer-inner';const label=document.createElement('span');label.textContent='UNDC Market · Tienda virtual de pagos';inner.append(label);if(social){social.className='store-footer-social';inner.append(social);}footer.replaceChildren(inner);}
  document.querySelectorAll('.brand-title em').forEach(word=>word.textContent='Market');
  document.querySelectorAll('.account-menu .login-button').forEach(account=>{
   const name=account.querySelector('.account-name')?.textContent||'';
   const icon=account.querySelector('svg:not(.account-chevron)');
-  if(icon&&name){const initials=document.createElement('span');initials.className='store-account-initials';initials.setAttribute('aria-hidden','true');initials.textContent=name.trim().split(/\\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toUpperCase();icon.replaceWith(initials);}
+  if(icon&&name){const initials=document.createElement('span');initials.className='store-account-initials';initials.setAttribute('aria-hidden','true');initials.textContent=name.trim().split(/\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toUpperCase();icon.replaceWith(initials);}
  });
 
 }
@@ -352,7 +362,7 @@ const selected=tusneCategory==='all'?null:categoryById(tusneCategory);$('catalog
 function openConceptDetail(id){const item=tusneConcepts.find(concept=>concept.id===id);if(!item)return;const category=categoryById(item.category),name=localized(item.name,item.en),unit=item.unit?localized(item.unit,item.unitEn):'',note=item.note?localized(item.note,item.noteEn):localized('Esta tarifa referencial no constituye aprobación académica ni está habilitada para pago.','This reference fee does not constitute academic approval and is not enabled for payment.');const added=(state.cart?.items||[]).some(line=>String(line.catalog_item_id)===String(item.id));$('conceptDialogContent').innerHTML='<span class="dialog-category">'+esc(localized(category.name,category.en))+'</span><h2 id="conceptDialogTitle">'+esc(name)+'</h2><p class="dialog-description">'+esc(conceptDescription(item))+'</p><div class="dialog-facts"><div class="dialog-fact"><small>'+esc(localized('Código del concepto','Service code'))+'</small><strong>'+esc(item.code||item.id)+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Importe referencial','Reference amount'))+'</small><strong>'+esc(item.price+(unit?' '+unit:''))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Oficina responsable','Responsible office'))+'</small><strong>'+esc(item.office?.name||localized('Por confirmar','To be confirmed'))+'</strong></div><div class="dialog-fact"><small>'+esc(localized('Disponibilidad','Availability'))+'</small><strong>'+esc(localized('No habilitado para pago','Not enabled for payment'))+'</strong></div></div><p class="dialog-note">'+esc(note)+'</p><button class="reference-add-button dialog-add-button" type="button" data-catalog-cart="'+esc(item.id)+'" aria-pressed="'+String(added)+'">'+cartGlyph()+'<span>'+esc(localized(added?'Agregado al carrito':'Agregar al carrito',added?'Added to cart':'Add to cart'))+'</span></button>';const dialog=$('conceptDialog');dialog.style.setProperty('--dialog-color',category.color);dialog.showModal()}
 function screen(name){const page=['identity','review','payment'].includes(name)?'cart':name;if(page!==marketPage){window.location.assign(marketRoutes[page]||marketRoutes.catalog);return}state.screen=name;document.body.classList.toggle('market-cart-stage',name==='cart');document.body.classList.toggle('market-payment-view',name==='payment');document.body.classList.toggle('market-login-view',name==='login');document.body.classList.toggle('commerce-view',name!=='catalog');document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('visible',x.dataset.screen===name));document.querySelector('.page-grid')?.classList.toggle('cart-view',name==='cart');document.querySelectorAll('.step').forEach((step,i)=>{const order=['catalog','cart','identity','review'];step.classList.toggle('active',order[i]===name);step.classList.toggle('done',order.indexOf(name)>i)});window.scrollTo({top:0,behavior:'smooth'});}
 function updateCategoryNavigation(){
- document.querySelectorAll('#storeCategoryChips [data-category-nav], #storeCategoryTiles [data-category-nav]').forEach(link=>{let count=link.querySelector('.store-chip-count');if(!count){count=document.createElement('span');count.className='store-chip-count';link.append(count);}count.textContent=String(tusneConcepts.filter(item=>link.dataset.categoryNav==='all'||item.category===link.dataset.categoryNav).length);});
+ document.querySelectorAll('#storeCategoryChips [data-category-nav], #storeCategoryTiles [data-category-nav], #storeHeaderCategories [data-category-nav]').forEach(link=>{let count=link.querySelector('.store-chip-count');if(!count){count=document.createElement('span');count.className='store-chip-count';link.append(count);}count.textContent=String(tusneConcepts.filter(item=>link.dataset.categoryNav==='all'||item.category===link.dataset.categoryNav).length);});
  document.querySelectorAll('[data-category-nav]').forEach(link=>{
   const active=link.dataset.categoryNav===tusneCategory;
   link.classList.toggle('active',active);
