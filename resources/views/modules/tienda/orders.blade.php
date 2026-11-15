@@ -83,7 +83,35 @@ body.market-orders-view .site-header .top{height:auto;background:transparent;bor
 @media(max-width:380px){.market-orders-view .order-payment-grid{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){body.market-orders-view *,body.market-orders-view *::before,body.market-orders-view *::after{animation:none!important;transition:none!important}.order-ready-mark path{stroke-dashoffset:0}.order-ready-mark::before{display:none}}
 
+
+/* Complete the reference details without replacing real order state. */
+.market-orders-view .order-dates p{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;margin:0;border-radius:999px;border:1px solid var(--od-line);background:var(--od-row)}
+.market-orders-view .order-dates p::before{content:"▦";font-size:18px;color:var(--od-accent)}
+.market-orders-view .order-dates p:last-child::before{content:"◷"}
+.market-orders-view .order-concepts .payment-preview-line>span::after{content:"Tarifa oficial";display:block;width:fit-content;margin:6px 0 0 auto;padding:3px 10px;border:1px solid var(--od-line);border-radius:999px;color:var(--od-accent);font:600 12px system-ui,sans-serif}
+.market-orders-view .order-tracking summary{list-style:none;display:flex;align-items:center;gap:10px}
+.market-orders-view .order-tracking summary::-webkit-details-marker{display:none}
+.market-orders-view .order-tracking summary::before{content:"›";font-size:24px;transition:rotate .25s}
+.market-orders-view .order-tracking[open] summary::before{rotate:90deg}
+.market-orders-view .order-tracking .order-timeline{padding:12px 0 8px 16px}
+.market-orders-view .order-tracking .order-timeline li{min-height:58px;padding-left:30px;padding-bottom:24px}
+.market-orders-view .order-tracking .order-timeline li::before{content:"✓";display:grid;place-items:center;left:-15px;top:0;width:28px;height:28px;font-size:13px;font-weight:800;background:#0a7a4f;color:#fff}
+.market-orders-view .order-timeline strong,.market-orders-view .order-timeline time,.market-orders-view .order-timeline small{display:block}
+.market-orders-view .order-timeline strong{font-size:15px;color:var(--od-ink)}
+.market-orders-view .order-timeline time,.market-orders-view .order-timeline small{font-size:12px;color:var(--od-muted)}
+.market-orders-view .order-tracking .order-timeline li[aria-current]::before{content:"";background:var(--od-row);border:3px solid var(--od-accent);animation:odRing 1.6s infinite}
+.market-orders-view .order-tracking .order-timeline li.is-future::before{content:"";background:var(--od-row);border:3px solid var(--od-line)}
+.market-orders-view .order-tracking .order-timeline li.is-future strong{color:var(--od-muted)}
+.market-orders-view .order-ready-glow{position:fixed;pointer-events:none;z-index:0;top:-180px;left:-160px;width:520px;height:520px;border-radius:50%;background:var(--od-accent);opacity:.08;filter:blur(90px);animation:odDrift 16s infinite}
+.market-orders-view .order-ready-glow.second{left:auto;right:-180px;top:120px;animation-duration:20s;animation-direction:reverse}
+.market-orders-view main.wrap,.market-orders-view .site-header{position:relative;z-index:1}
+@keyframes odDrift{50%{transform:translate(60px,40px) scale(1.12)}}
+body[data-accessibility-color] .order-ready-glow{display:none}
+@media(max-width:800px){.market-orders-view .order-concepts .payment-preview-line>span::after{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.market-orders-view .order-ready-glow,.market-orders-view .order-tracking .order-timeline li[aria-current]::before{animation:none!important}.market-orders-view .order-tracking summary::before{transition:none}}
+
 </style>
+<div class="order-ready-glow" aria-hidden="true"></div><div class="order-ready-glow second" aria-hidden="true"></div>
 <div class="payment-preview orders-workspace">
 <nav class="payment-breadcrumb" aria-label="Ruta de compra"><a href="/tienda">Catálogo</a><span aria-hidden="true">/</span><a href="/tienda/carrito">Carrito</a><span aria-hidden="true">/</span><span aria-current="page">Mis pedidos</span></nav>
 <section id="ordersListPanel" aria-labelledby="ordersTitle">
