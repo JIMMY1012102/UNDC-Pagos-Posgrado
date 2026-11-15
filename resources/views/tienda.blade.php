@@ -389,6 +389,19 @@ body[data-market-page="catalog"] .site-header .utility-controls{order:3;margin-l
 body[data-market-page="catalog"] .site-header .nav-actions{order:4}
 @media(max-width:800px){body[data-market-page="catalog"] .site-header .store-posgrado-menu{order:5;flex-basis:100%;margin-left:0}}
 
+
+/* Restore the previous pale-green header with readable dark controls. */
+body[data-market-page="catalog"]:not([data-accessibility-color]) > header.site-header{background:#f4f9f5;color:#0a4a31;border-bottom:1px solid #cfe0d5}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title b,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .immersive-orders-link,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-posgrado-menu>summary{color:#0a4a31}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title em{color:#8a5f14}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .utility-controls .language-button{background:#fff;color:#17211b;border-color:#c3d5c9}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .nav-actions .login-button{background:transparent;color:#0a4a31}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-account-initials{background:#0a4a31;color:#fff;border-color:#0a4a31}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-posgrado-menu[open]>summary{background:#e3eee6}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
