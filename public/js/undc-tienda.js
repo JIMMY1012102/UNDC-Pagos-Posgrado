@@ -21,7 +21,7 @@ if(marketPage==='catalog'){
   chipSlot.querySelectorAll('[data-category-nav]').forEach((link,index)=>{const icon=document.createElement('span');icon.className='store-tile-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+icons[index]+'"/></svg>';link.prepend(icon);});
  }
 
- const all=chipSlot?.querySelector('[data-category-nav="all"] span');if(all)all.textContent=chipSlot.id==='storeHeaderCategories'?'Todos los conceptos':'Todos';
+ const all=chipSlot?.querySelector('[data-category-nav="all"] span:not(.store-tile-icon)');if(all)all.textContent=chipSlot.id==='storeHeaderCategories'?'Todos los conceptos':'Todos';
  const footer=document.querySelector('body>.footer'),social=document.querySelector('.market-social-rail');
  if(footer){const inner=document.createElement('div');inner.className='store-footer-inner';const label=document.createElement('span');label.textContent='UNDC Market · Tienda virtual de pagos';inner.append(label);if(social){social.className='store-footer-social';inner.append(social);}footer.replaceChildren(inner);}
  document.querySelectorAll('.brand-title em').forEach(word=>word.textContent='Market');
