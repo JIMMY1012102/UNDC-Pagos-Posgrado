@@ -88,7 +88,6 @@ body.market-orders-view .site-header .top{height:auto;background:transparent;bor
 .market-orders-view .order-dates p{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;margin:0;border-radius:999px;border:1px solid var(--od-line);background:var(--od-row)}
 .market-orders-view .order-dates p::before{content:"▦";font-size:18px;color:var(--od-accent)}
 .market-orders-view .order-dates p:last-child::before{content:"◷"}
-.market-orders-view .order-concepts .payment-preview-line>span::after{content:"Tarifa oficial";display:block;width:fit-content;margin:6px 0 0 auto;padding:3px 10px;border:1px solid var(--od-line);border-radius:999px;color:var(--od-accent);font:600 12px system-ui,sans-serif}
 .market-orders-view .order-tracking summary{list-style:none;display:flex;align-items:center;gap:10px}
 .market-orders-view .order-tracking summary::-webkit-details-marker{display:none}
 .market-orders-view .order-tracking summary::before{content:"›";font-size:24px;transition:rotate .25s}
