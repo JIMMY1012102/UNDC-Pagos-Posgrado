@@ -32,7 +32,7 @@ async function detail(code){
  const buyer=node('div',undefined,'payment-buyer');
  const avatar=node('span',String(order.buyer_name||'').trim().split(/\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toUpperCase(),'payment-buyer-avatar');
  const buyerCopy=node('div',undefined,'payment-buyer-copy');buyerCopy.append(node('h2',order.buyer_name),node('p',order.buyer_email));buyer.append(avatar,buyerCopy);selection.append(buyer);
- const heading=node('div',undefined,'payment-selection-heading');heading.append(node('h2','Conceptos del pedido'),node('span',order.items.length+' conceptos'));selection.append(heading);
+ const heading=node('div',undefined,'payment-selection-heading');heading.append(node('h2','Conceptos del pedido'));selection.append(heading);
  const concepts=node('div',undefined,'order-concepts');
  for(const item of order.items){const row=node('div',undefined,'payment-preview-line'),name=node('strong',item.concept_name);name.append(node('small','Posgrado · Cantidad '+item.quantity));row.append(name,node('span',money(item.total_amount)));concepts.append(row);}selection.append(concepts);
  const dates=node('div',undefined,'order-dates');dates.append(node('p','Creado: '+date(order.created_at)),node('p','Vence: '+date(order.expires_at)));selection.append(dates);
@@ -54,7 +54,7 @@ async function detail(code){
  tracking.append(history);selection.append(tracking);
  const column=node('div',undefined,'payment-summary-column'),summary=node('aside',undefined,'payment-preview-summary');
  summary.append(node('h2','Resumen del pedido'),node('span',labels[order.status]||order.status,'order-status'));
- const total=node('div',undefined,'payment-total-block');total.append(node('p','Total del pedido'),node('strong',money(order.total_amount),'payment-preview-total'),node('p','Importes oficiales guardados en tu pedido.','payment-total-note'));summary.append(total);
+ const total=node('div',undefined,'payment-total-block');total.append(node('p','Total del pedido'),node('strong',money(order.total_amount),'payment-preview-total'));summary.append(total);
  if(order.status==='pending'){
   const methods=node('section',undefined,'order-payment-options');methods.setAttribute('aria-label','Opciones de pago');methods.append(node('h3','Opciones de pago'));
   const methodGrid=node('div',undefined,'order-payment-grid');
