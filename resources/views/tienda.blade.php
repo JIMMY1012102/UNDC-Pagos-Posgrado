@@ -129,6 +129,19 @@ body[data-market-page="catalog"] :is(button,a,input):focus-visible{outline:3px s
 @media(max-width:520px){body[data-market-page="catalog"] .tusne-results{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){body[data-market-page="catalog"] .catalog-product,body[data-market-page="catalog"] .store-category-chips a{transition:none}body[data-market-page="catalog"] .catalog-product:hover{transform:none}}
 
+
+/* Compact desktop banner, matching the reference height without cropping the photograph. */
+@media(min-width:801px){
+ body[data-market-page="catalog"] .hero.market-hero[data-market-carousel]{min-height:205px;height:auto;position:relative;isolation:isolate}
+ body[data-market-page="catalog"] .market-hero-photo{position:absolute;inset:0 0 auto auto;width:50%;height:205px;object-fit:contain;object-position:right center;z-index:-2}
+ body[data-market-page="catalog"] .market-hero-shade{display:block;z-index:-1;background:linear-gradient(90deg,#0a4a31 0%,#0a4a31 49%,rgb(10 74 49 / 70%) 59%,transparent 78%)}
+ body[data-market-page="catalog"] .market-hero-content{position:relative;inset:auto;width:62%;padding:16px clamp(24px,6.4vw,88px);box-sizing:border-box}
+ body[data-market-page="catalog"] .market-hero-eyebrow{margin:0 0 6px}
+ body[data-market-page="catalog"] .market-hero [data-hero-slide] h1,body[data-market-page="catalog"] .market-hero [data-hero-slide] h2{font-size:calc(28px * var(--a11y-text-scale,1));line-height:1.08;margin:0 0 6px}
+ body[data-market-page="catalog"] .market-hero [data-hero-slide] p{font-size:calc(14px * var(--a11y-text-scale,1));line-height:1.4;margin:0 0 10px}
+ body[data-market-page="catalog"] .market-hero-cta{min-height:44px;padding:0 18px}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
