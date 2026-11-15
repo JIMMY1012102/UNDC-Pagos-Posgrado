@@ -263,6 +263,16 @@ mask-image:linear-gradient(to right,transparent 9.375%,#000 50.15625%);
 }
 }
 
+
+/* Expand photo to 72%, keeping fade at 42%–68.1% of the hero. */
+@media(min-width:761px){
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{
+width:72%;
+mask-image:linear-gradient(to right,transparent 19.444444%,#000 55.694444%);
+-webkit-mask-image:linear-gradient(to right,transparent 19.444444%,#000 55.694444%);
+}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
