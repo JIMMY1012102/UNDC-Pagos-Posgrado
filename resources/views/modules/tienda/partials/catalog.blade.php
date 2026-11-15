@@ -3,6 +3,7 @@
 <button class="detail-button" id="catalogRetry" type="button" hidden>Reintentar</button>
 <p id="catalogStatus" role="status" aria-live="polite">Cargando catálogo…</p>
 <div class="catalog-results-heading"><div><h3 id="catalogResultsTitle">Todos los conceptos</h3></div><strong id="visibleConceptCount" aria-live="polite">0 opciones visibles</strong></div>
+<nav class="store-category-chips" id="storeCategoryChips" aria-label="Filtrar conceptos por categoría"></nav>
 <div class="tusne-results" id="tusneResults"></div>
 <div class="catalog-empty" id="tusneEmpty" hidden><span>⌕</span><h3>No encontramos trámites</h3><p>Prueba otra búsqueda o vuelve a mostrar todas las categorías.</p><button class="btn" id="clearCatalogFilters" type="button">Limpiar filtros</button></div>
 </section>
