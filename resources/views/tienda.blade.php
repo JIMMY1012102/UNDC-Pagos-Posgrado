@@ -4,7 +4,7 @@
 @include('modules.tienda.partials.heroes')
 @endsection
 @section('content')
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
 <style>
 body[data-market-page="catalog"]{--st-bg:#092f22;--st-card:#104534;--st-ink:#eafff3;--st-muted:#b5d4c3;--st-line:#386b52;--st-green:#66dfaa;background:var(--st-bg)}
 body.light-mode[data-market-page="catalog"]{--st-bg:#f3f7f4;--st-card:#fff;--st-ink:#14231b;--st-muted:#3d4f45;--st-line:#dce6e0;--st-green:#0b5d3b;background:var(--st-bg)}
@@ -322,6 +322,51 @@ mask-image:linear-gradient(to right,transparent 27.5%,#000 60.125%);
 }
 }
 
+
+/* Immersive header and hero fill the first viewport together. */
+body[data-market-page="catalog"] .site-header{background:linear-gradient(110deg,#002d1d,#053f35);border:0;color:#fff}
+body[data-market-page="catalog"] .site-header .top-inner{max-width:none;width:calc(100% - 80px);min-height:80px;padding:12px 0;gap:24px}
+body[data-market-page="catalog"] .site-header .brand{gap:18px}
+body[data-market-page="catalog"] .site-header .brand .crest{width:48px;height:54px}
+body[data-market-page="catalog"] .site-header .brand-title,body[data-market-page="catalog"] .site-header .brand-title b,body[data-market-page="catalog"] .site-header .brand-title em{font:800 clamp(21px,2.5vw,38px) Inter,system-ui,sans-serif;color:#fff;letter-spacing:-.025em;text-transform:uppercase}
+body[data-market-page="catalog"] .store-posgrado-menu{color:#fff;margin-left:20px}
+body[data-market-page="catalog"] .store-posgrado-menu>summary{font-size:18px;color:#fff;padding:10px 12px}
+body[data-market-page="catalog"] .store-posgrado-menu[open]>summary{background:rgb(255 255 255 / 10%)}
+body[data-market-page="catalog"] .site-header .utility-controls .language-button{background:transparent;color:#fff;border-color:rgb(255 255 255 / 30%)}
+body[data-market-page="catalog"] .site-header .nav-actions>.cart-button{background:#fff;color:#061b11;border:0;border-radius:20px;padding:0 18px;min-height:48px}
+body[data-market-page="catalog"] .site-header .nav-actions>.cart-button::after{content:"Mi carrito";font:700 15px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .site-header .nav-actions .login-button{background:transparent;color:#fff;border:0}
+body[data-market-page="catalog"] .site-header .account-name{display:none}
+body[data-market-page="catalog"] .site-header .store-account-initials{width:44px;height:44px;background:transparent;border:2px solid #bafa46;color:#fff;font-size:16px}
+body[data-market-page="catalog"] .hero.market-hero.immersive-hero{height:calc(100svh - var(--market-header-height,80px));min-height:0;display:flex;justify-content:center;background:#003b25}
+body[data-market-page="catalog"] .immersive-hero .market-hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right 68%;z-index:0;mask-image:linear-gradient(to right,transparent 32%,#000 68%);-webkit-mask-image:linear-gradient(to right,transparent 32%,#000 68%)}
+body[data-market-page="catalog"] .immersive-hero .market-hero-content{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:none;height:100%;box-sizing:border-box;padding:clamp(18px,4vh,48px) 4%;inset:auto;margin:0}
+body[data-market-page="catalog"] .immersive-hero .market-hero-eyebrow{color:#f5fff7!important;font:700 clamp(13px,1.5vw,21px) Inter,system-ui,sans-serif;margin:0 0 clamp(14px,2.5vh,28px);letter-spacing:.02em}
+body[data-market-page="catalog"] .immersive-hero .market-hero-eyebrow::before{background:#c5fa42;width:38px;height:4px}
+body[data-market-page="catalog"] .immersive-hero .market-hero-slides{max-width:720px;width:54%;height:auto;min-height:0}
+body[data-market-page="catalog"] .immersive-hero [data-hero-slide] h1{font:900 clamp(48px,min(7.5vw,12vh),112px)/.96 Inter,system-ui,sans-serif;color:#fff;text-transform:uppercase;letter-spacing:-.055em;margin:0}
+body[data-market-page="catalog"] .immersive-hero [data-hero-slide] .immersive-subtitle{font:800 clamp(25px,3.1vw,46px)/1.08 Inter,system-ui,sans-serif;color:#c5fa42;letter-spacing:-.035em;margin:14px 0 0}
+body[data-market-page="catalog"] .immersive-hero [data-hero-slide] p{font:500 clamp(14px,1.5vw,20px)/1.45 Inter,system-ui,sans-serif;color:#f0fff5;margin:12px 0 0;max-width:52ch}
+body[data-market-page="catalog"] .immersive-hero #storeHeroSearch{margin-top:clamp(16px,3vh,30px);max-width:620px}
+body[data-market-page="catalog"] .immersive-hero .header-search{flex-wrap:nowrap;border:2px solid #fff;border-radius:999px;padding:6px;height:66px;box-sizing:border-box;background:rgb(255 255 255 / 9%);gap:6px}
+body[data-market-page="catalog"] .immersive-hero .header-search input{flex:1 1 auto;width:0;min-width:0;height:100%;border-radius:999px;background:transparent;color:#fff;padding:0 10px 0 46px;font-size:18px}
+body[data-market-page="catalog"] .immersive-hero .header-search input::placeholder{color:#f4fff8;opacity:1}
+body[data-market-page="catalog"] .immersive-hero .header-search .search-icon{color:#fff;top:19px;left:20px;width:24px;height:24px}
+body[data-market-page="catalog"] .immersive-hero .header-search>button[type="submit"]{height:50px;width:50px;flex:0 0 50px;padding:0;border-radius:50%;background:#c5fa42;color:#071909}
+body[data-market-page="catalog"] .immersive-hero .header-search>button[type="submit"]::after{content:"→";font-size:30px}
+html[lang="en"] body[data-market-page="catalog"] .immersive-hero .header-search>button[type="submit"]::after{content:"→"}
+body[data-market-page="catalog"] .immersive-hero .store-quick-links{gap:12px 28px;margin-top:18px}
+body[data-market-page="catalog"] .immersive-hero .store-quick-links a{font:600 clamp(14px,1.5vw,20px) Inter,system-ui,sans-serif;text-decoration-thickness:2px;text-underline-offset:8px}
+.hero-scroll-cue{display:flex;align-items:center;gap:18px;width:fit-content;margin-top:clamp(22px,5vh,60px);color:#fff;font:600 16px Inter,system-ui,sans-serif;text-decoration:none}
+.hero-scroll-cue span{font-size:28px}
+body[data-market-page="catalog"] #catalogResultsTitle{font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:-.03em}
+@media(max-height:680px) and (min-width:801px){body[data-market-page="catalog"] .immersive-hero .market-hero-content{padding-top:16px;padding-bottom:16px}body[data-market-page="catalog"] .immersive-hero .market-hero-eyebrow{margin-bottom:12px}body[data-market-page="catalog"] .immersive-hero [data-hero-slide] h1{font-size:64px}body[data-market-page="catalog"] .immersive-hero [data-hero-slide] .immersive-subtitle{font-size:30px}.hero-scroll-cue{margin-top:20px}}
+@media(max-width:800px){body[data-market-page="catalog"] .site-header .top-inner{width:calc(100% - 24px);gap:10px}body[data-market-page="catalog"] .store-posgrado-menu{margin:0}body[data-market-page="catalog"] .hero.market-hero.immersive-hero{height:auto;min-height:calc(100svh - var(--market-header-height,80px))}body[data-market-page="catalog"] .immersive-hero .market-hero-content{height:auto;min-height:inherit;padding:32px 20px}body[data-market-page="catalog"] .immersive-hero .market-hero-slides{width:100%;max-width:620px}body[data-market-page="catalog"] .immersive-hero .market-hero-photo{display:block;opacity:.35;mask-image:linear-gradient(to right,transparent,#000);-webkit-mask-image:linear-gradient(to right,transparent,#000)}body[data-market-page="catalog"] .immersive-hero [data-hero-slide] h1{font-size:clamp(48px,10vw,76px)}body[data-market-page="catalog"] .immersive-hero .header-search input{font-size:16px}body[data-market-page="catalog"] .immersive-hero .header-search>button[type="submit"]{width:50px}body[data-market-page="catalog"] .site-header .nav-actions>.cart-button::after{display:none}}
+@media(prefers-reduced-motion:reduce){.hero-scroll-cue{scroll-behavior:auto}}
+
+
+.immersive-orders-link{color:#fff;font:600 17px Inter,system-ui,sans-serif;text-decoration:none;white-space:nowrap}
+@media(max-width:1050px){.immersive-orders-link{display:none}}
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
