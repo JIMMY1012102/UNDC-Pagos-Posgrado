@@ -81,9 +81,9 @@ async function detail(code){
    try{const token=sessionStorage.getItem('undc_cart_token');await api('pedidos/'+encodeURIComponent(code)+'/modificar','POST',token?{cart_token:token}:{});sessionStorage.removeItem('undc_cart_token');sessionStorage.removeItem('undc_resume_purchase');window.location.assign('/tienda/carrito');}
    catch(error){$('orderDetailMessage').textContent=error.message;edit.disabled=false;}
   });
-  summary.append(edit,node('p','Volverás al carrito para agregar o quitar conceptos. Este pedido se anulará y al confirmar se generará uno nuevo.','payment-total-note'));
+  summary.append(edit);
  }
- const catalog=node('a','Seguir explorando','payment-text-button payment-modify');catalog.href='/tienda';summary.append(catalog);column.append(summary,node('p','El código identifica tu pedido; no acredita un pago.','payment-gateway-note'));grid.append(selection,column);box.append(grid);
+ column.append(summary,node('p','El código identifica tu pedido; no acredita un pago.','payment-gateway-note'));grid.append(selection,column);box.append(grid);
  $('ordersListPanel').hidden=true;$('orderDetailPanel').hidden=false;$('orderDetailMessage').textContent='';
  $('orderDialogTitle').textContent=order.status==='pending'?'Tu pedido está listo.':'Detalle de tu pedido.';
  $('orderDialogTitle').focus({preventScroll:true});window.scrollTo?.({top:0,behavior:'instant'});

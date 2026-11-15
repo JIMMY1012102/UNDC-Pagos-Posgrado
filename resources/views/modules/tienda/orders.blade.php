@@ -110,6 +110,43 @@ body[data-accessibility-color] .order-ready-glow{display:none}
 @media(max-width:800px){.market-orders-view .order-concepts .payment-preview-line>span::after{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.market-orders-view .order-ready-glow,.market-orders-view .order-tracking .order-timeline li[aria-current]::before{animation:none!important}.market-orders-view .order-tracking summary::before{transition:none}}
 
+
+/* Compact short orders naturally; long selections can extend the document. */
+.market-orders-view #orderDetailMessage:empty{display:none}
+@media(min-width:1001px) and (max-height:850px){
+body.market-orders-view:has(#orderDetailPanel:not([hidden])) main.wrap{padding-top:12px;padding-bottom:12px}
+.market-orders-view #orderDetailPanel>.payment-preview-heading{margin-bottom:14px;gap:16px}
+.market-orders-view #orderDetailPanel .payment-preview-heading h1{font-size:34px}
+.market-orders-view .order-ready-mark{width:48px;height:48px;flex-basis:48px}
+.market-orders-view #orderDetail .order-selection,.market-orders-view #orderDetail .payment-preview-summary{padding:18px 20px}
+.market-orders-view #orderDetail .payment-buyer{padding-bottom:12px;gap:12px}
+.market-orders-view #orderDetail .payment-buyer-avatar{width:44px;height:44px;flex-basis:44px}
+.market-orders-view #orderDetail .payment-buyer h2{font-size:18px}
+.market-orders-view #orderDetail .payment-selection-heading{margin:14px 0 10px}
+.market-orders-view #orderDetail .payment-selection-heading h2{font-size:18px}
+.market-orders-view #orderDetail .order-concepts .payment-preview-line{padding:12px;gap:12px;margin-bottom:8px}
+.market-orders-view #orderDetail .order-concepts .payment-preview-line::before{width:42px;height:42px}
+.market-orders-view #orderDetail .order-dates{padding:8px 0;gap:6px}
+.market-orders-view #orderDetail .order-dates p{font-size:11px;padding:6px 10px}
+.market-orders-view #orderDetail .order-code-box{margin:10px 0;padding:5px 8px}
+.market-orders-view #orderDetail .payment-preview-summary h2{margin:0 0 6px}
+.market-orders-view #orderDetail .payment-total-block{margin-top:10px;padding:10px 0}
+.market-orders-view #orderDetail .payment-preview-total{font-size:32px}
+.market-orders-view #orderDetail .order-payment-options{margin-top:10px}
+.market-orders-view #orderDetail .order-payment-options h3{font-size:16px;margin-bottom:8px}
+.market-orders-view #orderDetail .order-payment-method{min-height:60px;padding:10px}
+.market-orders-view #orderDetail .order-pay-button{min-height:44px;margin-top:10px}
+.market-orders-view #orderDetail .payment-modify{min-height:30px;margin-top:6px}
+.market-orders-view #orderDetail .payment-gateway-note{font-size:11px;margin-top:8px}
+body.market-orders-view:has(#orderDetailPanel:not([hidden])) .orders-footer{margin-top:12px;padding-top:10px;font-size:11px}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-tracking{margin-top:8px;padding-top:6px}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;padding:10px 0 0}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline li{border-left:0;border-top:2px solid var(--od-line);padding:22px 0 0;min-height:0}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline li::before{left:0;top:-13px;width:24px;height:24px}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline strong{font-size:12px}
+.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline time,.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline small{font-size:11px;line-height:1.4}
+}
+
 </style>
 <div class="order-ready-glow" aria-hidden="true"></div><div class="order-ready-glow second" aria-hidden="true"></div>
 <div class="payment-preview orders-workspace">
