@@ -300,6 +300,18 @@ body[data-market-page="catalog"] .site-header .utility-controls{margin-left:0}
 @media(max-width:800px){body[data-market-page="catalog"] .hero.market-hero.institutional-hero{min-height:480px}body[data-market-page="catalog"] .institutional-hero .market-hero-content{padding:40px 20px}body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font-size:40px}.store-posgrado-menu{order:5;flex-basis:100%;margin-left:0}#storeHeaderCategories{width:min(380px,calc(100vw - 32px))}}
 @media(prefers-reduced-motion:reduce){.store-posgrado-menu>summary::after{transition:none}}
 
+
+/* Plain vertical dropdown matching the supplied second image. */
+body[data-market-page="catalog"] #storeHeaderCategories{width:250px;padding:24px 0;border-radius:0;box-shadow:none;border:1px solid var(--st-line);top:calc(100% + 12px);max-height:calc(100dvh - 120px);overflow-y:auto}
+body[data-market-page="catalog"] #storeHeaderCategories .store-menu-title,
+body[data-market-page="catalog"] #storeHeaderCategories .store-tile-icon,
+body[data-market-page="catalog"] #storeHeaderCategories .store-chip-count{display:none}
+body[data-market-page="catalog"] #storeHeaderCategories .nav-links{gap:0}
+body[data-market-page="catalog"] #storeHeaderCategories a{display:flex;align-items:center;justify-content:flex-start;min-height:44px;padding:12px 24px;border-radius:0;gap:0;text-align:left;background:transparent}
+body[data-market-page="catalog"] #storeHeaderCategories a>span:not(.store-tile-icon):not(.store-chip-count){font:400 11px/1.5 Inter,system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;text-align:left}
+body[data-market-page="catalog"] #storeHeaderCategories a.active{background:transparent;color:var(--st-green)}
+body[data-market-page="catalog"] #storeHeaderCategories a:hover{background:var(--st-bg)}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
