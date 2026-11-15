@@ -42,7 +42,7 @@ async function detail(code){
   const entry=node('li');entry.style.setProperty('--order-history-index',Math.min(index,8));
   const title=index===0&&item.to_status==='pending'?'Pedido generado':(labels[item.to_status]||item.to_status);
   entry.append(node('strong',title),node('time',date(item.occurred_at)));
-  if(item.reason)entry.append(node('small',item.reason));
+  if(item.reason && item.reason !== 'Pedido generado con importes oficiales verificados. No acredita pago ni inicia trámite académico.')entry.append(node('small',item.reason));
   history.append(entry);
  }
  const current=node('li');current.setAttribute('aria-current','step');current.style.setProperty('--order-history-index',Math.min(order.history.length,8));
