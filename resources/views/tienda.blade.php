@@ -254,6 +254,15 @@ body[data-market-page="catalog"] .catalog-product-name::first-letter{text-transf
 body[data-market-page="catalog"] .institutional-hero .market-hero-photo{width:64%;object-position:center 80%}
 }
 
+
+/* Anchor the fade to its previous viewport position while retaining the 64% photo. */
+@media(min-width:761px){
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{
+mask-image:linear-gradient(to right,transparent 9.375%,#000 50.15625%);
+-webkit-mask-image:linear-gradient(to right,transparent 9.375%,#000 50.15625%);
+}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
