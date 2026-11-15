@@ -36,7 +36,22 @@ async function detail(code){
  const concepts=node('div',undefined,'order-concepts');
  for(const item of order.items){const row=node('div',undefined,'payment-preview-line'),name=node('strong',item.concept_name);name.append(node('small','Posgrado · Cantidad '+item.quantity));row.append(name,node('span',money(item.total_amount)));concepts.append(row);}selection.append(concepts);
  const dates=node('div',undefined,'order-dates');dates.append(node('p','Creado: '+date(order.created_at)),node('p','Vence: '+date(order.expires_at)));selection.append(dates);
- const tracking=node('details',undefined,'order-tracking');tracking.append(node('summary','Seguimiento del pedido'));const history=node('ol',undefined,'order-timeline');for(const [index,item] of order.history.entries()){const entry=node('li',date(item.occurred_at)+' · '+(labels[item.to_status]||item.to_status)+' — '+(item.reason||''));entry.style.setProperty('--order-history-index',Math.min(index,8));history.append(entry);}tracking.append(history);selection.append(tracking);
+ const tracking=node('details',undefined,'order-tracking');tracking.open=true;tracking.append(node('summary','Seguimiento del pedido'));
+ const history=node('ol',undefined,'order-timeline');
+ for(const [index,item] of order.history.entries()){
+  const entry=node('li');entry.style.setProperty('--order-history-index',Math.min(index,8));
+  const title=index===0&&item.to_status==='pending'?'Pedido generado':(labels[item.to_status]||item.to_status);
+  entry.append(node('strong',title),node('time',date(item.occurred_at)));
+  if(item.reason)entry.append(node('small',item.reason));
+  history.append(entry);
+ }
+ const current=node('li');current.setAttribute('aria-current','step');current.style.setProperty('--order-history-index',Math.min(order.history.length,8));
+ current.append(node('strong',labels[order.status]||order.status),node('small','Estado actual de tu pedido.'));history.append(current);
+ if(order.status==='pending'){
+  const future=node('li',undefined,'is-future');future.style.setProperty('--order-history-index',Math.min(order.history.length+1,8));
+  future.append(node('strong','Pago confirmado'),node('small','Etapa pendiente. Se actualizará cuando exista una confirmación de pago verificada.'));history.append(future);
+ }
+ tracking.append(history);selection.append(tracking);
  const column=node('div',undefined,'payment-summary-column'),summary=node('aside',undefined,'payment-preview-summary');
  const codeBox=node('div',undefined,'order-code-box'),codeText=node('p',order.code,'order-code'),copyCode=node('button','Copiar','order-copy-code');
  copyCode.type='button';copyCode.setAttribute('aria-label','Copiar código del pedido');copyCode.setAttribute('aria-live','polite');
