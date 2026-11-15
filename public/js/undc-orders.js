@@ -36,7 +36,7 @@ async function detail(code){
  const concepts=node('div',undefined,'order-concepts');
  for(const item of order.items){const row=node('div',undefined,'payment-preview-line'),name=node('strong',item.concept_name);name.append(node('small','Posgrado · Cantidad '+item.quantity));row.append(name,node('span',money(item.total_amount)));concepts.append(row);}selection.append(concepts);
  const dates=node('div',undefined,'order-dates');dates.append(node('p','Creado: '+date(order.created_at)),node('p','Vence: '+date(order.expires_at)));selection.append(dates);
- const tracking=node('details',undefined,'order-tracking');tracking.open=true;tracking.append(node('summary','Seguimiento del pedido'));
+ const tracking=node('details',undefined,'order-tracking');tracking.open=false;tracking.append(node('summary','Seguimiento del pedido'));
  const history=node('ol',undefined,'order-timeline');
  for(const [index,item] of order.history.entries()){
   const entry=node('li');entry.style.setProperty('--order-history-index',Math.min(index,8));
