@@ -312,6 +312,16 @@ body[data-market-page="catalog"] #storeHeaderCategories a>span:not(.store-tile-i
 body[data-market-page="catalog"] #storeHeaderCategories a.active{background:transparent;color:var(--st-green)}
 body[data-market-page="catalog"] #storeHeaderCategories a:hover{background:var(--st-bg)}
 
+
+/* Wider photograph; fade remains anchored at 42% and 68.1% of the hero. */
+@media(min-width:761px){
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{
+width:80%;
+mask-image:linear-gradient(to right,transparent 27.5%,#000 60.125%);
+-webkit-mask-image:linear-gradient(to right,transparent 27.5%,#000 60.125%);
+}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
