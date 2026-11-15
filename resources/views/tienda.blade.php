@@ -204,6 +204,50 @@ body[data-market-page="catalog"] #storeCartContinue{font-size:15px;opacity:1}
 body[data-market-page="catalog"] .institutional-hero .market-hero-photo{width:58%;object-position:center 88%}
 }
 
+body.light-mode[data-market-page="catalog"]{--st-bg:#e8f1ea;--st-line:#d3e2d8}
+body.light-mode[data-market-page="catalog"] .site-header{background:#f4f9f5;border-color:#cfe0d5}
+body[data-market-page="catalog"] .site-header .top-inner{display:flex;justify-content:space-between;flex-wrap:nowrap;gap:24px}
+body[data-market-page="catalog"] .site-header .utility-controls{margin-left:auto}
+body[data-market-page="catalog"] .site-header .nav-actions{margin:0;gap:10px}
+body[data-market-page="catalog"] .site-header .nav-actions>.cart-button{display:flex;align-items:center;justify-content:center;gap:8px;width:auto;height:44px;padding:0 14px;border:1px solid #c3d5c9;border-radius:10px;background:var(--st-card);color:var(--st-ink)}
+body[data-market-page="catalog"] .site-header .cart-button svg{width:18px;height:18px}
+body[data-market-page="catalog"] .site-header #cartBadge{position:static;min-width:20px;height:20px;border:0;line-height:20px;padding:0 6px;border-radius:999px;background:#0a4a31;color:#fff;font-size:12px}
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{width:58%;object-position:center 80%;mask-image:linear-gradient(to right,transparent,#000 45%);-webkit-mask-image:linear-gradient(to right,transparent,#000 45%)}
+body[data-market-page="catalog"] .institutional-hero .market-hero-content{padding:56px 24px 112px}
+body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:640px}
+body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font-size:50px;line-height:1.08;letter-spacing:-.015em;margin-top:14px;text-wrap:balance}
+body[data-market-page="catalog"] .institutional-hero [data-hero-slide] p{font-size:17px;line-height:1.5;margin-top:14px;max-width:52ch}
+#storeHeroSearch{max-width:600px;margin-top:26px}
+body[data-market-page="catalog"] .institutional-hero .header-search{position:relative;inset:auto;display:flex;flex-wrap:wrap;align-items:center;width:100%;height:auto;gap:10px;padding:0;margin:0;max-width:none;background:transparent;border:0;box-shadow:none}
+body[data-market-page="catalog"] .institutional-hero .header-search input{flex:1 1 280px;width:0;min-width:0;height:56px;box-sizing:border-box;padding:0 16px 0 46px;border:0;border-radius:12px;background:#fff;color:#17211b;font:400 15px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .institutional-hero .header-search .search-icon{position:absolute;left:16px;top:18px;width:20px;height:20px;color:#4a5c52}
+body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"]{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;height:56px;padding:0 26px;border:0;border-radius:12px;background:#e6c36f;color:#1b2a1f;font:600 16px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"]::after{content:"Buscar"}
+body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"] svg{display:none}
+html[lang="en"] body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"]::after{content:"Search"}
+.store-quick-links{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;font:400 14px Inter,system-ui,sans-serif;color:#c7ddd0}
+.store-quick-links a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgb(255 255 255 / 45%)}
+.store-quick-links a:hover{color:#e6c36f}
+.store-tiles-wrap{max-width:1240px;width:100%;box-sizing:border-box;margin:-64px auto 0;padding:0 24px;position:relative;z-index:2}
+.store-category-tiles{background:var(--st-card);border:1px solid var(--st-line);border-radius:18px;padding:12px;box-shadow:0 14px 36px rgb(10 60 40 / 16%)}
+body[data-market-page="catalog"] .store-category-tiles .nav-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(176px,100%),1fr));gap:10px;margin:0;padding:0;width:100%;height:auto;overflow:visible}
+body[data-market-page="catalog"] .store-category-tiles a{display:grid;grid-template-columns:40px minmax(0,1fr);gap:2px 12px;align-items:center;min-height:72px;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid var(--st-line);background:var(--st-bg);color:var(--st-ink);white-space:normal;text-align:left;text-decoration:none;transition:background .15s,box-shadow .15s}
+.store-category-tiles a>span:not(.store-tile-icon):not(.store-chip-count){font:600 14px/1.25 Inter,system-ui,sans-serif}
+.store-category-tiles .store-chip-count{grid-column:2;font:400 12px Inter,system-ui,sans-serif}
+.store-tile-icon{grid-row:1 / span 2;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#e9f1ea;color:#0a4a31}
+.store-tile-icon svg{width:22px;height:22px}
+body[data-market-page="catalog"] .store-category-tiles a.active{background:#0a4a31;color:#fff;border-color:#0a4a31}
+body[data-market-page="catalog"] .store-category-tiles a.active .store-tile-icon{background:rgb(255 255 255 / 16%);color:#e6c36f}
+body[data-market-page="catalog"] .store-category-tiles a::after{display:none}
+body[data-market-page="catalog"] .store-category-tiles a:hover{box-shadow:0 6px 18px rgb(10 60 40 / 12%)}
+body[data-market-page="catalog"] .store-category-chips{display:none}
+body[data-market-page="catalog"] main.wrap{padding-top:32px}
+body[data-market-page="catalog"] .catalog-product-name{display:block;text-transform:lowercase}
+body[data-market-page="catalog"] .catalog-product-name::first-letter{text-transform:uppercase}
+@media(max-width:760px){body[data-market-page="catalog"] .institutional-hero .market-hero-content{padding:36px 20px 100px}body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font-size:36px}body[data-market-page="catalog"] .institutional-hero [data-hero-slide] p{font-size:16px}.store-tiles-wrap{padding:0 12px}.store-category-tiles{padding:10px}body[data-market-page="catalog"] .site-header .top-inner{flex-wrap:wrap;gap:10px}}
+@media(max-width:400px){body[data-market-page="catalog"] .institutional-hero .header-search input{flex-basis:100%}body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"]{width:100%}body[data-market-page="catalog"] .store-category-tiles .nav-links{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){body[data-market-page="catalog"] .store-category-tiles a{transition:none}}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
