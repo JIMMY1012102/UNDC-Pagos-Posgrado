@@ -38,3 +38,11 @@ body:not(.light-mode) .order-payment-method{background:#194236}
 body:not(.light-mode) .orders-workspace .order-row{background:#194236}
 @media(max-width:760px){.orders-workspace .order-row{padding:18px}.order-row .payment-text-button{width:100%;text-align:left}.order-dates{flex-direction:column;gap:2px}}
 
+
+
+/* Keep account actions above animated checkout stacking contexts. */
+body.commerce-view > .site-header{z-index:30}
+body.commerce-view > .site-header .top,
+body.commerce-view > .site-header .top-inner{overflow:visible}
+body.commerce-view > .site-header .account-menu[open]{z-index:2}
+body.commerce-view > .site-header .account-dropdown{z-index:3}
