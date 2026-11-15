@@ -142,6 +142,35 @@ body[data-market-page="catalog"] :is(button,a,input):focus-visible{outline:3px s
  body[data-market-page="catalog"] .market-hero-cta{min-height:44px;padding:0 18px}
 }
 
+
+/* Institutional reference header: brand, search, language, account. */
+body[data-market-page="catalog"] .site-header .top-inner{display:flex;align-items:center;flex-wrap:nowrap;max-width:1192px;width:calc(100% - 48px);gap:28px;padding:12px 0;min-height:70px}
+body[data-market-page="catalog"] .site-header .brand{flex:0 0 auto;gap:12px;margin:0}
+body[data-market-page="catalog"] .site-header .brand .crest{display:block;width:46px;height:46px;object-fit:contain}
+body[data-market-page="catalog"] .site-header .brand-title{white-space:nowrap}
+body[data-market-page="catalog"] .site-header .payment-header-context,
+body[data-market-page="catalog"] .site-header .payment-orders-link,
+body[data-market-page="catalog"] .site-header .nav-actions>.cart-button,
+body[data-market-page="catalog"] .site-header .action-divider{display:none}
+body[data-market-page="catalog"] .site-header .top-inner>.header-search{flex:1 1 320px;order:0;min-width:120px;max-width:none;margin:0;height:44px;padding:0 12px;display:flex;align-items:center;gap:10px}
+body[data-market-page="catalog"] .site-header .header-search .search-icon{position:static;width:18px;height:18px;flex-shrink:0}
+body[data-market-page="catalog"] .site-header .header-search input{padding:0;height:100%;font:400 15px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .site-header .header-search>button[type="submit"]{display:none}
+body[data-market-page="catalog"] .site-header .utility-controls{display:flex;flex:0 0 auto;margin:0}
+body[data-market-page="catalog"] .site-header .utility-controls .language-button{height:44px;min-width:44px;padding:0 12px;background:var(--st-card);color:var(--st-ink);border:1px solid var(--st-line);border-radius:10px;gap:0}
+body[data-market-page="catalog"] .site-header .utility-controls .language-flag,
+body[data-market-page="catalog"] .site-header .utility-controls .chevron{display:none}
+body[data-market-page="catalog"] .site-header .utility-controls .language-label{font-size:0}
+body[data-market-page="catalog"] .site-header .utility-controls .language-label::after{content:"ES";font:500 14px Inter,system-ui,sans-serif}
+html[lang="en"] body[data-market-page="catalog"] .site-header .utility-controls .language-label::after{content:"EN"}
+body[data-market-page="catalog"] .site-header .nav-actions{display:flex;flex:0 0 auto;margin:0 0 0 -18px;gap:10px}
+body[data-market-page="catalog"] .site-header .nav-actions .login-button{height:44px;min-height:44px;padding:0 16px 0 12px;gap:10px;border:1px solid var(--st-line);border-radius:10px;background:var(--st-card);color:var(--st-ink);font:500 14px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .site-header .account-name{max-width:170px;font:500 14px Inter,system-ui,sans-serif}
+body[data-market-page="catalog"] .site-header .mobile-primary-actions,
+body[data-market-page="catalog"] .site-header .menu-toggle{display:none}
+@media(max-width:1050px){body[data-market-page="catalog"] .site-header .top-inner{gap:14px;flex-wrap:wrap}body[data-market-page="catalog"] .site-header .top-inner>.header-search{order:5;flex-basis:100%}body[data-market-page="catalog"] .site-header .utility-controls{margin-left:auto}body[data-market-page="catalog"] .site-header .nav-actions{margin-left:0}}
+@media(max-width:600px){body[data-market-page="catalog"] .site-header .top-inner{width:calc(100% - 24px);gap:10px}body[data-market-page="catalog"] .site-header .brand-title,body[data-market-page="catalog"] .site-header .brand-title b,body[data-market-page="catalog"] .site-header .brand-title em{font-size:20px}body[data-market-page="catalog"] .site-header .brand .crest{width:38px;height:42px}body[data-market-page="catalog"] .site-header .account-name{display:none}body[data-market-page="catalog"] .site-header .nav-actions .login-button{padding:0 8px;min-width:44px}body[data-market-page="catalog"] .site-header .nav-actions .account-chevron{display:none}}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
