@@ -367,6 +367,28 @@ body[data-market-page="catalog"] #catalogResultsTitle{font-family:Inter,system-u
 
 .immersive-orders-link{color:#fff;font:600 17px Inter,system-ui,sans-serif;text-decoration:none;white-space:nowrap}
 @media(max-width:1050px){.immersive-orders-link{display:none}}
+
+/* Keep the immersive header readable in the standard light theme. */
+body[data-market-page="catalog"]:not([data-accessibility-color]) > header.site-header{
+background:linear-gradient(110deg,#002d1d,#053f35);color:#fff;border:0;
+}
+body[data-market-page="catalog"]:not([data-accessibility-color]) > .site-header .top,
+body[data-market-page="catalog"]:not([data-accessibility-color]) > .site-header .top-inner{
+background:transparent;border:0;box-shadow:none;
+}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title b,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .brand-title em,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .immersive-orders-link,
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-posgrado-menu>summary{color:#fff}
+body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .utility-controls .language-button{background:transparent;color:#fff;border-color:rgb(255 255 255 / 30%)}
+body[data-market-page="catalog"] .site-header .brand{order:0}
+body[data-market-page="catalog"] .site-header .store-posgrado-menu{order:1;flex:0 1 auto;margin-left:24px}
+body[data-market-page="catalog"] .site-header .immersive-orders-link{order:2;margin-right:auto}
+body[data-market-page="catalog"] .site-header .utility-controls{order:3;margin-left:0}
+body[data-market-page="catalog"] .site-header .nav-actions{order:4}
+@media(max-width:800px){body[data-market-page="catalog"] .site-header .store-posgrado-menu{order:5;flex-basis:100%;margin-left:0}}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
