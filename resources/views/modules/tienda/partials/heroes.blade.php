@@ -8,4 +8,3 @@
 <div id="storeHeroSearch"></div>
 <div class="store-quick-links"><span>Accesos rápidos:</span><a href="/tienda?q=matrícula%20maestría#catalogo" data-store-quick="matrícula maestría">Matrícula maestría</a><a href="/tienda?q=matrícula%20doctorado#catalogo" data-store-quick="matrícula doctorado">Matrícula doctorado</a><a href="/tienda?q=pensión%20mensual#catalogo" data-store-quick="pensión mensual">Pensión mensual</a></div>
 </article></div></div></section>
-<div class="store-tiles-wrap"><nav class="store-category-tiles" id="storeCategoryTiles" aria-label="Filtrar conceptos por categoría"></nav></div>
