@@ -53,10 +53,7 @@ async function detail(code){
  }
  tracking.append(history);selection.append(tracking);
  const column=node('div',undefined,'payment-summary-column'),summary=node('aside',undefined,'payment-preview-summary');
- const codeBox=node('div',undefined,'order-code-box'),codeText=node('p',order.code,'order-code'),copyCode=node('button','Copiar','order-copy-code');
- copyCode.type='button';copyCode.setAttribute('aria-label','Copiar código del pedido');copyCode.setAttribute('aria-live','polite');
- copyCode.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(order.code);copyCode.textContent='Copiado';}catch(error){const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(codeText);selection.removeAllRanges();selection.addRange(range);$('orderDetailMessage').textContent='Código seleccionado. Usa Ctrl+C para copiarlo.';}});
- codeBox.append(codeText,copyCode);summary.append(node('h2','Resumen del pedido'),codeBox,node('span',labels[order.status]||order.status,'order-status'));
+ summary.append(node('h2','Resumen del pedido'),node('span',labels[order.status]||order.status,'order-status'));
  const total=node('div',undefined,'payment-total-block');total.append(node('p','Total del pedido'),node('strong',money(order.total_amount),'payment-preview-total'),node('p','Importes oficiales guardados en tu pedido.','payment-total-note'));summary.append(total);
  if(order.status==='pending'){
   const methods=node('section',undefined,'order-payment-options');methods.setAttribute('aria-label','Opciones de pago');methods.append(node('h3','Opciones de pago'));
@@ -83,7 +80,7 @@ async function detail(code){
   });
   summary.append(edit);
  }
- column.append(summary,node('p','El código identifica tu pedido; no acredita un pago.','payment-gateway-note'));grid.append(selection,column);box.append(grid);
+ column.append(summary);grid.append(selection,column);box.append(grid);
  $('ordersListPanel').hidden=true;$('orderDetailPanel').hidden=false;$('orderDetailMessage').textContent='';
  $('orderDialogTitle').textContent=order.status==='pending'?'Tu pedido está listo.':'Detalle de tu pedido.';
  $('orderDialogTitle').focus({preventScroll:true});window.scrollTo?.({top:0,behavior:'instant'});
