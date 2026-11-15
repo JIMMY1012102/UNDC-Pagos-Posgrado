@@ -248,6 +248,12 @@ body[data-market-page="catalog"] .catalog-product-name::first-letter{text-transf
 @media(max-width:400px){body[data-market-page="catalog"] .institutional-hero .header-search input{flex-basis:100%}body[data-market-page="catalog"] .institutional-hero .header-search>button[type="submit"]{width:100%}body[data-market-page="catalog"] .store-category-tiles .nav-links{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){body[data-market-page="catalog"] .store-category-tiles a{transition:none}}
 
+
+/* Slightly zoom the photo within the fixed hero, retaining its fade and layout. */
+@media(min-width:761px){
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{width:64%;object-position:center 80%}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
