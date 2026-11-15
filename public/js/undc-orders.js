@@ -49,7 +49,7 @@ async function detail(code){
  current.append(node('strong',labels[order.status]||order.status),node('small','Estado actual de tu pedido.'));history.append(current);
  if(order.status==='pending'){
   const future=node('li',undefined,'is-future');future.style.setProperty('--order-history-index',Math.min(order.history.length+1,8));
-  future.append(node('strong','Pago confirmado'),node('small','Etapa pendiente. Se actualizará cuando exista una confirmación de pago verificada.'));history.append(future);
+  future.append(node('strong','Pago confirmado'));history.append(future);
  }
  tracking.append(history);selection.append(tracking);
  const column=node('div',undefined,'payment-summary-column'),summary=node('aside',undefined,'payment-preview-summary');
