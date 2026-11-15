@@ -402,6 +402,19 @@ body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .n
 body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-account-initials{background:#0a4a31;color:#fff;border-color:#0a4a31}
 body[data-market-page="catalog"]:not([data-accessibility-color]) .site-header .store-posgrado-menu[open]>summary{background:#e3eee6}
 
+
+/* Return to the previous compact header dimensions. */
+body[data-market-page="catalog"] .site-header .top-inner{min-height:70px;padding:8px 0;box-sizing:border-box}
+body[data-market-page="catalog"] .site-header .brand .crest{width:40px;height:46px}
+body[data-market-page="catalog"] .site-header .brand-title,
+body[data-market-page="catalog"] .site-header .brand-title b,
+body[data-market-page="catalog"] .site-header .brand-title em{font-size:clamp(20px,2.1vw,28px)}
+body[data-market-page="catalog"] .site-header .nav-actions>.cart-button{min-height:44px;height:44px}
+body[data-market-page="catalog"] .site-header .store-account-initials{width:38px;height:38px;font-size:14px}
+body[data-market-page="catalog"] .site-header .store-posgrado-menu>summary,
+body[data-market-page="catalog"] .site-header .immersive-orders-link{font-size:16px}
+@media(max-width:800px){body[data-market-page="catalog"] .site-header .top-inner{padding:6px 0;gap:8px}body[data-market-page="catalog"] .site-header .brand-title,body[data-market-page="catalog"] .site-header .brand-title b,body[data-market-page="catalog"] .site-header .brand-title em{font-size:20px}}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
