@@ -26,7 +26,7 @@ $('generateOrder')?.addEventListener('click',async()=>{
  catch(error){$('orderQuoteMessage').textContent=error.message;$('generateOrder').disabled=false;creating=false;}
 });
 async function detail(code){
- const order=await api('pedidos/'+encodeURIComponent(code)),box=$('orderDetail');box.replaceChildren();
+ const order=await api('pedidos/'+encodeURIComponent(code)),box=$('orderDetail');box.replaceChildren();$('orderDetailPanel').dataset.orderStatus=order.status;
  const grid=node('div',undefined,'payment-preview-grid order-detail-grid');
  const selection=node('section',undefined,'payment-selection-card order-selection');
  const buyer=node('div',undefined,'payment-buyer');
@@ -36,9 +36,12 @@ async function detail(code){
  const concepts=node('div',undefined,'order-concepts');
  for(const item of order.items){const row=node('div',undefined,'payment-preview-line'),name=node('strong',item.concept_name);name.append(node('small','Posgrado · Cantidad '+item.quantity));row.append(name,node('span',money(item.total_amount)));concepts.append(row);}selection.append(concepts);
  const dates=node('div',undefined,'order-dates');dates.append(node('p','Creado: '+date(order.created_at)),node('p','Vence: '+date(order.expires_at)));selection.append(dates);
- const tracking=node('details',undefined,'order-tracking');tracking.append(node('summary','Seguimiento del pedido'));const history=node('ol',undefined,'order-timeline');for(const item of order.history)history.append(node('li',date(item.occurred_at)+' · '+(labels[item.to_status]||item.to_status)+' — '+(item.reason||'')));tracking.append(history);selection.append(tracking);
+ const tracking=node('details',undefined,'order-tracking');tracking.append(node('summary','Seguimiento del pedido'));const history=node('ol',undefined,'order-timeline');for(const [index,item] of order.history.entries()){const entry=node('li',date(item.occurred_at)+' · '+(labels[item.to_status]||item.to_status)+' — '+(item.reason||''));entry.style.setProperty('--order-history-index',Math.min(index,8));history.append(entry);}tracking.append(history);selection.append(tracking);
  const column=node('div',undefined,'payment-summary-column'),summary=node('aside',undefined,'payment-preview-summary');
- summary.append(node('h2','Resumen del pedido'),node('p',order.code,'order-code'),node('span',labels[order.status]||order.status,'order-status'));
+ const codeBox=node('div',undefined,'order-code-box'),codeText=node('p',order.code,'order-code'),copyCode=node('button','Copiar','order-copy-code');
+ copyCode.type='button';copyCode.setAttribute('aria-label','Copiar código del pedido');copyCode.setAttribute('aria-live','polite');
+ copyCode.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(order.code);copyCode.textContent='Copiado';}catch(error){const selection=window.getSelection(),range=document.createRange();range.selectNodeContents(codeText);selection.removeAllRanges();selection.addRange(range);$('orderDetailMessage').textContent='Código seleccionado. Usa Ctrl+C para copiarlo.';}});
+ codeBox.append(codeText,copyCode);summary.append(node('h2','Resumen del pedido'),codeBox,node('span',labels[order.status]||order.status,'order-status'));
  const total=node('div',undefined,'payment-total-block');total.append(node('p','Total del pedido'),node('strong',money(order.total_amount),'payment-preview-total'),node('p','Importes oficiales guardados en tu pedido.','payment-total-note'));summary.append(total);
  if(order.status==='pending'){
   const methods=node('section',undefined,'order-payment-options');methods.setAttribute('aria-label','Opciones de pago');methods.append(node('h3','Opciones de pago'));
@@ -47,7 +50,9 @@ async function detail(code){
    ['Interbank','Pago bancario','bank','<path d="M3 10h18L12 3 3 10Zm2 10h14M7 10v7m5-7v7m5-7v7M3 21h18"/>'],
    ['Pay-Me','Yape y Visa','gateway','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-5 5h2"/>']
   ]){
-   const method=node('div',undefined,'order-payment-method'),icon=node('span',undefined,'order-payment-icon order-payment-icon--'+kind),copy=node('div');
+   const method=node('button',undefined,'order-payment-method'),icon=node('span',undefined,'order-payment-icon order-payment-icon--'+kind),copy=node('div');
+   method.type='button';method.setAttribute('aria-pressed','false');
+   method.addEventListener('click',()=>{methodGrid.querySelectorAll('.order-payment-method').forEach(option=>option.setAttribute('aria-pressed',String(option===method)));});
    icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+shape+'</svg>';
    copy.append(node('strong',provider),node('span',description));method.append(icon,copy);methodGrid.append(method);
   }
