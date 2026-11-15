@@ -4,16 +4,18 @@ const marketPage=document.body.dataset.marketPage||'catalog';
 if(marketPage==='catalog'){
  const headerTop=document.querySelector('.top-inner');
  const categoryMenu=document.createElement('details');categoryMenu.className='store-posgrado-menu';
- const menuSummary=document.createElement('summary');menuSummary.textContent='Posgrado';menuSummary.setAttribute('aria-expanded','false');
+ const menuSummary=document.createElement('summary');menuSummary.textContent='Explorar trámites';menuSummary.setAttribute('aria-expanded','false');
  const menuPanel=document.createElement('nav');menuPanel.id='storeHeaderCategories';menuPanel.setAttribute('aria-label','Categorías de Posgrado');
  const menuTitle=document.createElement('p');menuTitle.className='store-menu-title';menuTitle.textContent='Categorías de Posgrado';menuPanel.append(menuTitle);
- categoryMenu.append(menuSummary,menuPanel);headerTop?.insertBefore(categoryMenu,headerTop.querySelector('.utility-controls'));
+ categoryMenu.append(menuSummary,menuPanel);
+ const ordersLink=document.createElement('a');ordersLink.className='immersive-orders-link';ordersLink.href='/tienda/mis-pedidos';ordersLink.textContent='Mis pedidos';headerTop?.insertBefore(ordersLink,headerTop.querySelector('.utility-controls'));
+headerTop?.insertBefore(categoryMenu,headerTop.querySelector('.utility-controls'));
  categoryMenu.addEventListener('toggle',()=>menuSummary.setAttribute('aria-expanded',String(categoryMenu.open)));
  categoryMenu.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryMenu.open=false;menuSummary.focus();}});
  document.addEventListener('click',event=>{if(!categoryMenu.contains(event.target))categoryMenu.open=false;});
  menuPanel.addEventListener('click',event=>{if(event.target.closest('[data-category-nav]'))categoryMenu.open=false;});
  const searchForm=$('headerSearch'),top=document.querySelector('.top-inner'),categories=document.querySelector('.nav-links'),chipSlot=$('storeHeaderCategories')||$('storeCategoryTiles')||$('storeCategoryChips');
- if(searchForm&&top){searchForm.hidden=false;const slot=$('storeHeroSearch');if(slot)slot.append(searchForm);else top.insertBefore(searchForm,top.querySelector('.utility-controls'));}
+ if(searchForm&&top){const queryInput=$('search');if(queryInput)queryInput.placeholder='¿Qué trámite necesitas?';searchForm.hidden=false;const slot=$('storeHeroSearch');if(slot)slot.append(searchForm);else top.insertBefore(searchForm,top.querySelector('.utility-controls'));}
  if(categories&&chipSlot)chipSlot.append(categories);
  if(chipSlot?.id==='storeCategoryTiles'||chipSlot?.id==='storeHeaderCategories'){
   const allLink=chipSlot.querySelector('[data-category-nav="all"]');if(allLink)allLink.querySelector('span').textContent='Todos los conceptos';
