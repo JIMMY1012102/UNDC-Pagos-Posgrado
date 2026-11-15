@@ -171,6 +171,33 @@ body[data-market-page="catalog"] .site-header .menu-toggle{display:none}
 @media(max-width:1050px){body[data-market-page="catalog"] .site-header .top-inner{gap:14px;flex-wrap:wrap}body[data-market-page="catalog"] .site-header .top-inner>.header-search{order:5;flex-basis:100%}body[data-market-page="catalog"] .site-header .utility-controls{margin-left:auto}body[data-market-page="catalog"] .site-header .nav-actions{margin-left:0}}
 @media(max-width:600px){body[data-market-page="catalog"] .site-header .top-inner{width:calc(100% - 24px);gap:10px}body[data-market-page="catalog"] .site-header .brand-title,body[data-market-page="catalog"] .site-header .brand-title b,body[data-market-page="catalog"] .site-header .brand-title em{font-size:20px}body[data-market-page="catalog"] .site-header .brand .crest{width:38px;height:42px}body[data-market-page="catalog"] .site-header .account-name{display:none}body[data-market-page="catalog"] .site-header .nav-actions .login-button{padding:0 8px;min-width:44px}body[data-market-page="catalog"] .site-header .nav-actions .account-chevron{display:none}}
 
+
+/* Match the supplied screenshot rather than inherited carousel geometry. */
+@media(min-width:1051px){
+body[data-market-page="catalog"] .site-header .top-inner{display:grid;grid-template-columns:max-content minmax(0,1fr) 44px max-content;max-width:1236px;gap:28px}
+body[data-market-page="catalog"] .site-header .brand{min-width:0;width:max-content;max-width:none}
+body[data-market-page="catalog"] .site-header .brand-copy{min-width:0;width:auto}
+body[data-market-page="catalog"] .site-header .top-inner>.header-search{grid-column:2;grid-row:1;width:100%;min-width:0;box-sizing:border-box}
+body[data-market-page="catalog"] .site-header .utility-controls{grid-column:3;grid-row:1;margin:0}
+body[data-market-page="catalog"] .site-header .nav-actions{grid-column:4;grid-row:1;margin:0}
+}
+body[data-market-page="catalog"] .hero.market-hero.institutional-hero{display:block;position:relative;isolation:isolate;min-height:0;height:auto;margin:0;padding:0;background:#0a4a31;overflow:hidden;border-radius:0}
+body[data-market-page="catalog"] .institutional-hero .market-hero-photo{position:absolute;inset:0 0 0 auto;width:48%;height:100%;min-height:0;max-height:none;object-fit:cover;object-position:center 88%;z-index:-1;border-radius:0;mask-image:linear-gradient(to right,transparent,#000 40%);-webkit-mask-image:linear-gradient(to right,transparent,#000 40%)}
+body[data-market-page="catalog"] .institutional-hero .market-hero-content{position:relative;inset:auto;display:block;width:100%;max-width:1240px;margin:0 auto;padding:26px 24px;box-sizing:border-box;transform:none}
+body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:560px;min-height:0;height:auto}
+body[data-market-page="catalog"] .institutional-hero .market-hero-eyebrow{margin:0 0 10px;font-size:12px}
+body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font:700 34px/1.12 'Source Serif 4',Georgia,serif;letter-spacing:-.01em;margin:0;color:#fff}
+body[data-market-page="catalog"] .institutional-hero [data-hero-slide] p{font:400 15px/1.5 Inter,system-ui,sans-serif;margin:8px 0 0;color:#d6e8de}
+body[data-market-page="catalog"] .institutional-hero .market-hero-cta{display:inline-flex;align-items:center;gap:10px;margin-top:16px;min-height:44px;padding:0 20px;font-size:15px;box-shadow:none}
+body[data-market-page="catalog"] main.wrap{max-width:1192px;padding-top:24px}
+body[data-market-page="catalog"] #visibleConceptCount{font:500 14px Inter,system-ui,sans-serif;color:var(--st-muted);background:transparent;border:0;padding:0;border-radius:0}
+body[data-market-page="catalog"] .catalog-results-heading{margin-bottom:18px}
+body[data-market-page="catalog"] .store-cart{gap:14px}
+body[data-market-page="catalog"] .store-cart-total{padding-top:4px}
+body[data-market-page="catalog"] #storeCartContinue{font-size:15px;opacity:1}
+@media(max-width:1050px){body[data-market-page="catalog"] .site-header .brand{min-width:0;width:auto}body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:56%}}
+@media(max-width:760px){body[data-market-page="catalog"] .institutional-hero .market-hero-photo{display:none}body[data-market-page="catalog"] .institutional-hero .market-hero-slides{max-width:100%}body[data-market-page="catalog"] .institutional-hero .market-hero-content{padding:26px 20px}body[data-market-page="catalog"] .institutional-hero [data-hero-slide] h1{font-size:30px}}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
