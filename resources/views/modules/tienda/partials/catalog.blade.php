@@ -6,6 +6,7 @@
 <nav class="store-category-chips" id="storeCategoryChips" aria-label="Filtrar conceptos por categoría"></nav>
 <div class="tusne-results" id="tusneResults"></div>
 <div class="catalog-empty" id="tusneEmpty" hidden><span>⌕</span><h3>No encontramos trámites</h3><p>Prueba otra búsqueda o vuelve a mostrar todas las categorías.</p><button class="btn" id="clearCatalogFilters" type="button">Limpiar filtros</button></div>
+<div class="store-show-all"><button type="button" id="storeShowAll">Ver todos los conceptos</button></div>
 </section>
 <dialog class="concept-dialog" id="conceptDialog" aria-labelledby="conceptDialogTitle"><button class="dialog-close" id="conceptDialogClose" type="button" aria-label="Cerrar detalle">×</button><div id="conceptDialogContent"></div></dialog>
 
