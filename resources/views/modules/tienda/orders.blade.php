@@ -147,6 +147,32 @@ body.market-orders-view:has(#orderDetailPanel:not([hidden])) .orders-footer{marg
 .market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline time,.market-orders-view #orderDetail:not(:has(.order-concepts>.payment-preview-line:nth-child(3))) .order-timeline small{font-size:11px;line-height:1.4}
 }
 
+
+/* Reference palette for the standard theme; accessible palettes remain authoritative. */
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-selection{background:rgb(255 255 255 / 82%);border-color:#fff}
+body.light-mode.market-orders-view:not([data-accessibility-color]) #orderDetail .payment-preview-summary{background:rgb(255 255 255 / 92%);border-color:#fff}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-buyer-avatar{background:#d7efe3;color:#0a4d33}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-concepts .payment-preview-line::before,
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-concepts .payment-preview-line>span::after{background:#e1f2ea;color:#0a6a45;border-color:transparent}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-code-box,
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-dates p:first-child{background:#eef7f2;color:#274038;border-color:transparent}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-code{color:#274038}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-copy-code{background:#fff;color:#0a6a45;border-color:transparent}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-dates p:last-child,
+body.light-mode.market-orders-view:not([data-accessibility-color]) #orderDetailPanel[data-order-status="pending"] .order-status{background:#fff1d6;color:#5c3500;border-color:transparent}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-dates p:last-child::before,
+body.light-mode.market-orders-view:not([data-accessibility-color]) #orderDetailPanel[data-order-status="pending"] .order-status::before{color:#b8740a}
+body.light-mode.market-orders-view:not([data-accessibility-color]) #orderDetailPanel[data-order-status="pending"] .order-status::before{background:#b8740a}
+body.light-mode.market-orders-view:not([data-accessibility-color]) #orderDetailPanel[data-order-status="pending"] .order-timeline li[aria-current]::before{background:#fff1d6;border-color:#b8740a}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-tracking .order-timeline li.is-future::before{background:#fff;border-color:#b3cbc0}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-payment-method{background:#fff;border-color:#cfe2d9}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .order-payment-method[aria-pressed="true"]{background:#effaf4;border-color:#0a7a4f}
+.market-orders-view .order-payment-method[aria-pressed="true"]::after{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#0a7a4f;color:#fff}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-workspace .order-pay-button{background:#dfe9e4;color:#46594f}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-progress li:not([aria-current]) span{background:#cfeedd;color:#0a4d33}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-progress li[aria-current] span{background:#0a7a4f;color:#fff}
+body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-footer{background:#062e22;color:#c3dfd3;border-color:#062e22;border-radius:18px;padding:14px 20px}
+
 </style>
 <div class="order-ready-glow" aria-hidden="true"></div><div class="order-ready-glow second" aria-hidden="true"></div>
 <div class="payment-preview orders-workspace">
