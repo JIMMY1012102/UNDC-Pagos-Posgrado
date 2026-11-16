@@ -68,6 +68,15 @@ final class PublishedCatalogQuery
         ]);
     }
 
+    public function quoteItems(array $ids): Collection
+    {
+        return $this->availablePublications()->whereIn('publication.id', $ids)->get([
+            'publication.id as catalog_item_id', 'publication.requires_eligibility_check',
+            'publication.legacy_concept_id', 'publication.legacy_office_id',
+            'concept.codigo_concepto', 'concept.concepto as name', 'concept.costo as reference_amount',
+        ])->keyBy('catalog_item_id');
+    }
+
     private function availablePublications(): Builder
     {
         return DB::table('tienda_conceptos_catalogo as publication')

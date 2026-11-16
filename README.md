@@ -27,7 +27,7 @@ Los directorios `app/Integrations/Sispagos`, `app/Integrations/Payme` y `app/Int
 - Consulta de catálogo mediante API; creación, consulta y modificación del carrito.
 - Registro e inicio de sesión, perfil del comprador y rutas de Google OAuth sujetas a configuración autorizada.
 - Vinculación del carrito a una cuenta y consulta del resumen de precompra.
-- La precompra mantiene `checkout_enabled=false`, `total_amount=null` y las tarifas pendientes de aprobación institucional. Una pantalla de pago no confirma un cobro.
+- Los precios son oficiales (`pricing_status=official`); la cotización definitiva se calcula en el servidor. `PAYME_ENABLED=false` mantiene el cobro deshabilitado independientemente de los precios. Activarlo requiere una integración Pay-me implementada y validada. Una pantalla de pago no confirma un cobro.
 
 ## Tecnologías
 
