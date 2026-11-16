@@ -1,13 +1,13 @@
-# API JSON de catálogo — fase inicial
+# API JSON de catálogo
 
-El backend se desarrolla como monolito modular Laravel, conforme a `docs/ARQUITECTURA.md`. Este primer corte implementa **solo consulta**, sin activar compras, precios, autenticación institucional o integración de pasarelas.
+El backend se desarrolla como monolito modular Laravel, conforme a `docs/ARQUITECTURA.md`. El módulo Catalogo expone publicaciones e importes oficiales; Pedidos administra las compras pendientes y Pagos conserva la integración de pasarela por implementar.
 
 ## Endpoint
 
 `GET /api/v1/tienda/catalogo?office_id=7`
 
 - `office_id` es obligatorio y debe ser entero positivo. No se presupone que el ID 7 corresponda al Posgrado real.
-- La consulta existente `PublishedCatalogQuery` filtra oficinas activas, catálogos habilitados y conceptos publicados, con costo histórico válido. **No devuelve el costo** como importe cobrable.
+- La consulta existente `PublishedCatalogQuery` filtra oficinas activas, catálogos habilitados y conceptos publicados, con costo histórico válido. La cotización usa el costo institucional o una versión PEN aprobada vigente, con validación en servidor.
 - El endpoint devuelve JSON con `success`, `data` y `message`.
 - El resultado vacío es `200` con `data: []`; entrada incorrecta retorna `422` con `errors`.
 - Límite básico por ruta: 60 solicitudes/minuto, sujeto a configuración del entorno.
@@ -27,7 +27,10 @@ Ejemplo exclusivamente ficticio:
       "requirements": null,
       "requires_eligibility_check": false,
       "office": {"id": 7, "name": "Posgrado ficticio"},
-      "pricing_status": "pending_institutional_approval",
+      "reference_amount": "10.00",
+      "orderable": true,
+      "orderable_reason": null,
+      "pricing_status": "official",
       "checkout_enabled": false
     }
   ],
@@ -37,13 +40,13 @@ Ejemplo exclusivamente ficticio:
 
 ## Separación por capas
 
-- `app/Modules/Tienda/routes.php`: ruta HTTP y limitación de frecuencia.
-- `app/Modules/Tienda/Http/Controllers/CatalogController.php`: entrada, respuesta y error 422.
-- `app/Modules/Tienda/Services/CatalogService.php`: transformación a contrato público JSON.
-- `app/Modules/Tienda/Queries/PublishedCatalogQuery.php`: consulta de solo lectura a maestros SISPAGOS + publicaciones de la tienda.
+- `app/Modules/Catalogo/routes.php`: ruta HTTP y limitación de frecuencia.
+- `app/Modules/Catalogo/Http/Controllers/CatalogController.php`: entrada, respuesta y error 422.
+- `app/Modules/Catalogo/Services/CatalogService.php`: transformación a contrato público JSON.
+- `app/Modules/Sispagos/Queries/PublishedCatalogQuery.php`: consulta de solo lectura a maestros SISPAGOS + publicaciones de la tienda.
 - `tests/Feature/Modules/CatalogApiTest.php`: prueba entrada, publicación, oficinas inactivas y método GET.
 
-El frontend podrá consumir el JSON. Los demás módulos continúan separados y no se acoplan mediante consultas HTTP internas. No existe API para carrito, pedidos, cobros o conciliación en este PR.
+El frontend consume este JSON. `orderable=false` informa `eligibility_required` o `invalid_or_ambiguous_price`; el carrito rechaza estos conceptos. `PricingPolicy` separa `pricing_status=official` de `checkout_enabled`, controlado por `PAYME_ENABLED` (falso por defecto). Una tarifa oficial no implica una pasarela funcional. Ver [pedidos](PEDIDOS_Y_PAGO_POSGRADO.md).
 
 ## Antes de uso institucional
 
