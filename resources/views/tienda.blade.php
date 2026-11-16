@@ -1,7 +1,9 @@
 @extends('layouts.market')
 @section('marketPage', 'catalog')
 @section('heroes')
+@if($isMarketHome ?? true)
 @include('modules.tienda.partials.heroes')
+@endif
 @endsection
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
@@ -427,7 +429,11 @@ body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:no
 }
 
 </style>
-<div class="store-layout">
+<link rel="stylesheet" href="{{ asset('css/undc-market-home.css') }}?v={{ filemtime(public_path('css/undc-market-home.css')) }}">
+@if($isMarketHome ?? true)
+@include('modules.tienda.partials.home')
+@endif
+<div class="store-layout" @if($isMarketHome ?? true) hidden @endif>
 @include('modules.tienda.partials.catalog')
 <aside class="store-cart" aria-labelledby="storeCartTitle">
 <div class="store-cart-heading"><h2 id="storeCartTitle">Tu carrito</h2><span id="storeCartCount" aria-live="polite">0</span></div>
@@ -437,5 +443,7 @@ body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:no
 <button id="storeCartContinue" type="button" disabled>Revisar carrito →</button>
 </aside>
 </div>
+<script src="{{ asset('js/undc-market-home.js') }}?v={{ filemtime(public_path('js/undc-market-home.js')) }}" defer></script>
 <script src="{{ asset('js/undc-store-motion.js') }}?v={{ filemtime(public_path('js/undc-store-motion.js')) }}" defer></script>
 @endsection
+
