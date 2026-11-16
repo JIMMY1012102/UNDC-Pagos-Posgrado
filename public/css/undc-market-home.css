@@ -55,7 +55,7 @@ body[data-market-page="catalog"] .immersive-hero [data-hero-slide] .immersive-su
 @media(prefers-reduced-motion:reduce){.market-home *{transition:none!important;animation:none!important}.home-bands>div,.home-story-photo img{transform:none!important}}
 
 /* Desktop reference: immersive photograph with an overlaid, readable header. */
-body.market-discovery-home:not([data-accessibility-color]) > header.site-header{background:linear-gradient(90deg,#031f12f5,#07391fd9);border:0;color:#fff;margin-bottom:calc(-1 * var(--market-header-height,70px))}
+body.market-discovery-home:not([data-accessibility-color]) > header.site-header{background:linear-gradient(90deg,#031f12,#07391f);border-bottom:1px solid #ffffff26;color:#fff;margin-bottom:0}
 body.market-discovery-home:not([data-accessibility-color]) .site-header .brand-title,
 body.market-discovery-home:not([data-accessibility-color]) .site-header .brand-title b,
 body.market-discovery-home:not([data-accessibility-color]) .site-header .brand-title em{color:#fff;font-family:'Bricolage Grotesque',Inter,sans-serif;font-size:clamp(22px,2.2vw,32px)}
@@ -68,10 +68,10 @@ body.market-discovery-home .home-help-link{order:2;text-decoration:none;font:500
 body.market-discovery-home:not([data-accessibility-color]) .site-header .store-account-initials{background:transparent;color:#c9f236;border:2px solid #c9f236;width:44px;height:44px}
 body.market-discovery-home:not([data-accessibility-color]) .site-header .utility-controls .language-button{background:transparent;border-color:#ffffff40;color:#fff}
 body.market-discovery-home:not([data-accessibility-color]) .site-header .store-posgrado-menu[open]>summary{background:#ffffff18}
-body.market-discovery-home .hero.market-hero.immersive-hero{height:100svh;min-height:680px;background:linear-gradient(120deg,#031f12,#07391f 55%,#0a4a28);overflow:hidden}
+body.market-discovery-home .hero.market-hero.immersive-hero{height:calc(100svh - var(--market-header-height,70px));min-height:0;background:linear-gradient(120deg,#031f12,#07391f 55%,#0a4a28);overflow:hidden}
 body.market-discovery-home .immersive-hero .market-hero-photo{inset:0 0 0 auto;width:64%;height:100%;object-position:35% 40%;mask-image:linear-gradient(to right,transparent 0%,#000 55%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 55%);transform-origin:60% 40%}
 body.market-discovery-home .immersive-hero::after{content:'';position:absolute;inset:55% 0 0;background:linear-gradient(transparent,#031f12d9);pointer-events:none;z-index:0}
-body.market-discovery-home .immersive-hero .market-hero-content{justify-content:center;padding:calc(var(--market-header-height,70px) + 24px) 5% 74px}
+body.market-discovery-home .immersive-hero .market-hero-content{justify-content:center;padding:24px 5% 74px}
 body.market-discovery-home .immersive-hero .market-hero-slides{width:74%;max-width:1000px}
 body.market-discovery-home .immersive-hero .market-hero-eyebrow{font-size:clamp(14px,1.25vw,18px);margin-bottom:26px}
 body.market-discovery-home .immersive-hero [data-hero-slide] h1{font-size:clamp(64px,min(12.36vw,19.8svh),178px);line-height:.86;letter-spacing:-.045em;text-shadow:0 6px 40px #0004}
@@ -92,8 +92,8 @@ body.market-discovery-home .home-ghost{font-size:clamp(180px,29.2vw,420px);botto
 body.market-discovery-home .home-orb{right:8.3%;top:62%;width:clamp(80px,11.8vw,170px);z-index:1}
 body.market-discovery-home .home-dot{display:none}
 @media(max-height:760px) and (min-width:901px){
-body.market-discovery-home .hero.market-hero.immersive-hero{min-height:610px}
-body.market-discovery-home .immersive-hero .market-hero-content{padding-top:calc(var(--market-header-height,70px) + 18px);padding-bottom:64px}
+body.market-discovery-home .hero.market-hero.immersive-hero{min-height:0}
+body.market-discovery-home .immersive-hero .market-hero-content{padding-top:18px;padding-bottom:64px}
 body.market-discovery-home .immersive-hero .market-hero-eyebrow{margin-bottom:16px}
 body.market-discovery-home .immersive-hero [data-hero-slide] h1{font-size:clamp(64px,16svh,122px)}
 body.market-discovery-home .immersive-hero [data-hero-slide] .immersive-subtitle{margin-top:16px;font-size:clamp(32px,6.5svh,50px)}
