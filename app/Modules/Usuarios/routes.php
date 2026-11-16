@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/tienda/login', 'modules.acceso.login')->name('tienda.login');
 
 // Authentication is provided by a trusted session, never by user_id in JSON.
-Route::middleware(['auth', 'throttle:30,1'])
+Route::middleware(['auth', 'throttle:market-access'])
     ->prefix('api/v1/acceso')
     ->name('api.acceso.')
     ->group(function (): void {
@@ -16,7 +16,7 @@ Route::middleware(['auth', 'throttle:30,1'])
     });
 
 // Web-session OAuth routes: keep Google login disabled until OTI configuration.
-Route::middleware('throttle:15,1')->group(function (): void {
+Route::middleware('throttle:market-oauth')->group(function (): void {
     Route::get('/auth/google/redirect', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
     Route::get('/auth/google/callback', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
@@ -26,10 +26,11 @@ Route::post('/auth/logout', [\App\Modules\Usuarios\Http\Controllers\GoogleAuthCo
 
 
 // Account and profile web forms use Laravel CSRF and session protection.
-Route::middleware('throttle:10,1')->group(function (): void {
-    Route::get('/tienda/registro', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'registerForm'])->name('tienda.registro');
+Route::get('/tienda/registro', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'registerForm'])->name('tienda.registro');
+Route::middleware('throttle:market-registration')->group(function (): void {
     Route::post('/tienda/registro', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'register'])->name('tienda.registro.store');
-    Route::post('/tienda/login', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'login'])->name('tienda.login.store');
 });
+Route::post('/tienda/login', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'login'])
+    ->middleware('throttle:market-login')->name('tienda.login.store');
 Route::get('/tienda/perfil', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'profileForm'])->name('tienda.perfil');
-Route::post('/tienda/perfil', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'saveProfile'])->middleware('throttle:20,1')->name('tienda.perfil.store');
+Route::post('/tienda/perfil', [\App\Modules\Usuarios\Http\Controllers\AccountController::class, 'saveProfile'])->middleware('throttle:market-profile')->name('tienda.perfil.store');
