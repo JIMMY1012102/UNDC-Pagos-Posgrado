@@ -593,6 +593,19 @@ if(state.authenticated&&sessionStorage.getItem('undc_resume_purchase')==='1'){if
 }catch(e){toast(e.message,true)}}
 
 const searchInput=$('search'),searchSuggestions=$('searchSuggestions');
+// Float suggestions outside the hero's clipped decorative box.
+if(isMarketHome&&searchSuggestions){document.body.append(searchSuggestions);searchSuggestions.classList.add('home-search-overlay');}
+function positionHomeSuggestions(){
+ if(!isMarketHome||!searchSuggestions||searchSuggestions.hidden||!searchInput)return;
+ const rect=searchInput.closest('form').getBoundingClientRect();
+ const below=window.innerHeight-rect.bottom-16,above=rect.top-16;
+ const up=below<150&&above>below,height=Math.min(280,Math.max(80,up?above:below));
+ Object.assign(searchSuggestions.style,{position:'fixed',left:rect.left+'px',width:rect.width+'px',maxHeight:height+'px',top:up?'auto':(rect.bottom+8)+'px',bottom:up?(window.innerHeight-rect.top+8)+'px':'auto'});
+}
+let searchPositionFrame=0;
+function scheduleSearchPosition(){if(searchPositionFrame)return;searchPositionFrame=requestAnimationFrame(()=>{searchPositionFrame=0;positionHomeSuggestions();});}
+if(isMarketHome){window.addEventListener('scroll',scheduleSearchPosition,{passive:true});window.addEventListener('resize',scheduleSearchPosition,{passive:true});}
+
 let suggestedProducts=[],activeSuggestion=-1;
 function closeSearchSuggestions(){if(searchSuggestions)searchSuggestions.hidden=true;searchInput?.setAttribute('aria-expanded','false');searchInput?.removeAttribute('aria-activedescendant');activeSuggestion=-1}
 function setHeaderSearchOpen(open,focus=true){
@@ -616,9 +629,9 @@ function renderSearchSuggestions(){
  suggestedProducts=catalogSuggestions(searchInput.value);activeSuggestion=-1;
  searchInput.removeAttribute('aria-activedescendant');
  if(!searchInput.value.trim()){closeSearchSuggestions();return}
- if(catalogLoading||catalogFailed){searchSuggestions.textContent=localized(catalogFailed?'No se pudo cargar el catálogo. Reintenta.':'Cargando conceptos…',catalogFailed?'Could not load the catalogue. Retry.':'Loading services…');searchSuggestions.hidden=false;searchInput.setAttribute('aria-expanded','true');return;}
+ if(catalogLoading||catalogFailed){searchSuggestions.textContent=localized(catalogFailed?'No se pudo cargar el catálogo. Reintenta.':'Cargando conceptos…',catalogFailed?'Could not load the catalogue. Retry.':'Loading services…');searchSuggestions.hidden=false;searchInput.setAttribute('aria-expanded','true');positionHomeSuggestions();return;}
  searchSuggestions.innerHTML=suggestedProducts.length?suggestedProducts.map((item,index)=>'<div class="search-suggestion" id="searchSuggestion'+index+'" role="option" aria-selected="false" data-search-suggestion="'+index+'"><strong>'+esc(localized(item.name,item.en))+'</strong><small>'+esc(localized(categoryById(item.category).name,categoryById(item.category).en))+' · '+esc(item.price)+'</small></div>').join(''):'<div class="search-no-results">'+esc(localized('No encontramos productos. Prueba otro nombre.','No products found. Try another name.'))+'</div>';
- searchSuggestions.hidden=false;searchInput.setAttribute('aria-expanded','true');
+ searchSuggestions.hidden=false;searchInput.setAttribute('aria-expanded','true');positionHomeSuggestions();
 }
 function chooseSearchSuggestion(index){
  const item=suggestedProducts[index];if(!item)return;
@@ -635,8 +648,8 @@ searchInput?.addEventListener('keydown',event=>{
  }else if(event.key==='Enter'&&activeSuggestion>=0){event.preventDefault();chooseSearchSuggestion(activeSuggestion)}
 });
 searchSuggestions?.addEventListener('click',event=>{const option=event.target.closest('[data-search-suggestion]');if(option)chooseSearchSuggestion(Number(option.dataset.searchSuggestion))});
-document.addEventListener('click',event=>{if(!event.target.closest('.header-search'))closeSearchSuggestions()});
-document.addEventListener('focusin',event=>{if(!event.target.closest('.header-search'))closeSearchSuggestions()});
+document.addEventListener('click',event=>{if(!event.target.closest('.header-search')&&!searchSuggestions?.contains(event.target))closeSearchSuggestions()});
+document.addEventListener('focusin',event=>{if(!event.target.closest('.header-search')&&!searchSuggestions?.contains(event.target))closeSearchSuggestions()});
 
 $('search')?.addEventListener('input',()=>{if(!isMarketHome)searchCatalog();renderSearchSuggestions();});
 $('tusneResults')?.addEventListener('click',async event=>{
