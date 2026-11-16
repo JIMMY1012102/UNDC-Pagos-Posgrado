@@ -19,7 +19,6 @@
 <a class="home-category-card" href="{{ url('/tienda/catalogo') }}?category={{ $category }}"><span>POSGRADO / UNDC</span><h3>{{ $label }}</h3><p>{{ $description }}</p><strong>Explorar ↗</strong></a>
 @endforeach
 </div>
-<div class="home-section-heading home-featured-heading"><h2>Conceptos destacados</h2><a href="/tienda/catalogo">Todos los conceptos ↗</a></div><div id="homeFeaturedCards" class="home-featured-grid" aria-live="polite"><p>Consulta los conceptos disponibles en el catálogo.</p></div>
 </section>
 <section class="home-news home-facebook-news" aria-labelledby="homeNewsTitle">
 <div class="home-news-inner">
