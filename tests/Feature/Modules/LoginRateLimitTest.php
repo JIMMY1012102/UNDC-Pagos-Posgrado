@@ -34,7 +34,11 @@ class LoginRateLimitTest extends TestCase
             ->assertRedirect('/tienda/login')
             ->assertSessionHasErrors(['email' => 'Has realizado varios intentos de acceso. Espera un minuto y vuelve a intentarlo.'])
             ->assertSessionMissing('_old_input.password');
-        $this->get('/tienda/login')->assertOk()
-            ->assertSee('Espera un minuto');
+        $before = session('errors')?->all();
+        $response = $this->get('/tienda/login')->assertOk();
+        preg_match('/<div class="warning"[\s\S]*?<\/div>/', $response->getContent(), $alert);
+        $this->assertStringContainsString('Espera un minuto', $response->getContent(), json_encode([
+            'before' => $before, 'after' => session('errors')?->all(), 'alert' => $alert[0] ?? null,
+        ]));
     }
 }
