@@ -65,7 +65,7 @@ body.market-discovery-home:not([data-accessibility-color]) .site-header .home-he
 body.market-discovery-home:not([data-accessibility-color]) .site-header .nav-actions .login-button{color:#fff}
 body.market-discovery-home .market-home-link{display:none}
 body.market-discovery-home .home-help-link{order:2;text-decoration:none;font:500 16px Inter,sans-serif}
-body.market-discovery-home:not([data-accessibility-color]) .site-header .store-account-initials{background:#fff;color:#063827;border:2px solid #fff;width:44px;height:44px;box-shadow:0 2px 10px #031f1226}
+body.market-discovery-home:not([data-accessibility-color]) .site-header .store-account-initials{background:#fff;color:#063827;border:2px solid #fff;width:44px;height:44px;box-shadow:0 2px 10px #031f1226;font-weight:700}
 body.market-discovery-home:not([data-accessibility-color]) .site-header .utility-controls .language-button{background:transparent;border-color:#ffffff40;color:#fff}
 body.market-discovery-home:not([data-accessibility-color]) .site-header .store-posgrado-menu[open]>summary{background:#ffffff18}
 body.market-discovery-home .hero.market-hero.immersive-hero{height:auto;min-height:100svh;background:linear-gradient(120deg,#031f12,#07391f 55%,#0a4a28);overflow:hidden}
