@@ -4,7 +4,7 @@
 <div class="market-hero-content">
 <p class="market-hero-eyebrow">POSGRADO / UNDC</p>
 <div class="market-hero-slides"><article data-hero-slide>
-<h1>Tus metas<br>avanzan.</h1>
+<h1>Tus<br>metas<br>avanzan.</h1>
 <h2 class="immersive-subtitle">Tus trámites también.</h2>
 <p>Encuentra y paga tus trámites de posgrado en un solo lugar.</p>
 <div id="storeHeroSearch"></div>
