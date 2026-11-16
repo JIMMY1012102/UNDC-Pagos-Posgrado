@@ -188,3 +188,8 @@ body.market-discovery-home>.home-search-overlay[hidden]{display:none!important}
 body.market-discovery-home .site-header a.login-button[data-login-trigger]{font-weight:700}
 body.market-discovery-home .site-header a.login-button[data-login-trigger]>svg,
 body.market-discovery-home .site-header a.mobile-login[data-login-trigger]>svg{stroke-width:2.4}
+
+/* Catalog preview: keep all cards and the cart visible above the CTA. */
+.home-story-photo.home-story-catalog{aspect-ratio:1.1;background:#e6f1eb;padding-bottom:92px}
+.home-story-photo.home-story-catalog img{display:block;object-fit:contain;object-position:center;transform:none}
+.home-story-photo.home-story-catalog::after{display:none}

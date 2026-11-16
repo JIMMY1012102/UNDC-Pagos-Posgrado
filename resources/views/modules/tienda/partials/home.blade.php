@@ -4,7 +4,7 @@
 <div class="home-story-stage">
 <div class="home-story-copy"><p class="home-eyebrow">Así funciona <span id="homeStoryCounter" aria-hidden="true">01 / 03</span></p><h2 id="homeStoryTitle" class="home-sr-only">Elige, revisa y paga tu pedido</h2>
 <ol><li><h3>Elige.</h3><p>Encuentra el concepto que necesitas: matrícula, pensiones, constancias y más.</p></li><li><h3>Revisa.</h3><p>Organiza tus conceptos en el carrito y revisa el resumen antes de continuar.</p></li><li><h3>Paga.</h3><p>Paga tus trámites al instante con Yape o Visa, a través de Pay-me.</p></li></ol></div>
-<div class="home-story-photo"><img src="{{ asset('assets/hero-undc/posgrado-comunidad.webp') }}" alt="Comunidad de Posgrado reunida en el campus UNDC" loading="lazy" width="1672" height="941"><a id="homeStoryLink" href="/tienda/catalogo">Explorar trámites ↗</a></div>
+<div class="home-story-photo home-story-catalog"><img src="{{ asset('assets/hero-undc/catalogo-carrito.webp') }}" alt="Vista del catálogo de trámites de UNDC Market y su carrito" loading="lazy" width="1254" height="1254"><a id="homeStoryLink" href="/tienda/catalogo">Explorar trámites ↗</a></div>
 </div></section>
 <section class="home-discover" aria-labelledby="homeForYouTitle"><div class="home-section-heading"><div><p class="home-eyebrow">Para ti</p><h2 id="homeForYouTitle">Tu próximo<br>paso empieza aquí.</h2></div><a href="/tienda/catalogo">Ver catálogo ↗</a></div>
 <div class="home-category-grid">
