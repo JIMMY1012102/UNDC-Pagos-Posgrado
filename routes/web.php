@@ -13,7 +13,11 @@ Route::get('/tienda', function (\Illuminate\Http\Request $request) {
         return redirect()->route('tienda.login');
     }
 
-    return view('tienda');
+    if ($request->hasAny(['q', 'category', 'view'])) {
+        return redirect('/tienda/catalogo'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
+    }
+
+    return view('tienda', ['isMarketHome' => true]);
 })->name('tienda');
 
 
@@ -21,3 +25,4 @@ Route::get('/tienda', function (\Illuminate\Http\Request $request) {
 foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
     require app_path("Modules/{$module}/routes.php");
 }
+
