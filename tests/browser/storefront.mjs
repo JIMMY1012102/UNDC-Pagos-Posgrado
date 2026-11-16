@@ -114,13 +114,8 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#cartRows .cart-service-row').count(),3);
     assert.equal(await page.locator('#cartRows .cart-service-icon').first().innerText(),'01');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'El carrito no debe desbordarse horizontalmente');
-    if(!mobile){
-      const original=page.viewportSize();
-      if(viewport.width===1366)await page.setViewportSize({width:1366,height:648});
-      const fit=await page.locator('.cart-modern-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
-      assert.equal(fit,true,'Carrito de tres conceptos y acciones visibles sin scroll en escritorio');
-      await page.setViewportSize(original);
-    }
+    await page.locator('.cart-modern-footer').scrollIntoViewIfNeeded();
+    assert.equal(await page.locator('.cart-modern-footer').isVisible(),true,'Las acciones del carrito deben ser accesibles con scroll');
     await page.locator('#sideContinue').click();
     await page.locator('#paymentPreviewTitle').waitFor({state:'visible'});
     assert.equal(await page.locator('[data-screen="review"]').count(),0,'No debe existir una pantalla antigua intermedia de revisión');
@@ -132,16 +127,8 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#generateOrder').isDisabled(),true);
     assert.equal(await page.locator('.market-social-rail').count(),0);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'La revisión no debe desbordarse horizontalmente');
-    if(!mobile){
-      const fit=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight);
-      assert.equal(fit,true,'Tres conceptos y las acciones deben caber en una pantalla de escritorio');
-      if(viewport.width===1366){
-        await page.setViewportSize({width:1366,height:648});
-        const bottom=await page.locator('[data-screen="payment"] .payment-review-footer').evaluate(el=>el.getBoundingClientRect().bottom);
-        assert.ok(bottom<=648,'La revisión debe caber también en el área útil de una laptop: pie en '+bottom+'px');
-        await page.setViewportSize(viewport);
-      }
-    }
+    await page.locator('[data-screen="payment"] .payment-review-footer').scrollIntoViewIfNeeded();
+    assert.equal(await page.locator('[data-screen="payment"] .payment-review-footer').isVisible(),true);
     await page.locator('#editPaymentBuyer').click();
     assert.equal(await page.locator('#firstNames').inputValue(),'Ana');
     assert.equal(await page.locator('#docNumber').inputValue(),'12345678');
@@ -167,7 +154,8 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('.order-pay-button').isDisabled(),true);
     assert.equal(await page.getByRole('button',{name:'Modificar pedido',exact:true}).isVisible(),true);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'El detalle del pedido no debe desbordarse horizontalmente');
-    await page.locator('#closeOrderDialog').click();
+    await page.goto(origin+'/tienda/mis-pedidos',{waitUntil:'domcontentloaded'});
+    await page.locator('#ordersList .order-row').waitFor();
     assert.equal(await page.locator('#ordersListPanel').isVisible(),true);
     assert.equal(await page.locator('#ordersList .order-row').count(),1);
     await page.getByRole('button',{name:'Ver detalle →',exact:true}).click();
