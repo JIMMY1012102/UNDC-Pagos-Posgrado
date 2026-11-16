@@ -415,6 +415,17 @@ body[data-market-page="catalog"] .site-header .store-posgrado-menu>summary,
 body[data-market-page="catalog"] .site-header .immersive-orders-link{font-size:16px}
 @media(max-width:800px){body[data-market-page="catalog"] .site-header .top-inner{padding:6px 0;gap:8px}body[data-market-page="catalog"] .site-header .brand-title,body[data-market-page="catalog"] .site-header .brand-title b,body[data-market-page="catalog"] .site-header .brand-title em{font-size:20px}}
 
+
+/* Scroll motion is progressive: content stays readable without JavaScript. */
+body[data-market-page="catalog"] .immersive-hero .kinetic-word{display:inline-block;transform:translate(calc(var(--word-direction,1) * var(--word-spread,0px)),var(--title-travel,0px)) scale(var(--title-scale,1));transform-origin:left center}
+body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:translateY(var(--hero-travel,0px)) scale(1.08);transform-origin:right center}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){
+html{scroll-behavior:auto}
+body[data-market-page="catalog"] .immersive-hero .kinetic-word,
+body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:none!important}
+}
+
 </style>
 <div class="store-layout">
 @include('modules.tienda.partials.catalog')
@@ -426,4 +437,5 @@ body[data-market-page="catalog"] .site-header .immersive-orders-link{font-size:1
 <button id="storeCartContinue" type="button" disabled>Revisar carrito →</button>
 </aside>
 </div>
+<script src="{{ asset('js/undc-store-motion.js') }}?v={{ filemtime(public_path('js/undc-store-motion.js')) }}" defer></script>
 @endsection
