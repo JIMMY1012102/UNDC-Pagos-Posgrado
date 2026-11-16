@@ -175,3 +175,11 @@ body.market-discovery-home .immersive-hero .search-suggestion strong{color:#103d
 body.market-discovery-home .immersive-hero .search-suggestion small{color:#4f6c59}
 body[data-market-page="catalog"] .site-header .header-search>button[type="submit"]{display:flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:#075b3d;color:#fff}
 body[data-market-page="catalog"] .site-header .header-search>button[type="submit"] svg{width:18px;height:18px}
+
+/* Body-level suggestions escape the hero's overflow clipping. */
+body.market-discovery-home>.home-search-overlay{inset:auto;margin:0;box-sizing:border-box;z-index:100;overflow-y:auto;overscroll-behavior:contain;padding:8px;border:1px solid #ccded2;border-radius:18px;background:#fff;color:#103d2a;box-shadow:0 16px 35px #001e2040;font:400 14px/1.45 Inter,system-ui,sans-serif;text-align:left}
+body.market-discovery-home>.home-search-overlay[hidden]{display:none!important}
+.home-search-overlay .search-suggestion{display:grid;gap:5px;padding:12px;border-radius:10px;cursor:pointer;background:#fff;color:#103d2a}
+.home-search-overlay .search-suggestion:hover,.home-search-overlay .search-suggestion[aria-selected="true"]{background:#eaf4e9}
+.home-search-overlay .search-suggestion strong{color:#103d2a}
+.home-search-overlay .search-suggestion small{color:#4f6c59}
