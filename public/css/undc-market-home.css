@@ -165,3 +165,13 @@ body.market-discovery-home .immersive-hero .market-hero-content{min-height:calc(
 @media(max-width:400px){.home-facebook-news{padding:44px 12px}.home-facebook-card{padding:10px;border-radius:18px}.home-news-copy .home-news-cta{padding:15px 16px;font-size:13px}}
 /* The transparent hero header needs a solid surface over lighter sections. */
 body.market-discovery-home.home-past-hero:not([data-accessibility-color]) > header.site-header{background:#063827;box-shadow:0 4px 18px #031f121a}
+
+/* Keep search suggestions readable and above the hero content. */
+body.market-discovery-home .immersive-hero .header-search .search-suggestions{position:absolute;top:calc(100% + 10px);left:0;right:0;z-index:10;width:100%;max-height:260px;overflow-y:auto;padding:8px;border:1px solid #ccded2;border-radius:18px;background:#fff;color:#103d2a;box-shadow:0 16px 35px #001e2040;text-shadow:none}
+body.market-discovery-home .immersive-hero .search-suggestion{padding:12px;border-radius:10px;cursor:pointer;background:#fff;color:#103d2a}
+body.market-discovery-home .immersive-hero .search-suggestion:hover,
+body.market-discovery-home .immersive-hero .search-suggestion[aria-selected="true"]{background:#eaf4e9}
+body.market-discovery-home .immersive-hero .search-suggestion strong{color:#103d2a}
+body.market-discovery-home .immersive-hero .search-suggestion small{color:#4f6c59}
+body[data-market-page="catalog"] .site-header .header-search>button[type="submit"]{display:flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:#075b3d;color:#fff}
+body[data-market-page="catalog"] .site-header .header-search>button[type="submit"] svg{width:18px;height:18px}
