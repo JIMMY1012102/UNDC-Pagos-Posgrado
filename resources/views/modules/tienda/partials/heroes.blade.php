@@ -1,6 +1,6 @@
 <section class="hero market-hero institutional-hero immersive-hero" id="hero" aria-label="Posgrado UNDC">
 <img class="market-hero-photo" src="{{ asset('assets/hero-undc/posgrado-comunidad.webp') }}" alt="Comunidad de Posgrado de la Universidad Nacional de Cañete" width="1672" height="941" fetchpriority="high">
-<span class="home-ghost" aria-hidden="true">POSGRADO</span><span class="home-orb" aria-hidden="true"></span><span class="home-dot" aria-hidden="true"></span>
+<span class="home-ghost" aria-hidden="true">POSGRADO</span><span class="home-dot" aria-hidden="true"></span>
 <div class="market-hero-content">
 <p class="market-hero-eyebrow">POSGRADO / UNDC</p>
 <div class="market-hero-slides"><article data-hero-slide>
