@@ -1,5 +1,6 @@
 @extends('layouts.market')
 @section('marketPage', 'catalog')
+@section('bodyClass', ($isMarketHome ?? true) ? 'market-discovery-home' : '')
 @section('heroes')
 @if($isMarketHome ?? true)
 @include('modules.tienda.partials.heroes')

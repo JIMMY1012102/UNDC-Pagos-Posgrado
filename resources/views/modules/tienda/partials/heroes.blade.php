@@ -12,6 +12,7 @@
 </article></div>
 <a class="hero-scroll-cue" href="#homeStory">Explora tu próximo paso <span aria-hidden="true">↓</span></a>
 </div>
+<div class="home-hero-progress" aria-hidden="true"><span><i id="homeHeroProgressBar"></i></span><b id="homeHeroProgressValue">0%</b></div>
 </section>
 <script>
 (() => {
