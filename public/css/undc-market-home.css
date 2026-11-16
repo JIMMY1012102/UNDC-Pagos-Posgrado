@@ -183,3 +183,8 @@ body.market-discovery-home>.home-search-overlay[hidden]{display:none!important}
 .home-search-overlay .search-suggestion:hover,.home-search-overlay .search-suggestion[aria-selected="true"]{background:#eaf4e9}
 .home-search-overlay .search-suggestion strong{color:#103d2a}
 .home-search-overlay .search-suggestion small{color:#4f6c59}
+
+/* Guest account entry matches the weight of the header navigation. */
+body.market-discovery-home .site-header a.login-button[data-login-trigger]{font-weight:700}
+body.market-discovery-home .site-header a.login-button[data-login-trigger]>svg,
+body.market-discovery-home .site-header a.mobile-login[data-login-trigger]>svg{stroke-width:2.4}
