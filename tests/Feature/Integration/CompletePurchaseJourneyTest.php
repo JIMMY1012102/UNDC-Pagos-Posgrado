@@ -184,4 +184,22 @@ class CompletePurchaseJourneyTest extends TestCase
         $this->assertDatabaseCount('tienda_transacciones_pago', 0);
     }
 
+
+    public function test_mariadb_enforces_active_cart_uniqueness_and_merge(): void
+    {
+        $buyer = User::factory()->create();
+        $item = (int) DB::table('tienda_conceptos_catalogo')->where('slug', 'e2e-test')->value('id');
+        $carts = app(\App\Modules\Pedidos\Services\CartService::class);
+        $first = $carts->create();
+        $carts->add($first['token'], $item, 2);
+        $owned = $carts->claim($first['token'], $buyer->id);
+        $second = $carts->create();
+        $carts->add($second['token'], $item, 3);
+        $merged = $carts->claim($second['token'], $buyer->id);
+        $this->assertSame($owned['id'], $merged['id']);
+        $this->assertSame(5, $merged['items_count']);
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+    }
+
 }
