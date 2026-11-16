@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id), csrf=document.querySelector('meta[name="csrf-token"]').content;
 const marketPage=document.body.dataset.marketPage||'catalog';
+const isMarketHome=!!document.getElementById('marketHome');
 if(marketPage==='catalog'){
  const headerTop=document.querySelector('.top-inner');
  const categoryMenu=document.createElement('details');categoryMenu.className='store-posgrado-menu';
@@ -8,6 +9,7 @@ if(marketPage==='catalog'){
  const menuPanel=document.createElement('nav');menuPanel.id='storeHeaderCategories';menuPanel.setAttribute('aria-label','Categorías de Posgrado');
  const menuTitle=document.createElement('p');menuTitle.className='store-menu-title';menuTitle.textContent='Categorías de Posgrado';menuPanel.append(menuTitle);
  categoryMenu.append(menuSummary,menuPanel);
+ const homeLink=document.createElement('a');homeLink.className='market-home-link';homeLink.href='/tienda';homeLink.textContent='Inicio';if(isMarketHome)homeLink.setAttribute('aria-current','page');headerTop?.insertBefore(homeLink,headerTop.querySelector('.utility-controls'));
  const ordersLink=document.createElement('a');ordersLink.className='immersive-orders-link';ordersLink.href='/tienda/mis-pedidos';ordersLink.textContent='Mis pedidos';headerTop?.insertBefore(ordersLink,headerTop.querySelector('.utility-controls'));
 headerTop?.insertBefore(categoryMenu,headerTop.querySelector('.utility-controls'));
  categoryMenu.addEventListener('toggle',()=>menuSummary.setAttribute('aria-expanded',String(categoryMenu.open)));
@@ -34,7 +36,7 @@ headerTop?.insertBefore(categoryMenu,headerTop.querySelector('.utility-controls'
  });
 
 }
-const marketRoutes={catalog:'/tienda',cart:'/tienda/carrito',login:'/tienda/login'};
+const marketRoutes={catalog:'/tienda/catalogo',cart:'/tienda/carrito',login:'/tienda/login'};
 const state={token:sessionStorage.getItem('undc_cart_token'),cart:null,owned:false,profile:null,office:sessionStorage.getItem('undc_office_id')||'',catalog:[],screen:marketPage,authenticated:false};
 let currentLanguage=localStorage.getItem('undc_language')==='en'?'en':'es';
 const languagePairs={
@@ -345,11 +347,15 @@ function renderConceptCard(item,category){
 const normalizeCatalogSearch=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
 function matchesCatalogSearch(item,query){const category=categoryById(item.category);const searchable=normalizeCatalogSearch([item.name,item.en,item.code||item.id,item.description,item.descriptionEn,category?.name,category?.en].join(' '));return normalizeCatalogSearch(query).split(/\s+/).filter(Boolean).every(word=>searchable.includes(word))}
 function searchCatalog(reveal=false){
- if(marketPage!=='catalog'){window.location.assign('/tienda?q='+encodeURIComponent($('search')?.value.trim()||''));return}
+ if(isMarketHome){if(reveal)window.location.assign('/tienda/catalogo?q='+encodeURIComponent($('search')?.value.trim()||''));return;}
+ if(marketPage!=='catalog'){window.location.assign('/tienda/catalogo?q='+encodeURIComponent($('search')?.value.trim()||''));return}
  tusneCategory='all';renderTusneCatalog();
  if(reveal){setMainView('catalogs');const results=$('tusneCatalog');results?.scrollIntoView({behavior:'smooth',block:'start'});const title=$('catalogResultsTitle');title?.setAttribute('tabindex','-1');title?.focus({preventScroll:true})}
 }
 function renderTusneCatalog(){
+ const featured=$('homeFeaturedCards');
+ if(featured){featured.replaceChildren();tusneConcepts.slice(0,3).forEach(item=>{const link=document.createElement('a');link.className='home-featured-link';link.href='/tienda/catalogo?q='+encodeURIComponent(item.name);const name=document.createElement('h3'),cta=document.createElement('span');name.textContent=item.name;cta.textContent=localized('Ver trámite ↗','View service ↗');link.append(name,cta);featured.append(link);});if(!tusneConcepts.length)featured.textContent=localized('Consulta los conceptos disponibles en el catálogo.','Browse available services in the catalogue.');}
+
 updateCategoryNavigation();
 if(!$('tusneResults'))return;
 const query=$('search')?.value.trim()||'';
@@ -383,9 +389,10 @@ function scrollCatalogBelowHeader(){
  window.scrollTo({top:Math.max(0,top),behavior:reducedMotion?'instant':'smooth'});
 }
 function selectCatalogCategory(category,reveal=true){
+ if(isMarketHome){window.location.assign('/tienda/catalogo?category='+encodeURIComponent(category));return;}
  category=normalizarCategoria(category);
  if(category!=='all'&&!tusneCategories.some(item=>item.id===category))return;
- if(marketPage!=='catalog'){window.location.assign('/tienda?category='+encodeURIComponent(category));return}
+ if(marketPage!=='catalog'){window.location.assign('/tienda/catalogo?category='+encodeURIComponent(category));return}
  tusneCategory=category;if($('search'))$('search').value='';closeSearchSuggestions();
  setMainView(category==='all'?'procedures':'catalogs');renderTusneCatalog();
  if(reveal){
@@ -625,7 +632,7 @@ searchSuggestions?.addEventListener('click',event=>{const option=event.target.cl
 document.addEventListener('click',event=>{if(!event.target.closest('.header-search'))closeSearchSuggestions()});
 document.addEventListener('focusin',event=>{if(!event.target.closest('.header-search'))closeSearchSuggestions()});
 
-$('search')?.addEventListener('input',()=>{searchCatalog();renderSearchSuggestions();});
+$('search')?.addEventListener('input',()=>{if(!isMarketHome){searchCatalog();renderSearchSuggestions();}});
 $('tusneResults')?.addEventListener('click',async event=>{
  const cartButton=event.target.closest('[data-store-cart]');
  if(cartButton){cartButton.disabled=true;const id=cartButton.dataset.storeCart,line=(state.cart?.items||[]).find(item=>String(item.catalog_item_id)===id);try{if(line)await removeItem(line.id);else await addItem(id);}finally{cartButton.disabled=false;}return;}
@@ -812,3 +819,4 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 document.querySelectorAll('[data-logout-form]').forEach(form=>form.addEventListener('submit',()=>{sessionStorage.removeItem('undc_resume_purchase');sessionStorage.removeItem('undc_cart_token')}));
 
 })();
+
