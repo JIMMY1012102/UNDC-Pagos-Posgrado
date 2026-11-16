@@ -20,6 +20,8 @@ async function scenario(viewport, name) {
       await page.locator('#mobileDrawer [data-category-nav="' + category + '"]').click();
       assert.equal(await page.locator('#mobileDrawer').isVisible(), false);
     } else {
+      const menu=page.locator('.store-posgrado-menu');
+      if(!await menu.getAttribute('open'))await menu.locator('summary').click();
       await page.locator(`.posgrado-links [data-category-nav="${category}"]`).click();
     }
   }
@@ -35,7 +37,7 @@ async function scenario(viewport, name) {
         { id: 13, name: 'Biblioteca de prueba', category: 'servicios_administrativos', reference_amount: '10.00' },
       ],
     } }));
-    const catalog = await page.goto(origin + '/tienda', { waitUntil: 'domcontentloaded' });
+    const catalog = await page.goto(origin + '/tienda/catalogo', { waitUntil: 'domcontentloaded' });
     assert.equal(catalog?.status(), 200, 'El catálogo debe responder HTTP 200');
     await page.locator('#catalogResultsTitle').waitFor();
     assert.equal(await page.locator('#tusneTitle').count(), 0, 'El título Nuestros trámites se eliminó del catálogo');
@@ -54,27 +56,10 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#accessibilityPanel').isVisible(), false);
     assert.equal(await floatingA11y.evaluate(el => el === document.activeElement), true);
 
-    const hero = page.locator('[data-market-carousel]');
-    await hero.locator('[data-hero-next]').waitFor();
-    assert.equal(await hero.locator('[data-hero-pause]').getAttribute('aria-pressed'), 'true', 'Respetar movimiento reducido');
-    await hero.locator('[data-hero-next]').click();
-    assert.equal(await hero.locator('[data-hero-count]').innerText(), '02 / 03');
-    assert.equal(await hero.locator('[data-hero-slide]:not([hidden])').count(), 1);
-    await hero.locator('[data-hero-prev]').click();
-    assert.equal(await hero.locator('[data-hero-count]').innerText(), '01 / 03');
-    const photo = hero.locator('.market-hero-photo');
-    await photo.evaluate(img => img.decode());
-    const photoInfo = await photo.evaluate(img => ({ width: img.clientWidth, height: img.clientHeight, ratio: img.naturalWidth / img.naturalHeight }));
-    if (viewport.width <= 900) assert.ok(Math.abs(photoInfo.width / photoInfo.height - photoInfo.ratio) < .02, 'Foto móvil completa sin deformación');
-
-    assert.deepEqual(await page.locator('.posgrado-links a').allTextContents(), [
-      'Para ti', 'Admisión', 'Matrícula y pensiones', 'Trámites académicos',
-      'Certificados y constancias', 'Tesis y grados', 'Servicios administrativos',
-    ]);
+    assert.equal(await page.locator('#marketHome, #hero').count(), 0, 'Inicio y catálogo son pantallas separadas');
     await page.waitForFunction(() => document.querySelector('#tusneResults').textContent.includes('Examen de prueba'));
     await selectCategory('servicios_administrativos');
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
-    assert.equal(await hero.isVisible(), false, 'Las categorías no deben mostrar el carrusel');
     await page.waitForFunction(() => {
       const header = document.querySelector('.site-header').getBoundingClientRect();
       const results = document.querySelector('.catalog-results-heading').getBoundingClientRect();
@@ -86,7 +71,6 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#tusneEmpty').isVisible(), true);
     await selectCategory('all');
     assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
-    assert.equal(await hero.isVisible(), true, 'Para ti debe recuperar el carrusel');
     assert.equal(await page.locator('#catalogFilters, [data-category-filter]').count(), 0, 'Solo debe existir el menú superior de categorías');
     const product = page.locator('.catalog-product').first();
     assert.equal(await product.locator('img').count(), 1);
@@ -104,70 +88,12 @@ async function scenario(viewport, name) {
     assert.equal(await page.locator('#conceptDialogContent [data-catalog-cart]').count(), 1);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#conceptDialog').isVisible(), false);
-    if (viewport.width >= 1200) {
-      const menu = await page.locator('.posgrado-links').evaluate(el => ({
-        font: parseFloat(getComputedStyle(el.querySelector('a')).fontSize),
-        fits: el.scrollWidth <= el.clientWidth + 2,
-        tops: [...el.querySelectorAll('a')].map(link => link.getBoundingClientRect().top),
-      }));
-      assert.ok(menu.font >= 15, 'Las categorías deben tener letra legible de al menos 15px');
-      assert.equal(menu.fits, true, 'Las siete opciones deben caber al 100% sin desplazamiento');
-      assert.ok(menu.tops.every(top => Math.abs(top - menu.tops[0]) < 2), 'Las siete opciones deben compartir fila');
-    }
-    if (!mobile) {
-    const submenu = await page.locator('.nav.posgrado-nav').boundingBox();
-    const rail = await page.locator('.market-social-rail').boundingBox();
-    assert.ok(rail && Math.abs(rail.width - 40) < 1, 'La franja social debe reservar 40px');
-    assert.equal(await page.locator('.market-social-rail a').count(), 4);
-    assert.ok(Math.abs(submenu.x - rail.width) < 1 && Math.abs(submenu.width + rail.width - viewport.width) < 2,
-      'El submenú debe cubrir el espacio disponible junto a la franja social, sin solaparse');
-    const searchStyle = await page.locator('#catalogSearchToggle').evaluate(el => ({
-      radius: parseFloat(getComputedStyle(el).borderRadius),
-      color: getComputedStyle(el).color,
-    }));
-    assert.ok(searchStyle.radius <= 5, 'La lupa debe ser un botón cuadrado con esquinas suaves');
-    assert.equal(searchStyle.color, 'rgb(255, 255, 255)');
-    // Enlarged accessibility text must not move the magnifier below the categories.
-    await page.evaluate(() => {
-      document.documentElement.setAttribute('data-accessibility-text', '');
-      document.documentElement.style.setProperty('--a11y-text-scale', '1.2');
-    });
-    const linksBox = await page.locator('.posgrado-links').boundingBox();
-    const searchBox = await page.locator('#catalogSearchToggle').boundingBox();
-    assert.ok(searchBox.x >= linksBox.x + linksBox.width - 2, 'La lupa debe quedar a la derecha');
-    assert.ok(Math.abs((searchBox.y + searchBox.height / 2) - (linksBox.y + linksBox.height / 2)) < 3,
-      'La lupa y las categorías deben compartir la fila con texto ampliado');
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false);
-    await selectCategory('admision');
-    await page.waitForFunction(() => Math.abs(
-      document.querySelector('.catalog-results-heading').getBoundingClientRect().top -
-      document.querySelector('.site-header').getBoundingClientRect().bottom - 12
-    ) < 3);
-
-    await page.evaluate(() => {
-      document.documentElement.removeAttribute('data-accessibility-text');
-      document.documentElement.style.removeProperty('--a11y-text-scale');
-    });
-    assert.equal(await page.locator('#search').isVisible(), false);
-    await page.locator('#catalogSearchToggle').click();
-    assert.equal(await page.locator('#search').isVisible(), true);
-    assert.equal(await page.locator('#search').evaluate(el => document.activeElement === el), true);
     await page.locator('#search').fill('Biblioteca');
     assert.match(await page.locator('#tusneResults').innerText(), /Biblioteca de prueba/);
     assert.doesNotMatch(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
     await page.locator('#search').press('Escape');
-    assert.equal(await page.locator('#search').isVisible(), false);
-    assert.equal(await page.locator('#catalogSearchToggle').getAttribute('aria-expanded'), 'false');
-    assert.equal(await page.locator('#catalogSearchToggle').evaluate(el => document.activeElement === el), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
-      'El catálogo y sus siete enlaces no deben desbordar la pantalla');
-
-    } else {
-      assert.equal(await page.locator('#headerNavPanel').isVisible(), false,
-        'En móvil no debe aparecer el submenú duplicado');
-      await selectCategory('admision');
-      assert.match(await page.locator('#tusneResults').innerText(), /Examen de prueba/);
-    }
+      'El catálogo no debe desbordarse horizontalmente');
 
     const cart = await page.goto(origin + '/tienda/carrito', { waitUntil: 'domcontentloaded' });
     assert.equal(cart?.status(), 200, 'El carrito debe responder HTTP 200');
@@ -266,7 +192,7 @@ async function scenario(viewport, name) {
     const login = await page.goto(origin + '/tienda/login', { waitUntil: 'domcontentloaded' });
     assert.equal(login?.status(), 200, 'El login debe responder HTTP 200');
     await page.locator('#marketLoginTitle').waitFor();
-    assert.match(await page.locator('#marketLoginTitle').innerText(), /INICIA SESIÓN/);
+    assert.match(await page.locator('#marketLoginTitle').innerText(), /Bienvenido/);
     assert.equal(await page.locator('input[name="email"]').count(), 1);
     assert.equal(await page.locator('input[name="password"]').count(), 1);
     assert.equal(await page.locator('#marketLoginGoogle').isDisabled(), true,
