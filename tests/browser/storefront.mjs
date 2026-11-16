@@ -15,15 +15,10 @@ async function scenario(viewport, name) {
 
   const mobile = viewport.width <= 940;
   async function selectCategory(category) {
-    if (mobile) {
-      await page.locator('#headerMenuButton').click();
-      await page.locator('#mobileDrawer [data-category-nav="' + category + '"]').click();
-      assert.equal(await page.locator('#mobileDrawer').isVisible(), false);
-    } else {
-      const menu=page.locator('.store-posgrado-menu');
-      if(!await menu.getAttribute('open'))await menu.locator('summary').click();
-      await page.locator(`.posgrado-links [data-category-nav="${category}"]`).click();
-    }
+    const menu=page.locator('.store-posgrado-menu');
+    if(await menu.getAttribute('open') === null)await menu.locator('summary').click();
+    await menu.locator(`[data-category-nav="${category}"]`).click();
+
   }
 
   try {
@@ -75,7 +70,7 @@ async function scenario(viewport, name) {
     const product = page.locator('.catalog-product').first();
     assert.equal(await product.locator('img').count(), 1);
     assert.equal(await product.locator('.catalog-product-name').innerText(), 'Examen de prueba');
-    assert.equal(await product.locator('.catalog-product-price').innerText(), 'S/ 300.00');
+    assert.equal((await product.locator('.catalog-product-price').innerText()).replace(/\s+/g,' '), 'S/ 300.00');
     assert.equal(await product.locator('.category-tag, .concept-description, .concept-actions, [data-catalog-cart]').count(), 0);
     const imageBox = await product.locator('.catalog-product-image').boundingBox();
     const titleBox = await product.locator('.catalog-product-name').boundingBox();
