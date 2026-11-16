@@ -12,15 +12,29 @@ final class OrderQuoteService
 
     public function line(int $id, int $quantity): ?array
     {
-        $item = $this->catalog->findAvailable($id);
-        if (! $item || $item->requires_eligibility_check || $quantity < 1 || $quantity > 20) {
-            return null;
-        }
-        $prices = DB::table('tienda_versiones_tarifas')->where('catalog_item_id', $id)
+        return $this->lines([$id], $quantity)[$id] ?? null;
+    }
+
+    /** Resolve a complete catalog page in two queries. */
+    public function lines(array $ids, int $quantity = 1): array
+    {
+        if ($quantity < 1 || $quantity > 20) return [];
+        $items = $this->catalog->quoteItems($ids);
+        $versions = DB::table('tienda_versiones_tarifas')->whereIn('catalog_item_id', $ids)
             ->where('is_approved', true)->whereNotNull('approval_reference')
             ->where('approval_reference', '<>', '')->where('currency', 'PEN')
             ->where('valid_from', '<=', now())
-            ->where(fn ($q) => $q->whereNull('valid_until')->orWhere('valid_until', '>', now()))->get();
+            ->where(fn ($q) => $q->whereNull('valid_until')->orWhere('valid_until', '>', now()))->get()->groupBy('catalog_item_id');
+        $result = [];
+        foreach ($items as $id => $item) {
+            $result[$id] = $this->resolve((int) $id, $quantity, $item, $versions->get($id) ?? collect());
+        }
+        return $result;
+    }
+
+    private function resolve(int $id, int $quantity, object $item, \Illuminate\Support\Collection $prices): ?array
+    {
+        if ($item->requires_eligibility_check) return null;
         // Una tarifa vigente inequívoca; no escoger arbitrariamente entre aprobaciones.
         if ($prices->count() > 1) {
             return null;
@@ -29,7 +43,7 @@ final class OrderQuoteService
         // aprobada vigente puede sustituirlos; no se exige duplicar su aprobación.
         $amount = $prices->isNotEmpty()
             ? (string) $prices->first()->amount
-            : (string) ($this->catalog->referencesFor([$id])->first()?->reference_amount ?? '');
+            : (string) $item->reference_amount;
         if (! preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amount)) {
             return null;
         }

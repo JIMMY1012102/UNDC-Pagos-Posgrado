@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 function boot({fail=false,order=null,modifyFail=false}={}){
  const callbacks={},calls=[],redirects=[],els=new Map();
- class El{constructor(){this.classList={add(){},remove(){}};this.disabled=false;this.children=[];this.textContent='';this.listeners={};}addEventListener(k,f){this.listeners[k]=f;}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}setAttribute(){}focus(){}}
+ class El{constructor(){this.dataset={};this.style={setProperty(){}};this.classList={add(){},remove(){}};this.disabled=false;this.children=[];this.textContent='';this.listeners={};}addEventListener(k,f){this.listeners[k]=f;}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}setAttribute(){}focus(){}}
  for(const id of ['generateOrder','orderQuoteMessage','paymentPreviewItems','paymentPreviewTotal',...(order?['orderDetail','ordersListPanel','orderDetailPanel','orderDetailMessage','orderDialogTitle']:[])])els.set(id,new El());
  const document={getElementById:id=>els.get(id)||null,querySelector:()=>({content:'csrf'}),createElement:()=>new El(),addEventListener:(k,f)=>callbacks[k]=f};
  let release;const response=new Promise(r=>release=r);

@@ -95,4 +95,45 @@ class PrepurchaseFlowTest extends TestCase
         $this->actingAs($second)->getJson('/api/v1/tienda/precompra/resumen')->assertJsonPath('data.cart', null);
         $this->actingAs($second)->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $token])->assertNotFound();
     }
+
+    public function test_claim_merges_existing_cart_and_consumes_token(): void
+    {
+        $this->catalog();
+        $buyer = User::factory()->create();
+        $carts = app(\App\Modules\Pedidos\Services\CartService::class);
+        $first = $carts->create();
+        $carts->add($first['token'], 101, 2);
+        $owned = $carts->claim($first['token'], $buyer->id);
+        $second = $carts->create();
+        $carts->add($second['token'], 101, 3);
+        $merged = $carts->claim($second['token'], $buyer->id);
+        $this->assertSame($owned['id'], $merged['id']);
+        $this->assertSame(5, $merged['items_count']);
+        $this->assertSame(1, DB::table('tienda_carritos')->where('user_id', $buyer->id)->where('status', 'active')->count());
+        $this->assertNull($carts->find($second['token']));
+        $this->assertSame($merged['id'], $carts->forBuyer($buyer->id)['id']);
+    }
+
+    public function test_merge_overflow_rolls_back_without_losing_either_selection(): void
+    {
+        $this->catalog();
+        $buyer = User::factory()->create();
+        $carts = app(\App\Modules\Pedidos\Services\CartService::class);
+        $first = $carts->create();
+        $carts->add($first['token'], 101, 20);
+        $carts->claim($first['token'], $buyer->id);
+        $second = $carts->create();
+        $carts->add($second['token'], 101, 1);
+        $this->actingAs($buyer)->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $second['token']])->assertUnprocessable();
+        $this->assertSame(20, $carts->forBuyer($buyer->id)['items_count']);
+        $this->assertSame(1, $carts->find($second['token'])['items_count']);
+    }
+
+    public function test_database_rejects_second_active_cart_but_allows_anonymous_carts(): void
+    {
+        $buyer = User::factory()->create();
+        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+    }
 }

@@ -17,17 +17,21 @@ final class CatalogService
         'administrative' => 'servicios_administrativos',
     ];
 
-    public function __construct(private readonly PublishedCatalogQuery $catalog) {}
+    public function __construct(private readonly PublishedCatalogQuery $catalog, private readonly OrderQuoteService $prices) {}
 
     /** Resolve all cart concepts in one query, independently of catalog pagination. */
     public function referencesFor(array $ids): Collection
     {
-        return $this->catalog->referencesFor($ids)->mapWithKeys(static fn (object $item): array => [
-            (int) $item->catalog_item_id => [
+        $quotes = $this->prices->lines($ids);
+        return $this->catalog->referencesFor($ids)->mapWithKeys(static function (object $item) use ($quotes): array {
+            $quote = $quotes[$item->catalog_item_id] ?? null;
+            return [(int) $item->catalog_item_id => [
                 'name' => (string) $item->name,
-                'reference_amount' => number_format((float) $item->reference_amount, 2, '.', ''),
-            ],
-        ]);
+                'reference_amount' => $quote !== null
+                    ? sprintf('%d.%02d', intdiv($quote['unit_cents'], 100), $quote['unit_cents'] % 100)
+                    : number_format((float) $item->reference_amount, 2, '.', ''),
+            ]];
+        });
     }
 
     public function offices(): Collection
@@ -41,7 +45,10 @@ final class CatalogService
     /** @return Collection<int, array<string, mixed>> */
     public function forOffice(int $officeId): Collection
     {
-        return $this->catalog->forOffice($officeId)->map(static function (object $item): array {
+        $items = $this->catalog->forOffice($officeId);
+        $quotes = $this->prices->lines($items->pluck('catalog_item_id')->all());
+        return $items->map(function (object $item) use ($quotes): array {
+            $quote = $quotes[$item->catalog_item_id] ?? null;
             return [
                 'id' => (int) $item->catalog_item_id,
                 'slug' => (string) $item->slug,
@@ -57,11 +64,10 @@ final class CatalogService
                     'id' => (int) $item->legacy_office_id,
                     'name' => (string) $item->office_name,
                 ],
-                'reference_amount' => number_format((float) $item->legacy_base_amount, 2, '.', ''),
-                // A legacy cost is NOT an approved online checkout tariff.
-                // It must not be represented as a payable amount.
-                'pricing_status' => 'pending_institutional_approval',
-                'checkout_enabled' => false,
+                'reference_amount' => $quote !== null ? sprintf('%d.%02d', intdiv($quote['unit_cents'], 100), $quote['unit_cents'] % 100) : number_format((float) $item->legacy_base_amount, 2, '.', ''),
+                'orderable' => $quote !== null,
+                'orderable_reason' => $quote !== null ? null : ($item->requires_eligibility_check ? 'eligibility_required' : 'invalid_or_ambiguous_price'),
+                ...PricingPolicy::status(),
             ];
         });
     }

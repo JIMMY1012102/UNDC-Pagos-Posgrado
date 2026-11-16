@@ -150,7 +150,11 @@ jobs:
       - name: Instalar navegador de prueba
         run: |
           npm install --no-save --package-lock=false playwright
-          npx playwright install --with-deps chromium
+          if command -v google-chrome >/dev/null; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
       - name: Iniciar Laravel y comprobar pantallas en navegador
         run: |
           SESSION_DRIVER=file CACHE_STORE=file DB_CONNECTION=sqlite DB_DATABASE=database/database.sqlite php artisan serve --host=127.0.0.1 --port=8000 > /tmp/undc-serve.log 2>&1 &

@@ -5,7 +5,7 @@ namespace App\Modules\Pedidos\Services;
 use App\Modules\Catalogo\Contracts\CatalogItemLookup;
 use App\Modules\Catalogo\Services\CatalogService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Modules\Catalogo\Services\PricingPolicy;
 use RuntimeException;
 
 final class CartService
@@ -48,13 +48,39 @@ final class CartService
     public function claim(string $token, int $userId): ?array
     {
         return DB::transaction(function () use ($token, $userId): ?array {
+            // Serialize all claims and order replacements for this buyer.
+            DB::table('users')->where('id', $userId)->lockForUpdate()->first();
+            DB::table('tienda_carritos')->where('user_id', $userId)->where('status', 'active')
+                ->where('expires_at', '<=', now())->update(['status' => 'expired', 'updated_at' => now()]);
             $cart = $this->activeCart($token, true);
             if ($cart === null) {
                 return null;
             }
 
+            $existing = $this->activeCart(null, true, $userId);
+            if ($existing) {
+                $lines = DB::table('tienda_detalles_carrito')->where('cart_id', $cart->id)->orderBy('id')->get();
+                foreach ($lines as $line) {
+                    $target = DB::table('tienda_detalles_carrito')->where('cart_id', $existing->id)
+                        ->where('catalog_item_id', $line->catalog_item_id)->where('beneficiary_id', $line->beneficiary_id)->first();
+                    if ($target) {
+                        $quantity = (int) $target->quantity + (int) $line->quantity;
+                        // Preserve both selections on overflow; never silently truncate.
+                        if ($quantity > self::MAX_QUANTITY) {
+                            throw \Illuminate\Validation\ValidationException::withMessages(['quantity' => 'La selección combinada supera 20 unidades. Ajusta el carrito antes de vincularlo.']);
+                        }
+                        DB::table('tienda_detalles_carrito')->where('id', $target->id)->update(['quantity' => $quantity, 'updated_at' => now()]);
+                        DB::table('tienda_detalles_carrito')->where('id', $line->id)->delete();
+                    } else {
+                        DB::table('tienda_detalles_carrito')->where('id', $line->id)->update(['cart_id' => $existing->id, 'updated_at' => now()]);
+                    }
+                }
+                DB::table('tienda_carritos')->where('id', $cart->id)->update(['status' => 'merged', 'token_hash' => null, 'updated_at' => now()]);
+                return $this->snapshot((int) $existing->id);
+            }
+
             DB::table('tienda_carritos')->where('id', $cart->id)->update([
-                'user_id' => $userId,
+                'user_id'  => $userId,
                 'token_hash' => null,
                 'updated_at' => now(),
             ]);
@@ -190,9 +216,8 @@ final class CartService
             'currency' => 'PEN',
             'items' => $lines,
             'items_count' => array_sum(array_column($lines, 'quantity')),
-            'pricing_status' => 'pending_institutional_approval',
+            ...PricingPolicy::status(),
             'total_amount' => null,
-            'checkout_enabled' => false,
         ];
     }
 }

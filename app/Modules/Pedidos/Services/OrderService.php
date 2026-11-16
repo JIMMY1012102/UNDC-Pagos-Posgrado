@@ -3,6 +3,7 @@
 namespace App\Modules\Pedidos\Services;
 
 use App\Modules\Catalogo\Services\OrderQuoteService;
+use App\Modules\Catalogo\Services\PricingPolicy;
 use App\Modules\Pagos\Services\OrderPaymentGuard;
 use App\Modules\Usuarios\Services\BuyerProfileService;
 use Illuminate\Support\Facades\DB;
@@ -124,6 +125,8 @@ final class OrderService
                     ->whereColumn('cart_id', 'tienda_carritos.id'))->exists();
             abort_if($active, 409, 'Ya tienes otra selección en tu carrito. Revísala antes de modificar este pedido.');
 
+            DB::table('tienda_carritos')->where('user_id', $userId)->where('status', 'active')
+                ->update(['status' => 'expired', 'updated_at' => now()]);
             $now = now();
             $cartId = DB::table('tienda_carritos')->insertGetId([
                 'user_id' => $userId, 'token_hash' => null, 'status' => 'active', 'currency' => $order->currency,
@@ -156,33 +159,71 @@ final class OrderService
         abort_unless($order, 404);
         $this->expire((int) $order->id, $userId);
         $order = DB::table('tienda_pedidos')->where('id', $order->id)->first();
+        return $this->present($order);
+    }
+
+    private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null): array
+    {
         return [
             'code' => $order->code, 'status' => $order->status, 'currency' => $order->currency,
             'total_amount' => $order->total_amount, 'created_at' => $order->created_at, 'expires_at' => $order->expires_at,
             'paid_at' => $order->paid_at, 'buyer_name' => $order->buyer_first_names.' '.$order->buyer_last_names,
-            'buyer_email' => $order->buyer_email, 'payment_enabled' => false,
+            'buyer_email' => $order->buyer_email, 'payment_enabled' => PricingPolicy::status()['checkout_enabled'] && $order->status === 'pending' && $order->paid_at === null && ($order->expires_at === null || now()->lt($order->expires_at)),
             'can_modify' => $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
-                && $this->payments->canModify((int) $order->id),
-            'items' => DB::table('tienda_detalles_pedido')->where('order_id', $order->id)->orderBy('id')
+                && ($canModify ?? $this->payments->canModify((int) $order->id)),
+            'items' => $items ?? DB::table('tienda_detalles_pedido')->where('order_id', $order->id)->orderBy('id')
                 ->get(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all(),
-            'history' => DB::table('tienda_historial_estados_pedido')->where('order_id', $order->id)->orderBy('id')
+            'history' => $history ?? DB::table('tienda_historial_estados_pedido')->where('order_id', $order->id)->orderBy('id')
                 ->get(['to_status', 'reason', 'occurred_at'])->all(),
         ];
     }
 
     public function listing(int $userId, int $page): array
     {
-        $query = DB::table('tienda_pedidos')->where('user_id', $userId);
-        $total = (clone $query)->count();
-        $codes = $query->latest('id')->offset(($page - 1) * 10)->limit(10)->pluck('code');
-        return ['items' => $codes->map(fn ($code) => $this->show($userId, $code))->all(), 'page' => $page, 'has_more' => $total > $page * 10];
+        $this->expireDue($userId);
+        $page = max(1, $page);
+        $orders = DB::table('tienda_pedidos')->where('user_id', $userId)->latest('id')
+            ->offset(($page - 1) * 10)->limit(11)->get();
+        $hasMore = $orders->count() > 10;
+        $orders = $orders->take(10);
+        $ids = $orders->pluck('id')->all();
+        $items = DB::table('tienda_detalles_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
+        $history = DB::table('tienda_historial_estados_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
+        $blocked = $this->payments->blockedOrderIds($ids);
+        return ['items' => $orders->map(fn ($order) => $this->present($order,
+            ($items->get($order->id) ?? collect())->map(fn ($line) => (object) collect((array) $line)->only(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all())->all(),
+            ($history->get($order->id) ?? collect())->map(fn ($event) => (object) collect((array) $event)->only(['to_status', 'reason', 'occurred_at'])->all())->all(),
+            ! in_array($order->id, $blocked)))->all(), 'page' => $page, 'has_more' => $hasMore];
+    }
+
+    /** Bounded transactions preserve one immutable event per expiry. */
+    public function expireDue(?int $userId = null): int
+    {
+        $count = 0;
+        do {
+            $changed = DB::transaction(function () use ($userId): int {
+                $now = now();
+                $ids = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
+                    ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+                    ->where('expires_at', '<=', $now)->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
+                if ($ids->isEmpty()) return 0;
+                DB::table('tienda_pedidos')->whereIn('id', $ids)->update(['status' => 'expired', 'updated_at' => $now]);
+                DB::table('tienda_historial_estados_pedido')->insert($ids->map(fn ($id) => [
+                    'order_id' => $id, 'from_status' => 'pending', 'to_status' => 'expired',
+                    'reason' => 'Venció el plazo del pedido sin confirmación de pago.', 'occurred_at' => $now,
+                ])->all());
+                return $ids->count();
+            }, 3);
+            $count += $changed;
+        } while ($changed === 200);
+        return $count;
     }
 
     private function expire(int $id, int $userId): void
     {
         DB::transaction(function () use ($id, $userId): void {
             $changed = DB::table('tienda_pedidos')->where('id', $id)->where('user_id', $userId)
-                ->where('status', 'pending')->where('expires_at', '<=', now())
+                ->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')->where('expires_at', '<=', now())
                 ->update(['status' => 'expired', 'updated_at' => now()]);
             if ($changed) {
                 DB::table('tienda_historial_estados_pedido')->insert([

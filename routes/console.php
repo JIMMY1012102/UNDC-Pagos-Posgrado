@@ -22,3 +22,12 @@ Artisan::command('treasury:schema-check', function () {
     $this->warn('No verifica reglas de negocio, datos, ni la versión en producción.');
     return 0;
 })->purpose('Comprobar compatibilidad estructural con la base compartida SISPAGOS sin modificarla');
+
+Artisan::command('market:expire', function () {
+    $orders = app(\App\Modules\Pedidos\Services\OrderService::class)->expireDue();
+    $carts = \Illuminate\Support\Facades\DB::table('tienda_carritos')->where('status', 'active')
+        ->where('expires_at', '<=', now())->update(['status' => 'expired', 'token_hash' => null, 'updated_at' => now()]);
+    $this->info("Pedidos vencidos: {$orders}; carritos vencidos: {$carts}");
+})->purpose('Vencer pedidos y retirar carritos caducados sin eliminar historial');
+
+\Illuminate\Support\Facades\Schedule::command('market:expire')->everyFiveMinutes()->withoutOverlapping();

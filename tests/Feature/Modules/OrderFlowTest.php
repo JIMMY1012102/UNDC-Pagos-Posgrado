@@ -220,4 +220,50 @@ class OrderFlowTest extends TestCase
         $this->assertDatabaseHas('tienda_detalles_carrito', ['cart_id' => $created['cart']['id'], 'quantity' => 1]);
     }
 
+
+    public function test_scheduled_expiry_is_idempotent_and_retires_anonymous_carts(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
+        $anonymous = app(\App\Modules\Pedidos\Services\CartService::class)->create();
+        $this->travel(25)->hours();
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->assertDatabaseHas('tienda_pedidos', ['cart_id' => $cart, 'status' => 'expired', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $anonymous['cart']['id'], 'status' => 'expired', 'token_hash' => null]);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 2);
+        $this->travelBack();
+    }
+
+    public function test_listing_batches_detail_queries_and_preserves_response(): void
+    {
+        [$buyer, $cart] = $this->buyerCart();
+        $orders = app(\App\Modules\Pedidos\Services\OrderService::class);
+        $first = $orders->create($buyer->id, $cart);
+        for ($i = 0; $i < 10; $i++) {
+            $next = $orders->modify($buyer->id, $first['code']);
+            $first = $orders->create($buyer->id, $next['cart_id']);
+        }
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        $result = $orders->listing($buyer->id, 1);
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+        $this->assertCount(10, $result['items']);
+        $this->assertTrue($result['has_more']);
+        $this->assertEquals($first, $result['items'][0]);
+        $this->assertLessThanOrEqual(9, $queries);
+        $this->assertCount(1, $orders->listing($buyer->id, 2)['items']);
+    }
+
+    public function test_database_rejects_duplicate_order_for_same_cart(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
+        $row = (array) DB::table('tienda_pedidos')->first();
+        unset($row['id']);
+        $row['code'] = 'DUPLICATE-TEST';
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('tienda_pedidos')->insert($row);
+    }
 }

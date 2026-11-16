@@ -75,7 +75,7 @@ class CartApiTest extends TestCase
             ->assertJsonPath('data.items.0.reference_amount', '10.00')
             ->assertJsonPath('data.total_amount', null)
             ->assertJsonPath('data.checkout_enabled', false)
-            ->assertJsonPath('data.pricing_status', 'pending_institutional_approval')
+            ->assertJsonPath('data.pricing_status', 'official')
             ->assertJsonCount(1, 'data.items')
             ->assertJsonMissingPath('data.amount');
 
@@ -190,4 +190,28 @@ class CartApiTest extends TestCase
         $this->deleteJson('/api/v1/tienda/carritos/actual/items/1')->assertNotFound();
     }
 
+
+    public function test_unorderable_concepts_are_rejected_before_cart_insertion(): void
+    {
+        $this->makeCatalog();
+        $carts = app(CartService::class);
+        $cart = $carts->create();
+        foreach ([['requires_eligibility_check' => true], ['requires_eligibility_check' => false]] as $state) {
+            DB::table('tienda_conceptos_catalogo')->where('id', 101)->update($state);
+            if (! $state['requires_eligibility_check']) DB::table('tm_conceptos')->where('id_concepto', 12)->update(['costo' => 0]);
+            $this->withToken($cart['token'])->postJson('/api/v1/tienda/carritos/actual/items', ['catalog_item_id' => 101, 'quantity' => 1])->assertStatus(409);
+            $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()->assertJsonPath('data.0.orderable', false);
+        }
+        $this->assertDatabaseCount('tienda_detalles_carrito', 0);
+    }
+
+    public function test_payment_flag_is_independent_from_official_pricing(): void
+    {
+        config(['payments.payme_enabled' => true]);
+        $cart = app(CartService::class)->create();
+        $this->assertSame('official', $cart['cart']['pricing_status']);
+        $this->assertTrue($cart['cart']['checkout_enabled']);
+        config(['payments.payme_enabled' => false]);
+        $this->assertFalse(app(CartService::class)->find($cart['token'])['checkout_enabled']);
+    }
 }

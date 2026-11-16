@@ -3,6 +3,7 @@
 namespace App\Modules\Pedidos\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Catalogo\Services\PricingPolicy;
 use App\Modules\Usuarios\Services\BuyerProfileService;
 use App\Modules\Pedidos\Services\CartService;
 use Illuminate\Http\JsonResponse;
@@ -40,11 +41,10 @@ final class PrepurchaseController extends Controller
                 'profile' => $profiles->find($userId),
                 'cart' => $cart,
                 'next_step' => ! $complete ? 'complete_profile' : ($cart === null || $cart['items_count'] === 0 ? 'cart' : 'review'),
-                'checkout_enabled' => false,
+                ...PricingPolicy::status(),
                 'total_amount' => null,
-                'pricing_status' => 'pending_institutional_approval',
             ],
-            'message' => 'Precompra pendiente de autorización de cobro.',
+            'message' => 'Importes oficiales; la disponibilidad de cobro se configura por separado.',
         ])->header('Cache-Control', 'no-store');
     }
 }

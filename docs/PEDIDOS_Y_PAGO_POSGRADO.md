@@ -3,13 +3,13 @@
 ## Alcance implementado
 Carrito identificado → revisión de tarifas aprobadas → confirmación explícita → pedido pendiente → Mis pedidos y detalle con historial. El código UNDC identifica el pedido, no es una autorización de pago. Generar el pedido o pagar un concepto no inicia automáticamente el trámite académico.
 
-Se reutilizan `tienda_pedidos`, `tienda_detalles_pedido`, `tienda_historial_estados_pedido` y las tablas de carrito existentes. No hay migraciones nuevas ni cambios a `tm_*`.
+Se reutilizan `tienda_pedidos`, `tienda_detalles_pedido`, `tienda_historial_estados_pedido` y las tablas de carrito existentes. La migración `2026_11_16_000001` añade restricciones de unicidad e índice de vencimiento. No modifica `tm_*`.
 
 - Catalogo cotiza leyendo los importes oficiales publicados mediante el adaptador Sispagos. Si existe una versión PEN aprobada y vigente en `tienda_versiones_tarifas`, la aplica; si no existe, utiliza el importe oficial de `tm_conceptos.costo`, confirmado como fuente institucional del catálogo. No exige registrar una segunda aprobación para ese precio. Bloquea versiones aprobadas ambiguas e importes inválidos o no positivos. Nunca usa montos del navegador. Conceptos que requieren elegibilidad siguen bloqueados hasta implementar esa validación.
 - Pedidos autentica y filtra por propietario; no consulta directamente las tablas históricas. Guarda una instantánea del comprador, conceptos, cantidades e importes calculados en centavos. No admite beneficiarios distintos al comprador en esta etapa.
 - Generar el pedido convierte el carrito. Una transacción y bloqueo de ese carrito serializan reintentos: el mismo carrito devuelve el mismo pedido, aunque el perfil o las tarifas cambien después.
-- Vencimiento inicial: 24 horas. Se materializa el estado `expired` al consultar el pedido o su página de historial; un cambio condicional registra la transición una sola vez. No hay tarea programada nueva. No se expira un pedido ya pagado.
-- Mis pedidos muestra 10 pedidos por página. Los detalles y cotizaciones se sirven con `Cache-Control: no-store`.
+- Vencimiento inicial: 24 horas. Se materializa el estado `expired` al consultar el pedido o su página de historial; un cambio condicional registra la transición una sola vez. `market:expire` materializa vencimientos cada cinco minutos mediante el scheduler de Laravel; requiere cron en el servidor. No se expira un pedido ya pagado.
+- Mis pedidos muestra 10 pedidos por página. Carga líneas, historial y bloqueos de pago por lote, sin consultar el detalle por pedido. Los detalles y cotizaciones se sirven con `Cache-Control: no-store`.
 
 ## Rutas
 - El carrito activo vinculado permite agregar y quitar conceptos mediante las mismas rutas de carrito, usando la sesión del propietario sin token anónimo. Un token consumido no vuelve a ser válido. Se conserva el límite de 20 unidades y el bloqueo transaccional; carritos vencidos o convertidos no se editan.
@@ -21,7 +21,7 @@ Se reutilizan `tienda_pedidos`, `tienda_detalles_pedido`, `tienda_historial_esta
 Todas las API requieren sesión y tienen límite de peticiones; escrituras sujetas al middleware web/CSRF existente.
 
 ## Pendiente para cobrar
-La selección de tarjeta y billetera electrónica es una preparación visual. `payment_enabled` permanece falso: no se crea sesión bancaria, QR de cobro, transacción ni intento ficticio. No se reciben datos de tarjeta ni códigos de Yape. No existe endpoint que permita al navegador establecer `paid`.
+La selección de tarjeta y billetera electrónica es una preparación visual. `PAYME_ENABLED=false` mantiene `payment_enabled` deshabilitado: no se crea sesión bancaria, QR de cobro, transacción ni intento ficticio. No se reciben datos de tarjeta ni códigos de Yape. No existe endpoint que permita al navegador establecer `paid`.
 
 Para habilitar cobros se requiere el contrato y credenciales de la pasarela autorizada, documentación técnica, tarifas aprobadas y validación académica donde corresponda. El siguiente incremento en Pagos debe implementar un adaptador de proveedor, creación idempotente de intento, vencimiento coordinado con la sesión bancaria, notificaciones autenticadas y verificación servidor-servidor de referencia, monto y moneda, registro de cobros inciertos/tardíos y una sola aplicación al pedido. Una redirección o captura del cliente nunca confirma un pago.
 
@@ -31,6 +31,10 @@ Los importes publicados en el catálogo son oficiales, según confirmación del 
 Pruebas HTTP nuevas: importe adulterado, precio legado distinto, tarifas faltantes/ambiguas, perfil incompleto, elegibilidad pendiente, publicación retirada, carrito vencido, aislamiento de usuarios, reintentos, instantáneas y vencimiento sin marcar pagado. Pruebas JavaScript: cotización del servidor, texto sin HTML, doble clic y bloqueo sin tarifas.
 
 ## Modificar desde el paso Pago
-El propietario puede usar «Modificar pedido» mientras esté pendiente, vigente, sin confirmación y sin registros de intentos, transacciones ni pagos aplicados. `POST /api/v1/tienda/pedidos/{code}/modificar` conserva las instantáneas del pedido anterior, lo anula con motivo y crea un carrito vinculado con sus conceptos y cantidades. La confirmación posterior vuelve a calcular importes en servidor y genera otro código de pedido. No altera pedidos pagados ni elimina historial; no cambia el esquema.
+El propietario puede usar «Modificar pedido» mientras esté pendiente, vigente, sin confirmación y sin registros de intentos, transacciones ni pagos aplicados. `POST /api/v1/tienda/pedidos/{code}/modificar` conserva las instantáneas del pedido anterior, lo anula con motivo y crea un carrito vinculado con sus conceptos y cantidades. La confirmación posterior vuelve a calcular importes en servidor y genera otro código de pedido. No altera pedidos pagados ni elimina historial; respeta la unicidad del carrito activo; retira carritos activos vacíos o vencidos antes de crear el reemplazo.
 
 La operación es transaccional y los reintentos devuelven el mismo carrito mientras siga activo. Si ya hay otra selección activa con conceptos, devuelve 409 sin reemplazarla. El frontend informa la anulación antes de usar el botón. Pagos expone el bloqueo a través de `OrderPaymentGuard`; una futura integración deberá serializar el inicio de pago sobre el mismo pedido y comprobar que siga pendiente antes de crear una sesión bancaria.
+
+## Consistencia y unicidad
+
+`PricingPolicy` identifica los precios como oficiales y separa el flag de cobro. El catálogo informa `orderable` y su motivo; agregar al carrito utiliza la misma cotización que generar pedidos. La vinculación fusiona conceptos/beneficiarios iguales sin superar 20 unidades; ante exceso responde 422 y revierte toda la fusión. La base garantiza un carrito activo por usuario y un pedido por carrito. Consultar [revisión previa a Pay-me](REVISION_PRE_PAYME.md) para migración, duplicados existentes y cron.
