@@ -40,5 +40,5 @@
 </div>
 </div>
 </section>
-<section class="home-ending"><span class="home-ending-orb" aria-hidden="true"></span><h2>Tus metas<br>avanzan.</h2><p>Tus trámites también.</p><div><a href="/tienda/catalogo">Explorar trámites →</a><a href="#hero">Volver al inicio ↑</a></div></section>
+<section class="home-ending"><span class="home-ending-orb" aria-hidden="true"></span><h2>Cañete<br>avanza.</h2><p>Tus pagos también.</p><div><a href="/tienda/catalogo">Explorar trámites →</a><a href="#hero">Volver al inicio ↑</a></div></section>
 </div>
