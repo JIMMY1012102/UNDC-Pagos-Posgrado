@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 // Browser smoke test of the current three-page frontend.
 // Backend + MariaDB journey is independently tested in PHP CI.
 const origin = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined });
 let failures = 0;
 
 async function scenario(viewport, name) {

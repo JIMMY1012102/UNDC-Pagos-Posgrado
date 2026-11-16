@@ -37,7 +37,7 @@ class LoginRateLimitTest extends TestCase
         $before = session('errors')?->all();
         $response = $this->get('/tienda/login')->assertOk();
         preg_match('/<div class="warning"[\s\S]*?<\/div>/', $response->getContent(), $alert);
-        $this->assertStringContainsString('Espera un minuto', $response->getContent(), json_encode([
+        if (! str_contains($response->getContent(), 'Espera un minuto')) throw new \RuntimeException(json_encode([
             'before' => $before, 'after' => session('errors')?->all(), 'alert' => $alert[0] ?? null,
         ]));
     }
