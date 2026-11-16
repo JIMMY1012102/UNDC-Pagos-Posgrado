@@ -10,7 +10,7 @@ class MarketHomeNavigationTest extends TestCase
     {
         $this->get('/tienda')->assertOk()
             ->assertSee('id="marketHome"', false)
-            ->assertSee('Novedades de Posgrado')
+            ->assertSee('Elige, revisa y paga tu pedido')
             ->assertSee('id="homeStory"', false);
     }
 
@@ -25,7 +25,7 @@ class MarketHomeNavigationTest extends TestCase
     public function test_old_search_links_keep_their_filters(): void
     {
         $this->get('/tienda?q=matricula&category=matricula_pensiones')
-            ->assertRedirect('/tienda/catalogo?q=matricula&category=matricula_pensiones');
+            ->assertRedirect('/tienda/catalogo?category=matricula_pensiones&q=matricula');
     }
 
     public function test_old_login_shortcut_still_works(): void

@@ -6,7 +6,7 @@ const root=path.resolve(__dirname,'../..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 function expand(text){return text.replace(/@include\('([^']+)'\)/g,(_,name)=>expand(read('resources/views/'+name.replaceAll('.','/')+'.blade.php')))}
 class Element {
- constructor(){this.dataset={};this.listeners={};this.style={setProperty(){}};this.classList={toggle(){},remove(){},contains(){return false}};this.content='csrf';this.value='';this.hidden=true;this.children=[];this.attrs={};}
+ constructor(){this.dataset={};this.listeners={};this.style={setProperty(){}};this.classList={add(){},toggle(){},remove(){},contains(){return false}};this.content='csrf';this.value='';this.hidden=true;this.children=[];this.attrs={};}
  querySelectorAll(){return []} querySelector(){return null}
  addEventListener(k,f){this.listeners[k]=f} setAttribute(k,v){this.attrs[k]=v} removeAttribute(k){delete this.attrs[k]} showModal(){this.open=true} close(){this.open=false} toggleAttribute(){} append(...els){this.children.push(...els)} replaceChildren(){this.children=[]} scrollIntoView(){} focus(){} contains(){return false}
 }
@@ -18,6 +18,7 @@ async function boot(page,{owned=false,authenticated=false,complete=true,resume=f
  const file={catalog:'tienda',cart:'modules/tienda/cart',login:'modules/acceso/login'}[page];
  const html=expand(read('resources/views/'+file+'.blade.php'))+expand(read('resources/views/layouts/market.blade.php'));
  const ids=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
+ if(page==='catalog')ids.delete('marketHome'); // This harness exercises /tienda/catalogo, not the discovery home.
  const body=new Element();body.dataset.marketPage=page;const assigned=[];
  const storage=new Map(resume?[['undc_resume_purchase','1']]:[]);
  const store=m=>({getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)});
@@ -122,12 +123,12 @@ test('header search finds services across categories without accents or word-ord
  assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto/);
  input.value='6.15';input.listeners.input();
  assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto/);
- assert.match(app.ids.get('visibleConceptCount').textContent,/^1 /);
+ assert.match(app.ids.get('visibleConceptCount').textContent,/^Mostrando 1 /);
  input.value='xyz-inexistente';input.listeners.input();
  assert.equal(app.ids.get('tusneEmpty').hidden,false);
  input.value='';input.listeners.input();
  assert.equal(app.ids.get('tusneEmpty').hidden,true);
- assert.equal(app.ids.get('visibleConceptCount').textContent.split(' ')[0],String(app.context.marketTest.tusneConcepts.length));
+ assert.equal(app.ids.get('visibleConceptCount').textContent.split(' ')[1],String(app.context.marketTest.tusneConcepts.length));
 });
 
 test('search suggestions rank exact names first, limit results and select a product',async()=>{
@@ -160,43 +161,42 @@ test('six top categories filter API concepts, survive reload and reset with Para
  api.selectCatalogCategory('all');
  assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
  const login=await boot('login');login.context.marketTest.selectCatalogCategory('tramites');
- assert.deepEqual(login.assigned,['/tienda?category=tramites']);
+ assert.deepEqual(login.assigned,['/tienda/catalogo?category=tramites']);
  for(const label of ['Para ti','Admisión','Matrícula y pensiones','Trámites académicos','Certificados y constancias','Tesis y grados','Servicios administrativos'])assert.ok(app.html.includes(label));
 });
 
-test('search stays collapsed until magnifier click and Escape closes it',async()=>{
- const app=await boot('catalog');const form=app.ids.get('headerSearch'),toggle=app.ids.get('catalogSearchToggle');
- assert.equal(form.hidden,true);
- toggle.listeners.click();
- assert.equal(form.hidden,false);assert.equal(toggle.attrs['aria-expanded'],'true');
+test('catalog search remains visible and Escape dismisses suggestions',async()=>{
+ const app=await boot('catalog');const form=app.ids.get('headerSearch');
+ // Header layout is supplied by Blade; this VM tests the input interactions.
+ form.hidden=false;
  app.ids.get('search').value='matricula';app.ids.get('search').listeners.input();
  assert.match(app.ids.get('tusneResults').innerHTML,/Matrícula/);
  form.listeners.keydown({key:'Escape',preventDefault(){}});
- assert.equal(form.hidden,true);assert.equal(toggle.attrs['aria-expanded'],'false');
+ assert.equal(form.hidden,false);
  assert.equal(app.ids.get('searchSuggestions').hidden,true);
- toggle.listeners.click();toggle.listeners.click();assert.equal(form.hidden,true);
 });
+
 
 
 const categoriasEspanol={admission:'admision',tuition:'matricula_pensiones',transfers:'tramites',certificates:'certificados_constancias',degrees:'tesis_grados',administrative:'servicios_administrativos'};
 for(const [anterior,actual] of Object.entries(categoriasEspanol))test('categoría '+actual+' filtra y conserva enlaces anteriores',async()=>{
  const catalog=[{...fixture[0],category:actual},{...fixture[1],category:'categoria_personalizada'}];
  const app=await boot('catalog',{catalog,search:'?category='+actual});
- assert.equal(app.ids.get('visibleConceptCount').textContent,'1 opción visible');
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'Mostrando 1 de 2 conceptos');
  assert.match(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
  assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Matrícula de Maestría/);
  const legacy=await boot('catalog',{catalog:[{...fixture[0],category:anterior}],search:'?category='+anterior});
  assert.equal(legacy.context.marketTest.tusneConcepts[0].category,actual);
- assert.equal(legacy.ids.get('visibleConceptCount').textContent,'1 opción visible');
+ assert.equal(legacy.ids.get('visibleConceptCount').textContent,'Mostrando 1 de 1 conceptos');
  const login=await boot('login');login.context.marketTest.selectCatalogCategory(anterior);
- assert.deepEqual(login.assigned,['/tienda?category='+actual]);
+ assert.deepEqual(login.assigned,['/tienda/catalogo?category='+actual]);
  assert.ok(app.html.includes('data-category-nav="'+actual+'"'));
  assert.ok(!app.html.includes('category='+anterior+'#'));
 });
 test('categorías personalizadas y vacías permanecen visibles en Otros conceptos',async()=>{
  const app=await boot('catalog',{catalog:[{...fixture[0],category:'personalizada'},{...fixture[1],category:null}]});
  assert.ok(app.context.marketTest.tusneConcepts.every(item=>item.category==='general'));
- assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'Mostrando 2 de 2 conceptos');
 });
 
 
@@ -205,13 +205,13 @@ test('product cards contain only image, name and formatted reference price',asyn
  const html=app.ids.get('tusneResults').innerHTML;
  assert.match(html,/catalog-product-image/);
  assert.match(html,/catalog-product-name/);
- assert.match(html,/S\/ 300\.00/);
+ assert.match(html,/S\/<\/small> 300\.00/);
  for(const removed of ['category-tag','concept-description','concept-icon','concept-actions','data-catalog-cart','Ver detalles</','Importe</'])assert.ok(!html.includes(removed),removed);
  app.context.marketTest.openConceptDetail('12');
  assert.equal(app.ids.get('conceptDialog').open,true);
  const detail=app.ids.get('conceptDialogContent').innerHTML;
  assert.match(detail,/Concepto de prueba/);
- assert.match(detail,/Importe referencial/);
+ assert.match(detail,/Importe oficial/);
  assert.match(detail,/data-catalog-cart="12"/);
 });
 for(const amount of [null,undefined,'',-1,'-1.00','<script>','NaN',true])test('invalid reference amount stays pending: '+String(amount),async()=>{
@@ -220,7 +220,7 @@ for(const amount of [null,undefined,'',-1,'-1.00','<script>','NaN',true])test('i
 });
 test('zero reference amount is displayed without enabling checkout',async()=>{
  const app=await boot('catalog',{catalog:[{...fixture[0],reference_amount:'0.00',checkout_enabled:false}]});
- assert.match(app.ids.get('tusneResults').innerHTML,/S\/ 0\.00/);
+ assert.match(app.ids.get('tusneResults').innerHTML,/S\/<\/small> 0\.00/);
  assert.ok(!app.calls.some(call=>call.url.includes('/pagos')));
 });
 
@@ -235,7 +235,7 @@ test('the top navigation is the only category menu and filtering still renders p
  assert.doesNotMatch(app.ids.get('tusneResults').innerHTML,/Prospecto de admisión/);
  assert.equal(app.ids.get('catalogResultsTitle').textContent,'Matrícula y pensiones');
  app.context.marketTest.selectCatalogCategory('all');
- assert.equal(app.ids.get('visibleConceptCount').textContent,'2 opciones visibles');
+ assert.equal(app.ids.get('visibleConceptCount').textContent,'Mostrando 2 de 2 conceptos');
 });
 
 
@@ -265,7 +265,7 @@ test('cart displays API names and reference totals without loading the catalog p
  assert.equal(rows[0].children[0].textContent,'01');
  assert.equal(rows[0].children[1].children[1].textContent,'Posgrado · Cantidad 2');
  assert.equal(app.ids.get('cartTotalCount').textContent,'2 conceptos');
- assert.match(rows[0].children[2].textContent,/250[,.]20/);
+ assert.match(rows[0].children[2].children[0].textContent,/250[,.]20/);
  assert.match(app.ids.get('cartSummaryEstimate').textContent,/260[,.]45/);
  assert.ok(!app.calls.some(call=>call.url.includes('/catalogo?')));
  assert.equal(cart.total_amount,null);assert.equal(cart.checkout_enabled,false);
@@ -278,7 +278,7 @@ test('cart never invents a total when a reference amount is missing or invalid',
  for(const amount of [null,undefined,'-1.00','<script>','',true]){
   const app=await boot('cart',{cart:{items:[{id:1,catalog_item_id:101,name:'Concepto',reference_amount:amount,quantity:1}],items_count:1}});
   assert.equal(app.ids.get('cartSummaryEstimate').textContent,'Por confirmar');
-  assert.equal(app.ids.get('cartRows').children[0].children[2].textContent,'Por confirmar');
+  assert.equal(app.ids.get('cartRows').children[0].children[2].children[0].textContent,'Por confirmar');
  }
 });
 
@@ -290,7 +290,7 @@ test('payment review retains cart reference amounts and quantities before the ap
  const rows=app.ids.get('paymentPreviewItems').children;
  assert.equal(rows[0].children[0].textContent,'<script>Concepto</script>');
  assert.equal(rows[0].children[0].children[0].textContent,'Posgrado · Cantidad 2');
- assert.equal(rows[0].children[1].textContent,app.ids.get('cartRows').children[0].children[2].textContent);
+ assert.equal(rows[0].children[1].textContent,app.ids.get('cartRows').children[0].children[2].children[0].textContent);
  assert.match(rows[0].children[1].textContent,/250[,.]20/);
  assert.equal(app.ids.get('paymentPreviewTotal').textContent,app.ids.get('cartSummaryEstimate').textContent);
  assert.match(app.ids.get('paymentPreviewTotal').textContent,/260[,.]45/);

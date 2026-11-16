@@ -15,6 +15,16 @@ return new class extends Migration
             || DB::table('tienda_pedidos')->whereNotNull('cart_id')->groupBy('cart_id')->havingRaw('COUNT(*) > 1')->exists()) {
             throw new RuntimeException('Hay carritos activos o pedidos duplicados. Conciliar los registros antes de aplicar esta migración; no se eliminó ningún dato.');
         }
+        // MariaDB forbids a stored expression over a SET NULL foreign key.
+        // Keep ownership/history intact instead of silently anonymizing carts.
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'])) {
+            foreach (Schema::getForeignKeys('tienda_carritos') as $key) {
+                if ($key['columns'] === ['user_id']) {
+                    Schema::table('tienda_carritos', fn (Blueprint $table) => $table->dropForeign($key['name']));
+                }
+            }
+            Schema::table('tienda_carritos', fn (Blueprint $table) => $table->foreign('user_id', 'fk_cart_owner_restrict')->references('id')->on('users')->restrictOnDelete());
+        }
         Schema::table('tienda_carritos', function (Blueprint $table) {
             $table->unsignedBigInteger('active_user_id')->nullable()->storedAs("CASE WHEN status = 'active' THEN user_id ELSE NULL END");
             $table->unique('active_user_id', 'uq_cart_active_user');
@@ -35,5 +45,11 @@ return new class extends Migration
             $table->dropUnique('uq_cart_active_user');
             $table->dropColumn('active_user_id');
         });
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'])) {
+            Schema::table('tienda_carritos', function (Blueprint $table) {
+                $table->dropForeign('fk_cart_owner_restrict');
+                $table->foreign('user_id', 'store_carts_user_id_foreign')->references('id')->on('users')->nullOnDelete();
+            });
+        }
     }
 };

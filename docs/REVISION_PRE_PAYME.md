@@ -12,3 +12,5 @@
 La nueva migración debe revisarse y aplicarse de manera coordinada al desplegar. No se ejecuta contra bases institucionales desde esta rama. El servidor necesita el cron estándar de Laravel (`php artisan schedule:run` cada minuto) para ejecutar la tarea; registrar el horario en código no instala el cron del servidor. Las notificaciones futuras de Pay-me deben verificar importe, identidad e idempotencia y reconciliar pagos tardíos incluso si el pedido ya venció. Esta rama no implementa webhooks.
 
 No se elimina ninguna tabla: la revisión recibida no identifica cuál sería prescindible y borrar estructura de pagos/tesorería excedería estos cinco ajustes.
+
+La FK de propietario del carrito usa RESTRICT en MariaDB/MySQL para permitir la columna generada persistente. No se permite borrar una cuenta con carritos asociados; la reversión restaura SET NULL después de quitar la columna generada.

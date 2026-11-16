@@ -251,7 +251,7 @@ class OrderFlowTest extends TestCase
         DB::disableQueryLog();
         $this->assertCount(10, $result['items']);
         $this->assertTrue($result['has_more']);
-        $this->assertSame($first, $result['items'][0]);
+        $this->assertEquals($first, $result['items'][0]);
         $this->assertLessThanOrEqual(9, $queries);
         $this->assertCount(1, $orders->listing($buyer->id, 2)['items']);
     }

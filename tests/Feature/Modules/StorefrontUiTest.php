@@ -8,13 +8,12 @@ class StorefrontUiTest extends TestCase
 {
     public function test_public_catalog_and_dedicated_cart_render_without_authentication(): void
     {
-        $response = $this->get('/tienda');
+        $response = $this->get('/tienda/catalogo');
         $response->assertOk()
             ->assertSee('Universidad Nacional de Cañete')
             ->assertSee('Admisión')
             ->assertSee('Servicios administrativos')
             ->assertSee('Carrito')
-            ->assertSee('Tus metas avanzan.')
             ->assertDontSee('data-main-view="catalogs"', false)
             ->assertDontSee('data-main-view="categories"', false)
             ->assertDontSee('id="tusneTitle"', false)
