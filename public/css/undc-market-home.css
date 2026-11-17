@@ -270,6 +270,7 @@ body.market-discovery-home.light-mode:not([data-accessibility-color]) .immersive
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .immersive-hero .header-search{width:100%;max-width:100%;min-width:0}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .home-story-photo img{max-width:100%}
 @media(max-width:600px){
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header :is(.store-posgrado-menu,.immersive-orders-link,.home-help-link,.utility-controls,.nav-actions){display:none}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .top-inner{width:calc(100% - 24px);gap:10px;flex-wrap:nowrap}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand{min-width:0;gap:8px;flex:1 1 auto}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand .crest{width:32px;height:38px;flex:0 0 32px}
