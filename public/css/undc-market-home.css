@@ -263,3 +263,16 @@ body.market-discovery-home.light-mode:not([data-accessibility-color]) .immersive
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .home-story{padding:40px 16px}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .home-story h3{font-size:clamp(40px,12vw,52px)}
 }
+
+/* Keep intrinsic image and text sizes inside their grid tracks. */
+body.market-discovery-home.light-mode:not([data-accessibility-color]) :is(.market-hero-content,.market-hero-slides,.home-story-copy,.home-story-photo){min-width:0}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .immersive-hero .kinetic-word{max-width:100%;overflow-wrap:anywhere;transform:none}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .immersive-hero .header-search{width:100%;max-width:100%;min-width:0}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .home-story-photo img{max-width:100%}
+@media(max-width:600px){
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .top-inner{width:calc(100% - 24px);gap:10px;flex-wrap:nowrap}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand{min-width:0;gap:8px;flex:1 1 auto}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand .crest{width:32px;height:38px;flex:0 0 32px}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header :is(.brand-title,.brand-title b,.brand-title em){font-size:clamp(17px,5vw,24px)}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .menu-toggle{flex:0 0 44px}
+}
