@@ -5,6 +5,7 @@ namespace Tests\Feature\Modules;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -14,6 +15,7 @@ class CatalogApiTest extends TestCase
 
     private function prepareFixture(): void
     {
+        Cache::flush();
         Schema::create('tm_oficina', function (Blueprint $table): void {
             $table->integer('oficina_id')->primary();
             $table->string('oficina_nom');
@@ -130,5 +132,73 @@ class CatalogApiTest extends TestCase
                 ->assertOk()->assertJsonPath('data.0.category', $category);
         }
     }
-}
 
+    public function test_catalog_listing_reads_one_join_and_one_tariff_query(): void
+    {
+        $this->prepareFixture();
+        $this->assertSame('array', config('cache.default'));
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        try {
+            $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()
+                ->assertJsonPath('data.0.reference_amount', '10.00');
+            $queries = DB::getQueryLog();
+            $this->assertNotEmpty($queries);
+            $this->assertLessThanOrEqual(2, count($queries));
+            $this->assertCount(1, array_filter($queries, fn ($q) => str_contains($q['query'], 'join')));
+            $this->assertCount(1, array_filter($queries, fn ($q) => str_contains($q['query'], 'tienda_versiones_tarifas')));
+        } finally {
+            DB::disableQueryLog();
+        }
+    }
+
+    public function test_references_read_one_join_and_one_tariff_query_without_page_limit(): void
+    {
+        $this->prepareFixture();
+        // More than the public page limit, including a concept that cannot be quoted.
+        foreach (range(1, 55) as $index) {
+            DB::table('tm_conceptos')->insert([
+                'id_concepto' => 100 + $index, 'codigo_concepto' => 'EXTRA-'.$index,
+                'concepto' => 'Concepto ficticio', 'costo' => 10,
+            ]);
+            DB::table('tienda_conceptos_catalogo')->insert([
+                'legacy_office_id' => 7, 'legacy_concept_id' => 100 + $index,
+                'slug' => 'extra-'.$index, 'is_published' => true,
+                'requires_eligibility_check' => $index === 55,
+            ]);
+        }
+        $ids = DB::table('tienda_conceptos_catalogo')->where('is_published', true)
+            ->where('legacy_office_id', 7)->pluck('id')->all();
+        $service = app(\App\Modules\Catalogo\Services\CatalogService::class);
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        try {
+            $references = $service->referencesFor([...$ids, 999999]);
+            $queries = DB::getQueryLog();
+            $this->assertCount(56, $references);
+            $this->assertSame(['name' => 'Concepto ficticio', 'reference_amount' => '10.00'], $references[$ids[55]]);
+            $this->assertLessThanOrEqual(2, count($queries));
+            $this->assertCount(1, array_filter($queries, fn ($q) => str_contains($q['query'], 'join')));
+            $this->assertCount(1, array_filter($queries, fn ($q) => str_contains($q['query'], 'tienda_versiones_tarifas')));
+        } finally {
+            DB::disableQueryLog();
+        }
+    }
+
+    public function test_listing_and_references_use_current_approved_tariff_and_keep_ineligible_reference(): void
+    {
+        $this->prepareFixture();
+        $id = (int) DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->value('id');
+        DB::table('tienda_versiones_tarifas')->insert([
+            'catalog_item_id' => $id, 'amount' => '23.45', 'currency' => 'PEN',
+            'is_approved' => true, 'approval_reference' => 'DEMO-APPROVAL',
+            'valid_from' => now()->subDay(),
+        ]);
+        $service = app(\App\Modules\Catalogo\Services\CatalogService::class);
+        $this->assertSame('23.45', $service->forOffice(7)->first()['reference_amount']);
+        $this->assertSame('23.45', $service->referencesFor([$id])[$id]['reference_amount']);
+        DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['requires_eligibility_check' => true]);
+        $this->assertSame('10.00', $service->referencesFor([$id])[$id]['reference_amount']);
+        $this->assertFalse($service->forOffice(7)->first()['orderable']);
+    }
+}
