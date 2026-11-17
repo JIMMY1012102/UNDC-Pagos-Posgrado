@@ -197,7 +197,7 @@ async function scenario(viewport, name) {
   }
 }
 
-// Check the actual Blade-rendered discovery home through its accessibility UI.
+// Theme switches change paint only, never geometry or line breaks.
 async function responsiveLightHome(viewport) {
  const page=await browser.newPage({viewport,reducedMotion:'reduce'});
  const exceptions=[];page.on('pageerror',error=>exceptions.push(error.message));
@@ -205,33 +205,34 @@ async function responsiveLightHome(viewport) {
   await page.route('**/api/v1/tienda/catalogo/oficinas',route=>route.fulfill({json:{success:true,data:[{id:7,name:'Posgrado de prueba'}]}}));
   await page.route('**/api/v1/tienda/catalogo?*',route=>route.fulfill({json:{success:true,data:[]}}));
   await page.goto(origin+'/tienda',{waitUntil:'networkidle'});
-  await page.locator('#accessibilityFloatingButton').click();
-  await page.locator('[data-accessibility-theme="light"]').click();
-  await page.waitForFunction(()=>document.body.classList.contains('light-mode'));
-  const panel=await page.locator('#accessibilityPanel').boundingBox();
-  assert.ok(panel.x>=0&&panel.x+panel.width<=viewport.width+1,'Panel de accesibilidad dentro de la pantalla');
-  await page.keyboard.press('Escape');
-  await page.waitForFunction(()=>!document.querySelector('#homeStory').classList.contains('motion-ready'));
-  const layout=await page.evaluate(()=>{
-   const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
-   return {overflow:document.documentElement.scrollWidth>innerWidth+2,background:getComputedStyle(document.querySelector('#hero')).backgroundColor,ink:getComputedStyle(document.querySelector('#hero h1')).color,photo:box('.market-hero-photo'),copy:box('.market-hero-content'),search:box('#storeHeroSearch'),header:box('.site-header'),menu:box('#headerMenuButton'),steps:[...document.querySelectorAll('.home-story li p')].every(p=>getComputedStyle(p).display!=='none')};
-  });
-  assert.equal(layout.overflow,false,'Inicio claro sin desplazamiento horizontal a '+viewport.width+'px');
-  assert.equal(layout.background,'rgb(245, 249, 242)');assert.equal(layout.ink,'rgb(10, 59, 34)');
-  for(const key of ['photo','copy','search'])assert.ok(layout[key].x>=-1&&layout[key].right<=viewport.width+1,key+' dentro de la pantalla');
-  assert.ok(layout.steps,'Los tres pasos deben ser legibles en modo claro');
-  if(viewport.width<=900)assert.ok(layout.photo.y>=layout.copy.bottom-1,'La foto debe quedar debajo del texto en móvil y tablet');
-  else assert.ok(layout.photo.x>=layout.copy.right-1,'La foto debe quedar a la derecha en escritorio');
-  if(viewport.width<=600){
-   assert.ok(layout.menu.width>=44&&layout.menu.right<=viewport.width,'Menú táctil accesible');
-   await page.locator('#headerMenuButton').click();assert.equal(await page.locator('#mobileDrawer').isVisible(),true);await page.keyboard.press('Escape');
+  await page.evaluate(()=>document.fonts.ready);
+  async function theme(value){
+   await page.locator('#accessibilityFloatingButton').click();
+   await page.locator('[data-accessibility-theme="'+value+'"]').click();
+   await page.keyboard.press('Escape');
+   await page.evaluate(()=>scrollTo(0,0));
+   await page.waitForFunction(value=>document.body.classList.contains('light-mode')===(value==='light'),value);
   }
-  assert.deepEqual(exceptions,[],'Sin errores JavaScript al seleccionar el tema claro');
-  console.log('PASS light home responsive '+viewport.width+'px: tema, columnas, buscador, menú y accesibilidad');
- }catch(error){failures++;console.error('FAIL light home '+viewport.width+'px: '+error.stack);await page.screenshot({path:'/tmp/undc-light-'+viewport.width+'.png',fullPage:true}).catch(()=>{});}
+  async function geometry(){return page.evaluate(()=>{
+   const selectors=['.site-header','#hero','.market-hero-photo','.market-hero-content','#hero h1','.immersive-subtitle','#storeHeroSearch','.store-quick-links','#homeStory','.home-story-stage','.home-story-photo','.home-ending'];
+   return Object.fromEntries(selectors.map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [selector,{x:r.x,y:r.y+scrollY,width:r.width,height:r.height,font:s.font,lineHeight:s.lineHeight,position:s.position,display:s.display}]}));
+  });}
+  await theme('dark');const dark=await geometry();
+  await theme('light');const light=await geometry();
+  for(const selector of Object.keys(dark)){
+   for(const key of ['x','y','width','height'])assert.ok(Math.abs(dark[selector][key]-light[selector][key])<1,selector+' '+key+' debe conservarse al cambiar de tema: '+JSON.stringify({dark:dark[selector],light:light[selector]}));
+   for(const key of ['font','lineHeight','position','display'])assert.equal(light[selector][key],dark[selector][key],selector+' '+key);
+  }
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'Sin desbordamiento horizontal');
+  assert.equal(await page.locator('#hero h1').evaluate(e=>getComputedStyle(e).color),'rgb(10, 59, 34)');
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('light-mode')),true,'La preferencia clara debe persistir');
+  assert.deepEqual(exceptions,[],'Sin errores JavaScript');
+  console.log('PASS light/dark layout parity '+viewport.width+'px: misma foto, texto, tamaños, posiciones y responsive');
+ }catch(error){failures++;console.error('FAIL light home '+viewport.width+'px: '+error.stack);}
  finally{await page.close();}
 }
-for(const width of [320,375,768,1024,1366,1920])await responsiveLightHome({width,height:width<=768?844:900});
+for(const width of [320,375,768,1024,1366,1920])await responsiveLightHome({width,height:width<=768?844:768});
 
 await scenario({ width: 1440, height: 900 }, 'desktop');
 await scenario({ width: 1366, height: 768 }, 'laptop');
