@@ -5,6 +5,8 @@ namespace Tests\Feature\Modules;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Fixtures\BuyerDocumentCases;
+use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 class BuyerOnboardingFlowTest extends TestCase
 {
@@ -77,5 +79,26 @@ class BuyerOnboardingFlowTest extends TestCase
         $this->actingAs($second)->getJson('/api/v1/acceso/estado')
             ->assertJsonPath('data.profile_complete', false)
             ->assertJsonPath('data.profile', null);
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'invalid')]
+    public function test_invalid_document_keeps_onboarding_incomplete_until_corrected(mixed $type, mixed $number, string $field): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => $type, 'document_number' => $number,
+        ])->assertUnprocessable()->assertJsonValidationErrors($field);
+        $this->getJson('/api/v1/acceso/estado')->assertOk()
+            ->assertJsonPath('data.profile_complete', false)
+            ->assertJsonPath('data.next_step', 'complete_profile');
+        $this->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => ' ce ', 'document_number' => ' ab1234 ',
+        ])->assertOk();
+        $this->getJson('/api/v1/acceso/estado')->assertOk()
+            ->assertJsonPath('data.profile_complete', true)->assertJsonPath('data.next_step', 'tienda')
+            ->assertJsonPath('data.profile.document_type', 'CE')->assertJsonPath('data.profile.document_number', 'AB1234');
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
     }
 }

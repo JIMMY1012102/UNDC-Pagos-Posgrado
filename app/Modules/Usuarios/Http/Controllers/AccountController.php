@@ -5,6 +5,7 @@ namespace App\Modules\Usuarios\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Usuarios\Services\BuyerProfileService;
+use App\Modules\Usuarios\Validation\BuyerProfileRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,17 +14,6 @@ use Illuminate\Validation\Rules\Password;
 
 final class AccountController extends Controller
 {
-    private function profileRules(): array
-    {
-        return [
-            'first_names' => ['required', 'string', 'max:160'],
-            'last_names' => ['required', 'string', 'max:160'],
-            'document_type' => ['required', Rule::in(['DNI', 'CE', 'PASAPORTE'])],
-            'document_number' => ['required', 'string', 'max:32'],
-            'phone' => ['nullable', 'string', 'max:30'],
-        ];
-    }
-
     public function registerForm(Request $request)
     {
         return $request->user() ? redirect('/tienda/perfil') : view('modules.acceso.register', ['profile' => []]);
@@ -34,8 +24,9 @@ final class AccountController extends Controller
         if ($request->user()) {
             return redirect('/tienda/perfil');
         }
+        $request->merge(BuyerProfileRules::normalize($request->all()));
         $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
-        $data = $request->validate(array_merge($this->profileRules(), [
+        $data = $request->validate(array_merge(BuyerProfileRules::rules($request->all()), [
             'email' => ['required', 'email', 'max:254', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'max:128', 'confirmed', Password::min(12)],
         ]));
@@ -87,7 +78,8 @@ final class AccountController extends Controller
         if (! $request->user()) {
             return redirect('/tienda/login');
         }
-        $data = $request->validate($this->profileRules());
+        $request->merge(BuyerProfileRules::normalize($request->all()));
+        $data = $request->validate(BuyerProfileRules::rules($request->all()));
         $profiles->save((int) $request->user()->id, array_merge($data, ['contact_email' => $request->user()->email]));
         $request->session()->forget('market_google_profile');
         return redirect('/tienda/carrito');

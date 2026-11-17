@@ -7,6 +7,8 @@ use App\Modules\Usuarios\Services\BuyerProfileService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use Tests\Fixtures\BuyerDocumentCases;
+use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 class AccountRegistrationTest extends TestCase
 {
@@ -131,5 +133,37 @@ class AccountRegistrationTest extends TestCase
     public function test_guest_api_requests_remain_unauthorized_json(): void
     {
         $this->getJson('/api/v1/acceso/estado')->assertUnauthorized();
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'invalid')]
+    public function test_invalid_document_redirects_registration_without_creating_account(mixed $type, mixed $number, string $field): void
+    {
+        $this->from('/tienda/registro')->post('/tienda/registro', array_merge($this->input(), [
+            'document_type' => $type, 'document_number' => $number,
+        ]))->assertRedirect('/tienda/registro')->assertSessionHasErrors($field);
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'valid')]
+    public function test_registration_normalizes_valid_documents(string $type, string $number, string $expectedType, string $expectedNumber): void
+    {
+        $this->post('/tienda/registro', array_merge($this->input(), [
+            'document_type' => $type, 'document_number' => $number,
+        ]))->assertRedirect('/tienda/carrito');
+        $this->assertDatabaseHas('tienda_perfiles_compradores', [
+            'document_type' => $expectedType, 'document_number' => $expectedNumber,
+        ]);
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'invalid')]
+    public function test_invalid_document_redirects_web_profile_without_saving(mixed $type, mixed $number, string $field): void
+    {
+        $this->actingAs(User::factory()->create())->from('/tienda/perfil')
+            ->post('/tienda/perfil', array_merge($this->input(), [
+                'document_type' => $type, 'document_number' => $number,
+            ]))->assertRedirect('/tienda/perfil')->assertSessionHasErrors($field);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
     }
 }
