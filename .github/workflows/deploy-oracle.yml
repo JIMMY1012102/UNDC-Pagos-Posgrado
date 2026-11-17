@@ -1,0 +1,83 @@
+name: Publicar en Oracle
+
+on:
+  workflow_run:
+    workflows: ['CI · Laravel']
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oracle-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      vars.ORACLE_AUTO_DEPLOY == 'true' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Compilar frontend en GitHub
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          tar -czf /tmp/undc-build.tgz -C public/build .
+
+      - name: Preparar acceso SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.ORACLE_DEPLOY_KEY }}
+          KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+        run: |
+          test -n "$DEPLOY_KEY"
+          test -n "$KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/oracle
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/oracle ~/.ssh/known_hosts
+
+      - name: Actualizar Oracle
+        env:
+          DEPLOY_HOST: ${{ vars.ORACLE_HOST }}
+          DEPLOY_USER: ${{ vars.ORACLE_USER }}
+          DEPLOY_PORT: ${{ vars.ORACLE_PORT || '22' }}
+          DEPLOY_PATH: ${{ vars.ORACLE_PATH }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$DEPLOY_PORT" =~ ^[0-9]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/[a-zA-Z0-9_/-]+$ ]]
+
+          archive="/tmp/undc-build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tgz"
+
+          scp -B -i ~/.ssh/oracle -P "$DEPLOY_PORT" \
+            -o StrictHostKeyChecking=yes -o ConnectTimeout=15 \
+            /tmp/undc-build.tgz "$DEPLOY_USER@$DEPLOY_HOST:$archive"
+
+          ssh -i ~/.ssh/oracle -p "$DEPLOY_PORT" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -s -- '$DEPLOY_PATH' '$DEPLOY_SHA' '$archive'" \
+            < scripts/deploy-oracle.sh
+
+      - name: Quitar clave temporal
+        if: always()
+        run: rm -f ~/.ssh/oracle
