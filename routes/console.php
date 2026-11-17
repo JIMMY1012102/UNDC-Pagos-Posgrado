@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\Pedidos\Services\CartService;
+use App\Modules\Pedidos\Services\OrderService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -23,10 +25,9 @@ Artisan::command('treasury:schema-check', function () {
     return 0;
 })->purpose('Comprobar compatibilidad estructural con la base compartida SISPAGOS sin modificarla');
 
-Artisan::command('market:expire', function () {
-    $orders = app(\App\Modules\Pedidos\Services\OrderService::class)->expireDue();
-    $carts = \Illuminate\Support\Facades\DB::table('tienda_carritos')->where('status', 'active')
-        ->where('expires_at', '<=', now())->update(['status' => 'expired', 'token_hash' => null, 'updated_at' => now()]);
+Artisan::command('market:expire', function (OrderService $orders, CartService $carts) {
+    $orders = $orders->expireDue();
+    $carts = $carts->expireDue();
     $this->info("Pedidos vencidos: {$orders}; carritos vencidos: {$carts}");
 })->purpose('Vencer pedidos y retirar carritos caducados sin eliminar historial');
 
