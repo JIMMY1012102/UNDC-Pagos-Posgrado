@@ -50,8 +50,7 @@ final class CartService
         return DB::transaction(function () use ($token, $userId): ?array {
             // Serialize all claims and order replacements for this buyer.
             DB::table('users')->where('id', $userId)->lockForUpdate()->first();
-            DB::table('tienda_carritos')->where('user_id', $userId)->where('status', 'active')
-                ->where('expires_at', '<=', now())->update(['status' => 'expired', 'updated_at' => now()]);
+            $this->expireDue($userId);
             $cart = $this->activeCart($token, true);
             if ($cart === null) {
                 return null;
@@ -87,6 +86,16 @@ final class CartService
 
             return $this->snapshot((int) $cart->id);
         });
+    }
+
+    public function expireDue(?int $userId = null): int
+    {
+        $now = now();
+
+        return DB::table('tienda_carritos')->where('status', 'active')
+            ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+            ->where('expires_at', '<=', $now)
+            ->update(['status' => 'expired', 'token_hash' => null, 'updated_at' => $now]);
     }
 
     /** @return array<string,mixed>|null */

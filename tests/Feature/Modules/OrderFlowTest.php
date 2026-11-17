@@ -105,9 +105,52 @@ class OrderFlowTest extends TestCase
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
         $this->travel(25)->hours();
         $this->getJson('/api/v1/tienda/pedidos/'.$code.'?status=paid')->assertOk()->assertJsonPath('data.status', 'expired')->assertJsonPath('data.paid_at', null);
+        $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonCount(1, 'data.history');
+        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->artisan('market:expire')->assertSuccessful();
         $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonCount(2, 'data.history');
         $this->postJson('/api/v1/tienda/pedidos/'.$code, ['status' => 'paid'])->assertMethodNotAllowed();
         $this->travelBack();
+    }
+
+    public function test_expired_order_is_presented_without_writing_on_detail_or_listing(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $before = DB::table('tienda_pedidos')->where('code', $code)->first();
+        $this->travel(25)->hours();
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()
+            ->assertJsonPath('data.status', 'expired')->assertJsonPath('data.can_modify', false)
+            ->assertJsonPath('data.payment_enabled', false)->assertJsonCount(1, 'data.history');
+        $this->getJson('/api/v1/tienda/pedidos')->assertOk()
+            ->assertJsonPath('data.items.0.status', 'expired')->assertJsonPath('data.items.0.can_modify', false)
+            ->assertJsonCount(1, 'data.items.0.history');
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+        foreach ($queries as $query) {
+            $this->assertDoesNotMatchRegularExpression('/\b(insert|update|delete|replace)\b|for update/i', $query['query']);
+        }
+        $this->assertEquals($before, DB::table('tienda_pedidos')->where('code', $code)->first());
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
+        $this->travelBack();
+    }
+
+    public function test_claim_retires_expired_owned_cart_and_clears_its_token(): void
+    {
+        [$buyer, $cart] = $this->buyerCart();
+        $carts = app(\App\Modules\Pedidos\Services\CartService::class);
+        $anonymous = $carts->create();
+        DB::table('tienda_carritos')->where('id', $cart)->update([
+            'expires_at' => now()->subSecond(), 'token_hash' => hash('sha256', 'retired-token'),
+        ]);
+
+        $this->assertSame($anonymous['cart']['id'], $carts->claim($anonymous['token'], $buyer->id)['id']);
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'status' => 'expired', 'token_hash' => null]);
     }
 
     public function test_ineligible_unpublished_expired_cart_and_incomplete_profile_are_blocked(): void

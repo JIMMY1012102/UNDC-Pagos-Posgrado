@@ -157,19 +157,21 @@ final class OrderService
     {
         $order = DB::table('tienda_pedidos')->where('user_id', $userId)->where('code', $code)->first();
         abort_unless($order, 404);
-        $this->expire((int) $order->id, $userId);
-        $order = DB::table('tienda_pedidos')->where('id', $order->id)->first();
         return $this->present($order);
     }
 
     private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null): array
     {
+        $status = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
+            && $order->expires_at !== null && now()->gte($order->expires_at)
+            ? 'expired' : $order->status;
+
         return [
-            'code' => $order->code, 'status' => $order->status, 'currency' => $order->currency,
+            'code' => $order->code, 'status' => $status, 'currency' => $order->currency,
             'total_amount' => $order->total_amount, 'created_at' => $order->created_at, 'expires_at' => $order->expires_at,
             'paid_at' => $order->paid_at, 'buyer_name' => $order->buyer_first_names.' '.$order->buyer_last_names,
-            'buyer_email' => $order->buyer_email, 'payment_enabled' => PricingPolicy::status()['checkout_enabled'] && $order->status === 'pending' && $order->paid_at === null && ($order->expires_at === null || now()->lt($order->expires_at)),
-            'can_modify' => $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
+            'buyer_email' => $order->buyer_email, 'payment_enabled' => PricingPolicy::status()['checkout_enabled'] && $status === 'pending' && $order->paid_at === null && ($order->expires_at === null || now()->lt($order->expires_at)),
+            'can_modify' => $status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
                 && ($canModify ?? $this->payments->canModify((int) $order->id)),
             'items' => $items ?? DB::table('tienda_detalles_pedido')->where('order_id', $order->id)->orderBy('id')
                 ->get(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all(),
@@ -180,7 +182,6 @@ final class OrderService
 
     public function listing(int $userId, int $page): array
     {
-        $this->expireDue($userId);
         $page = max(1, $page);
         $orders = DB::table('tienda_pedidos')->where('user_id', $userId)->latest('id')
             ->offset(($page - 1) * 10)->limit(11)->get();
@@ -219,18 +220,4 @@ final class OrderService
         return $count;
     }
 
-    private function expire(int $id, int $userId): void
-    {
-        DB::transaction(function () use ($id, $userId): void {
-            $changed = DB::table('tienda_pedidos')->where('id', $id)->where('user_id', $userId)
-                ->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')->where('expires_at', '<=', now())
-                ->update(['status' => 'expired', 'updated_at' => now()]);
-            if ($changed) {
-                DB::table('tienda_historial_estados_pedido')->insert([
-                    'order_id' => $id, 'to_status' => 'expired', 'from_status' => 'pending',
-                    'reason' => 'Venció el plazo del pedido sin confirmación de pago.', 'occurred_at' => now(),
-                ]);
-            }
-        });
-    }
 }
