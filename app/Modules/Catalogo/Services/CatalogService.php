@@ -4,6 +4,7 @@ namespace App\Modules\Catalogo\Services;
 
 use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 final class CatalogService
 {
@@ -37,39 +38,44 @@ final class CatalogService
 
     public function offices(): Collection
     {
-        return $this->catalog->offices()->map(static fn (object $office): array => [
+        return Cache::remember('catalogo.publico.v1.oficinas', 120, fn (): Collection => $this->catalog->offices()->map(static fn (object $office): array => [
             'id' => (int) $office->id,
             'name' => (string) $office->name,
-        ]);
+        ]));
     }
 
     /** @return Collection<int, array<string, mixed>> */
     public function forOffice(int $officeId): Collection
     {
-        $items = $this->catalog->forOffice($officeId);
-        $quotes = $this->prices->linesForItems($items);
-        return $items->map(function (object $item) use ($quotes): array {
-            $quote = $quotes[$item->catalog_item_id] ?? null;
-            return [
-                'id' => (int) $item->catalog_item_id,
-                'slug' => (string) $item->slug,
-                'code' => (string) $item->codigo_concepto,
-                'name' => (string) $item->name,
-                'description' => $item->description,
-                'requirements' => $item->requirements,
-                'category' => self::CATEGORIAS_ANTERIORES[$item->category] ?? $item->category,
-                'categoria_id' => $item->categoria_id === null ? null : (int) $item->categoria_id,
-                'category_name' => $item->category_name,
-                'requires_eligibility_check' => (bool) $item->requires_eligibility_check,
-                'office' => [
-                    'id' => (int) $item->legacy_office_id,
-                    'name' => (string) $item->office_name,
-                ],
-                'reference_amount' => $quote !== null ? sprintf('%d.%02d', intdiv($quote['unit_cents'], 100), $quote['unit_cents'] % 100) : number_format((float) $item->legacy_base_amount, 2, '.', ''),
-                'orderable' => $quote !== null,
-                'orderable_reason' => $quote !== null ? null : ($item->requires_eligibility_check ? 'eligibility_required' : 'invalid_or_ambiguous_price'),
-                ...PricingPolicy::status(),
-            ];
+        $items = Cache::remember("catalogo.publico.v1.oficina.{$officeId}", 120, function () use ($officeId): Collection {
+            $items = $this->catalog->forOffice($officeId);
+            $quotes = $this->prices->linesForItems($items);
+            return $items->map(function (object $item) use ($quotes): array {
+                $quote = $quotes[$item->catalog_item_id] ?? null;
+                return [
+                    'id' => (int) $item->catalog_item_id,
+                    'slug' => (string) $item->slug,
+                    'code' => (string) $item->codigo_concepto,
+                    'name' => (string) $item->name,
+                    'description' => $item->description,
+                    'requirements' => $item->requirements,
+                    'category' => self::CATEGORIAS_ANTERIORES[$item->category] ?? $item->category,
+                    'categoria_id' => $item->categoria_id === null ? null : (int) $item->categoria_id,
+                    'category_name' => $item->category_name,
+                    'requires_eligibility_check' => (bool) $item->requires_eligibility_check,
+                    'office' => [
+                        'id' => (int) $item->legacy_office_id,
+                        'name' => (string) $item->office_name,
+                    ],
+                    'reference_amount' => $quote !== null ? sprintf('%d.%02d', intdiv($quote['unit_cents'], 100), $quote['unit_cents'] % 100) : number_format((float) $item->legacy_base_amount, 2, '.', ''),
+                    'orderable' => $quote !== null,
+                    'orderable_reason' => $quote !== null ? null : ($item->requires_eligibility_check ? 'eligibility_required' : 'invalid_or_ambiguous_price'),
+                ];
+            });
         });
+
+        $status = PricingPolicy::status();
+
+        return $items->map(static fn (array $item): array => [...$item, ...$status]);
     }
 }
