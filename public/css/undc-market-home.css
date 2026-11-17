@@ -275,5 +275,6 @@ body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-head
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand{min-width:0;gap:8px;flex:1 1 auto}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .brand .crest{width:32px;height:38px;flex:0 0 32px}
 body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header :is(.brand-title,.brand-title b,.brand-title em){font-size:clamp(17px,5vw,24px)}
-body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .menu-toggle{flex:0 0 44px}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .menu-toggle{display:grid;width:44px;height:44px;min-height:44px;flex:0 0 44px;background:#fff;border-color:#b9cfb2;color:#0a3b22}
+body.market-discovery-home.light-mode:not([data-accessibility-color]) .site-header .menu-toggle>span:not(.sr-only){background:#0a3b22}
 }
