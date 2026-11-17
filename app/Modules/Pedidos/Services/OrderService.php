@@ -5,6 +5,7 @@ namespace App\Modules\Pedidos\Services;
 use App\Modules\Catalogo\Services\OrderQuoteService;
 use App\Modules\Catalogo\Services\PricingPolicy;
 use App\Modules\Pagos\Services\OrderPaymentGuard;
+use App\Modules\Pedidos\Queries\ActiveCartQuery;
 use App\Modules\Usuarios\Services\BuyerProfileService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,12 +13,11 @@ use Illuminate\Validation\ValidationException;
 
 final class OrderService
 {
-    public function __construct(private readonly OrderQuoteService $prices, private readonly BuyerProfileService $profiles, private readonly OrderPaymentGuard $payments) {}
+    public function __construct(private readonly OrderQuoteService $prices, private readonly BuyerProfileService $profiles, private readonly OrderPaymentGuard $payments, private readonly CartService $carts) {}
 
     public function quote(int $userId, int $cartId): array
     {
-        $cart = DB::table('tienda_carritos')->where('id', $cartId)->where('user_id', $userId)
-            ->where('status', 'active')->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->first();
+        $cart = ActiveCartQuery::make()->where('id', $cartId)->where('user_id', $userId)->first();
         abort_unless($cart, 404);
         $lines = DB::table('tienda_detalles_carrito')->where('cart_id', $cartId)->orderBy('id')->get();
         $items = []; $total = 0;
@@ -87,8 +87,13 @@ final class OrderService
     }
 
     /** Replace an unpaid order with an editable cart; keep its original snapshot. */
-    public function modify(int $userId, string $code): array
+    public function modify(int $userId, string $code, ?string $cartToken = null): array
     {
+        if ($cartToken !== null) {
+            $cart = $this->carts->find($cartToken);
+            abort_if(($cart['items_count'] ?? 0) > 0, 409, 'Ya tienes otra selección en tu carrito. Revísala antes de modificar este pedido.');
+        }
+
         return DB::transaction(function () use ($userId, $code): array {
             // Serialize replacements for the same buyer; preserve create() lock order.
             DB::table('users')->where('id', $userId)->lockForUpdate()->first();
@@ -103,9 +108,8 @@ final class OrderService
                 $context = $event ? json_decode($event->context ?? '{}', true) : [];
                 $action = $context['action'] ?? null;
                 if ($action === 'modify_order') {
-                    $cart = DB::table('tienda_carritos')->where('id', $context['replacement_cart_id'] ?? 0)
-                        ->where('user_id', $userId)->where('status', 'active')
-                        ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->first();
+                    $cart = ActiveCartQuery::make()->where('id', $context['replacement_cart_id'] ?? 0)
+                        ->where('user_id', $userId)->first();
                     if ($cart) {
                         return ['cart_id' => (int) $cart->id];
                     }
@@ -119,8 +123,7 @@ final class OrderService
                 'Solo puedes modificar un pedido pendiente, vigente y sin pagos iniciados.');
 
             // Do not overwrite another selection that the buyer has already started.
-            $active = DB::table('tienda_carritos')->where('user_id', $userId)->where('status', 'active')
-                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            $active = ActiveCartQuery::make()->where('user_id', $userId)
                 ->whereExists(fn ($q) => $q->selectRaw('1')->from('tienda_detalles_carrito')
                     ->whereColumn('cart_id', 'tienda_carritos.id'))->exists();
             abort_if($active, 409, 'Ya tienes otra selección en tu carrito. Revísala antes de modificar este pedido.');
