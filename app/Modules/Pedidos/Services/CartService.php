@@ -4,9 +4,11 @@ namespace App\Modules\Pedidos\Services;
 
 use App\Modules\Catalogo\Contracts\CatalogItemLookup;
 use App\Modules\Catalogo\Services\CatalogService;
-use Illuminate\Support\Facades\DB;
 use App\Modules\Catalogo\Services\PricingPolicy;
-use RuntimeException;
+use App\Modules\Pedidos\Exceptions\CatalogItemUnavailable;
+use App\Modules\Pedidos\Exceptions\QuantityLimitExceeded;
+use App\Modules\Pedidos\Queries\ActiveCartQuery;
+use Illuminate\Support\Facades\DB;
 
 final class CartService
 {
@@ -92,9 +94,7 @@ final class CartService
     /** @return array<string,mixed>|null */
     public function forBuyer(int $userId): ?array
     {
-        $cart = DB::table('tienda_carritos')->where('user_id', $userId)
-            ->where('status', 'active')
-            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+        $cart = ActiveCartQuery::make()->where('user_id', $userId)
             ->latest('id')->first();
 
         return $cart ? $this->snapshot((int) $cart->id) : null;
@@ -113,7 +113,7 @@ final class CartService
             $valid = $this->catalog->isAvailable($catalogId);
 
             if (! $valid) {
-                throw new RuntimeException('CATALOG_ITEM_UNAVAILABLE');
+                throw new CatalogItemUnavailable();
             }
 
             $line = DB::table('tienda_detalles_carrito')
@@ -125,7 +125,7 @@ final class CartService
 
             if ($line) {
                 if ((int) $line->quantity + $quantity > self::MAX_QUANTITY) {
-                    throw new RuntimeException('QUANTITY_LIMIT');
+                    throw new QuantityLimitExceeded();
                 }
 
                 DB::table('tienda_detalles_carrito')->where('id', $line->id)->update([
@@ -171,14 +171,10 @@ final class CartService
             return null;
         }
 
-        $query = DB::table('tienda_carritos')
+        $query = ActiveCartQuery::make()
             ->when($token !== null,
                 fn ($q) => $q->where('token_hash', hash('sha256', $token))->whereNull('user_id'),
-                fn ($q) => $q->where('user_id', $userId))
-            ->where('status', 'active')
-            ->where(function ($query): void {
-                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            });
+                fn ($q) => $q->where('user_id', $userId));
 
         return ($lock ? $query->lockForUpdate() : $query)->latest('id')->first();
     }

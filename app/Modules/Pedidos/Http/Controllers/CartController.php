@@ -3,11 +3,12 @@
 namespace App\Modules\Pedidos\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Pedidos\Exceptions\CatalogItemUnavailable;
+use App\Modules\Pedidos\Exceptions\QuantityLimitExceeded;
 use App\Modules\Pedidos\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use RuntimeException;
 
 final class CartController extends Controller
 {
@@ -25,7 +26,7 @@ final class CartController extends Controller
     public function show(Request $request, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
+        if ($this->requiresToken($request, $token)) {
             return $this->invalidToken();
         }
 
@@ -41,7 +42,7 @@ final class CartController extends Controller
     public function add(Request $request, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
+        if ($this->requiresToken($request, $token)) {
             return $this->invalidToken();
         }
 
@@ -61,18 +62,16 @@ final class CartController extends Controller
 
         try {
             $cart = $service->add($token, (int) $validator->validated()['catalog_item_id'], (int) $validator->validated()['quantity'], $request->user()?->id);
-        } catch (RuntimeException $e) {
-            if (! in_array($e->getMessage(), ['CATALOG_ITEM_UNAVAILABLE', 'QUANTITY_LIMIT'], true)) {
-                throw $e;
-            }
+        } catch (CatalogItemUnavailable|QuantityLimitExceeded $e) {
+            $quantityLimit = $e instanceof QuantityLimitExceeded;
 
             return response()->json([
                 'success' => false,
                 'data' => null,
-                'message' => $e->getMessage() === 'QUANTITY_LIMIT'
+                'message' => $quantityLimit
                     ? 'Se excedió la cantidad permitida por concepto.'
                     : 'Concepto no disponible para este catálogo.',
-            ], $e->getMessage() === 'QUANTITY_LIMIT' ? 422 : 409)->header('Cache-Control', 'no-store');
+            ], $quantityLimit ? 422 : 409)->header('Cache-Control', 'no-store');
         }
 
         return $cart === null ? $this->notFound() : response()->json([
@@ -85,7 +84,7 @@ final class CartController extends Controller
     public function remove(Request $request, int $line, CartService $service): JsonResponse
     {
         $token = $this->token($request);
-        if ($token === null && ($request->bearerToken() !== null || $request->user() === null)) {
+        if ($this->requiresToken($request, $token)) {
             return $this->invalidToken();
         }
 
@@ -96,6 +95,11 @@ final class CartController extends Controller
             'data' => $cart,
             'message' => 'Carrito actualizado.',
         ])->header('Cache-Control', 'no-store');
+    }
+
+    private function requiresToken(Request $request, ?string $token): bool
+    {
+        return $token === null && ($request->bearerToken() !== null || $request->user() === null);
     }
 
     private function token(Request $request): ?string

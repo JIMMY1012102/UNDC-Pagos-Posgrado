@@ -28,12 +28,7 @@ final class OrderController extends Controller
     public function modify(Request $request, string $code, OrderService $orders): JsonResponse
     {
         $data = $request->validate(['cart_token' => ['nullable', 'string', 'regex:/^[a-f0-9]{64}$/D']]);
-        if (! empty($data['cart_token'])) {
-            $cart = app(\App\Modules\Pedidos\Services\CartService::class)->find($data['cart_token']);
-            abort_if(($cart['items_count'] ?? 0) > 0, 409, 'Ya tienes otra selección en tu carrito. Revísala antes de modificar este pedido.');
-        }
-
-        return response()->json(['success' => true, 'data' => $orders->modify((int) $request->user()->id, $code)])
+        return response()->json(['success' => true, 'data' => $orders->modify((int) $request->user()->id, $code, $data['cart_token'] ?? null)])
             ->header('Cache-Control', 'no-store');
     }
 
