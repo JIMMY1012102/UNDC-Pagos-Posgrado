@@ -197,9 +197,46 @@ async function scenario(viewport, name) {
   }
 }
 
+// Check the actual Blade-rendered discovery home through its accessibility UI.
+async function responsiveLightHome(viewport) {
+ const page=await browser.newPage({viewport,reducedMotion:'reduce'});
+ const exceptions=[];page.on('pageerror',error=>exceptions.push(error.message));
+ try {
+  await page.route('**/api/v1/tienda/catalogo/oficinas',route=>route.fulfill({json:{success:true,data:[{id:7,name:'Posgrado de prueba'}]}}));
+  await page.route('**/api/v1/tienda/catalogo?*',route=>route.fulfill({json:{success:true,data:[]}}));
+  await page.goto(origin+'/tienda',{waitUntil:'networkidle'});
+  await page.locator('#accessibilityFloatingButton').click();
+  await page.locator('[data-accessibility-theme="light"]').click();
+  await page.waitForFunction(()=>document.body.classList.contains('light-mode'));
+  const panel=await page.locator('#accessibilityPanel').boundingBox();
+  assert.ok(panel.x>=0&&panel.x+panel.width<=viewport.width+1,'Panel de accesibilidad dentro de la pantalla');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('#homeStory').classList.contains('motion-ready'));
+  const layout=await page.evaluate(()=>{
+   const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+   return {overflow:document.documentElement.scrollWidth>innerWidth+2,background:getComputedStyle(document.querySelector('#hero')).backgroundColor,ink:getComputedStyle(document.querySelector('#hero h1')).color,photo:box('.market-hero-photo'),copy:box('.market-hero-content'),search:box('#storeHeroSearch'),header:box('.site-header'),menu:box('#headerMenuButton'),steps:[...document.querySelectorAll('.home-story li p')].every(p=>getComputedStyle(p).display!=='none')};
+  });
+  assert.equal(layout.overflow,false,'Inicio claro sin desplazamiento horizontal a '+viewport.width+'px');
+  assert.equal(layout.background,'rgb(245, 249, 242)');assert.equal(layout.ink,'rgb(10, 59, 34)');
+  for(const key of ['photo','copy','search'])assert.ok(layout[key].x>=-1&&layout[key].right<=viewport.width+1,key+' dentro de la pantalla');
+  assert.ok(layout.steps,'Los tres pasos deben ser legibles en modo claro');
+  if(viewport.width<=900)assert.ok(layout.photo.y>=layout.copy.bottom-1,'La foto debe quedar debajo del texto en móvil y tablet');
+  else assert.ok(layout.photo.x>=layout.copy.right-1,'La foto debe quedar a la derecha en escritorio');
+  if(viewport.width<=600){
+   assert.ok(layout.menu.width>=44&&layout.menu.right<=viewport.width,'Menú táctil accesible');
+   await page.locator('#headerMenuButton').click();assert.equal(await page.locator('#mobileDrawer').isVisible(),true);await page.keyboard.press('Escape');
+  }
+  assert.deepEqual(exceptions,[],'Sin errores JavaScript al seleccionar el tema claro');
+  console.log('PASS light home responsive '+viewport.width+'px: tema, columnas, buscador, menú y accesibilidad');
+ }catch(error){failures++;console.error('FAIL light home '+viewport.width+'px: '+error.stack);await page.screenshot({path:'/tmp/undc-light-'+viewport.width+'.png',fullPage:true}).catch(()=>{});}
+ finally{await page.close();}
+}
+for(const width of [320,375,768,1024,1366,1920])await responsiveLightHome({width,height:width<=768?844:900});
+
 await scenario({ width: 1440, height: 900 }, 'desktop');
 await scenario({ width: 1366, height: 768 }, 'laptop');
 await scenario({ width: 390, height: 844 }, 'mobile');
 await browser.close();
 if (failures > 0) process.exit(1);
+
 
