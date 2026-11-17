@@ -17,15 +17,6 @@ final class PrepararCategoriasPosgrado
         'servicios_administrativos' => 'Servicios administrativos',
     ];
 
-    private const ANTERIORES = [
-        'admision' => 'admission',
-        'matricula_pensiones' => 'tuition',
-        'tramites' => 'transfers',
-        'certificados_constancias' => 'certificates',
-        'tesis_grados' => 'degrees',
-        'servicios_administrativos' => 'administrative',
-    ];
-
     public function __construct(private readonly PosgradoOfficesQuery $oficinas) {}
 
     public function ejecutar(): int
@@ -44,7 +35,7 @@ final class PrepararCategoriasPosgrado
                         ->where('legacy_office_id', $oficinaId)->where('codigo', $codigo)->value('id');
                     DB::table('tienda_conceptos_catalogo')
                         ->where('legacy_office_id', $oficinaId)->whereNull('categoria_id')
-                        ->whereIn('category', [$codigo, self::ANTERIORES[$codigo]])
+                        ->where('category', $codigo)
                         ->update(['categoria_id' => $categoriaId]);
                 }
             }
