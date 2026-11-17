@@ -4,6 +4,7 @@ namespace App\Modules\Usuarios\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Usuarios\Services\BuyerProfileService;
+use App\Modules\Usuarios\Validation\BuyerProfileRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -37,14 +38,10 @@ final class BuyerProfileController extends Controller
 
     public function update(Request $request, BuyerProfileService $service): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'first_names' => ['required', 'string', 'max:160'],
-            'last_names' => ['required', 'string', 'max:160'],
-            'document_type' => ['required', 'string', 'max:30'],
-            'document_number' => ['required', 'string', 'max:32'],
-            'phone' => ['nullable', 'string', 'max:30'],
+        $input = BuyerProfileRules::normalize($request->all());
+        $validator = Validator::make($input, array_merge(BuyerProfileRules::rules($input), [
             'contact_email' => ['nullable', 'email', 'max:254'],
-        ]);
+        ]));
         if ($validator->fails()) {
             return response()->json([
                 'success' => false, 'data' => null,

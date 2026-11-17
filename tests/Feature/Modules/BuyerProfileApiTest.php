@@ -5,6 +5,8 @@ namespace Tests\Feature\Modules;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Fixtures\BuyerDocumentCases;
+use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 class BuyerProfileApiTest extends TestCase
 {
@@ -56,5 +58,31 @@ class BuyerProfileApiTest extends TestCase
 
         $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
         $this->getJson('/api/v1/acceso/perfil')->assertJsonPath('data.first_names', 'Segundo');
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'invalid')]
+    public function test_invalid_document_preserves_api_error_envelope(mixed $type, mixed $number, string $field): void
+    {
+        $this->actingAs(User::factory()->create())->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => $type, 'document_number' => $number,
+        ])->assertUnprocessable()->assertJsonPath('success', false)->assertJsonPath('data', null)
+            ->assertJsonPath('message', 'Datos personales no válidos.')
+            ->assertJsonValidationErrors($field);
+        $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
+    }
+
+    #[DataProviderExternal(BuyerDocumentCases::class, 'valid')]
+    public function test_document_is_normalized_before_api_validation_and_storage(string $type, string $number, string $expectedType, string $expectedNumber): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
+            'first_names' => ' Persona ', 'last_names' => ' Prueba ',
+            'document_type' => $type, 'document_number' => $number,
+        ])->assertOk()->assertJsonPath('data.document_type', $expectedType)
+            ->assertJsonPath('data.document_number', $expectedNumber)->assertJsonPath('data.first_names', 'Persona');
+        $this->assertDatabaseHas('tienda_perfiles_compradores', [
+            'user_id' => $buyer->id, 'document_type' => $expectedType, 'document_number' => $expectedNumber,
+        ]);
     }
 }
