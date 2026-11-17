@@ -14,6 +14,11 @@ concurrency:
 
 jobs:
   laravel:
+    strategy:
+      matrix:
+        timezone: [UTC, America/Lima]
+    env:
+      APP_TIMEZONE: ${{ matrix.timezone }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
