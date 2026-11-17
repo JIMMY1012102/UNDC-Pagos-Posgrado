@@ -39,9 +39,6 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: Ejecutar pruebas Laravel
-        run: php artisan test --no-ansi
-
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
@@ -55,6 +52,9 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm run build
+
+      - name: Ejecutar pruebas Laravel
+        run: php artisan test --no-ansi
 
   maria-db-compartida:
     name: Integración real SISPAGOS + tienda (MariaDB)
@@ -99,6 +99,17 @@ jobs:
           composer install --no-interaction --prefer-dist --no-progress
           cp .env.example .env
           php artisan key:generate
+
+      - name: Preparar Node.js y assets para las vistas
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Compilar assets de integración
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
 
       - name: Crear solo las seis tablas originales vacías de SISPAGOS
         run: php tests/Fixtures/mariadb_check.php setup
@@ -147,6 +158,8 @@ jobs:
           node-version: '22'
       - name: Instalar navegador de prueba
         run: |
+          npm ci --no-audit --no-fund
+          npm run build
           npm install --no-save --package-lock=false playwright
           if command -v google-chrome >/dev/null; then
             echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"

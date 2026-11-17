@@ -172,7 +172,7 @@ class OrderFlowTest extends TestCase
     public function test_history_page_renders_for_an_authenticated_buyer(): void
     {
         $this->actingAs(User::factory()->create())->get('/tienda/mis-pedidos')
-            ->assertOk()->assertSee('id="ordersList"', false)->assertSee('js/undc-orders.js');
+            ->assertOk()->assertSee('id="ordersList"', false)->assertSee(\Illuminate\Support\Facades\Vite::asset('resources/js/undc-orders.js'));
     }
 
     public function test_guest_cannot_query_or_create_orders(): void

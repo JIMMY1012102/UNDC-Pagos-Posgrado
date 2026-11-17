@@ -18,8 +18,8 @@ class StorefrontUiTest extends TestCase
             ->assertDontSee('data-main-view="categories"', false)
             ->assertDontSee('id="tusneTitle"', false)
             ->assertSee('aria-labelledby="catalogResultsTitle"', false)
-            ->assertSee('css/undc-tienda.css')
-            ->assertSee('js/undc-tienda.js');
+            ->assertSee(\Illuminate\Support\Facades\Vite::asset('resources/css/undc-tienda.css'))
+            ->assertSee(\Illuminate\Support\Facades\Vite::asset('resources/js/undc-tienda.js'));
 
         // Since the UI was split into separate pages, checkout belongs in cart.
         $this->get('/tienda/carrito')->assertOk()
@@ -31,8 +31,8 @@ class StorefrontUiTest extends TestCase
 
     public function test_frontend_files_are_available_and_do_not_enable_unapproved_checkout(): void
     {
-        $css = file_get_contents(public_path('css/undc-tienda.css'));
-        $js = file_get_contents(public_path('js/undc-tienda.js'));
+        $css = file_get_contents(resource_path('css/undc-tienda.css'));
+        $js = file_get_contents(resource_path('js/undc-tienda.js'));
 
         $this->assertIsString($css);
         $this->assertIsString($js);
@@ -41,5 +41,12 @@ class StorefrontUiTest extends TestCase
         $this->assertStringContainsString('/api/v1/tienda/precompra/resumen', $js);
         $this->assertStringContainsString('/auth/google/redirect', $js);
         $this->assertStringNotContainsString('/api/v1/pagos/confirmar', $js);
+    }
+    public function test_welcome_renders_with_built_assets(): void
+    {
+        $html = view('welcome')->render();
+        $this->assertStringContainsString(\Illuminate\Support\Facades\Vite::asset('resources/css/app.css'), $html);
+        $this->assertStringContainsString(\Illuminate\Support\Facades\Vite::asset('resources/js/app.js'), $html);
+        $this->assertStringContainsString("Let's get started", $html);
     }
 }

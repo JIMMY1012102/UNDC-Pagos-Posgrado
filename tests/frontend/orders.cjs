@@ -6,7 +6,7 @@ function boot({fail=false,order=null,modifyFail=false}={}){
  const document={getElementById:id=>els.get(id)||null,querySelector:()=>({content:'csrf'}),createElement:()=>new El(),addEventListener:(k,f)=>callbacks[k]=f};
  let release;const response=new Promise(r=>release=r);
  const fetch=async(url,options)=>{calls.push({url,options});if(order&&options.method==='GET')return {ok:true,json:async()=>({data:order})};if(url.endsWith('/modificar')&&modifyFail)return {ok:false,json:async()=>({message:'Pago en curso'})};if(url.endsWith('/cotizar'))return {ok:!fail,json:async()=>fail?{errors:{tariff:['Tarifa pendiente']}}:{data:{items:[{name:'<script>texto</script>',quantity:2,total_amount:'50.20'}],total_amount:'50.20'}}};await response;return {ok:true,json:async()=>({data:{code:'UNDC-TEST'}})};};
- const source=fs.readFileSync(path.join(__dirname,'../../public/js/undc-orders.js'),'utf8').replace(/\}\)\(\);\s*$/, 'globalThis.orderTest={detail};})();');const context={};
+ const source=fs.readFileSync(path.join(__dirname,'../../resources/js/undc-orders.js'),'utf8').replace(/\}\)\(\);\s*$/, 'globalThis.orderTest={detail};})();');const context={};
  vm.runInNewContext(source,Object.assign(context,{document,fetch,window:{location:{assign:p=>redirects.push(p)},scrollTo(){}},sessionStorage:{getItem(){return null},removeItem(){}},URLSearchParams,Intl,Date}));
  return {callbacks,calls,redirects,els,release,context};
 }

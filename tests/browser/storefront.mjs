@@ -5,6 +5,14 @@ import {readFileSync} from 'node:fs';
 // Browser smoke test of the current three-page frontend.
 // Backend + MariaDB journey is independently tested in PHP CI.
 const origin = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
+const manifest = JSON.parse(readFileSync(new URL('../../public/build/manifest.json', import.meta.url), 'utf8'));
+function compiledAsset(entry) {
+  const asset = manifest[entry];
+  assert.ok(asset?.file, `Asset ausente del manifest: ${entry}`);
+  return asset.file.endsWith('.css')
+    ? `<link rel="stylesheet" href="/build/${asset.file}">`
+    : `<script type="module" src="/build/${asset.file}"></script>`;
+}
 const browser = await chromium.launch({ headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined });
 let failures = 0;
 
@@ -37,8 +45,8 @@ async function scenario(viewport, name) {
     await page.locator('#catalogResultsTitle').waitFor();
     assert.equal(await page.locator('#tusneTitle').count(), 0, 'El título Nuestros trámites se eliminó del catálogo');
     assert.equal(await page.locator('#tusneCatalog').getAttribute('aria-labelledby'), 'catalogResultsTitle');
-    assert.equal(await page.locator('link[href*="css/undc-tienda.css"]').count(), 1);
-    assert.equal(await page.locator('script[src*="js/undc-tienda.js"]').count(), 1);
+    assert.equal(await page.locator('link[rel="stylesheet"][href*="/build/assets/undc-tienda-"][href$=".css"]').count(), 1);
+    assert.equal(await page.locator('script[src*="/build/assets/undc-tienda-"][src$=".js"]').count(), 1);
 
     const floatingA11y = page.locator('#accessibilityFloatingButton');
     await floatingA11y.waitFor();
@@ -141,7 +149,7 @@ async function scenario(viewport, name) {
     await page.route('**/api/v1/tienda/pedidos?*',route=>route.fulfill({json:{data:{items:[order],page:1,has_more:false}}}));
     await page.route('**/api/v1/tienda/pedidos/UNDC-*',route=>route.fulfill({json:{data:order}}));
     const template=readFileSync(new URL('../../resources/views/modules/tienda/orders.blade.php',import.meta.url),'utf8');
-    const content=template.split("@section('content')")[1].split('@endsection')[0].replace(/\{\{ asset\('([^']+)'\) \}\}/g,(_,file)=>'/'+file).replace(/\?v=\{\{[^}]+\}\}/g,'');
+    const content=template.split("@section('content')")[1].split('@endsection')[0].replace(/@vite\('([^']+)'\)/g, (_, entry) => compiledAsset(entry)).replace(/\{\{ asset\('([^']+)'\) \}\}/g,(_,file)=>'/'+file).replace(/\?v=\{\{[^}]+\}\}/g,'');
     const shell=(await page.content()).replace(/<main\b[^>]*>[\s\S]*?<\/main>/,'<main class="wrap" id="catalogo">'+content+'</main>').replace('data-market-page="cart"','data-market-page="orders"').replace(/<body class="[^"]*"/,'<body class="commerce-view market-cart-view market-orders-view light-mode"');
     await page.route('**/tienda/mis-pedidos*',route=>route.fulfill({contentType:'text/html',body:shell}));
     await page.locator('#sideContinue').click();

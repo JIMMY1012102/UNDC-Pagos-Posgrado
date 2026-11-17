@@ -7,8 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}?v={{ filemtime(public_path('css/undc-tienda.css')) }}">
-<link rel="stylesheet" href="{{ asset('css/undc-orders.css') }}?v={{ filemtime(public_path('css/undc-orders.css')) }}">
+@vite(['resources/css/undc-tienda.css', 'resources/css/undc-orders.css'])
 </head>
 @php($showSocialRail = trim($__env->yieldContent('marketPage', 'catalog')) === 'catalog')
 <body class="{{ $showSocialRail ? 'market-with-social-rail' : '' }} @yield('bodyClass')" data-market-page="@yield('marketPage', 'catalog')">
@@ -21,8 +20,7 @@
 <main class="wrap" id="catalogo">@yield('content')</main>
 <footer class="footer">Universidad Nacional de Cañete · Oficina de Tecnologías de la Información · Versión de desarrollo de la tienda de Posgrado</footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="{{ asset('js/undc-tienda.js') }}?v={{ filemtime(public_path('js/undc-tienda.js')) }}" defer></script>
-<script src="{{ asset('js/undc-hero.js') }}?v={{ filemtime(public_path('js/undc-hero.js')) }}" defer></script>
+@vite(['resources/js/undc-tienda.js', 'resources/js/undc-hero.js'])
 </body></html>
 
 
