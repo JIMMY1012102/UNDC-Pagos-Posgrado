@@ -19,11 +19,12 @@ final class CatalogService
 
     public function __construct(private readonly PublishedCatalogQuery $catalog, private readonly OrderQuoteService $prices) {}
 
-    /** Resolve all cart concepts in one query, independently of catalog pagination. */
+    /** Resolve all cart concepts in two queries, independently of catalog pagination. */
     public function referencesFor(array $ids): Collection
     {
-        $quotes = $this->prices->lines($ids);
-        return $this->catalog->referencesFor($ids)->mapWithKeys(static function (object $item) use ($quotes): array {
+        $items = $this->catalog->quoteItems($ids);
+        $quotes = $this->prices->linesForItems($items);
+        return $items->mapWithKeys(static function (object $item) use ($quotes): array {
             $quote = $quotes[$item->catalog_item_id] ?? null;
             return [(int) $item->catalog_item_id => [
                 'name' => (string) $item->name,
@@ -46,7 +47,7 @@ final class CatalogService
     public function forOffice(int $officeId): Collection
     {
         $items = $this->catalog->forOffice($officeId);
-        $quotes = $this->prices->lines($items->pluck('catalog_item_id')->all());
+        $quotes = $this->prices->linesForItems($items);
         return $items->map(function (object $item) use ($quotes): array {
             $quote = $quotes[$item->catalog_item_id] ?? null;
             return [
