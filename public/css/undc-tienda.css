@@ -75,7 +75,7 @@ a { color: inherit; text-decoration: none; }
 .top { height: 70px; border-bottom: 1px solid #0a684c; background: linear-gradient(90deg, var(--header-bg-start), var(--header-bg-end)); }
 .top-inner { width: min(calc(100% - 80px), var(--header-max)); height: 100%; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { min-width: 385px; display: flex; align-items: center; gap: 16px; margin-left: 60px; }
-.crest { width: auto; height: 62px; flex: 0 0 auto; object-fit: contain; }
+.crest { width: auto; height: 64px; flex: 0 0 auto; object-fit: contain; }
 .brand-copy { min-width: 0; display: block; }
 .brand-title { display: block; color: var(--header-text); font-size: calc(38px * var(--a11y-text-scale, 1)); font-weight: 700; line-height: 1.05; letter-spacing: -.035em; white-space: nowrap; }
 .brand-title b { font-weight: 700; }
