@@ -8,16 +8,6 @@ use Illuminate\Support\Facades\Cache;
 
 final class CatalogService
 {
-    // Mantiene la lectura de datos antiguos hasta ejecutar la migración en cada entorno.
-    private const CATEGORIAS_ANTERIORES = [
-        'admission' => 'admision',
-        'tuition' => 'matricula_pensiones',
-        'transfers' => 'tramites',
-        'certificates' => 'certificados_constancias',
-        'degrees' => 'tesis_grados',
-        'administrative' => 'servicios_administrativos',
-    ];
-
     public function __construct(private readonly PublishedCatalogQuery $catalog, private readonly OrderQuoteService $prices) {}
 
     /** Resolve all cart concepts in two queries, independently of catalog pagination. */
@@ -59,7 +49,7 @@ final class CatalogService
                     'name' => (string) $item->name,
                     'description' => $item->description,
                     'requirements' => $item->requirements,
-                    'category' => self::CATEGORIAS_ANTERIORES[$item->category] ?? $item->category,
+                    'category' => $item->category,
                     'categoria_id' => $item->categoria_id === null ? null : (int) $item->categoria_id,
                     'category_name' => $item->category_name,
                     'requires_eligibility_check' => (bool) $item->requires_eligibility_check,

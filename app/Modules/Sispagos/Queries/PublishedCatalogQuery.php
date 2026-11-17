@@ -32,7 +32,7 @@ final class PublishedCatalogQuery
                 'publication.slug',
                 'publication.description',
                 'publication.requirements',
-                DB::raw('COALESCE(category.codigo, publication.category) as category'),
+                'category.codigo as category',
                 'publication.categoria_id',
                 'category.nombre as category_name',
                 'publication.requires_eligibility_check',

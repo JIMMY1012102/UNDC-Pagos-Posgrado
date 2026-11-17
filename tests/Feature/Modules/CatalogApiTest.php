@@ -97,45 +97,41 @@ class CatalogApiTest extends TestCase
             ->assertOk()->assertJsonCount(0, 'data');
     }
 
-    public function test_category_is_read_from_publication_and_not_inferred_from_price(): void
+    public function test_category_is_read_from_selected_category_and_not_inferred_from_price(): void
     {
         $this->prepareFixture();
+        app(\App\Modules\Catalogo\Services\PrepararCategoriasPosgrado::class)->ejecutar();
+        $categoryId = DB::table('tienda_categorias')->where('legacy_office_id', 7)->where('codigo', 'admision')->value('id');
         DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-            ->update(['category' => 'admision']);
+            ->update(['categoria_id' => $categoryId]);
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')
             ->assertOk()->assertJsonPath('data.0.category', 'admision')
             ->assertJsonPath('data.0.checkout_enabled', false)
             ->assertJsonMissingPath('data.0.amount');
     }
-    public function test_api_returns_spanish_categories_before_and_after_data_migration(): void
+    public function test_api_uses_only_selected_spanish_categories(): void
     {
         $this->prepareFixture();
-        $categories = [
-            'admission' => 'admision',
-            'tuition' => 'matricula_pensiones',
-            'transfers' => 'tramites',
-            'certificates' => 'certificados_constancias',
-            'degrees' => 'tesis_grados',
-            'administrative' => 'servicios_administrativos',
-        ];
-        foreach ($categories as $old => $new) {
-            foreach ([$old, $new] as $stored) {
-                DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-                    ->update(['category' => $stored]);
-                Cache::forget('catalogo.publico.v1.oficina.7');
-                $this->getJson('/api/v1/tienda/catalogo?office_id=7')
-                    ->assertOk()->assertJsonPath('data.0.category', $new);
-            }
-        }
-        foreach ([null, '', 'personalizada'] as $category) {
+        app(\App\Modules\Catalogo\Services\PrepararCategoriasPosgrado::class)->ejecutar();
+        foreach (DB::table('tienda_categorias')->where('legacy_office_id', 7)->get() as $category) {
             DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-                ->update(['category' => $category]);
+                ->update(['categoria_id' => $category->id]);
             Cache::forget('catalogo.publico.v1.oficina.7');
             $this->getJson('/api/v1/tienda/catalogo?office_id=7')
-                ->assertOk()->assertJsonPath('data.0.category', $category);
+                ->assertOk()->assertJsonPath('data.0.category', $category->codigo)
+                ->assertJsonPath('data.0.category_name', $category->nombre);
         }
     }
 
+    public function test_english_categories_are_not_backfilled_or_used_as_fallback(): void
+    {
+        $this->prepareFixture();
+        DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->update(['category' => 'admission']);
+        app(\App\Modules\Catalogo\Services\PrepararCategoriasPosgrado::class)->ejecutar();
+        $this->assertNull(DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->value('categoria_id'));
+        $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()
+            ->assertJsonPath('data.0.category', null)->assertJsonPath('data.0.categoria_id', null);
+    }
     public function test_catalog_listing_reads_one_join_and_one_tariff_query(): void
     {
         $this->prepareFixture();
