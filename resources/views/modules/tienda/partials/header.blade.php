@@ -1,6 +1,6 @@
 <header class="site-header">
 <div class="top"><div class="top-inner">
-<a href="/tienda" class="brand" aria-label="UNDC MARKET — Inicio"><img class="crest" src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo de la Universidad Nacional de Cañete"><span class="brand-copy"><span class="brand-title"><b>UNDC</b> <em>MARKET</em></span></span><span class="payment-header-context">Posgrado</span></a>
+<a href="/tienda" class="brand" aria-label="UNDC MARKET — Inicio"><img class="crest" src="{{ asset('logo-undc-128.png') }}" srcset="{{ asset('logo-undc-128.png') }} 1x, {{ asset('logo-undc-256.png') }} 2x" alt="Escudo de la Universidad Nacional de Cañete" width="62" height="62"><span class="brand-copy"><span class="brand-title"><b>UNDC</b> <em>MARKET</em></span></span><span class="payment-header-context">Posgrado</span></a>
 <div class="utility-controls" aria-label="Configuraciones">
 <div class="language-picker" data-language-picker data-no-translate><button class="utility-control language-button" type="button" aria-haspopup="true" aria-expanded="false"><span class="language-flag peru-flag" aria-hidden="true"><i></i></span><span class="language-label">ESPAÑOL</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg></button><div class="language-menu" hidden><button type="button" data-language="es"><span class="peru-flag" aria-hidden="true"><i></i></span>Español</button><button type="button" data-language="en"><span class="usa-flag" aria-hidden="true"><i></i></span>English</button></div></div>
 </div>
@@ -27,7 +27,7 @@
 </header>
 
 <dialog id="mobileDrawer" class="mobile-drawer" aria-labelledby="mobileDrawerTitle">
-<div class="drawer-heading"><a href="/tienda" class="drawer-brand"><img src="{{ asset('Logo_UNDC_OF.png') }}" alt="Escudo UNDC" width="44" height="52"><strong id="mobileDrawerTitle">UNDC <em>MARKET</em></strong></a><button type="button" id="mobileDrawerClose" aria-label="Cerrar menú">×</button></div>
+<div class="drawer-heading"><a href="/tienda" class="drawer-brand"><img src="{{ asset('logo-undc-128.png') }}" srcset="{{ asset('logo-undc-128.png') }} 1x, {{ asset('logo-undc-256.png') }} 2x" alt="Escudo UNDC" width="44" height="44"><strong id="mobileDrawerTitle">UNDC <em>MARKET</em></strong></a><button type="button" id="mobileDrawerClose" aria-label="Cerrar menú">×</button></div>
 <nav class="drawer-links" aria-label="Navegación móvil">
 @if(request()->routeIs('tienda.carrito'))
 <a href="/tienda"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5m6-6-6 6 6 6"/></svg><span>Seguir explorando</span><span class="drawer-arrow" aria-hidden="true">›</span></a>

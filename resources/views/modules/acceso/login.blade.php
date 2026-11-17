@@ -289,7 +289,7 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 
 <section class="emerald-intro" style="flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:space-between">
 <div class="in1" style="display:flex;align-items:center;gap:16px;padding-top:8px">
-<img class="emerald-university-emblem" src="{{ asset('Logo_UNDC_OF.png') }}" alt="Emblema de la Universidad Nacional de Cañete" width="64" height="76">
+<img class="emerald-university-emblem" src="{{ asset('logo-undc-128.png') }}" srcset="{{ asset('logo-undc-128.png') }} 1x, {{ asset('logo-undc-256.png') }} 2x" alt="Emblema de la Universidad Nacional de Cañete" width="64" height="64">
 <span><span class="sora" style="display:block;font-weight:800;font-size:30px;letter-spacing:.5px">UNDC <span style="color:#6ee7b7">MARKET</span></span><span style="display:block;margin-top:2px;color:#cfeee0;font-size:15px">Tienda virtual de pagos de la UNDC</span></span>
 </div>
 
