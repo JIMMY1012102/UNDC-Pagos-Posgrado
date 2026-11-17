@@ -83,4 +83,4 @@ body.market-payment-view .top-inner{width:100%;max-width:1200px;min-height:72px;
 </div>
 <div class="payment-review-footer"><p><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg><strong>Vigencia del pedido: 24 horas</strong></p><span>Generar un pedido no realiza un cobro ni inicia un trámite académico.</span></div>
 </section>
-<script src="{{ asset('js/undc-orders.js') }}?v={{ filemtime(public_path('js/undc-orders.js')) }}" defer></script>
+@vite('resources/js/undc-orders.js')

@@ -43,7 +43,7 @@ async function boot(page,{owned=false,authenticated=false,complete=true,resume=f
   return {status:200,ok:true,json:async()=>({success:true,data})};
  };
  const context=vm.createContext({document,window:{addEventListener(){},location:{search,assign:u=>assigned.push(u)},scrollTo(){},getSelection(){return null}},localStorage:store(local),sessionStorage:store(storage),CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}},URLSearchParams,Intl,MutationObserver:class{observe(){}},setTimeout:()=>0,clearTimeout(){},fetch});
- const source=read('public/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={openConceptDetail,selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,showPaymentPreview,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
+ const source=read('resources/js/undc-tienda.js').replace(/\}\)\(\);\s*$/, 'globalThis.marketTest={openConceptDetail,selectCatalogCategory,screen,renderCart,renderTusneCatalog,addItem,removeItem,loadCatalog,loadOffices,showPaymentPreview,get tusneConcepts(){return tusneConcepts},catalogSuggestions,chooseSearchSuggestion};})();');
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  return {ids,assigned,storage,context,html,calls};
 }

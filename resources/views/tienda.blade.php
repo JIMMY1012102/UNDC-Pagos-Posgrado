@@ -430,7 +430,7 @@ body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:no
 }
 
 </style>
-<link rel="stylesheet" href="{{ asset('css/undc-market-home.css') }}?v={{ filemtime(public_path('css/undc-market-home.css')) }}">
+@vite('resources/css/undc-market-home.css')
 @if($isMarketHome ?? true)
 @include('modules.tienda.partials.home')
 @endif
@@ -444,7 +444,6 @@ body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:no
 <button id="storeCartContinue" type="button" disabled>Revisar carrito →</button>
 </aside>
 </div>
-<script src="{{ asset('js/undc-market-home.js') }}?v={{ filemtime(public_path('js/undc-market-home.js')) }}" defer></script>
-<script src="{{ asset('js/undc-store-motion.js') }}?v={{ filemtime(public_path('js/undc-store-motion.js')) }}" defer></script>
+@vite(['resources/js/undc-market-home.js', 'resources/js/undc-store-motion.js'])
 @endsection
 

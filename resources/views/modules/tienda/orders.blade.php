@@ -187,5 +187,5 @@ body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-foote
 </section>
 <div class="payment-review-footer orders-footer"><span>Universidad Nacional de Cañete · Oficina de Tecnologías de la Información</span><span>Generar un pedido no realiza un cobro ni inicia un trámite académico.</span></div>
 </div>
-<script src="{{ asset('js/undc-orders.js') }}?v={{ filemtime(public_path('js/undc-orders.js')) }}" defer></script>
+@vite('resources/js/undc-orders.js')
 @endsection
