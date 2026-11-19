@@ -19,7 +19,7 @@ class PaymentConfigurationTest extends TestCase
         $this->assertSame('', config('payments.webhook_secret'));
         $this->assertSame(15, config('payments.attempt_ttl_minutes'));
         $this->assertSame(5, config('payments.connect_timeout_seconds'));
-        $this->assertSame(15, config('payments.timeout_seconds'));
+        $this->assertSame(15, config('payments.response_timeout_seconds'));
         $this->assertSame('PEN', config('payments.currency'));
         $this->assertSame('cents', config('payments.amount_unit'));
     }
@@ -66,7 +66,7 @@ class PaymentConfigurationTest extends TestCase
             'PAYMENTS_WEBHOOK_SECRET=',
             'PAYMENTS_ATTEMPT_TTL_MINUTES=',
             'PAYMENTS_CONNECT_TIMEOUT=',
-            'PAYMENTS_TIMEOUT=',
+            'PAYMENTS_RESPONSE_TIMEOUT=',
             'PAYMENTS_CURRENCY=',
         ] as $key) {
             $this->assertStringContainsString($key, $example);
