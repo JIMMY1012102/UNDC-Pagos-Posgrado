@@ -68,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
             throw new \LogicException("PAYMENTS_ATTEMPT_TTL_MINUTES must be between 1 and ".($orderTtl - 1)." minutes; the current order TTL is {$orderTtl} minutes.");
         }
 
-        foreach (['connect_timeout_seconds', 'timeout_seconds'] as $key) {
+        foreach (['connect_timeout_seconds', 'response_timeout_seconds'] as $key) {
             if ((int) config("payments.{$key}") < 1) {
                 throw new \LogicException("Payment configuration [payments.{$key}] must be greater than zero.");
             }
