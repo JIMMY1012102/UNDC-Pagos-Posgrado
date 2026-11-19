@@ -31,7 +31,7 @@ class PaymentConfigurationTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('fake payment driver is forbidden in production');
 
-        app(AppServiceProvider::class)->boot();
+        (new AppServiceProvider($this->app))->boot();
     }
 
     public function test_unknown_driver_is_rejected(): void
@@ -41,7 +41,7 @@ class PaymentConfigurationTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Unsupported payment driver [unknown]');
 
-        app(AppServiceProvider::class)->boot();
+        (new AppServiceProvider($this->app))->boot();
     }
 
     public function test_attempt_ttl_is_less_than_the_current_order_ttl(): void
