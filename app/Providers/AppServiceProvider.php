@@ -54,23 +54,23 @@ class AppServiceProvider extends ServiceProvider
         $environment = (string) config('app.env');
 
         if (! in_array($driver, ['fake', 'payme'], true)) {
-            throw new \\LogicException("Unsupported payment driver [{$driver}]. Allowed drivers: fake, payme.");
+            throw new \LogicException("Unsupported payment driver [{$driver}]. Allowed drivers: fake, payme.");
         }
 
         if ($environment === 'production' && $driver === 'fake') {
-            throw new \\LogicException('The fake payment driver is forbidden in production. Set PAYMENTS_DRIVER=payme.');
+            throw new \LogicException('The fake payment driver is forbidden in production. Set PAYMENTS_DRIVER=payme.');
         }
 
         $attemptTtl = (int) config('payments.attempt_ttl_minutes');
         $orderTtl = 24 * 60; // OrderService currently expires orders after addHours(24).
 
         if ($attemptTtl < 1 || $attemptTtl >= $orderTtl) {
-            throw new \\LogicException("PAYMENTS_ATTEMPT_TTL_MINUTES must be between 1 and ".($orderTtl - 1)." minutes; the current order TTL is {$orderTtl} minutes.");
+            throw new \LogicException("PAYMENTS_ATTEMPT_TTL_MINUTES must be between 1 and ".($orderTtl - 1)." minutes; the current order TTL is {$orderTtl} minutes.");
         }
 
         foreach (['connect_timeout_seconds', 'timeout_seconds'] as $key) {
             if ((int) config("payments.{$key}") < 1) {
-                throw new \\LogicException("Payment configuration [payments.{$key}] must be greater than zero.");
+                throw new \LogicException("Payment configuration [payments.{$key}] must be greater than zero.");
             }
         }
     }
