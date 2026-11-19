@@ -23,7 +23,7 @@ return [
     'attempt_ttl_minutes' => (int) env('PAYMENTS_ATTEMPT_TTL_MINUTES', 15),
 
     'connect_timeout_seconds' => (int) env('PAYMENTS_CONNECT_TIMEOUT', 5),
-    'timeout_seconds' => (int) env('PAYMENTS_TIMEOUT', 15),
+    'response_timeout_seconds' => (int) env('PAYMENTS_RESPONSE_TIMEOUT', 15),
 
     'currency' => env('PAYMENTS_CURRENCY', 'PEN'),
     'amount_unit' => 'cents',
