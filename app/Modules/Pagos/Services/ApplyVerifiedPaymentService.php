@@ -11,7 +11,7 @@ final class ApplyVerifiedPaymentService
 {
     /**
      * Apply a transaction only after its provider status has been verified
-     * server-to-server. The unique order claim is the final idempotency guard.
+     * server-to-server and the verification evidence has been persisted.
      *
      * @return array{result: string, order_id: int}
      */
@@ -32,6 +32,15 @@ final class ApplyVerifiedPaymentService
                 throw new InvalidArgumentException('El pedido asociado no existe.');
             }
 
+            $status = TransactionStatus::tryFrom((string) $transaction->status);
+            $hasServerVerification = $transaction->verified_at !== null
+                && is_string($transaction->verification_source)
+                && trim($transaction->verification_source) !== '';
+
+            if (! $hasServerVerification || ! $status?->isPayable()) {
+                return ['result' => 'not_verified', 'order_id' => (int) $order->id];
+            }
+
             $existing = DB::table('tienda_pagos_aplicados_pedidos')
                 ->where('order_id', $order->id)->first();
 
@@ -44,15 +53,10 @@ final class ApplyVerifiedPaymentService
                     (int) $order->id,
                     (int) $transaction->id,
                     IncidentKind::DuplicateCharge,
-                    'Se observó otro cobro para un pedido que ya tiene un pago aplicado. Requiere revisión de Tesorería.',
+                    'Se observó otro cobro verificado para un pedido que ya tiene un pago aplicado. Requiere revisión de Tesorería.',
                 );
 
                 return ['result' => 'duplicate_charge', 'order_id' => (int) $order->id];
-            }
-
-            $status = TransactionStatus::tryFrom((string) $transaction->status);
-            if (! $status?->isPayable()) {
-                return ['result' => 'not_verified', 'order_id' => (int) $order->id];
             }
 
             if (
