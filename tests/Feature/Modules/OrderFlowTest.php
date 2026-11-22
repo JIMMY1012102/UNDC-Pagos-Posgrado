@@ -347,7 +347,7 @@ class OrderFlowTest extends TestCase
             'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
         ]);
 
-        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame(['result' => 'applied', 'order_id' => $orderId], $service->apply($transactionId));
         $this->assertSame(['result' => 'already_applied', 'order_id' => $orderId], $service->apply($transactionId));
         $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
@@ -372,7 +372,7 @@ class OrderFlowTest extends TestCase
             'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
         ]);
 
-        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame('mismatch', $service->apply($mismatchId)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
             'order_id' => $orderId, 'payment_transaction_id' => $mismatchId, 'kind' => 'mismatch', 'status' => 'open',
@@ -409,7 +409,7 @@ class OrderFlowTest extends TestCase
             'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
         ]);
 
-        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame('applied', $service->apply($first)['result']);
         $this->assertSame('duplicate_charge', $service->apply($second)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
@@ -429,7 +429,7 @@ class OrderFlowTest extends TestCase
             'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN', 'observed_at' => now(),
         ]);
 
-        $result = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class)->apply($transactionId);
+        $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
         $this->assertSame('not_verified', $result['result']);
         $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
