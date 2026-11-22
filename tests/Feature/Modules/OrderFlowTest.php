@@ -379,6 +379,16 @@ class OrderFlowTest extends TestCase
         ]);
         $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
 
+        $currencyMismatchId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-CURRENCY',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'USD',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+        $this->assertSame('mismatch', $service->apply($currencyMismatchId)['result']);
+        $this->assertDatabaseHas('tienda_incidencias_pago', [
+            'order_id' => $orderId, 'payment_transaction_id' => $currencyMismatchId, 'kind' => 'mismatch', 'status' => 'open',
+        ]);
+
         DB::table('tienda_pedidos')->where('id', $orderId)->update(['status' => 'expired', 'expires_at' => now()->subMinute()]);
         $lateId = DB::table('tienda_transacciones_pago')->insertGetId([
             'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-LATE',
