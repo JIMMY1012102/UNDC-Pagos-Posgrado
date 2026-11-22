@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const money=value=>'S/ '+Number(value).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
 const date=value=>value?new Date(String(value).replace(' ','T')+(/Z$|[+-]\d\d:\d\d$/.test(value)?'':'Z')).toLocaleString('es-PE'):'—';
-const labels={pending:'Pendiente de pago',expired:'Vencido',paid:'Pagado',cancelled:'Anulado',confirmed:'Confirmado'};
+const labels={pending:'Pendiente de pago',payment_in_review:'En revisión de pago',expired:'Vencido',paid:'Pagado',cancelled:'Anulado',confirmed:'Confirmado'};
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 async function api(path,method='GET',body){
  const res=await fetch('/api/v1/tienda/'+path,{method,credentials:'same-origin',headers:{Accept:'application/json','Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},...(body?{body:JSON.stringify(body)}:{})});
@@ -70,7 +70,7 @@ async function detail(code){
   }
   methods.append(methodGrid);summary.append(methods);
   const pay=node('button','Pago aún no disponible','btn block order-pay-button');pay.type='button';pay.disabled=true;summary.append(pay);
- }else summary.append(node('p',order.status==='expired'?'Este pedido venció. Puedes volver al catálogo para realizar una nueva selección.':'Consulta el seguimiento para conocer el estado de tu pedido.','payment-quote-message'));
+ }else summary.append(node('p',order.status==='payment_in_review'?'Estamos verificando tu pago; no inicies otro cobro':order.status==='expired'?'Este pedido venció. Puedes volver al catálogo para realizar una nueva selección.':'Consulta el seguimiento para conocer el estado de tu pedido.','payment-quote-message'));
  if(order.can_modify){
   const edit=node('button','Modificar pedido','payment-text-button payment-modify');edit.type='button';
   edit.addEventListener('click',async()=>{
