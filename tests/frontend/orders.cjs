@@ -35,6 +35,16 @@ test('modification failure remains on order and allows retry',async()=>{
  const edit=descendants(b.els.get('orderDetail')).find(el=>el.textContent==='Modificar pedido');await edit.listeners.click();
  assert.equal(edit.disabled,false);assert.equal(b.els.get('orderDetailMessage').textContent,'Pago en curso');assert.equal(b.redirects.length,0);
 });
+
+test('payment review status has a visible label and prevents another charge',async()=>{
+ const reviewOrder={...exampleOrder,status:'payment_in_review',can_modify:false};
+ const b=boot({order:reviewOrder});await b.context.orderTest.detail(reviewOrder.code);
+ const text=descendants(b.els.get('orderDetail')).map(el=>el.textContent);
+ assert.ok(text.includes('En revisión de pago'));
+ assert.ok(text.includes('Estamos verificando tu pago; no inicies otro cobro'));
+ assert.equal(text.includes('Modificar pedido'),false);
+});
+
 test('orders blocked by server do not offer modification',async()=>{
  const b=boot({order:{...exampleOrder,status:'paid',can_modify:false}});await b.context.orderTest.detail(exampleOrder.code);
  assert.equal(descendants(b.els.get('orderDetail')).some(el=>el.textContent==='Modificar pedido'),false);
