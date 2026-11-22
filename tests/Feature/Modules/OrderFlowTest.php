@@ -283,9 +283,14 @@ class OrderFlowTest extends TestCase
         [$buyer, $cart] = $this->buyerCart();
         $orders = app(\App\Modules\Pedidos\Services\OrderService::class);
         $first = $orders->create($buyer->id, $cart);
-        for ($i = 0; $i < 10; $i++) {
-            $next = $orders->modify($buyer->id, $first['code']);
-            $first = $orders->create($buyer->id, $next['cart_id']);
+        for ($i = 0; $i < 9; $i++) {
+            $nextCart = DB::table('tienda_carritos')->insertGetId([
+                'user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay(),
+            ]);
+            DB::table('tienda_detalles_carrito')->insert([
+                'cart_id' => $nextCart, 'catalog_item_id' => 101, 'quantity' => 2,
+            ]);
+            $orders->create($buyer->id, $nextCart);
         }
         $orderIds = DB::table('tienda_pedidos')->where('user_id', $buyer->id)->pluck('id');
         DB::table('tienda_pedidos')->whereIn('id', $orderIds)->update(['expires_at' => now()->subMinute()]);
@@ -305,7 +310,7 @@ class OrderFlowTest extends TestCase
         $this->assertTrue($result['has_more']);
         $this->assertSame($first['code'], $result['items'][0]['code']);
         $this->assertSame('payment_in_review', $result['items'][0]['status']);
-        $this->assertGreaterThanOrEqual(1, count(array_filter($result['items'], fn ($order) => $order['status'] === 'payment_in_review')));
+        $this->assertCount(10, array_filter($result['items'], fn ($order) => $order['status'] === 'payment_in_review'));
         $this->assertLessThanOrEqual(9, $queries);
         $this->assertCount(1, $orders->listing($buyer->id, 2)['items']);
     }
