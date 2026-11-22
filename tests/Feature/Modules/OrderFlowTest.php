@@ -287,6 +287,15 @@ class OrderFlowTest extends TestCase
             $next = $orders->modify($buyer->id, $first['code']);
             $first = $orders->create($buyer->id, $next['cart_id']);
         }
+        $orderIds = DB::table('tienda_pedidos')->where('user_id', $buyer->id)->pluck('id');
+        DB::table('tienda_pedidos')->whereIn('id', $orderIds)->update(['expires_at' => now()->subMinute()]);
+        foreach ($orderIds as $orderId) {
+            DB::table('tienda_intentos_pago')->insert([
+                'order_id' => $orderId, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
+                'idempotency_key' => 'listing-review-'.$orderId, 'requested_amount' => '50.20',
+                'currency' => 'PEN', 'started_at' => now()->subMinutes(2),
+            ]);
+        }
         DB::enableQueryLog();
         DB::flushQueryLog();
         $result = $orders->listing($buyer->id, 1);
@@ -294,7 +303,9 @@ class OrderFlowTest extends TestCase
         DB::disableQueryLog();
         $this->assertCount(10, $result['items']);
         $this->assertTrue($result['has_more']);
-        $this->assertEquals($first, $result['items'][0]);
+        $this->assertSame($first['code'], $result['items'][0]['code']);
+        $this->assertSame('payment_in_review', $result['items'][0]['status']);
+        $this->assertCount(10, array_filter($result['items'], fn ($order) => $order['status'] === 'payment_in_review'));
         $this->assertLessThanOrEqual(9, $queries);
         $this->assertCount(1, $orders->listing($buyer->id, 2)['items']);
     }
