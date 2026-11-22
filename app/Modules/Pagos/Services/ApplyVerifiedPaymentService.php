@@ -75,11 +75,21 @@ final class ApplyVerifiedPaymentService
                 return ['result' => 'mismatch', 'order_id' => (int) $order->id];
             }
 
-            $now = now();
-            $expired = $order->status === 'expired'
-                || ($order->expires_at !== null && $now->greaterThanOrEqualTo($order->expires_at));
+            $paymentStartedAt = $transaction->payment_attempt_id !== null
+                ? DB::table('tienda_intentos_pago')->where('id', $transaction->payment_attempt_id)->value('started_at')
+                : $transaction->observed_at;
+            if ($paymentStartedAt === null) {
+                return ['result' => 'not_verified', 'order_id' => (int) $order->id];
+            }
 
-            if ($expired || $order->status !== 'pending' || $order->paid_at !== null) {
+            $startedAfterExpiry = $order->expires_at !== null
+                && now()->parse($paymentStartedAt)->greaterThan(now()->parse($order->expires_at));
+
+            if (
+                $startedAfterExpiry
+                || ! in_array($order->status, ['pending', 'expired'], true)
+                || $order->paid_at !== null
+            ) {
                 $this->recordIncident(
                     (int) $order->id,
                     (int) $transaction->id,
