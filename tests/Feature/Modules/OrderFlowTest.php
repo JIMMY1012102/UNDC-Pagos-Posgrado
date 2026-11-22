@@ -309,4 +309,130 @@ class OrderFlowTest extends TestCase
         $this->expectException(\Illuminate\Database\QueryException::class);
         DB::table('tienda_pedidos')->insert($row);
     }
+
+    public function test_expiry_skips_initiated_and_unknown_payment_attempts(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        DB::table('tienda_intentos_pago')->insert([
+            'order_id' => $orderId, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
+            'idempotency_key' => 'expiry-open-test', 'requested_amount' => '50.20', 'currency' => 'PEN', 'started_at' => now(),
+        ]);
+
+        $this->travel(25)->hours();
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
+
+        DB::table('tienda_intentos_pago')->where('order_id', $orderId)->update(['status' => 'future_unknown_status']);
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+
+        DB::table('tienda_intentos_pago')->where('order_id', $orderId)->update(['status' => 'expired']);
+        $this->artisan('market:expire')->assertSuccessful();
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'expired', 'paid_at' => null]);
+        $this->assertDatabaseCount('tienda_historial_estados_pedido', 2);
+        $this->travelBack();
+    }
+
+    public function test_verified_payment_is_applied_once_and_paid_transition_is_recorded(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-ONCE',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+
+        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $this->assertSame(['result' => 'applied', 'order_id' => $orderId], $service->apply($transactionId));
+        $this->assertSame(['result' => 'already_applied', 'order_id' => $orderId], $service->apply($transactionId));
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
+        $this->assertNotNull(DB::table('tienda_pedidos')->where('id', $orderId)->value('paid_at'));
+        $this->assertDatabaseHas('tienda_pagos_aplicados_pedidos', [
+            'order_id' => $orderId, 'payment_transaction_id' => $transactionId,
+        ]);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 1);
+        $this->assertDatabaseHas('tienda_historial_estados_pedido', [
+            'order_id' => $orderId, 'from_status' => 'pending', 'to_status' => 'paid',
+        ]);
+    }
+
+    public function test_amount_mismatch_and_late_payment_create_incidents_without_marking_paid(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $mismatchId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-MISMATCH',
+            'status' => 'authorized', 'amount' => '50.21', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+
+        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $this->assertSame('mismatch', $service->apply($mismatchId)['result']);
+        $this->assertDatabaseHas('tienda_incidencias_pago', [
+            'order_id' => $orderId, 'payment_transaction_id' => $mismatchId, 'kind' => 'mismatch', 'status' => 'open',
+        ]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+
+        DB::table('tienda_pedidos')->where('id', $orderId)->update(['status' => 'expired', 'expires_at' => now()->subMinute()]);
+        $lateId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-LATE',
+            'status' => 'settled', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+        $this->assertSame('late_payment', $service->apply($lateId)['result']);
+        $this->assertDatabaseHas('tienda_incidencias_pago', [
+            'order_id' => $orderId, 'payment_transaction_id' => $lateId, 'kind' => 'late_payment', 'status' => 'open',
+        ]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'expired', 'paid_at' => null]);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
+    }
+
+    public function test_second_verified_charge_is_recorded_as_duplicate_incident(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $first = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-FIRST',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+        $second = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-SECOND',
+            'status' => 'settled', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+
+        $service = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class);
+        $this->assertSame('applied', $service->apply($first)['result']);
+        $this->assertSame('duplicate_charge', $service->apply($second)['result']);
+        $this->assertDatabaseHas('tienda_incidencias_pago', [
+            'order_id' => $orderId, 'payment_transaction_id' => $second, 'kind' => 'duplicate_charge', 'status' => 'open',
+        ]);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 1);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
+    }
+
+    public function test_authorized_status_without_server_verification_does_not_mark_order_paid(): void
+    {
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'UNVERIFIED-ONLY',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN', 'observed_at' => now(),
+        ]);
+
+        $result = app(\\App\\Modules\\Pagos\\Services\\ApplyVerifiedPaymentService::class)->apply($transactionId);
+        $this->assertSame('not_verified', $result['result']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
+    }
+
 }
