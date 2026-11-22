@@ -83,7 +83,7 @@ final class ApplyVerifiedPaymentService
             }
 
             $startedAfterExpiry = $order->expires_at !== null
-                && now()->parse($paymentStartedAt)->greaterThan(now()->parse($order->expires_at));
+                && \Illuminate\Support\Carbon::parse($paymentStartedAt)->greaterThan(\Illuminate\Support\Carbon::parse($order->expires_at));
 
             if (
                 $startedAfterExpiry
