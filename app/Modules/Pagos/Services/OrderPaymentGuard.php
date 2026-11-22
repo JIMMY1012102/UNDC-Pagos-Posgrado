@@ -30,6 +30,23 @@ final class OrderPaymentGuard
         return true;
     }
 
+
+    /** A pending order with unresolved provider evidence is shown for review, not as expired. */
+    public function hasUnresolvedPayment(int $orderId): bool
+    {
+        if (DB::table('tienda_intentos_pago')->where('order_id', $orderId)
+            ->whereNotIn('status', AttemptStatus::terminalValues())->exists()) {
+            return true;
+        }
+
+        if (DB::table('tienda_transacciones_pago')->where('order_id', $orderId)
+            ->whereNotIn('status', TransactionStatus::terminalValues())->exists()) {
+            return true;
+        }
+
+        return DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->exists();
+    }
+
     /**
      * Unknown statuses are deliberately treated as unresolved: only known
      * terminal states allow an unpaid order to expire.
