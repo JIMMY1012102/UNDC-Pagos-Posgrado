@@ -45,4 +45,25 @@ class PaymentEnumsTest extends TestCase
             IncidentKind::cases(),
         ));
     }
+    public function test_decimal_amount_parser_accepts_zero_to_two_fractional_digits(): void
+    {
+        $this->assertSame(15000, \App\Modules\Pagos\Services\ApplyVerifiedPaymentService::toCents('150'));
+        $this->assertSame(15050, \App\Modules\Pagos\Services\ApplyVerifiedPaymentService::toCents('150.5'));
+        $this->assertSame(15000, \App\Modules\Pagos\Services\ApplyVerifiedPaymentService::toCents('150.00'));
+    }
+
+    public function test_decimal_amount_parser_rejects_more_than_two_decimals_and_negative_values(): void
+    {
+        try {
+            \App\Modules\Pagos\Services\ApplyVerifiedPaymentService::toCents('150.001');
+            $this->fail('Amounts with more than two decimal places must be rejected.');
+        } catch (\InvalidArgumentException) {
+            $this->assertTrue(true);
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        \App\Modules\Pagos\Services\ApplyVerifiedPaymentService::toCents('-0.01');
+    }
+
+
 }
