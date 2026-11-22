@@ -165,9 +165,11 @@ final class OrderService
 
     private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null): array
     {
-        $status = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
-            && $order->expires_at !== null && now()->gte($order->expires_at)
-            ? 'expired' : $order->status;
+        $isPastExpiry = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
+            && $order->expires_at !== null && now()->gte($order->expires_at);
+        $status = $isPastExpiry
+            ? ($this->payments->hasUnresolvedPayment((int) $order->id) ? 'payment_in_review' : 'expired')
+            : $order->status;
 
         return [
             'code' => $order->code, 'status' => $status, 'currency' => $order->currency,
