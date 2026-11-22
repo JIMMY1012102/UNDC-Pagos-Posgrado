@@ -18,6 +18,19 @@ final class OrderPaymentGuard
         return array_unique($blocked);
     }
 
+    /** Return orders with unresolved provider evidence, in a bounded batch. */
+    public function unresolvedOrderIds(array $ids): array
+    {
+        if ($ids === []) return [];
+        $unresolved = DB::table('tienda_intentos_pago')->whereIn('order_id', $ids)
+            ->whereNotIn('status', AttemptStatus::terminalValues())->distinct()->pluck('order_id')->all();
+        $unresolved = array_merge($unresolved, DB::table('tienda_transacciones_pago')->whereIn('order_id', $ids)
+            ->whereNotIn('status', TransactionStatus::terminalValues())->distinct()->pluck('order_id')->all());
+        $unresolved = array_merge($unresolved, DB::table('tienda_pagos_aplicados_pedidos')
+            ->whereIn('order_id', $ids)->distinct()->pluck('order_id')->all());
+        return array_values(array_unique($unresolved));
+    }
+
     /** Any payment evidence requires resolution before replacing an order. */
     public function canModify(int $orderId): bool
     {
