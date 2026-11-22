@@ -207,9 +207,11 @@ final class OrderService
         do {
             $changed = DB::transaction(function () use ($userId): int {
                 $now = now();
-                $ids = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
+                $query = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
                     ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
-                    ->where('expires_at', '<=', $now)->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
+                    ->where('expires_at', '<=', $now);
+                $ids = $this->payments->excludeOrdersWithUnresolvedPayments($query)
+                    ->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
                 if ($ids->isEmpty()) return 0;
                 DB::table('tienda_pedidos')->whereIn('id', $ids)->update(['status' => 'expired', 'updated_at' => $now]);
                 DB::table('tienda_historial_estados_pedido')->insert($ids->map(fn ($id) => [
