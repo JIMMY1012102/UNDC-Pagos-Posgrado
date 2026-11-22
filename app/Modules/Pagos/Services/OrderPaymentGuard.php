@@ -2,6 +2,9 @@
 
 namespace App\Modules\Pagos\Services;
 
+use App\Modules\Pagos\Enums\AttemptStatus;
+use App\Modules\Pagos\Enums\TransactionStatus;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 final class OrderPaymentGuard
@@ -25,5 +28,28 @@ final class OrderPaymentGuard
         }
 
         return true;
+    }
+
+    /**
+     * Unknown statuses are deliberately treated as unresolved: only known
+     * terminal states allow an unpaid order to expire.
+     */
+    public function excludeOrdersWithUnresolvedPayments(Builder $orders): Builder
+    {
+        return $orders
+            ->whereNotExists(function (Builder $query): void {
+                $query->selectRaw('1')->from('tienda_intentos_pago')
+                    ->whereColumn('tienda_intentos_pago.order_id', 'tienda_pedidos.id')
+                    ->whereNotIn('tienda_intentos_pago.status', AttemptStatus::terminalValues());
+            })
+            ->whereNotExists(function (Builder $query): void {
+                $query->selectRaw('1')->from('tienda_transacciones_pago')
+                    ->whereColumn('tienda_transacciones_pago.order_id', 'tienda_pedidos.id')
+                    ->whereNotIn('tienda_transacciones_pago.status', TransactionStatus::terminalValues());
+            })
+            ->whereNotExists(function (Builder $query): void {
+                $query->selectRaw('1')->from('tienda_pagos_aplicados_pedidos')
+                    ->whereColumn('tienda_pagos_aplicados_pedidos.order_id', 'tienda_pedidos.id');
+            });
     }
 }
