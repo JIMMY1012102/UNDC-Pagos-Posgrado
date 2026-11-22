@@ -35,7 +35,9 @@ final class ApplyVerifiedPaymentService
             $status = TransactionStatus::tryFrom((string) $transaction->status);
             $hasServerVerification = $transaction->verified_at !== null
                 && is_string($transaction->verification_source)
-                && trim($transaction->verification_source) !== '';
+                && trim($transaction->verification_source) !== ''
+                && is_string($transaction->provider_transaction_reference)
+                && trim($transaction->provider_transaction_reference) !== '';
 
             if (! $hasServerVerification || ! $status?->isPayable()) {
                 return ['result' => 'not_verified', 'order_id' => (int) $order->id];
