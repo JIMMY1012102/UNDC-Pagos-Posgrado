@@ -100,6 +100,7 @@ final class ApplyVerifiedPaymentService
                 return ['result' => 'late_payment', 'order_id' => (int) $order->id];
             }
 
+            $now = now();
             DB::table('tienda_pagos_aplicados_pedidos')->insert([
                 'order_id' => $order->id,
                 'payment_transaction_id' => $transaction->id,
@@ -114,9 +115,9 @@ final class ApplyVerifiedPaymentService
 
             DB::table('tienda_historial_estados_pedido')->insert([
                 'order_id' => $order->id,
-                'from_status' => 'pending',
+                'from_status' => $order->status,
                 'to_status' => 'paid',
-                'reason' => 'Pago aplicado después de verificar servidor-servidor la referencia, el monto y la moneda.',
+                'reason' => 'Pago aplicado después de verificar servidor-servidor la referencia, el monto y la moneda; el inicio ocurrió antes del vencimiento.',
                 'occurred_at' => $now,
             ]);
 
@@ -145,14 +146,18 @@ final class ApplyVerifiedPaymentService
         }
     }
 
-    private static function toCents(string $amount): int
+    public static function toCents(string $amount): int
     {
-        if (! preg_match('/^\d{1,12}\.\d{2}$/', $amount)) {
-            throw new InvalidArgumentException('El monto debe tener dos decimales y formato decimal válido.');
+        // Parse decimal text only: never multiply or round a binary float.
+        if (! preg_match('/^\\d{1,12}(?:\\.(\\d{1,2}))?$/D', $amount, $matches)) {
+            throw new InvalidArgumentException('El monto debe ser no negativo y tener como máximo dos decimales.');
         }
 
-        [$units, $cents] = explode('.', $amount);
+        $parts = explode('.', $amount, 2);
+        $units = $parts[0];
+        $fraction = $parts[1] ?? '';
+        $cents = (int) str_pad($fraction, 2, '0');
 
-        return ((int) $units * 100) + (int) $cents;
+        return ((int) $units * 100) + $cents;
     }
 }
