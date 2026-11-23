@@ -119,4 +119,32 @@ class BuyerProfileApiTest extends TestCase
     }
 
 
+    public function test_legacy_phone_formats_are_normalized_and_invalid_numbers_return_spanish_errors(): void
+    {
+        $buyer = User::factory()->create();
+        $base = [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+            'phone_country_code' => '+51',
+        ];
+
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', $base + ['phone' => '987 654 321'])
+            ->assertOk()->assertJsonPath('data.phone', '987654321');
+        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '987-654-321'])
+            ->assertOk()->assertJsonPath('data.phone', '987654321');
+        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '+51987654321'])
+            ->assertOk()->assertJsonPath('data.phone', '987654321');
+
+        $message = 'El teléfono debe tener solo números (7 a 15 dígitos), sin el código de país. El código va en el campo «Código de país».';
+        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '+34600123456'])
+            ->assertUnprocessable()->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Datos personales no válidos.')
+            ->assertJsonPath('errors.phone.0', $message);
+        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '98765abc1'])
+            ->assertUnprocessable()->assertJsonPath('errors.phone.0', $message);
+        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '987654321', 'phone_country_code' => '+0'])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.phone_country_code.0', 'El código de país debe tener el formato +51.');
+    }
+    
 }

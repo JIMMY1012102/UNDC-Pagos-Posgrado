@@ -2,7 +2,6 @@
 
 namespace App\Modules\Usuarios\Services;
 
-use App\Modules\Usuarios\Validation\BuyerProfileRules;
 use Illuminate\Support\Facades\DB;
 
 final class BuyerProfileService
@@ -31,10 +30,7 @@ final class BuyerProfileService
 
         return $profile !== null
             && collect(['line_1', 'city', 'state', 'country', 'phone_country_code', 'phone'])
-                ->every(static fn (string $key): bool => filled($profile[$key] ?? null))
-            && preg_match('/^[0-9]{7,15}$/D', (string) $profile['phone']) === 1
-            && preg_match('/^\+[1-9][0-9]{0,3}$/D', (string) $profile['phone_country_code']) === 1
-            && BuyerProfileRules::isIsoCountry((string) $profile['country']);
+                ->every(static fn (string $key): bool => filled($profile[$key] ?? null));
     }
 
     /** @param array<string,string|null> $input @return array<string,mixed> */
