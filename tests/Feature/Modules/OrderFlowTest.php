@@ -546,4 +546,52 @@ class OrderFlowTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_checkout_disabled_allows_order_without_address_snapshot(): void
+    {
+        config(['payments.payme_enabled' => false]);
+        [$buyer, $cart] = $this->buyerCart();
+        $response = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
+        $this->assertDatabaseHas('tienda_pedidos', [
+            'code' => $response->json('data.code'),
+            'buyer_address_line_1' => null,
+            'buyer_address_city' => null,
+            'buyer_address_state' => null,
+            'buyer_address_country' => null,
+        ]);
+    }
+
+    public function test_checkout_enabled_requires_address_and_phone_and_snapshots_them(): void
+    {
+        config(['payments.payme_enabled' => true]);
+        [$buyer, $cart] = $this->buyerCart();
+
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('profile')
+            ->assertJsonPath('errors.profile.0', 'Para continuar con el pago, completa tu dirección y teléfono (incluido el código de país) en tu perfil.');
+        $this->assertDatabaseCount('tienda_pedidos', 0);
+
+        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
+            'line_1' => 'Av. Prueba 123', 'line_2' => 'Interior 2',
+            'city' => 'Mala', 'state' => 'Lima', 'country' => 'PE',
+            'phone_country_code' => '+51', 'phone' => '987654321',
+        ]);
+        $order = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
+            ->assertCreated()->json('data');
+        $this->assertDatabaseHas('tienda_pedidos', [
+            'code' => $order['code'],
+            'buyer_address_line_1' => 'Av. Prueba 123',
+            'buyer_address_line_2' => 'Interior 2',
+            'buyer_address_city' => 'Mala',
+            'buyer_address_state' => 'Lima',
+            'buyer_address_country' => 'PE',
+            'buyer_phone_country_code' => '+51',
+            'buyer_phone' => '987654321',
+        ]);
+
+        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update(['line_1' => 'Dirección modificada']);
+        $this->assertDatabaseHas('tienda_pedidos', ['code' => $order['code'], 'buyer_address_line_1' => 'Av. Prueba 123']);
+    }
+
+
 }
