@@ -660,4 +660,119 @@ class OrderFlowTest extends TestCase
         $this->get('/tienda/perfil')->assertOk()->assertSee('PERFIL DEL COMPRADOR');
     }
 
+
+
+    public function test_reversed_verified_transaction_is_not_applied(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-REVERSED',
+            'status' => 'reversed', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+
+        $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
+
+        $this->assertSame('not_verified', $result['result']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
+        $this->travelBack();
+    }
+
+    public function test_reversing_an_applied_transaction_does_not_unmark_the_paid_order(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-APPLIED-THEN-REVERSED',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
+
+        $this->assertSame('applied', $service->apply($transactionId)['result']);
+        $paidAt = DB::table('tienda_pedidos')->where('id', $orderId)->value('paid_at');
+        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['status' => 'reversed']);
+
+        $this->assertSame('not_verified', $service->apply($transactionId)['result']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid', 'paid_at' => $paidAt]);
+        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->count());
+        $this->assertSame(0, DB::table('tienda_incidencias_pago')->where('payment_transaction_id', $transactionId)->count());
+        $this->travelBack();
+    }
+
+    public function test_settled_status_after_authorized_application_is_already_applied(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'AUTHORIZED-THEN-SETTLED',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
+
+        $this->assertSame('applied', $service->apply($transactionId)['result']);
+        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['status' => 'settled']);
+
+        $this->assertSame('already_applied', $service->apply($transactionId)['result']);
+        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->count());
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
+        $this->travelBack();
+    }
+
+    public function test_verified_payment_for_cancelled_order_creates_late_payment_incident(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        DB::table('tienda_pedidos')->where('id', $orderId)->update(['status' => 'cancelled']);
+        $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-CANCELLED-ORDER',
+            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
+            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+        ]);
+
+        $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
+
+        $this->assertSame('late_payment', $result['result']);
+        $this->assertDatabaseHas('tienda_incidencias_pago', [
+            'order_id' => $orderId, 'payment_transaction_id' => $transactionId, 'kind' => 'late_payment', 'status' => 'open',
+        ]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'cancelled']);
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
+        $this->travelBack();
+    }
+
+    public function test_verified_terminal_transaction_statuses_are_not_applied(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
+        [, $cart] = $this->buyerCart();
+        $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
+        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
+
+        foreach (['declined', 'expired', 'cancelled'] as $status) {
+            $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
+                'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'TERMINAL-'.$status,
+                'status' => $status, 'amount' => '50.20', 'currency' => 'PEN',
+                'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            ]);
+
+            $this->assertSame('not_verified', $service->apply($transactionId)['result']);
+            $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        }
+
+        $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
+        $this->travelBack();
+    }
+
 }
