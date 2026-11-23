@@ -283,14 +283,14 @@ class OrderFlowTest extends TestCase
         [$buyer, $cart] = $this->buyerCart();
         $orders = app(\App\Modules\Pedidos\Services\OrderService::class);
         $first = $orders->create($buyer->id, $cart);
-        for ($i = 0; $i < 9; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $nextCart = DB::table('tienda_carritos')->insertGetId([
                 'user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay(),
             ]);
             DB::table('tienda_detalles_carrito')->insert([
                 'cart_id' => $nextCart, 'catalog_item_id' => 101, 'quantity' => 2,
             ]);
-            $orders->create($buyer->id, $nextCart);
+            $first = $orders->create($buyer->id, $nextCart);
         }
         $orderIds = DB::table('tienda_pedidos')->where('user_id', $buyer->id)->pluck('id');
         DB::table('tienda_pedidos')->whereIn('id', $orderIds)->update(['expires_at' => now()->subMinute()]);
