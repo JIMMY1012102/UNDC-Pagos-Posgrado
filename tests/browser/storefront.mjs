@@ -214,7 +214,7 @@ async function responsiveLightHome(viewport) {
    await page.waitForFunction(value=>document.body.classList.contains('light-mode')===(value==='light'),value);
   }
   async function geometry(){return page.evaluate(()=>{
-   const selectors=['.site-header','#undc-track','.stage','.bg','.copy','.h1','.serif','#storeHeroSearch','.quick','.below','#tramites','#cuenta'];
+   const selectors=['.site-header','#undc-track','.stage','.bg','.copy','.h1','.serif','#storeHeroSearch','.quick','.below','#tramites'#cuenta];
    return Object.fromEntries(selectors.map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [selector,{x:r.x,y:r.y+scrollY,width:r.width,height:r.height,font:s.font,lineHeight:s.lineHeight,position:s.position,display:s.display}]}));
   });}
   await theme('dark');const dark=await geometry();
