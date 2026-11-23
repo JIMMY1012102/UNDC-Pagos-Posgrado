@@ -195,4 +195,49 @@ class AccountRegistrationTest extends TestCase
     }
 
 
+    public function test_complete_personal_profile_can_open_profile_form_and_guest_is_redirected(): void
+    {
+        $user = User::factory()->create();
+        app(BuyerProfileService::class)->save($user->id, [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+        ]);
+
+        $this->actingAs($user)->get('/tienda/perfil')->assertOk()
+            ->assertSee('PERFIL DEL COMPRADOR')
+            ->assertSee('value="Persona"', false)
+            ->assertSee('value="Prueba"', false);
+        auth()->logout();
+        $this->get('/tienda/perfil')->assertRedirect('/tienda/login');
+    }
+
+    public function test_password_login_with_complete_profile_still_redirects_to_cart(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'complete@example.test', 'password' => 'Demo-password-2026',
+        ]);
+        app(BuyerProfileService::class)->save($user->id, [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+        ]);
+
+        $this->post('/tienda/login', [
+            'email' => $user->email, 'password' => 'Demo-password-2026',
+        ])->assertRedirect('/tienda/carrito');
+    }
+
+    public function test_invalid_legacy_phone_message_is_used_by_registration_and_profile_form(): void
+    {
+        $message = 'El teléfono debe tener solo números (7 a 15 dígitos), sin el código de país. El código va en el campo «Código de país».';
+        $this->from('/tienda/registro')->post('/tienda/registro', array_merge($this->input(), [
+            'phone_country_code' => '+51', 'phone' => '98765abc1',
+        ]))->assertRedirect('/tienda/registro')->assertSessionHasErrors(['phone' => $message]);
+        $this->assertDatabaseCount('users', 0);
+
+        $user = User::factory()->create();
+        $this->actingAs($user)->from('/tienda/perfil')->post('/tienda/perfil', array_merge($this->input(), [
+            'phone_country_code' => '+51', 'phone' => '+34600123456',
+        ]))->assertRedirect('/tienda/perfil')->assertSessionHasErrors(['phone' => $message]);
+    }
+
 }

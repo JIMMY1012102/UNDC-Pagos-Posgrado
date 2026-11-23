@@ -594,4 +594,70 @@ class OrderFlowTest extends TestCase
     }
 
 
+    public function test_legacy_invalid_phone_blocks_enabled_checkout_but_not_disabled_checkout(): void
+    {
+        [$buyer, $cart] = $this->buyerCart();
+        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
+            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
+            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '+51 987 654 321',
+        ]);
+        $profiles = app(\App\Modules\Usuarios\Services\BuyerProfileService::class);
+        $this->assertTrue($profiles->isComplete($buyer->id));
+        $this->assertFalse($profiles->isCheckoutReady($buyer->id));
+
+        config(['payments.payme_enabled' => true]);
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.profile.0', 'Para continuar con el pago, completa tu dirección y teléfono (incluido el código de país) en tu perfil.');
+        $this->assertDatabaseCount('tienda_pedidos', 0);
+
+        config(['payments.payme_enabled' => false]);
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
+    }
+
+    public function test_correcting_legacy_phone_through_profile_api_enables_checkout_and_snapshots_normalized_number(): void
+    {
+        [$buyer, $cart] = $this->buyerCart();
+        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
+            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
+            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '+51 987 654 321',
+        ]);
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
+            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '+51 987 654 321',
+        ])->assertOk()->assertJsonPath('data.phone', '987654321');
+
+        $profiles = app(\App\Modules\Usuarios\Services\BuyerProfileService::class);
+        $this->assertTrue($profiles->isCheckoutReady($buyer->id));
+        config(['payments.payme_enabled' => true]);
+        $order = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated()->json('data');
+        $this->assertDatabaseHas('tienda_pedidos', [
+            'code' => $order['code'], 'buyer_phone_country_code' => '+51',
+            'buyer_phone' => '987654321', 'buyer_address_line_1' => 'Av. Prueba 123',
+        ]);
+    }
+
+    public function test_checkout_readiness_rejects_unknown_iso_country_inserted_directly(): void
+    {
+        [$buyer] = $this->buyerCart();
+        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
+            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
+            'country' => 'ZZ', 'phone_country_code' => '+51', 'phone' => '987654321',
+        ]);
+        $this->assertFalse(app(\App\Modules\Usuarios\Services\BuyerProfileService::class)->isCheckoutReady($buyer->id));
+    }
+
+    public function test_complete_personal_profile_without_address_can_open_profile_after_checkout_block(): void
+    {
+        config(['payments.payme_enabled' => true]);
+        [$buyer, $cart] = $this->buyerCart();
+        $this->assertTrue(app(\App\Modules\Usuarios\Services\BuyerProfileService::class)->isComplete($buyer->id));
+        $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.profile.0', 'Para continuar con el pago, completa tu dirección y teléfono (incluido el código de país) en tu perfil.');
+        $this->get('/tienda/perfil')->assertOk()->assertSee('PERFIL DEL COMPRADOR');
+    }
+
 }

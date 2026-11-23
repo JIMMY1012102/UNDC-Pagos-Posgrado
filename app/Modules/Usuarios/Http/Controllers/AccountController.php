@@ -29,7 +29,7 @@ final class AccountController extends Controller
         $data = $request->validate(array_merge(BuyerProfileRules::rules($request->all()), [
             'email' => ['required', 'email', 'max:254', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'max:128', 'confirmed', Password::min(12)],
-        ]));
+        ]), BuyerProfileRules::messages());
         $user = DB::transaction(function () use ($data, $profiles) {
             $user = User::query()->create([
                 'name' => mb_substr($data['first_names'].' '.$data['last_names'], 0, 255),
@@ -76,7 +76,7 @@ final class AccountController extends Controller
             return redirect('/tienda/login');
         }
         $request->merge(BuyerProfileRules::normalize($request->all()));
-        $data = $request->validate(BuyerProfileRules::rules($request->all()));
+        $data = $request->validate(BuyerProfileRules::rules($request->all()), BuyerProfileRules::messages());
         $profiles->save((int) $request->user()->id, array_merge($data, ['contact_email' => $request->user()->email]));
         $request->session()->forget('market_google_profile');
         return redirect('/tienda/carrito');
