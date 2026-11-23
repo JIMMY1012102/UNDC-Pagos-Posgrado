@@ -235,7 +235,7 @@
   </section>
 
   <!-- 3 · RESPALDO -->
-  <section class="sec" id="respaldo" data-rv="">
+  <section hidden class="sec" id="respaldo" data-rv="">
     <div class="orb" style="right:-220px;top:80px"></div>
     <div class="split">
       <div>
