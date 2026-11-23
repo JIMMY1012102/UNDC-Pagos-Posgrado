@@ -214,7 +214,7 @@ async function responsiveLightHome(viewport) {
    await page.waitForFunction(value=>document.body.classList.contains('light-mode')===(value==='light'),value);
   }
   async function geometry(){return page.evaluate(()=>{
-   const selectors=['.site-header','#hero','.market-hero-photo','.market-hero-content','#hero h1','.immersive-subtitle','#storeHeroSearch','.store-quick-links','#homeStory','.home-story-stage','.home-story-photo','.home-ending'];
+   const selectors=['.site-header','#undc-track','.stage','.bg','.copy','.h1','.serif','#storeHeroSearch','.quick','.below','#tramites','#cuenta','#respaldo'];
    return Object.fromEntries(selectors.map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [selector,{x:r.x,y:r.y+scrollY,width:r.width,height:r.height,font:s.font,lineHeight:s.lineHeight,position:s.position,display:s.display}]}));
   });}
   await theme('dark');const dark=await geometry();
@@ -224,7 +224,7 @@ async function responsiveLightHome(viewport) {
    for(const key of ['font','lineHeight','position','display'])assert.equal(light[selector][key],dark[selector][key],selector+' '+key);
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'Sin desbordamiento horizontal');
-  assert.equal(await page.locator('#hero h1').evaluate(e=>getComputedStyle(e).color),'rgb(10, 59, 34)');
+  assert.equal(await page.locator('.undc-hero-claro .h1').evaluate(e=>getComputedStyle(e).color),'rgb(11, 59, 36)');
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('light-mode')),true,'La preferencia clara debe persistir');
   assert.deepEqual(exceptions,[],'Sin errores JavaScript');

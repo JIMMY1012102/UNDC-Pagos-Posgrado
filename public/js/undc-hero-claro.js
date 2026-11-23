@@ -1,0 +1,13 @@
+(()=>{'use strict';
+const track=document.getElementById('undc-track');if(!track)return;
+const header=document.querySelector('.site-header');
+const setHeaderHeight=()=>{if(header)document.documentElement.style.setProperty('--market-header-height',header.getBoundingClientRect().height+'px');};
+let raf=0,tilted=null;
+const untilt=el=>{el.style.setProperty('--tx','0');el.style.setProperty('--ty','0');el.style.setProperty('--mx','.5');el.style.setProperty('--my','.5');};
+const sync=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;setHeaderHeight();const stage=track.querySelector('.stage');const rect=track.getBoundingClientRect();const dist=Math.max(1,track.offsetHeight-(stage?stage.offsetHeight:0));const p=Math.min(1,Math.max(0,-rect.top/dist));track.style.setProperty('--p',p.toFixed(4));track.setAttribute('data-scene',p<.26?'1':p<.51?'2':p<.76?'3':'4');const vh=window.innerHeight||800;document.querySelectorAll('.undc-hero-claro [data-rv]').forEach(el=>{const b=el.getBoundingClientRect();const d=Number(el.getAttribute('data-d'))||0;const v=(vh*.94-b.top-d*70)/(vh*.3);el.style.setProperty('--r',Math.min(1,Math.max(0,v)).toFixed(3));const c=(b.top+b.height/2-vh/2)/vh;el.style.setProperty('--c',Math.max(-1.5,Math.min(1.5,c)).toFixed(3));});});};
+const pointer=e=>{const el=e.target?.closest?.('.undc-hero-claro [data-tilt]');if(tilted&&tilted!==el)untilt(tilted);tilted=el;if(!el)return;const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/Math.max(1,r.width),y=(e.clientY-r.top)/Math.max(1,r.height);el.style.setProperty('--mx',x.toFixed(3));el.style.setProperty('--my',y.toFixed(3));el.style.setProperty('--tx',((x-.5)*2).toFixed(3));el.style.setProperty('--ty',((y-.5)*2).toFixed(3));};
+const pointerOut=e=>{if(!e.relatedTarget&&tilted){untilt(tilted);tilted=null;}};
+setHeaderHeight();
+if(header&&'ResizeObserver'in window)new ResizeObserver(()=>{setHeaderHeight();sync();}).observe(header);
+window.addEventListener('scroll',sync,{passive:true,capture:true});window.addEventListener('resize',sync,{passive:true});document.addEventListener('pointermove',pointer,{passive:true});document.addEventListener('pointerout',pointerOut);sync();
+})();
