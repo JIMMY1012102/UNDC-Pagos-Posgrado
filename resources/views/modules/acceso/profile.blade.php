@@ -1,5 +1,5 @@
 @extends('layouts.market')
-@section('title', 'COMPLETA TUS DATOS · UNDC MARKET')
+@section('title', 'PERFIL DEL COMPRADOR · UNDC MARKET')
 @section('marketPage', 'profile')
 @section('bodyClass', 'commerce-view market-login-view')
 @section('content')
@@ -17,12 +17,12 @@
 <input type="hidden" name="return_to" value="login">
 <button class="back" type="submit">← Regresar</button>
 </form>
-<div class="market-login-heading" style="padding-top:56px"><h1>COMPLETA TUS DATOS</h1></div>
+<div class="market-login-heading" style="padding-top:56px"><h1>PERFIL DEL COMPRADOR</h1></div>
 @include('modules.acceso.partials.errors')
 <form method="post" action="{{ route('tienda.perfil.store') }}">
 @csrf
 <div class="form-grid">
 @include('modules.acceso.partials.profile-fields')
-<div class="field"><label for="account_email">Correo de tu cuenta</label><input id="account_email" type="email" value="{{ auth()->user()->email }}" readonly></div></div><button type="submit" class="btn block" style="margin-top:24px">Guardar y continuar →</button>
+<div class="field"><label for="account_email">Correo de tu cuenta</label><input id="account_email" type="email" value="{{ auth()->user()->email }}" readonly></div></div><button type="submit" class="btn block" style="margin-top:24px">Guardar perfil →</button>
 </form></div></div></section>
 @endsection
