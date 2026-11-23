@@ -64,9 +64,6 @@ final class AccountController extends Controller
         if (! $request->user()) {
             return redirect('/tienda/login');
         }
-        if ($profiles->isComplete((int) $request->user()->id)) {
-            return redirect('/tienda/carrito');
-        }
         // Only provider-verified server-side session data is used for prefilling.
         $profile = array_merge($request->session()->get('market_google_profile', []),
             array_filter($profiles->find((int) $request->user()->id) ?? [], fn ($value) => filled($value)));
