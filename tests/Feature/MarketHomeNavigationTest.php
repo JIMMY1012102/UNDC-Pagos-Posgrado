@@ -10,9 +10,8 @@ class MarketHomeNavigationTest extends TestCase
     {
         $this->get('/tienda')->assertOk()
             ->assertSee('id="marketHome"', false)
-            ->assertDontSee('Elige, revisa y paga tu pedido')
-            ->assertDontSee('Respaldo institucional')
-            ->assertDontSee('Tu próximo');
+            ->assertSee('Elige, revisa y paga tu pedido')
+            ->assertSee('id="homeStory"', false);
     }
 
     public function test_catalogue_is_a_separate_screen(): void
