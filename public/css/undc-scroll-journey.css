@@ -333,3 +333,171 @@ button{font-family:inherit}
   .sway,.fl3,.sk,.tlist,.topo,.orbit,.oc .pl,.idc::after,.seal svg.t,.nd2.last u::after,.status i,.badge2,.next i svg,.sbox u{animation:none !important}
   .rv,.rvh,.rvx,.z{transform:none !important;scale:none !important;filter:none !important}
 }
+
+
+/* ---- Escala compacta del home: proporciones de escritorio y ajustes responsive ---- */
+:root {
+  --sh: clamp(600px, calc(100svh - 48px), 720px);
+}
+
+.hdr {
+  height: 72px;
+  padding-inline: clamp(20px, 3.2vw, 48px);
+  gap: 18px;
+}
+.brand { gap: 10px; }
+.logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  font-size: 18px;
+}
+.brand b { font-size: 23px; }
+.nav { gap: clamp(14px, 1.65vw, 24px); }
+.nav a { font-size: 14px; gap: 6px; }
+.tools { gap: 12px; }
+.es {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.cart {
+  height: 42px;
+  gap: 9px;
+  padding: 0 16px 0 10px;
+  font-size: 14px;
+}
+.cart i {
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+}
+.login { gap: 7px; font-size: 14px; }
+.login svg { width: 19px; height: 19px; }
+
+.copy {
+  max-width: 1080px;
+  height: 100%;
+  margin-top: 0;
+}
+.col { padding: 82px 24px 76px; }
+.tag {
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  letter-spacing: .16em;
+}
+.tag i { width: 7px; height: 7px; }
+.h1,.h2 {
+  font-size: clamp(40px, 4.2vw, 60px);
+  line-height: .98;
+}
+.serif {
+  margin-top: 10px;
+  font-size: clamp(36px, 3.8vw, 52px);
+  line-height: 1;
+}
+.lead {
+  max-width: 520px;
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.search {
+  max-width: 640px;
+  height: 52px;
+  margin-top: 20px;
+  gap: 10px;
+  padding: 0 8px 0 18px;
+  border-width: 1.5px;
+}
+.search input { font-size: 16px; }
+.go { width: 38px; height: 38px; }
+.quick {
+  gap: 8px 24px;
+  margin-top: 14px;
+}
+.quick a { font-size: 14px; text-underline-offset: 4px; }
+.btns { gap: 12px; margin-top: 24px; }
+.b-main,.b-ghost {
+  height: 46px;
+  gap: 10px;
+  padding-inline: 18px;
+  font-size: 15px;
+}
+.b-main { padding-right: 10px; }
+.b-main i { width: 28px; height: 28px; }
+.progin { padding: 0 40px 20px; gap: 18px; }
+.cnt { font-size: 12px; }
+.hint { font-size: 12px; }
+.hint i { width: 32px; height: 32px; }
+.bar { width: 44px; }
+
+@media (min-width: 901px) and (max-height: 700px) {
+  :root { --sh: 640px; }
+  .col { padding-top: 72px; padding-bottom: 68px; }
+  .tag { margin-bottom: 12px; }
+  .lead { margin-top: 12px; }
+  .search { margin-top: 16px; }
+  .quick { margin-top: 10px; }
+}
+
+@media (max-width: 900px) {
+  :root { --sh: clamp(600px, calc(100svh - 24px), 700px); }
+  .hdr { height: 68px; padding-inline: 18px; gap: 12px; }
+  .brand b { font-size: 21px; }
+  .logo { width: 36px; height: 36px; font-size: 17px; }
+  .nav { display: none; }
+  .es { display: inline-flex; align-items: center; justify-content: center; }
+  .login span { display: inline; }
+  .cart { height: 40px; font-size: 13px; padding-inline: 9px 12px; }
+  .login { font-size: 13px; }
+  .col { padding: 76px 20px 72px; }
+  .h1,.h2 { font-size: clamp(38px, 6vw, 50px); }
+  .serif { font-size: clamp(34px, 5vw, 42px); }
+  .lead { max-width: 500px; font-size: 15px; }
+  .search { max-width: min(100%, 560px); height: 50px; margin-top: 18px; }
+  .search input { font-size: 15px; }
+  .go { width: 36px; height: 36px; }
+  .quick { display: flex; gap: 8px 20px; margin-top: 12px; }
+  .quick a { font-size: 14px; }
+  .b-main,.b-ghost { height: 44px; font-size: 14px; }
+  .progin { padding: 0 20px 16px; }
+  .bar { width: 34px; }
+  .journey { padding: 80px 20px 0; }
+  .jsec { padding: 80px 20px 0; }
+}
+
+@media (max-width: 600px) {
+  :root { --sh: max(600px, 100svh); }
+  .hdr { height: 64px; padding-inline: 14px; gap: 8px; }
+  .brand { gap: 7px; }
+  .brand b { font-size: 17px; }
+  .logo { width: 32px; height: 32px; border-radius: 9px; font-size: 15px; }
+  .tools { gap: 7px; }
+  .es { width: 34px; height: 34px; font-size: 12px; }
+  .cart { height: 36px; gap: 6px; padding: 0 9px; font-size: 12px; }
+  .cart i { width: 21px; height: 21px; font-size: 11px; }
+  .login { gap: 0; }
+  .login span { display: none; }
+  .login svg { width: 20px; height: 20px; }
+  .col { padding: 72px 16px 70px; }
+  .tag { margin-bottom: 12px; font-size: 10px; }
+  .h1,.h2 { font-size: clamp(32px, 8.8vw, 38px); }
+  .serif { margin-top: 8px; font-size: clamp(30px, 8vw, 34px); }
+  .lead { max-width: 340px; margin-top: 12px; font-size: 14px; line-height: 1.4; }
+  .search { height: 48px; margin-top: 16px; padding-left: 14px; gap: 8px; }
+  .search input { font-size: 14px; }
+  .search svg { width: 19px; height: 19px; }
+  .go { width: 34px; height: 34px; }
+  .quick { gap: 7px 15px; margin-top: 10px; }
+  .quick a { font-size: 12px; text-underline-offset: 3px; }
+  .btns { gap: 8px; margin-top: 18px; }
+  .b-main,.b-ghost { height: 40px; padding-inline: 12px; font-size: 12px; }
+  .b-main i { width: 24px; height: 24px; }
+  .progin { padding: 0 14px 14px; gap: 10px; }
+  .cnt { width: 54px; font-size: 11px; }
+  .bars { gap: 5px; }
+  .bar { width: 22px; height: 3px; }
+}
