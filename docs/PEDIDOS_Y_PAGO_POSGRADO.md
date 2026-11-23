@@ -40,9 +40,8 @@ La operación es transaccional y los reintentos devuelven el mismo carrito mient
 `PricingPolicy` identifica los precios como oficiales y separa el flag de cobro. El catálogo informa `orderable` y su motivo; agregar al carrito utiliza la misma cotización que generar pedidos. La vinculación fusiona conceptos/beneficiarios iguales sin superar 20 unidades; ante exceso responde 422 y revierte toda la fusión. La base garantiza un carrito activo por usuario y un pedido por carrito. Consultar [revisión previa a Pay-me](REVISION_PRE_PAYME.md) para migración, duplicados existentes y cron.
 
 
+## Datos de facturación del comprador
 - La ruta `/tienda/perfil` muestra el formulario también a compradores cuyo perfil personal ya está completo: permite completar o corregir la dirección y el teléfono exigidos al cobrar, sin devolverlos al carrito.
-
-## Datos de facturación del comprador\n
 - En la creación del pedido, cuando `PAYME_ENABLED=true`, se exige dirección y teléfono del comprador y se guarda su instantánea. Mientras el cobro esté deshabilitado, estos datos son opcionales y la instantánea puede quedar en `NULL`.
 - **Pendiente para Fase 3/5:** al iniciar el pago se rechazará cualquier pedido cuya instantánea no contenga dirección y teléfono completos; no basta con que el perfil actual se haya completado después de generar el pedido.
 - **Pendiente de confirmar con Alignet:** longitudes máximas admitidas para `line_1`, `city` y `state`; los límites actuales son provisionales.
