@@ -67,7 +67,7 @@ class AccountRegistrationTest extends TestCase
             ->assertRedirect('/tienda/perfil');
         $this->assertAuthenticatedAs($user);
         $this->post('/tienda/perfil', $this->input())->assertRedirect('/tienda/carrito');
-        $this->get('/tienda/perfil')->assertRedirect('/tienda/carrito');
+        $this->get('/tienda/perfil')->assertOk()->assertSee('PERFIL DEL COMPRADOR');
     }
 
     public function test_profile_form_prefills_trusted_google_names_and_account_email(): void
@@ -166,4 +166,33 @@ class AccountRegistrationTest extends TestCase
             ]))->assertRedirect('/tienda/perfil')->assertSessionHasErrors($field);
         $this->assertDatabaseCount('tienda_perfiles_compradores', 0);
     }
+    public function test_complete_buyer_can_edit_address_and_phone_from_profile_page(): void
+    {
+        $user = User::factory()->create();
+        app(BuyerProfileService::class)->save($user->id, [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+        ]);
+
+        $this->actingAs($user)->get('/tienda/perfil')
+            ->assertOk()->assertSee('Dirección')->assertSee('Referencia (opcional)')
+            ->assertSee('Ciudad')->assertSee('Departamento / región')
+            ->assertSee('País')->assertSee('Código de país')->assertSee('Teléfono');
+
+        $this->post('/tienda/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+            'phone_country_code' => '+51', 'phone' => '987654321',
+            'line_1' => 'Av. Ejemplo 123', 'line_2' => 'Dpto. 402',
+            'city' => 'Mala', 'state' => 'Lima', 'country' => 'pe',
+        ])->assertRedirect('/tienda/carrito');
+
+        $this->assertDatabaseHas('tienda_perfiles_compradores', [
+            'user_id' => $user->id, 'line_1' => 'Av. Ejemplo 123',
+            'line_2' => 'Dpto. 402', 'city' => 'Mala', 'state' => 'Lima',
+            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '987654321',
+        ]);
+    }
+
+
 }
