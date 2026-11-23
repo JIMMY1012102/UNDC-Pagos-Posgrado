@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Modules\\Usuarios\\Validation;
+namespace App\Modules\Usuarios\Validation;
 
-use Illuminate\\Validation\\Rule;
+use Illuminate\Validation\Rule;
 
 final class BuyerProfileRules
 {
@@ -34,7 +34,7 @@ final class BuyerProfileRules
             'document_type' => ['required', 'string', Rule::in(['DNI', 'CE', 'PASAPORTE'])],
             'document_number' => ['required', 'string', 'regex:'.$format],
             'phone' => ['nullable', 'string', 'regex:/^[0-9]{7,15}$/D'],
-            'phone_country_code' => ['nullable', 'string', 'regex:/^\\+[1-9][0-9]{0,3}$/D', 'max:5'],
+            'phone_country_code' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{0,3}$/D', 'max:5'],
             'line_1' => ['nullable', 'string', 'max:255'],
             'line_2' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:120'],
