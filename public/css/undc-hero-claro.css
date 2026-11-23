@@ -5,7 +5,7 @@
 .undc-hero-claro button{font-family:inherit}
 
 .undc-hero-claro /* ---- scroll mechanics: --p (0..1) is written by the script below ---- */
-.track{--p:0;position:relative;height:calc(var(--sh) + 1900px)}
+.track{--p:0;position:relative;height:calc(var(--sh) + 1900px - var(--market-header-height,0px))}
 .undc-hero-claro .stage{position:sticky;top:var(--market-header-height,0px);z-index:10;height:calc(var(--sh) - var(--market-header-height,0px));overflow:hidden;background:#f4f8f1;isolation:isolate}
 
 .undc-hero-claro .fx{opacity:min(var(--in,1),var(--out,1));transform:translateY(calc((1 - var(--in,1)) * 36px - (1 - var(--out,1)) * 36px));visibility:hidden}
