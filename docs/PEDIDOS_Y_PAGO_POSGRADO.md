@@ -38,3 +38,10 @@ La operación es transaccional y los reintentos devuelven el mismo carrito mient
 ## Consistencia y unicidad
 
 `PricingPolicy` identifica los precios como oficiales y separa el flag de cobro. El catálogo informa `orderable` y su motivo; agregar al carrito utiliza la misma cotización que generar pedidos. La vinculación fusiona conceptos/beneficiarios iguales sin superar 20 unidades; ante exceso responde 422 y revierte toda la fusión. La base garantiza un carrito activo por usuario y un pedido por carrito. Consultar [revisión previa a Pay-me](REVISION_PRE_PAYME.md) para migración, duplicados existentes y cron.
+
+
+## Pendientes de seguridad y conciliación Pay-me
+
+- En Fase 3 debe definirse la política para intentos abandonados en estado `initiated`: consultar Pay-me antes de cerrarlos, y mantener el estado incierto si la consulta no permite confirmar el resultado.
+- Debe definirse con Tesorería el tratamiento de `EXTORNADO` cuando el pedido ya está pagado. No revertir automáticamente el pedido ni eliminar la aplicación sin conciliación y decisión explícita.
+- Solo el manejador que verifica servidor-servidor puede escribir `verified_at` y `verification_source`; se debe encapsular y probar esa autoridad en el núcleo de pagos.

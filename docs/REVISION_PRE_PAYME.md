@@ -14,3 +14,10 @@ La nueva migración debe revisarse y aplicarse de manera coordinada al desplegar
 No se elimina ninguna tabla: la revisión recibida no identifica cuál sería prescindible y borrar estructura de pagos/tesorería excedería estos cinco ajustes.
 
 La FK de propietario del carrito usa RESTRICT en MariaDB/MySQL para permitir la columna generada persistente. No se permite borrar una cuenta con carritos asociados; la reversión restaura SET NULL después de quitar la columna generada.
+
+
+## Pendientes de diseño y seguridad para la integración
+
+1. **Vencimiento de intentos abandonados en `initiated` (Fase 3):** definir plazo, reintentos y conciliación. Antes de cerrar un intento por abandono debe consultarse Pay-me servidor-servidor; un timeout local no demuestra que no exista un cargo. Si la consulta no resuelve el estado, conservarlo como incierto y mantener el pedido en revisión.
+2. **`EXTORNADO` después de un pedido pagado:** definir el flujo de reversión/compensación, conciliación con Tesorería, trazabilidad y estado visible. No revertir automáticamente `paid`, borrar la aplicación ni asumir que un extorno equivale a un reembolso completado.
+3. **Autoridad para evidencia de verificación:** únicamente el manejador que completa la consulta/verificación servidor-servidor podrá escribir `verified_at` y `verification_source`. Callbacks del navegador, formularios, jobs genéricos y escrituras administrativas no deben poder establecer esos campos. En Fase 3 se debe encapsular la escritura en el verificador y probar que ninguna ruta alternativa puede acreditar pagos.

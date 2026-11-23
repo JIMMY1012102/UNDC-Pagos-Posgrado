@@ -7,4 +7,5 @@ enum IncidentKind: string
     case DuplicateCharge = 'duplicate_charge';
     case Uncertain = 'uncertain';
     case Mismatch = 'mismatch';
+    case LatePayment = 'late_payment';
 }

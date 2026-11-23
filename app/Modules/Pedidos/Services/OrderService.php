@@ -163,11 +163,13 @@ final class OrderService
         return $this->present($order);
     }
 
-    private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null): array
+    private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null, ?bool $hasUnresolvedPayment = null): array
     {
-        $status = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
-            && $order->expires_at !== null && now()->gte($order->expires_at)
-            ? 'expired' : $order->status;
+        $isPastExpiry = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
+            && $order->expires_at !== null && now()->gte($order->expires_at);
+        $status = $isPastExpiry
+            ? (($hasUnresolvedPayment ?? $this->payments->hasUnresolvedPayment((int) $order->id)) ? 'payment_in_review' : 'expired')
+            : $order->status;
 
         return [
             'code' => $order->code, 'status' => $status, 'currency' => $order->currency,
@@ -194,10 +196,14 @@ final class OrderService
         $items = DB::table('tienda_detalles_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
         $history = DB::table('tienda_historial_estados_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
         $blocked = $this->payments->blockedOrderIds($ids);
+        $expiredPendingIds = $orders->filter(fn ($order) => $order->status === 'pending'
+            && $order->paid_at === null && $order->confirmed_at === null
+            && $order->expires_at !== null && now()->gte($order->expires_at))->pluck('id')->all();
+        $unresolved = $this->payments->unresolvedOrderIds($expiredPendingIds);
         return ['items' => $orders->map(fn ($order) => $this->present($order,
             ($items->get($order->id) ?? collect())->map(fn ($line) => (object) collect((array) $line)->only(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all())->all(),
             ($history->get($order->id) ?? collect())->map(fn ($event) => (object) collect((array) $event)->only(['to_status', 'reason', 'occurred_at'])->all())->all(),
-            ! in_array($order->id, $blocked)))->all(), 'page' => $page, 'has_more' => $hasMore];
+            ! in_array($order->id, $blocked), in_array($order->id, $unresolved)))->all(), 'page' => $page, 'has_more' => $hasMore];
     }
 
     /** Bounded transactions preserve one immutable event per expiry. */
@@ -207,9 +213,11 @@ final class OrderService
         do {
             $changed = DB::transaction(function () use ($userId): int {
                 $now = now();
-                $ids = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
+                $query = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
                     ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
-                    ->where('expires_at', '<=', $now)->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
+                    ->where('expires_at', '<=', $now);
+                $ids = $this->payments->excludeOrdersWithUnresolvedPayments($query)
+                    ->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
                 if ($ids->isEmpty()) return 0;
                 DB::table('tienda_pedidos')->whereIn('id', $ids)->update(['status' => 'expired', 'updated_at' => $now]);
                 DB::table('tienda_historial_estados_pedido')->insert($ids->map(fn ($id) => [
