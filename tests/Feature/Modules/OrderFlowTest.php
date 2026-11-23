@@ -556,7 +556,7 @@ class OrderFlowTest extends TestCase
             'buyer_address_line_1' => null,
             'buyer_address_city' => null,
             'buyer_address_state' => null,
-            'buyer_address_country' => null,
+            'buyer_address_country' => 'PE',
         ]);
     }
 
