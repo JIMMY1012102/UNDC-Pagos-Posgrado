@@ -8,7 +8,13 @@
 <div class="field"><label for="lastNames">Apellidos *</label><input id="lastNames" name="last_names" required maxlength="160" autocomplete="family-name"></div>
 <div class="field"><label for="docType">Tipo de documento *</label><select id="docType" name="document_type" required><option value="DNI">DNI</option><option value="CE">Carné de extranjería</option><option value="PASAPORTE">Pasaporte</option></select></div>
 <div class="field"><label for="docNumber">Número de documento *</label><input id="docNumber" name="document_number" required maxlength="32"></div>
-<div class="field"><label for="phone">Teléfono</label><input id="phone" name="phone" autocomplete="tel" maxlength="30"></div>
+<div class="field"><label for="phoneCountryCode">Código de país</label><input id="phoneCountryCode" name="phone_country_code" value="+51" maxlength="5" autocomplete="tel-country-code"></div>
+<div class="field"><label for="phone">Teléfono</label><input id="phone" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="15"></div>
+<div class="field"><label for="line1">Dirección</label><input id="line1" name="line_1" maxlength="255" autocomplete="address-line1"></div>
+<div class="field"><label for="line2">Referencia (opcional)</label><input id="line2" name="line_2" maxlength="255" autocomplete="address-line2"></div>
+<div class="field"><label for="city">Ciudad</label><input id="city" name="city" maxlength="120" autocomplete="address-level2"></div>
+<div class="field"><label for="state">Departamento / región</label><input id="state" name="state" maxlength="120" autocomplete="address-level1"></div>
+<div class="field"><label for="country">País</label><input id="country" name="country" value="PE" maxlength="2" autocomplete="country" autocapitalize="characters"></div>
 <div class="field"><label for="email">Correo de contacto</label><input id="email" name="contact_email" type="email" autocomplete="email" maxlength="254"></div>
 </div><button type="submit" class="btn block" style="margin-top:24px">Guardar y continuar →</button></form></div></div>
 </section>
