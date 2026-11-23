@@ -142,7 +142,7 @@ class BuyerProfileApiTest extends TestCase
             ->assertJsonPath('errors.phone.0', $message);
         $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '98765abc1'])
             ->assertUnprocessable()->assertJsonPath('errors.phone.0', $message);
-        $this->putJson('/api/v1/acceso/perfil', $base + ['phone' => '987654321', 'phone_country_code' => '+0'])
+        $this->putJson('/api/v1/acceso/perfil', array_merge($base, ['phone' => '987654321', 'phone_country_code' => '+0']))
             ->assertUnprocessable()
             ->assertJsonPath('errors.phone_country_code.0', 'El código de país debe tener el formato +51.');
     }
