@@ -53,6 +53,10 @@ final class OrderService
             if (! $this->profiles->isComplete($userId)) {
                 throw ValidationException::withMessages(['profile' => 'Completa tus datos antes de generar el pedido.']);
             }
+            $checkoutEnabled = PricingPolicy::status()['checkout_enabled'];
+            if ($checkoutEnabled && ! $this->profiles->isCheckoutReady($userId)) {
+                throw ValidationException::withMessages(['profile' => 'Para continuar con el pago, completa tu dirección y teléfono (incluido el código de país) en tu perfil.']);
+            }
             $quote = $this->quote($userId, $cartId);
             $profile = $this->profiles->find($userId);
             $email = $profile['contact_email'] ?: DB::table('users')->where('id', $userId)->value('email');
@@ -64,6 +68,12 @@ final class OrderService
                 'buyer_first_names' => $profile['first_names'], 'buyer_last_names' => $profile['last_names'],
                 'buyer_document_type' => $profile['document_type'], 'buyer_document_number' => $profile['document_number'],
                 'buyer_email' => $email, 'buyer_phone' => $profile['phone'],
+                'buyer_phone_country_code' => $profile['phone_country_code'] ?? null,
+                'buyer_address_line_1' => $profile['line_1'] ?? null,
+                'buyer_address_line_2' => $profile['line_2'] ?? null,
+                'buyer_address_city' => $profile['city'] ?? null,
+                'buyer_address_state' => $profile['state'] ?? null,
+                'buyer_address_country' => $profile['country'] ?? null,
                 'expires_at' => $now->copy()->addHours(24), 'created_at' => $now, 'updated_at' => $now,
             ]);
             foreach ($quote['items'] as $line) {

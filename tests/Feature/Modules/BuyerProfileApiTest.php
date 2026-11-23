@@ -85,4 +85,38 @@ class BuyerProfileApiTest extends TestCase
             'user_id' => $buyer->id, 'document_type' => $expectedType, 'document_number' => $expectedNumber,
         ]);
     }
+    public function test_address_and_phone_fields_are_saved_normalized_and_returned_by_profile_api(): void
+    {
+        $buyer = User::factory()->create();
+        $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+            'phone' => '987654321', 'phone_country_code' => '+51',
+            'line_1' => 'Av. Ejemplo 123', 'line_2' => 'Dpto. 402',
+            'city' => 'Mala', 'state' => 'Lima', 'country' => 'pe',
+        ])->assertOk()
+            ->assertJsonPath('data.line_1', 'Av. Ejemplo 123')
+            ->assertJsonPath('data.line_2', 'Dpto. 402')
+            ->assertJsonPath('data.city', 'Mala')
+            ->assertJsonPath('data.state', 'Lima')
+            ->assertJsonPath('data.country', 'PE')
+            ->assertJsonPath('data.phone_country_code', '+51')
+            ->assertJsonPath('data.phone', '987654321');
+
+        $this->getJson('/api/v1/acceso/perfil')->assertOk()
+            ->assertJsonPath('data.line_1', 'Av. Ejemplo 123')
+            ->assertJsonPath('data.country', 'PE')
+            ->assertJsonPath('data.phone_country_code', '+51');
+    }
+
+    public function test_invalid_iso_country_and_non_numeric_phone_are_rejected(): void
+    {
+        $this->actingAs(User::factory()->create())->putJson('/api/v1/acceso/perfil', [
+            'first_names' => 'Persona', 'last_names' => 'Prueba',
+            'document_type' => 'DNI', 'document_number' => '00000000',
+            'phone' => '98ABC4321', 'country' => 'XX',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['phone', 'country']);
+    }
+
+
 }
