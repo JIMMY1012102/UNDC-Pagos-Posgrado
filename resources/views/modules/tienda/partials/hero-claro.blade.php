@@ -52,7 +52,7 @@
             <a class="b-main" href="/tienda/carrito">Ir a mi carrito
               <i><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"></path></svg></i>
             </a>
-            <a class="b-ghost" href="/tienda#respaldo">Ayuda
+            <a class="b-ghost" href="/tienda/mis-pedidos">Mis pedidos
               <svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg>
             </a>
           </div>
@@ -234,65 +234,6 @@
     </div>
   </section>
 
-  <!-- 3 · RESPALDO -->
-  <section class="sec" id="respaldo" data-rv="">
-    <div class="orb" style="right:-220px;top:80px"></div>
-    <div class="split">
-      <div>
-        <div class="doc rv" data-rv="" data-tilt="" aria-hidden="true">
-          <div class="inner4"><div class="scene"><div class="sway">
-            <div class="z" style="--z:10px;--par:-12px;left:120px;top:32px">
-              <div class="sheet">
-                <div class="hd"><u>U</u>CONSTANCIA</div>
-                <div class="sb">Posgrado · UNDC</div>
-                <div class="l sk" style="margin-top:20px;width:90%"></div>
-                <div class="l sk" style="width:100%"></div>
-                <div class="l sk" style="width:76%"></div>
-                <div class="l sk" style="width:92%"></div>
-                <div class="num">N.º [código]</div>
-                <svg class="sig" sc-camel-view-box="0 0 110 34"><path sc-camel-path-length="1" d="M4 24C14 4 22 4 20 20C18 32 30 8 38 18C44 26 52 22 60 16C70 8 80 22 106 14" fill="none" stroke="#2f5a49" stroke-width="2" stroke-linecap="round"></path></svg>
-              </div>
-            </div>
-            <div class="z" style="--z:90px;--par:-34px;left:268px;top:196px"><div class="seal">
-              <div class="disc"></div>
-              <svg class="t" sc-camel-view-box="0 0 128 128"><defs><path id="sealp" d="M64 64 m-47 0 a47 47 0 1 1 94 0 a47 47 0 1 1 -94 0"></path></defs><text font-family="Inter Tight, sans-serif" font-weight="700" font-size="9.5" letter-spacing="2" fill="#d5f23a"><textPath href="#sealp" sc-camel-text-length="288" sc-camel-length-adjust="spacing">TESORERÍA · UNDC · VALIDADO · </textPath></text></svg>
-              <div class="ck"><svg width="26" height="26" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
-            </div></div>
-            <div class="z" style="--z:130px;--par:-48px;left:352px;top:62px"><div class="fl3 vchip"><b><svg width="14" height="14" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></b>Validado por Tesorería</div></div>
-          </div></div></div>
-        </div>
-        <div class="capt rvx" data-rv="">Tesorería valida cada pago</div>
-      </div>
 
-      <div>
-        <div class="rvh" data-rv="">
-          <div class="k">Respaldo institucional</div>
-          <h2 class="sh2" style="margin-bottom:40px">Hecho para<em>tu universidad.</em></h2>
-        </div>
-        <div class="feats">
-          <div class="ft rvx" data-rv="" data-d="0">
-            <span class="n">01</span>
-            <div><h4>Catálogo oficial</h4><p>Conceptos y oficinas tomados de SISPAGOS, el sistema de pagos de la universidad.</p></div>
-            <span class="ck"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-path-length="1" d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
-          </div>
-          <div class="ft rvx" data-rv="" data-d="1">
-            <span class="n">02</span>
-            <div><h4>Cuenta de comprador</h4><p>Registro, perfil e inicio de sesión con correo o con Google.</p></div>
-            <span class="ck"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-path-length="1" d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
-          </div>
-          <div class="ft rvx" data-rv="" data-d="2">
-            <span class="n">03</span>
-            <div><h4>Resumen antes de pagar</h4><p>Revisa tu carrito completo. Los importes se confirman con las tarifas aprobadas.</p></div>
-            <span class="ck"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-path-length="1" d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
-          </div>
-          <div class="ft rvx" data-rv="" data-d="3">
-            <span class="n">04</span>
-            <div><h4>Tesorería a cargo</h4><p>Conciliación, validación de pagos y constancias a cargo de la oficina de Tesorería.</p></div>
-            <span class="ck"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-path-length="1" d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </div>
 </div>
