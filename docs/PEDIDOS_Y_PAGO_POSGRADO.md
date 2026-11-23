@@ -40,7 +40,12 @@ La operación es transaccional y los reintentos devuelven el mismo carrito mient
 `PricingPolicy` identifica los precios como oficiales y separa el flag de cobro. El catálogo informa `orderable` y su motivo; agregar al carrito utiliza la misma cotización que generar pedidos. La vinculación fusiona conceptos/beneficiarios iguales sin superar 20 unidades; ante exceso responde 422 y revierte toda la fusión. La base garantiza un carrito activo por usuario y un pedido por carrito. Consultar [revisión previa a Pay-me](REVISION_PRE_PAYME.md) para migración, duplicados existentes y cron.
 
 
-## Pendientes de seguridad y conciliación Pay-me
+## Datos de facturación del comprador\n
+- En la creación del pedido, cuando `PAYME_ENABLED=true`, se exige dirección y teléfono del comprador y se guarda su instantánea. Mientras el cobro esté deshabilitado, estos datos son opcionales y la instantánea puede quedar en `NULL`.
+- **Pendiente para Fase 3/5:** al iniciar el pago se rechazará cualquier pedido cuya instantánea no contenga dirección y teléfono completos; no basta con que el perfil actual se haya completado después de generar el pedido.
+- **Pendiente de confirmar con Alignet:** longitudes máximas admitidas para `line_1`, `city` y `state`; los límites actuales son provisionales.
+- **Seguridad:** no registrar dirección, referencia, ciudad, región, país, código de país ni teléfono en logs, trazas o mensajes de diagnóstico.
+\n## Pendientes de seguridad y conciliación Pay-me
 
 - En Fase 3 debe definirse la política para intentos abandonados en estado `initiated`: consultar Pay-me antes de cerrarlos, y mantener el estado incierto si la consulta no permite confirmar el resultado.
 - Debe definirse con Tesorería el tratamiento de `EXTORNADO` cuando el pedido ya está pagado. No revertir automáticamente el pedido ni eliminar la aplicación sin conciliación y decisión explícita.
