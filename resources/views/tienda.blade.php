@@ -3,7 +3,7 @@
 @section('bodyClass', ($isMarketHome ?? true) ? 'market-discovery-home' : '')
 @section('heroes')
 @if($isMarketHome ?? true)
-@include('modules.tienda.partials.heroes')
+@include('modules.tienda.partials.hero-claro')
 @endif
 @endsection
 @section('content')
