@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Modules\Usuarios\Services;
+namespace App\\Modules\\Usuarios\\Services;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\\Support\\Facades\\DB;
 
 final class BuyerProfileService
 {
@@ -23,19 +23,26 @@ final class BuyerProfileService
                 ->every(static fn (string $key): bool => filled($profile[$key] ?? null));
     }
 
-    /** @param array<string,string|null> $input
-     *  @return array<string,mixed>
-     */
+    /** Checkout-only readiness. Deliberately does not alter the registration completeness contract. */
+    public function isCheckoutReady(int $userId): bool
+    {
+        $profile = $this->find($userId);
+
+        return $profile !== null
+            && collect(['line_1', 'city', 'state', 'country', 'phone_country_code', 'phone'])
+                ->every(static fn (string $key): bool => filled($profile[$key] ?? null));
+    }
+
+    /** @param array<string,string|null> $input @return array<string,mixed> */
     public function save(int $userId, array $input): array
     {
         return DB::transaction(function () use ($userId, $input): array {
-            // Never accept user_id, privilege flags or verified status from JSON.
             $profile = DB::table('tienda_perfiles_compradores')
                 ->where('user_id', $userId)->lockForUpdate()->first();
 
             $data = array_intersect_key($input, array_flip([
                 'first_names','last_names','document_type','document_number',
-                'phone','contact_email',
+                'phone','contact_email','line_1','line_2','city','state','country','phone_country_code',
             ]));
 
             if ($profile === null) {
@@ -61,6 +68,12 @@ final class BuyerProfileService
             'document_number' => $profile->document_number,
             'phone' => $profile->phone,
             'contact_email' => $profile->contact_email,
+            'line_1' => $profile->line_1,
+            'line_2' => $profile->line_2,
+            'city' => $profile->city,
+            'state' => $profile->state,
+            'country' => $profile->country,
+            'phone_country_code' => $profile->phone_country_code,
             'identity_verified' => false,
             'student_status_verified' => false,
         ];
