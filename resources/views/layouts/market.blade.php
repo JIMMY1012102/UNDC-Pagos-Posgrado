@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}?v={{ filemtime(public_path('css/undc-tienda.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/undc-orders.css') }}?v={{ filemtime(public_path('css/undc-orders.css')) }}">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/undc-hero-claro.css') }}?v={{ filemtime(public_path('css/undc-hero-claro.css')) }}">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/undc-scroll-journey.css') }}?v={{ filemtime(public_path('css/undc-scroll-journey.css')) }}">
 </head>
 @php($showSocialRail = trim($__env->yieldContent('marketPage', 'catalog')) === 'catalog')
 <body class="{{ $showSocialRail ? 'market-with-social-rail' : '' }} @yield('bodyClass')" data-market-page="@yield('marketPage', 'catalog')">
@@ -26,7 +26,7 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="{{ asset('js/undc-tienda.js') }}?v={{ filemtime(public_path('js/undc-tienda.js')) }}" defer></script>
 <script src="{{ asset('js/undc-hero.js') }}?v={{ filemtime(public_path('js/undc-hero.js')) }}" defer></script>
-<script src="{{ asset('js/undc-hero-claro.js') }}?v={{ filemtime(public_path('js/undc-hero-claro.js')) }}" defer></script>
+<script src="{{ asset('js/undc-scroll-journey.js') }}?v={{ filemtime(public_path('js/undc-scroll-journey.js')) }}" defer></script>
 </body></html>
 
 
