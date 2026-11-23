@@ -1,6 +1,6 @@
 @extends('layouts.market')
 @section('marketPage', 'catalog')
-@section('bodyClass', ($isMarketHome ?? true) ? 'market-discovery-home' : '')
+@section('bodyClass', ($isMarketHome ?? true) ? 'market-discovery-home market-journey-page' : '')
 @section('heroes')
 @if($isMarketHome ?? true)
 @include('modules.tienda.partials.hero-claro')
