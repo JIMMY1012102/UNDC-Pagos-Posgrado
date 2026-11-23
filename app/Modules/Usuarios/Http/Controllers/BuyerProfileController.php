@@ -41,7 +41,7 @@ final class BuyerProfileController extends Controller
         $input = BuyerProfileRules::normalize($request->all());
         $validator = Validator::make($input, array_merge(BuyerProfileRules::rules($input), [
             'contact_email' => ['nullable', 'email', 'max:254'],
-        ]), BuyerProfileRules::messages());
+        ]));
         if ($validator->fails()) {
             return response()->json([
                 'success' => false, 'data' => null,

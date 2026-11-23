@@ -19,33 +19,7 @@ final class BuyerProfileRules
             }
         }
 
-        if (isset($input['phone']) && is_string($input['phone'])) {
-            $input['phone'] = str_replace([' ', '-', '.', '(', ')'], '', $input['phone']);
-            $countryCode = $input['phone_country_code'] ?? null;
-
-            if (str_starts_with($input['phone'], '+')
-                && is_string($countryCode)
-                && preg_match('/^\\+[1-9][0-9]{0,3}$/D', $countryCode) === 1
-                && str_starts_with($input['phone'], $countryCode)) {
-                $input['phone'] = substr($input['phone'], strlen($countryCode));
-            }
-        }
-
         return $input;
-    }
-
-    public static function isIsoCountry(string $code): bool
-    {
-        return in_array(strtoupper(trim($code)), explode(' ', self::ISO_COUNTRIES), true);
-    }
-
-    public static function messages(): array
-    {
-        return [
-            'phone.regex' => 'El teléfono debe tener solo números (7 a 15 dígitos), sin el código de país. El código va en el campo «Código de país».',
-            'phone_country_code.regex' => 'El código de país debe tener el formato +51.',
-            'phone_country_code.max' => 'El código de país debe tener el formato +51.',
-        ];
     }
 
     public static function rules(array $input): array
@@ -65,11 +39,7 @@ final class BuyerProfileRules
             'line_2' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:120'],
             'state' => ['nullable', 'string', 'max:120'],
-            'country' => ['nullable', 'string', 'size:2', static function ($attribute, $value, $fail): void {
-                if (! self::isIsoCountry((string) $value)) {
-                    $fail(__('validation.in', ['attribute' => $attribute]));
-                }
-            }],
+            'country' => ['nullable', 'string', 'size:2', Rule::in(explode(' ', self::ISO_COUNTRIES))],
         ];
     }
 }
