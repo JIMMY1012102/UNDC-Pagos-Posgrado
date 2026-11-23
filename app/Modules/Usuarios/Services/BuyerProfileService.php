@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Modules\\Usuarios\\Services;
+namespace App\Modules\Usuarios\Services;
 
-use Illuminate\\Support\\Facades\\DB;
+use Illuminate\Support\Facades\DB;
 
 final class BuyerProfileService
 {
