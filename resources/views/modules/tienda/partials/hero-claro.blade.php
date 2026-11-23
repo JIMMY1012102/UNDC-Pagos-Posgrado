@@ -20,14 +20,7 @@
           <h1 class="h1">Tus metas avanzan.</h1>
           <p class="serif">Tus trámites también.</p>
           <p class="lead">Encuentra tus trámites de posgrado y prepara tu pedido en un solo lugar.</p>
-          <form class="search" action="#" onsubmit="return false">
-            <svg width="22" height="22" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-            <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">¿Qué trámite necesitas?</label>
-            <input id="q" type="text" placeholder="¿Qué trámite necesitas?">
-            <button class="go" type="submit" aria-label="Buscar">
-              <svg width="22" height="22" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-            </button>
-          </form>
+          <div class="hero-search-slot" id="storeHeroSearch"></div>
           <div class="quick">
             <a href="/tienda/catalogo?q=matrícula#catalogo">Matrícula ↗</a>
             <a href="/tienda/catalogo?q=pensión#catalogo">Pensiones ↗</a>
