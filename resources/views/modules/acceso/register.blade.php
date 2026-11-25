@@ -416,6 +416,66 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 }
 body.light-mode .emerald-register .password-help{color:#537e68}
 
+
+.emerald-register .gb.in3{padding:1px;border:1px solid #d8e9df;border-radius:25px;background:#fff;box-shadow:0 18px 48px rgb(22 111 73 / 14%)}
+.emerald-register .gb.in3::before{display:none}
+.emerald-register .account-data-card{border:0!important;border-radius:24px!important;background:#fff!important;color:#173f30!important;box-shadow:inset 0 0 0 1px rgb(15 91 58 / 5%)!important;padding:28px 30px!important}
+.emerald-register .market-login-heading{justify-content:flex-start!important;gap:12px!important;margin:0 0 16px!important;text-align:left!important}
+.emerald-register .market-login-symbol{width:42px!important;height:42px!important;flex:0 0 42px;border-radius:13px!important;transform:none!important}
+.emerald-register .market-login-heading h1{margin:0!important;color:#173f30!important;font:700 22px/1.2 Sora,Inter,sans-serif!important;letter-spacing:-.25px}
+.emerald-register .market-login-heading p{display:none!important}
+.emerald-register .emerald-register-fields h2{margin:0 0 16px!important;color:#087b53!important;font-size:17px!important;letter-spacing:0!important}
+.emerald-register .register-progress{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:0 0 18px!important;color:#315e49!important;font-size:13px!important}
+.emerald-register .register-progress-count{font-size:12px;font-weight:700;color:#527363}
+.emerald-register .register-progress-segments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.emerald-register .register-progress-segments li{display:flex;min-width:0;flex-direction:column;gap:7px;color:#87998f;font-size:13px;font-weight:600}
+.emerald-register .register-progress-track{display:block;width:100%;height:6px;border-radius:99px;background:#e5ece8;transition:background .18s ease}
+.emerald-register .register-progress-name{white-space:nowrap}
+.emerald-register .register-progress-segments li[data-state="current"]{color:#087b53}
+.emerald-register .register-progress-segments li[data-state="current"] .register-progress-track,.emerald-register .register-progress-segments li[data-state="complete"] .register-progress-track{background:#087b53}
+.emerald-register .register-progress-segments li[data-state="complete"] .register-progress-name::before{content:"✓ ";font-weight:800;color:#087b53}
+.emerald-register .register-step{animation:register-step-in .18s ease both}
+@keyframes register-step-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.emerald-register .field label{margin:0 0 6px!important;color:#315b47!important;font-size:13px!important;font-weight:600!important;line-height:1.25}
+.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:48px!important;padding:0 13px!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;color:#173f30!important;font:500 15px Inter,system-ui,sans-serif!important;box-shadow:inset 0 1px 2px rgb(18 74 48 / 4%)!important;color-scheme:light}
+.emerald-register .field input::placeholder{color:#789385!important}
+.emerald-register .field input:focus,.emerald-register .field select:focus,.emerald-register .register-password-control:focus-within{border-color:#087b53!important;outline:0!important;box-shadow:0 0 0 3px rgb(8 123 83 / 17%)!important;background:#fff!important}
+.emerald-register .field:focus-within{outline:0!important;box-shadow:none!important;background:transparent!important}
+.emerald-register .field [aria-invalid="true"],.emerald-register .register-password-control:has([aria-invalid="true"]){border-color:#d97770!important;background:#fffafa!important;box-shadow:0 0 0 2px rgb(217 119 112 / 10%)!important}
+.emerald-register .field-error{display:block;margin:5px 0 0;color:#b94b46;font-size:12px;line-height:1.3}
+.emerald-register .register-step-help{margin:16px 0 0;color:#617c6d;font-size:12px;line-height:1.35}
+.emerald-register .password-help{display:block;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.3}
+.emerald-register .register-password-control{position:relative!important;display:block!important;padding:0 48px 0 13px!important}
+.emerald-register .register-password-control input{display:block;width:100%;height:100%!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;color:#173f30!important}
+.emerald-register .register-password-control .eye{position:absolute!important;z-index:5;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:38px!important;height:38px!important;border:0;border-radius:9px;background:transparent;color:#287653;cursor:pointer}
+.emerald-register .register-password-control .eye:hover{background:#edf7f1}
+.emerald-register .register-password-control .eye:focus-visible{outline:3px solid #087b53!important;outline-offset:1px}
+.emerald-register .password-strength{display:flex;align-items:center;gap:9px;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.2}
+.emerald-register .password-strength-bars{display:flex;gap:3px;width:72px;flex:0 0 72px}
+.emerald-register .password-strength-bars i{height:4px;flex:1;border-radius:5px;background:#dfe9e3}
+.emerald-register .password-strength[data-level="1"] .password-strength-bars i:nth-child(-n+1){background:#d97770}
+.emerald-register .password-strength[data-level="2"] .password-strength-bars i:nth-child(-n+2){background:#d6a64b}
+.emerald-register .password-strength[data-level="3"] .password-strength-bars i:nth-child(-n+3){background:#83a94d}
+.emerald-register .password-strength[data-level="4"] .password-strength-bars i{background:#087b53}
+.emerald-register .register-step-actions{gap:12px!important;margin-top:auto!important;padding-top:18px!important}
+.emerald-register .register-step-next,.emerald-register .market-login-submit{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px!important;min-height:48px!important;border:1px solid #087b53!important;border-radius:12px!important;background:#087b53!important;color:#fff!important;font:700 15px Inter,system-ui,sans-serif!important;box-shadow:0 8px 18px rgb(8 123 83 / 16%)!important;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+.emerald-register .register-step-next:hover,.emerald-register .market-login-submit:hover{background:#066744!important;border-color:#066744!important;transform:translateY(-1px)}
+.emerald-register .register-step-next:focus-visible,.emerald-register .market-login-submit:focus-visible{outline:3px solid #69bd91!important;outline-offset:3px}
+.emerald-register .register-step-next:disabled,.emerald-register .market-login-submit:disabled{background:#a6b9ad!important;border-color:#a6b9ad!important;box-shadow:none!important;cursor:not-allowed;transform:none}
+.emerald-register .register-step-actions .back{display:inline-flex;align-items:center;justify-content:center;min-height:48px!important;padding:0 18px!important;margin:0!important;border:1.5px solid #8eb6a0!important;border-radius:12px!important;background:#fff!important;color:#176044!important;font-size:14px;font-weight:700}
+.emerald-register .register-step-actions .back:hover{background:#f0f8f3!important;border-color:#087b53!important}
+.emerald-register .register-step-actions .back:focus-visible{outline:3px solid #69bd91;outline-offset:3px}
+.emerald-register .market-login-register{margin:14px 0 0!important;color:#526f60!important;font-size:13px!important;gap:6px}
+.emerald-register .market-login-register a{color:#087b53!important;text-decoration:underline;text-underline-offset:3px}
+.emerald-register .market-login-register a:hover{color:#055c3d!important}
+.emerald-register .register-step .form-grid{align-content:center!important;row-gap:14px!important}
+@media (min-width:768px){.emerald-register .account-data-card{padding:28px 30px!important}.emerald-register .register-step .form-grid{flex:1;align-content:center!important;row-gap:18px!important}.emerald-register .register-step-actions{margin-top:auto!important;padding-top:18px!important}.emerald-register .register-progress{margin-bottom:18px!important}.emerald-register .register-step-help{margin-top:12px}}
+@media (max-height:700px) and (min-width:768px){.emerald-register .account-data-card{padding:24px 28px!important}.emerald-register .market-login-heading{margin-bottom:12px!important}.emerald-register .register-progress{margin-bottom:12px!important}.emerald-register .register-step .form-grid{row-gap:12px!important}.emerald-register .register-step-actions{padding-top:12px!important}}
+@media (max-width:767px){.emerald-register .account-data-card{padding:26px 22px!important}.emerald-register .register-progress{margin-bottom:16px!important}.emerald-register .register-step .form-grid{align-content:start!important;row-gap:13px!important}.emerald-register .register-step-actions{margin-top:18px!important;padding-top:8px!important}.emerald-register .register-step-help{margin-top:12px}}
+@media (max-width:480px){.emerald-register .register-progress-name{font-size:12px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:46px!important}}
+@media (min-width:768px){.emerald-register .emerald-intro .stage{position:relative}.emerald-register .emerald-intro .float{max-width:190px;z-index:4}.emerald-register .emerald-intro .fa{left:0;right:auto;top:12px;bottom:auto}.emerald-register .emerald-intro .fb{left:auto;right:0;top:calc(50% - 30px);bottom:auto}.emerald-register .emerald-intro .fc{left:0;right:auto;top:auto;bottom:12px}}
+@media (prefers-reduced-motion:reduce){.emerald-register .register-step,.emerald-register .register-progress-track{animation:none!important;transition:none!important}}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -521,14 +581,18 @@ body.light-mode .emerald-register .password-help{color:#537e68}
     <div class="market-login-card account-data-card">
       <div class="market-login-heading">
         <span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
-        <div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Completa tus datos para crear tu cuenta.</p></div>
+        <div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1></div>
       </div>
       @include('modules.acceso.partials.errors')
       <form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())' data-error-messages='@json($errors->messages())'>
         @csrf
-        <div class="register-progress" data-register-progress aria-live="polite">
-          <span data-register-progress-label>Paso 1 de 3</span>
-          <span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span><span></span></span>
+        <div class="register-progress" data-register-progress role="group" aria-label="Progreso del registro" aria-live="polite">
+          <span class="register-progress-count" data-register-progress-label aria-label="Paso 1 de 3">Paso 1 de 3</span>
+          <ol class="register-progress-segments" aria-label="Etapas del registro">
+            <li data-register-progress-segment="1" data-state="current" aria-current="step"><span class="register-progress-track"></span><span class="register-progress-name">Identidad</span></li>
+            <li data-register-progress-segment="2" data-state="pending"><span class="register-progress-track"></span><span class="register-progress-name">Contacto</span></li>
+            <li data-register-progress-segment="3" data-state="pending"><span class="register-progress-track"></span><span class="register-progress-name">Acceso</span></li>
+          </ol>
         </div>
         <div class="emerald-register-fields">
           <fieldset class="register-step" data-register-step="1">
@@ -537,6 +601,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
               <div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div>
               <div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div>
             </div>
+            <p class="register-step-help">Usa los datos tal como figuran en tu documento.</p>
             <div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div>
           </fieldset>
           <fieldset class="register-step" data-register-step="2" hidden>
@@ -557,6 +622,10 @@ body.light-mode .emerald-register .password-help{color:#537e68}
                   <button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
                 <small class="password-help">Mínimo 12 caracteres</small>
+                <div class="password-strength" data-password-strength aria-live="polite">
+                  <span class="password-strength-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                  <span data-password-strength-label>Fortaleza de contraseña</span>
+                </div>
               </div>
               <div class="field">
                 <label for="account_password_confirmation">Confirmar contraseña</label>
@@ -593,8 +662,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   const card=form.closest('.account-data-card');
   const steps=[...form.querySelectorAll('[data-register-step]')];
   const progress=form.querySelector('[data-register-progress-label]');
-  const dots=form.querySelectorAll('.register-progress-dots span');
-  const subtitle=card.querySelector('[data-register-subtitle]');
+  const segments=form.querySelectorAll('[data-register-progress-segment]');
   const contactGrid=form.querySelector('[data-register-contact-grid]');
   const addressNames=['line_1','line_2','city','state','country'];
   const byName=name=>form.querySelector('[name="'+name+'"]');
@@ -613,6 +681,22 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     if(field)contactGrid.append(field);
   });
   const allFields=[...form.querySelectorAll('input,select,textarea')];
+  const passwordField=byName('password');
+  const strength=card.querySelector('[data-password-strength]');
+  const strengthLabel=card.querySelector('[data-password-strength-label]');
+  function updatePasswordStrength(){
+    if(!passwordField||!strength||!strengthLabel)return;
+    const value=passwordField.value;
+    let score=0;
+    if(value.length>=12)score++;
+    if(/[a-z]/.test(value)&&/[A-Z]/.test(value))score++;
+    if(/\d/.test(value))score++;
+    if(/[^A-Za-z0-9]/.test(value))score++;
+    strength.dataset.level=String(score);
+    strengthLabel.textContent=value.length===0?'Fortaleza de contraseña':['Por mejorar','Básica','Intermedia','Buena','Fuerte'][score];
+  }
+  passwordField?.addEventListener('input',updatePasswordStrength);
+  updatePasswordStrength();
   allFields.forEach(field=>{
     field.dataset.registerInitiallyRequired=field.required?'true':'false';
     field.addEventListener('input',()=>{
@@ -666,11 +750,14 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       });
     });
     progress.textContent='Paso '+number+' de 3';
-    dots.forEach((dot,index)=>{
-      if(index===number-1)dot.setAttribute('aria-current','step');
-      else dot.removeAttribute('aria-current');
+    progress.setAttribute('aria-label','Paso '+number+' de 3');
+    segments.forEach((segment,index)=>{
+      const state=index<number-1?'complete':index===number-1?'current':'pending';
+      segment.dataset.state=state;
+      if(state==='current')segment.setAttribute('aria-current','step');
+      else segment.removeAttribute('aria-current');
+      segment.setAttribute('aria-label',['Identidad','Contacto','Acceso'][index]+(state==='complete'?', completado':state==='current'?', paso actual':', pendiente'));
     });
-    subtitle.textContent=['Identidad','Contacto y ubicación','Acceso'][number-1];
     if(moveFocus){
       const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
       first?.focus({preventScroll:true});

@@ -378,6 +378,24 @@ async function responsiveAccountPage(viewport, kind) {
 
       await page.locator('.market-login-heading h1').waitFor({ state: 'visible' });
       await page.locator('[data-register-step="1"]').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('[data-register-subtitle]').count(), 0,
+        'El encabezado no debe repetir el nombre del paso');
+      assert.equal(await page.locator('.register-progress-segments li').count(), 3,
+        'El progreso debe mostrar tres segmentos etiquetados');
+      assert.deepEqual((await page.locator('.register-progress-segments li').allTextContents()).map(text => text.trim()),
+        ['Identidad', 'Contacto', 'Acceso']);
+      assert.equal(await page.locator('.register-progress-segments li[aria-current="step"]').getAttribute('data-state'), 'current');
+      if (desktop) {
+        const chips = await page.locator('.emerald-intro .float').evaluateAll(items => items.map(item => {
+          const r = item.getBoundingClientRect();
+          return { left:r.left, right:r.right, top:r.top, bottom:r.bottom };
+        }));
+        for (let i=0;i<chips.length;i++) for (let j=i+1;j<chips.length;j++) {
+          assert.ok(chips[i].right <= chips[j].left || chips[j].right <= chips[i].left ||
+            chips[i].bottom <= chips[j].top || chips[j].bottom <= chips[i].top,
+            'Los chips del panel izquierdo no deben superponerse: '+JSON.stringify({i,j,chips}));
+        }
+      }
       assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 1 de 3');
       for (const selector of ['#account_first_names', '#account_last_names', '#account_document_type', '#account_document_number']) {
         assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar en Identidad');
@@ -411,6 +429,13 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_password').isVisible(), true);
       assert.equal(await page.locator('#account_password_confirmation').isVisible(), true);
       assert.equal(await page.locator('#account_email').isVisible(), false);
+      const eyeBox = await page.locator('[data-toggle-password="account_password"]').boundingBox();
+      const passwordBox = await page.locator('#account_password').locator('xpath=ancestor::div[contains(@class,"register-password-control")]').boundingBox();
+      assert.ok(eyeBox.x >= passwordBox.x && eyeBox.x + eyeBox.width <= passwordBox.x + passwordBox.width &&
+        eyeBox.y >= passwordBox.y && eyeBox.y + eyeBox.height <= passwordBox.y + passwordBox.height,
+        'El botón ojo debe quedar dentro del contenedor del input');
+      assert.equal(await page.locator('[data-password-strength]').isVisible(), true,
+        'El indicador de fortaleza debe ser visible en Acceso');
       await noVerticalScroll(3);
       await captureStep(3);
       const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
@@ -428,9 +453,11 @@ async function responsiveAccountPage(viewport, kind) {
         'La confirmación debe validar coincidencia en línea');
       const eye = page.locator('[data-toggle-password="account_password"]');
       await eye.click();
+      assert.equal(await eye.getAttribute('aria-pressed'), 'true');
       assert.equal(await page.locator('#account_password').getAttribute('type'), 'text',
         'El botón ojo debe mostrar la contraseña');
       await eye.click();
+      assert.equal(await eye.getAttribute('aria-pressed'), 'false');
       assert.equal(await page.locator('#account_password').getAttribute('type'), 'password',
         'El botón ojo debe ocultar la contraseña');
 
