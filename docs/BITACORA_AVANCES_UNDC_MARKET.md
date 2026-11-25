@@ -267,3 +267,14 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se conservan los arreglos de comportamiento de #147: +51 por defecto, errores tras interacción/blur o Continuar, botón Atrás sin salto de línea y altura equivalente al primario. No se modifica backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni tablas SISPAGOS.
 - Chromium comprueba ausencia de scroll vertical del documento en pasos 1, 2 y 3, acceso al campo País mediante scroll interno sin invadir el pie, controles visibles, +51, ausencia de errores al entrar, validación tras interacción, botón Atrás y flujo entre pasos. Se mantienen los casos móviles de 375 px y se generan capturas de los tres pasos a 1366×590 y 1366×768.
 - Estado: cambios frontend y pruebas preparados en rama; pendientes CI (cuatro jobs) y revisión del artefacto. PR nuevo sin merge y sin despliegue Oracle.
+
+
+## 10. Corrección de solapamiento del paso Acceso y validación de campos (25 de noviembre de 2026)
+
+- Se crea `fix/registro-paso3-overlap` desde el `main` actualizado después del merge del PR #149.
+- El indicador inferior se activa únicamente cuando `scrollHeight > clientHeight + 1`, se oculta al llegar al final del scroll y no intercepta eventos; su área queda reservada al final del cuerpo para no cubrir controles.
+- El paso Acceso mantiene el indicador de fortaleza con altura mínima reservada y contenido sin scroll interno innecesario. La altura máxima de tarjeta/panel usa `100dvh` menos márgenes.
+- La validación cliente distingue interacción real (puntero, edición o cambio) de un simple foco por Tab: un campo no tocado no muestra error al recibir foco ni al salir; los errores aparecen tras blur de un campo tocado o al validar Continuar/Crear cuenta. Los errores del servidor tras un envío rechazado se conservan.
+- Se agregan estilos de autofill `:autofill` y `:-webkit-autofill`, preservando fondo, radio y espacio del ojo dentro del control.
+- Chromium añade verificaciones de entrada sin errores en los tres pasos, navegación por Tab sin errores prematuros, blur de campo tocado, ausencia de scroll/degradado en Acceso a 1366×590 y 1366×768, fortaleza fuera del pie y estilos autofill. Se conservan las pruebas existentes; no se eliminan ni relajan aserciones.
+- Alcance exclusivo: vista Blade del registro, pruebas de navegador y esta bitácora. Sin cambios en backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni SISPAGOS. No se hará merge ni despliegue sin aprobación literal.
