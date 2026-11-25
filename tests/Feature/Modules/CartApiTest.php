@@ -169,7 +169,7 @@ class CartApiTest extends TestCase
         ])->assertNotFound();
         $this->ownedCart($second);
         $this->deleteJson('/api/v1/tienda/carritos/actual/items/'.$line)->assertOk();
-        $this->assertDatabaseHas('tienda_detalles_carrito', ['id' => $line, 'quantity' => 1]);
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['id' => $line, 'cantidad' => 1]);
     }
 
     public function test_owner_cannot_edit_expired_or_converted_cart(): void
@@ -196,9 +196,9 @@ class CartApiTest extends TestCase
         $this->makeCatalog();
         $carts = app(CartService::class);
         $cart = $carts->create();
-        foreach ([['requires_eligibility_check' => true], ['requires_eligibility_check' => false]] as $state) {
-            DB::table('tienda_conceptos_catalogo')->where('id', 101)->update($state);
-            if (! $state['requires_eligibility_check']) DB::table('tm_conceptos')->where('id_concepto', 12)->update(['costo' => 0]);
+        foreach ([true, false] as $requiresEligibility) {
+            DB::table('tienda_conceptos_catalogo')->where('id', 101)->update(['requiere_verificacion_elegibilidad' => $requiresEligibility]);
+            if (! $requiresEligibility) DB::table('tm_conceptos')->where('id_concepto', 12)->update(['costo' => 0]);
             $this->withToken($cart['token'])->postJson('/api/v1/tienda/carritos/actual/items', ['catalog_item_id' => 101, 'quantity' => 1])->assertStatus(409);
             $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()->assertJsonPath('data.0.orderable', false);
         }

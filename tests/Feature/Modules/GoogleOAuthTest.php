@@ -38,8 +38,8 @@ class GoogleOAuthTest extends TestCase
         );
 
         $this->assertDatabaseHas('tienda_identidades_oauth', [
-            'user_id' => $user->id,
-            'provider' => 'google',
+            'usuario_id' => $user->id,
+            'proveedor' => 'google',
             'provider_subject' => 'subject-101',
         ]);
         $this->assertSame([], $user->getRoleNames()->all());

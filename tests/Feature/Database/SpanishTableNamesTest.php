@@ -55,8 +55,6 @@ class SpanishTableNamesTest extends TestCase
             $columns[$new] = Schema::getColumnListing($new);
         }
 
-        $columnMigration = require database_path('migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php');
-        $columnMigration->down();
         $migration = require database_path('migrations/2026_11_09_000001_rename_store_business_tables_to_spanish.php');
         $migration->down();
         foreach (self::TABLES as $old => $new) {
@@ -80,6 +78,8 @@ class SpanishTableNamesTest extends TestCase
 
     public function test_a_destination_collision_is_rejected_before_any_table_is_renamed(): void
     {
+        $columnMigration = require database_path('migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php');
+        $columnMigration->down();
         $migration = require database_path('migrations/2026_11_09_000001_rename_store_business_tables_to_spanish.php');
         $migration->down();
         // Colisión en la ÚLTIMA tabla: la validación debe proteger también la primera.

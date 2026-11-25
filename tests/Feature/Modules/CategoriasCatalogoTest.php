@@ -77,17 +77,19 @@ class CategoriasCatalogoTest extends TestCase
         $columnMigration->down();
         $migration = require database_path('migrations/2026_11_10_000002_create_tienda_categorias.php');
         $migration->down();
+        $columnMigration->up();
         $migration->up(); // Reproduce una actualización con datos ya existentes.
         $categoryId = DB::table('tienda_conceptos_catalogo')->where('id', $id)->value('categoria_id');
         $this->assertNotNull($categoryId);
         $this->assertSame('certificados_constancias', DB::table('tienda_categorias')->where('id', $categoryId)->value('codigo'));
         $this->assertSame('Descripción conservada', DB::table('tienda_conceptos_catalogo')->where('id', $id)->value('descripcion'));
-        DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['category' => null]);
+        DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['categoria_codigo' => null]);
+        $columnMigration->down();
         $migration->down();
         $this->assertFalse(Schema::hasColumn('tienda_conceptos_catalogo', 'categoria_id'));
         $this->assertSame('certificados_constancias', DB::table('tienda_conceptos_catalogo')->where('id', $id)->value('category'));
-        $migration->up();
         $columnMigration->up();
+        $migration->up();
         $this->assertSame(6, DB::table('tienda_categorias')->count());
     }
 

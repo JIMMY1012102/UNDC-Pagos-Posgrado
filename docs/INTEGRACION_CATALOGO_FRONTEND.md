@@ -51,7 +51,7 @@ La barra superior y el menú móvil ofrecen Para ti y seis categorías: Admisió
 
 ## Actualización de categorías al español
 
-La traducción inicial conservó `tienda_conceptos_catalogo.category`. La evolución posterior agrega `tienda_categorias` y `categoria_id` para seleccionar registros predefinidos; [ver guía](./CATEGORIAS_CATALOGO.md).
+La columna física de código es `tienda_conceptos_catalogo.categoria_codigo`; `categoria_id` selecciona el registro predefinido de `tienda_categorias`. La API y el frontend conservan la clave JSON `category` para compatibilidad. [Ver guía](./CATEGORIAS_CATALOGO.md).
 
 | Código anterior | Código actual |
 |---|---|

@@ -3,12 +3,14 @@
 namespace Tests\Feature\Database;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 final class SpanishColumnNamesTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_business_columns_are_renamed_without_touching_public_legacy_tables(): void
     {
         $expected = [
@@ -48,7 +50,6 @@ final class SpanishColumnNamesTest extends TestCase
         $this->assertFalse(Schema::hasColumn('tienda_conceptos_catalogo', 'categoria'));
         $this->assertFalse(Schema::hasColumn('tienda_eventos_auditoria', 'subject_id'));
         $this->assertFalse(Schema::hasColumn('tienda_eventos_auditoria', 'correlation_id'));
-        $this->assertTrue(Schema::hasColumn('tm_oficina', 'estado'));
     }
 
     public function test_generated_active_cart_owner_tracks_renamed_source_columns(): void

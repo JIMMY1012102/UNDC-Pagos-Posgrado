@@ -79,6 +79,8 @@ final class OrderService
             foreach ($quote['items'] as $line) {
                 DB::table('tienda_detalles_pedido')->insert([
                     'pedido_id' => $id, 'concepto_catalogo_id' => $line['catalog_item_id'],
+                    'legacy_concept_id' => $line['legacy_concept_id'], 'legacy_office_id' => $line['legacy_office_id'],
+                    'beneficiario_id' => null,
                     'codigo_concepto' => $line['concept_code'], 'concepto_nombre' => $line['concept_name'],
                     'cantidad' => $line['quantity'], 'monto_unitario' => self::money($line['unit_cents']),
                     'monto_total' => self::money($line['total_cents']),
@@ -204,7 +206,8 @@ final class OrderService
         $orders = $orders->take(10);
         $ids = $orders->pluck('id')->all();
         $items = DB::table('tienda_detalles_pedido')->whereIn('pedido_id', $ids)->orderBy('id')->get()->groupBy('pedido_id');
-        $history = DB::table('tienda_historial_estados_pedido')->whereIn('pedido_id', $ids)->orderBy('id')->get()->groupBy('pedido_id');
+        $history = DB::table('tienda_historial_estados_pedido')->whereIn('pedido_id', $ids)->orderBy('id')
+            ->get(['pedido_id', 'estado_nuevo as to_status', 'motivo as reason', 'ocurrido_en as occurred_at'])->groupBy('pedido_id');
         $blocked = $this->payments->blockedOrderIds($ids);
         $expiredPendingIds = $orders->filter(fn ($order) => $order->estado === 'pending'
             && $order->pagado_en === null && $order->confirmado_en === null
