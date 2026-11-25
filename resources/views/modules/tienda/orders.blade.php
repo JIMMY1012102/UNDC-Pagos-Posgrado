@@ -10,11 +10,11 @@ body.market-orders-view{--od-surface:#073c2d;--od-row:#0b4836;--od-ink:#e9fff4;-
 body.light-mode.market-orders-view{--od-surface:rgb(255 255 255 / 88%);--od-row:#fff;--od-ink:#062e22;--od-muted:#3c524b;--od-line:#d3e5dc;--od-accent:#0a7a4f;background:radial-gradient(ellipse at 0 0,#d5eee1,transparent 60%),radial-gradient(ellipse at 100% 25%,#dceff1,transparent 55%),#eff7f3}
 body.market-orders-view .site-header{padding:16px 24px 0;background:transparent;border:0;box-shadow:none}
 body.market-orders-view .site-header .top{height:auto;background:transparent;border:0}
-.market-orders-view .top-inner{width:100%;max-width:1200px;min-height:72px;height:auto;margin:auto;padding:10px 22px;background:var(--od-surface);border:1px solid var(--od-line);border-radius:999px;gap:16px}
+.market-orders-view .top-inner{width:100%;max-width:var(--container-max,1440px);min-height:72px;height:auto;margin:auto;padding:10px 22px;background:var(--od-surface);border:1px solid var(--od-line);border-radius:999px;gap:16px}
 .market-orders-view .brand-title,.market-orders-view .payment-header-context,.market-orders-view .payment-orders-link{color:var(--od-ink)}
 .market-orders-view .brand-title em{color:var(--od-accent)}
 .market-orders-view .login-button{border-radius:999px;background:var(--od-row);color:var(--od-ink)}
-.market-orders-view main.wrap{width:calc(100% - 48px);max-width:1200px;padding:28px 0 36px;margin:auto}
+.market-orders-view main.wrap{width:calc(100% - 48px);max-width:var(--container-max,1440px);padding:28px 0 36px;margin:auto}
 .market-orders-view .payment-preview-heading{gap:24px;align-items:center;margin-bottom:26px;animation:odRise .7s .05s both}
 .market-orders-view .payment-preview-heading h1{font:800 clamp(30px,3.3vw,46px)/1.08 Sora,system-ui,sans-serif;color:var(--od-ink);letter-spacing:-.035em}
 .market-orders-view .payment-preview-heading p,.market-orders-view .payment-breadcrumb{color:var(--od-muted)}
@@ -171,6 +171,11 @@ body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-works
 body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-progress li:not([aria-current]) span{background:#cfeedd;color:#0a4d33}
 body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-progress li[aria-current] span{background:#0a7a4f;color:#fff}
 body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-footer{background:#062e22;color:#c3dfd3;border-color:#062e22;border-radius:18px;padding:14px 20px}
+
+
+.market-orders-view .top-inner,.market-orders-view main.wrap{max-width:var(--container-max,1440px)}
+@media(min-width:1600px){.market-orders-view .order-detail-grid{grid-template-columns:minmax(0,1fr) minmax(380px,410px);gap:36px}.market-orders-view .orders-workspace{max-width:var(--container-max,1440px);margin-inline:auto}}
+@media(min-width:1920px){.market-orders-view .top-inner,.market-orders-view main.wrap,.market-orders-view .orders-workspace{max-width:var(--container-max,1680px)}.market-orders-view .order-detail-grid{grid-template-columns:minmax(0,1fr) minmax(410px,460px);gap:44px}}
 
 </style>
 <div class="order-ready-glow" aria-hidden="true"></div><div class="order-ready-glow second" aria-hidden="true"></div>
