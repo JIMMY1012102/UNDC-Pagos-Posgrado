@@ -243,3 +243,16 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se incorpora ayuda bajo Identidad, transición breve con respeto a prefers-reduced-motion y reposicionamiento de los chips flotantes del panel izquierdo.
 - Se amplía Chromium para verificar progreso, ausencia de subtítulo duplicado, posición interna del botón ojo, fortaleza y separación de chips. Se mantienen las comprobaciones existentes de altura y ausencia de scroll vertical en 1366×600, 1366×768 y 1920×1080.
 - Verificación pendiente de CI y revisión de las tres capturas nuevas del artefacto registro-tres-pasos-1366x768. No se hará merge ni despliegue a Oracle sin autorización expresa.
+
+
+## 8. Corrección de regresión visual del registro — seguimiento de PR #146 (25 de noviembre de 2026)
+
+- Se abre `fix/registro-paso2-layout` desde `main` (base `c8e20cf`) para corregir una regresión observada en Firefox a 1366×590 que no detectaba la prueba anterior centrada en el scroll del documento.
+- Causa raíz: reglas CSS posteriores al polish de #146 volvieron a imponer padding de 28–30 px, controles de 48 px y gaps de 14–18 px, además de convertir el stepper a columna. El paso 2 agrupa teléfono/código y seis campos adicionales; su altura excedía el espacio útil y la geometría no reservaba un cuerpo independiente para el formulario.
+- El stepper vertical no reservaba una banda compacta suficiente entre el título y el formulario, por lo que sus etiquetas quedaban demasiado próximas al encabezado y al primer campo.
+- Atrás heredaba ancho flexible insuficiente y permitía el salto de línea; ahora tiene ancho mínimo fijo, texto no envolvente y altura equivalente a Continuar.
+- El fallback Blade `+51` podía ser desplazado por un `old()` vacío. Se asegura el valor al inicializar en cliente sin modificar nombres ni validación del servidor.
+- Los eventos de edición llamaban la rutina de errores sin estado explícito de interacción. Se incorpora seguimiento de campo tocado; blur valida solo tras interacción y Continuar/submit fuerza la validación.
+- Se separan encabezado, progreso, cuerpo con scroll interno y pie de acciones mediante flex column; se compactan controles y gaps y se revisan los tres pasos.
+- Chromium comprueba geometría de cada control visible, no intersección con el pie, separación del stepper y botón Atrás en 1366×590, 1366×768 y 1920×1080. Capturas de los tres pasos en 1366×590 y 1366×768 se publican como artefactos diferenciados.
+- Alcance exclusivo: vista de registro, pruebas de navegador y bitácora. Sin cambios a backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni tablas SISPAGOS. Sin merge ni despliegue Oracle; pendiente CI y revisión de capturas.
