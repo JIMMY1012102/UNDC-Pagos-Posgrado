@@ -213,7 +213,8 @@ columna propia de negocio.
 - `tienda_conceptos_catalogo.categoria_codigo` es un código de clasificación;
   `categoria_id` sigue siendo la FK a `tienda_categorias.id`. Son conceptos
   distintos y ambos se conservan.
-- El índice único conserva el nombre técnico `uq_cart_active_user`, aunque su columna asociada ahora se llama `usuario_activo_id`.\n- `tienda_carritos.usuario_activo_id` sigue siendo una columna generada:
+- El índice único conserva el nombre técnico `uq_cart_active_user`, aunque su columna asociada ahora se llama `usuario_activo_id`.
+- `tienda_carritos.usuario_activo_id` sigue siendo una columna generada:
   `CASE WHEN estado = 'active' THEN usuario_id ELSE NULL END`. El valor
   almacenado `active` no se traduce.
 - Estados como `pending`, `paid`, `cancelled`, `expired`, `active`,
