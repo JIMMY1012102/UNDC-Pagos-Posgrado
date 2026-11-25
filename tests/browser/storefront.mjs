@@ -447,6 +447,19 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
       assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
       await noVerticalScroll(2);
+      const contactOverflow=await page.locator('[data-register-step="2"] .form-grid').evaluate(grid=>{
+        const overflow=grid.scrollHeight>grid.clientHeight+1;
+        grid.scrollTop=overflow?grid.scrollHeight:0;
+        grid.dispatchEvent(new Event('scroll'));
+        return {overflow,hasOverflow:grid.classList.contains('has-scroll-overflow'),
+          atEnd:grid.classList.contains('scroll-at-end'),opacity:getComputedStyle(grid,'::after').opacity};
+      });
+      assert.equal(contactOverflow.hasOverflow,contactOverflow.overflow,
+        'El degradado solo debe activarse con overflow real: '+JSON.stringify(contactOverflow));
+      if(contactOverflow.overflow){
+        assert.equal(contactOverflow.atEnd,true,'El indicador debe ocultarse al final del scroll');
+        assert.equal(contactOverflow.opacity,'0','El degradado no debe tapar el último campo al final');
+      }
       await page.locator('#account_email').focus();
       await page.locator('#account_line_1').focus();
       assert.equal(await page.locator('.field-error:visible').count(),0,
