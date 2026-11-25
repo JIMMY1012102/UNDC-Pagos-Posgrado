@@ -522,6 +522,106 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-progress-track{height:4px}
 .emerald-register .register-step-actions .back{min-width:104px;white-space:nowrap;word-break:keep-all}
 }
+
+/* Registro: composición simple con scroll confinado al área de campos. */
+@media (min-width: 768px) {
+  .emerald-register .emerald-panel {
+    height: auto !important;
+    max-height: calc(100dvh - 32px);
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .emerald-register .emerald-panel > .gb {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .emerald-register .account-data-card {
+    display: flex;
+    flex-direction: column;
+    height: auto !important;
+    max-height: calc(100dvh - 32px);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .emerald-register .market-login-heading,
+  .emerald-register .register-progress {
+    flex: 0 0 auto;
+  }
+  .emerald-register .account-data-card > form,
+  .emerald-register .emerald-register-fields,
+  .emerald-register .register-step {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .emerald-register .emerald-register-fields {
+    overflow: hidden !important;
+  }
+  .emerald-register .register-step {
+    height: auto !important;
+    overflow: hidden !important;
+  }
+  .emerald-register .register-step > h2 {
+    display: none !important;
+  }
+  .emerald-register .register-step .form-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: start;
+    align-items: start;
+    gap: 14px !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #83c9a5 transparent;
+    padding: 0 8px 14px 0;
+    box-shadow: inset 0 -12px 12px -14px rgba(131, 201, 165, .85);
+  }
+  .emerald-register .register-step .form-grid::-webkit-scrollbar { width: 6px; }
+  .emerald-register .register-step .form-grid::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #83c9a5;
+  }
+  .emerald-register .register-step .form-grid::-webkit-scrollbar-track { background: transparent; }
+  .emerald-register .register-step-actions {
+    position: static !important;
+    flex: 0 0 auto;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    gap: 10px !important;
+  }
+  .emerald-register .register-step-actions .back {
+    flex: 0 0 112px;
+    width: 112px;
+    min-width: 112px;
+    height: 46px !important;
+    min-height: 46px !important;
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+  .emerald-register .register-step-actions .register-step-next,
+  .emerald-register .register-step-actions .market-login-submit {
+    flex: 1 1 auto;
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+  .emerald-register .register-step-help { margin: 10px 0 0 !important; }
+  .emerald-register .register-progress-segments li { white-space: nowrap; }
+}
+@media (max-width: 767px) {
+  .emerald-register .register-step > h2 { display: none !important; }
+  .emerald-register .register-step-actions { flex-direction: row !important; }
+  .emerald-register .register-step-actions .back {
+    white-space: nowrap;
+    word-break: keep-all;
+    min-height: 46px;
+  }
+}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
