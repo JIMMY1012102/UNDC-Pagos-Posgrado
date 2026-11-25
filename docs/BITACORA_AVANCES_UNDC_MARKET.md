@@ -256,3 +256,14 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se separan encabezado, progreso, cuerpo con scroll interno y pie de acciones mediante flex column; se compactan controles y gaps y se revisan los tres pasos.
 - Chromium comprueba geometría de cada control visible, no intersección con el pie, separación del stepper y botón Atrás en 1366×590, 1366×768 y 1920×1080. Capturas de los tres pasos en 1366×590 y 1366×768 se publican como artefactos diferenciados.
 - Alcance exclusivo: vista de registro, pruebas de navegador y bitácora. Sin cambios a backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni tablas SISPAGOS. Sin merge ni despliegue Oracle; pendiente CI y revisión de capturas.
+
+
+## 9. Registro: scroll interno limitado al cuerpo (25 de noviembre de 2026)
+
+- Se descarta el enfoque de compactar/ocultar campos del PR #148, que se cerró sin merge. La nueva rama `fix/registro-scroll-interno` parte del `main` posterior a #147.
+- Se recupera la composición visual compacta del registro de #146: stepper horizontal de tres segmentos, botones primarios unificados, ojo de contraseña dentro del input y sin títulos de sección duplicados. Se elimina la composición de altura fija que centraba verticalmente el cuerpo y generaba huecos en Identidad.
+- Los ocho controles del paso 2 permanecen visibles y conservan sus `name` y validaciones: código de país, teléfono, correo, dirección, referencia, ciudad, departamento/región y país. No se oculta ni colapsa ningún campo.
+- Encabezado, stepper y pie de acciones quedan fuera del área desplazable. El scroll vertical se limita a `.register-step .form-grid`; la barra de botones permanece en flujo normal debajo del cuerpo, sin `position:absolute` ni `sticky`. Se añade scrollbar fino verde y una sombra/degradado sutil inferior como indicador.
+- Se conservan los arreglos de comportamiento de #147: +51 por defecto, errores tras interacción/blur o Continuar, botón Atrás sin salto de línea y altura equivalente al primario. No se modifica backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni tablas SISPAGOS.
+- Chromium comprueba ausencia de scroll vertical del documento en pasos 1, 2 y 3, acceso al campo País mediante scroll interno sin invadir el pie, controles visibles, +51, ausencia de errores al entrar, validación tras interacción, botón Atrás y flujo entre pasos. Se mantienen los casos móviles de 375 px y se generan capturas de los tres pasos a 1366×590 y 1366×768.
+- Estado: cambios frontend y pruebas preparados en rama; pendientes CI (cuatro jobs) y revisión del artefacto. PR nuevo sin merge y sin despliegue Oracle.
