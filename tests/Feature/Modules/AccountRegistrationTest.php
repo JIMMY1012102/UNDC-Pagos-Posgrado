@@ -22,6 +22,32 @@ class AccountRegistrationTest extends TestCase
             'password_confirmation' => 'Demo-password-2026'];
     }
 
+    public function test_registration_form_renders_three_steps_and_preserves_old_identity_and_contact_values(): void
+    {
+        $this->withSession(['_old_input' => [
+            'first_names' => 'Ana QA',
+            'last_names' => 'Torres Prueba',
+            'email' => 'ana@example.test',
+            'phone_country_code' => '+51',
+            'phone' => '987654321',
+            'line_1' => 'Av. de prueba 123',
+        ]])->get('/tienda/registro')
+            ->assertOk()
+            ->assertSee('Paso 1 de 3')
+            ->assertSee('Identidad')
+            ->assertSee('Contacto y ubicación')
+            ->assertSee('Acceso')
+            ->assertSee('data-register-step="1"', false)
+            ->assertSee('data-register-step="2"', false)
+            ->assertSee('data-register-step="3"', false)
+            ->assertSee('name="password_confirmation"', false)
+            ->assertSee('value="Ana QA"', false)
+            ->assertSee('value="Torres Prueba"', false)
+            ->assertSee('value="ana@example.test"', false)
+            ->assertSee('value="987654321"', false)
+            ->assertSee('value="Av. de prueba 123"', false);
+    }
+
     public function test_registration_creates_account_and_complete_profile_together(): void
     {
         $this->post('/tienda/registro', array_merge($this->input(), ['identity_verified' => true, 'role' => 'admin']))
