@@ -464,6 +464,10 @@ async function responsiveAccountPage(viewport, kind) {
         '.emerald-register-fields no debe competir como segundo contenedor de scroll: '+JSON.stringify(contactOverflow));
       assert.ok(contactOverflow.cardScrollHeight<=contactOverflow.cardClientHeight+1,
         'La tarjeta no debe desplazar el formulario completo: '+JSON.stringify(contactOverflow));
+      if(viewport.width===375){
+        assert.equal(contactOverflow.overflow,true,
+          'A 375px el cuerpo de Contacto debe conservar su scroll interno: '+JSON.stringify(contactOverflow));
+      }
       await contactGrid.evaluate(grid=>grid.scrollTo({top:grid.scrollHeight,behavior:'instant'}));
       await page.waitForFunction(()=>{
         const grid=document.querySelector('[data-register-step="2"] .form-grid');
