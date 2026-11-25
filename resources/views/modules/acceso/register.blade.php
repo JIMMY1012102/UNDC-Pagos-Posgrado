@@ -254,13 +254,16 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 .emerald-register .field:focus-within{outline:0;box-shadow:none;background:transparent}
 .emerald-register .emerald-layout{align-items:flex-start;gap:clamp(28px,4vw,64px);padding-top:32px;padding-bottom:48px}
 .emerald-register .emerald-intro{position:sticky;top:24px;height:calc(100svh - 48px);min-height:560px;align-self:flex-start}
-.emerald-register .emerald-panel{flex:1 1 740px;max-width:760px;min-width:0}
+.emerald-register .emerald-panel{flex:0 1 610px;max-width:610px;min-width:0}
 .emerald-register .market-login-card{width:100%;max-width:none}
-.emerald-register .market-login-heading{margin-bottom:24px}
+.emerald-register .market-login-heading{margin-bottom:20px}
 .emerald-register .market-login-heading h1{text-transform:none}
-.emerald-register .back{display:inline-flex;align-items:center;min-height:40px;margin:0 0 18px;padding:8px 14px;border:1px solid #639c7e;border-radius:12px;background:transparent;color:#d7ff9a;font:600 14px Inter,system-ui,sans-serif}
-.emerald-register .emerald-register-fields h2{margin:22px 0 12px;color:#b6f36b;font:700 13px Sora,Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.emerald-register .market-login-heading p{min-height:1.4em}
+.emerald-register .back{display:inline-flex;align-items:center;min-height:42px;margin:0 0 16px;padding:8px 14px;border:1px solid #639c7e;border-radius:12px;background:transparent;color:#d7ff9a;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}
+.emerald-register .emerald-register-fields h2{margin:0 0 14px;color:#b6f36b;font:700 13px Sora,Inter,sans-serif;letter-spacing:.04em}
 .emerald-register .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.emerald-register fieldset{min-width:0;margin:0;padding:0;border:0}
+.emerald-register .register-profile-fields{display:contents}
 .emerald-register .field{display:block;min-width:0;height:auto;margin:0;padding:0;border:0;border-radius:0;background:transparent}
 .emerald-register .field label{display:block;margin:0 0 7px;color:#d3f3e4;font-size:13px;font-weight:600}
 .emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{display:block;width:100%;min-width:0;height:48px;padding:0 14px;border:1.5px solid rgb(255 255 255 / 18%);border-radius:14px;background:rgb(255 255 255 / 6%);color:#fff;font:15px Inter,system-ui,sans-serif;outline:0;transition:border-color .2s,box-shadow .2s,background .2s}
@@ -268,21 +271,32 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 .emerald-register .field input:focus,.emerald-register .field select:focus,.emerald-register .register-password-control:focus-within{border-color:#b6f36b;box-shadow:0 0 0 4px rgb(182 243 107 / 14%);background:rgb(182 243 107 / 8%)}
 .emerald-register .field input::placeholder{color:#85bda3}
 .emerald-register .field input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #103f2e inset;-webkit-text-fill-color:#fff}
+.emerald-register .register-phone-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(104px, .34fr) minmax(0,1fr);gap:14px}
 .emerald-register .register-password-control{display:flex;align-items:center;gap:8px;padding-right:5px}
 .emerald-register .register-password-control input{height:100%;padding:0;border:0;background:transparent;box-shadow:none!important}
 .emerald-register .register-password-control .eye{flex:0 0 38px;width:38px;height:38px;color:#cfeee0}
-.emerald-register .market-login-submit{margin-top:26px}
-.emerald-register .market-login-register{margin-top:22px}
+.emerald-register .register-progress{display:flex;align-items:center;gap:12px;margin:0 0 20px;color:#cfeee0;font-size:12px;font-weight:700}
+.emerald-register .register-progress-dots{display:flex;align-items:center;gap:7px}
+.emerald-register .register-progress-dots span{width:8px;height:8px;border-radius:50%;background:rgb(255 255 255 / 22%);transition:background .2s,transform .2s}
+.emerald-register .register-progress-dots span[aria-current="step"]{background:#b6f36b;transform:scale(1.2)}
+.emerald-register .register-step-actions{display:flex;align-items:center;gap:12px;margin-top:24px}
+.emerald-register .register-step-actions .market-login-submit{flex:1;margin:0}
+.emerald-register .register-step-actions .back{margin:0}
+.emerald-register .register-step-next{width:100%;height:54px;border:0;border-radius:16px;background:linear-gradient(90deg,#b6f36b,#6ee7b7);color:#04281c;font:700 17px Inter,system-ui,sans-serif;box-shadow:0 16px 34px -12px rgb(182 243 107 / 35%)}
+.emerald-register .market-login-submit{height:54px;border-radius:16px;font-size:16px}
+.emerald-register .market-login-register{margin-top:20px}
 body.light-mode .emerald-register .back{background:#f2fcf6;color:#155c40;border-color:#7fbea0}
 body.light-mode .emerald-register .emerald-register-fields h2{color:#087b53}
 body.light-mode .emerald-register .field label{color:#367864}
 body.light-mode .emerald-register .field input,body.light-mode .emerald-register .field select,body.light-mode .emerald-register .register-password-control{border-color:#a7d1ba;background:#f3faf6;color:#163e2e;color-scheme:light}
 body.light-mode .emerald-register .field input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #f3faf6 inset;-webkit-text-fill-color:#163e2e}
 body.light-mode .emerald-register .register-password-control .eye{color:#197950}
-@media(max-width:1000px) and (min-width:761px){.emerald-register .emerald-layout{gap:24px;padding-inline:20px}.emerald-register .emerald-intro{min-width:0;flex-basis:40%!important}.emerald-register .emerald-panel{flex-basis:60%;max-width:none}.emerald-register .emerald-intro .stage{transform:scale(.72);margin:-48px -70px}}
-@media(max-width:760px){.emerald-register .emerald-layout{align-items:stretch;gap:24px;padding:24px 16px}.emerald-register .emerald-intro{position:relative;top:auto;height:auto;min-height:0}.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}}
+body.light-mode .emerald-register .register-progress{color:#367864}
+body.light-mode .emerald-register .register-progress-dots span{background:#c5dfd0}
+body.light-mode .emerald-register .register-progress-dots span[aria-current="step"]{background:#087b53}
+@media(max-width:1000px) and (min-width:761px){.emerald-register .emerald-layout{gap:24px;padding-inline:20px}.emerald-register .emerald-intro{min-width:0;flex-basis:40%!important}.emerald-register .emerald-panel{flex:0 1 60%;max-width:none}.emerald-register .emerald-intro .stage{transform:scale(.72);margin:-48px -70px}}
+@media(max-width:760px){.emerald-register .emerald-layout{align-items:stretch;gap:24px;padding:24px 16px}.emerald-register .emerald-intro{position:relative;top:auto;height:auto;min-height:0}.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
 @media(min-width:761px) and (max-height:700px){.emerald-register .emerald-layout{padding-top:12px}.emerald-register .emerald-intro{min-height:500px;height:calc(100svh - 24px)}.emerald-register .emerald-intro .stage{height:290px!important}.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
-
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -381,5 +395,84 @@ body.light-mode .emerald-register .register-password-control .eye{color:#197950}
 <h1 class="sora in2" style="margin:0;font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-1.5px">Tus trámites,<br><span style="background:linear-gradient(90deg,#6ee7b7,#b6f36b);-webkit-background-clip:text;background-clip:text;color:transparent">a un solo clic.</span></h1>
 </section>
 
-<section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><a class="back" href="{{ route('tienda.login') }}">← Regresar</a><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p>Completa tus datos para continuar.</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}">@csrf<div class="emerald-register-fields"><h2>Datos personales</h2><div class="form-grid">@include('modules.acceso.partials.profile-fields')</div><h2>Acceso</h2><div class="form-grid"><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div><div class="field"><label for="account_password">Contraseña (mínimo 12 caracteres)</label><div class="register-password-control"><input id="account_password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div><div class="field"><label for="account_password_confirmation">Repite tu contraseña</label><div class="register-password-control"><input id="account_password_confirmation" name="password_confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password_confirmation" aria-controls="account_password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div></div></div><button type="submit" class="btn market-login-submit">Crear cuenta y continuar →</button></form><div class="market-login-register"><span>¿Ya tienes una cuenta?</span><a href="{{ route('tienda.login') }}">Inicia sesión</a></div></div></div></section></div></section><script>document.querySelectorAll('[data-toggle-password]').forEach(function (button) {button.addEventListener('click', function () {const input = document.getElementById(this.dataset.togglePassword);const show = input.type === 'password';input.type = show ? 'text' : 'password';this.setAttribute('aria-pressed', String(show));this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');});});</script>
+<section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Cuéntanos quién eres.</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
+<div class="register-progress" data-register-progress aria-live="polite"><span data-register-progress-label>Paso 1 de 2</span><span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span></span></div>
+<div class="emerald-register-fields">
+<fieldset class="register-step" data-register-step="1"><h2>Datos personales y de contacto</h2><div class="form-grid"><div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div></div><div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div></fieldset>
+<fieldset class="register-step" data-register-step="2"><h2>Dirección y acceso</h2><div class="form-grid"><div class="register-address-fields" data-register-address-fields></div><div class="field"><label for="account_password">Contraseña (mínimo 12 caracteres)</label><div class="register-password-control"><input id="account_password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div><div class="field"><label for="account_password_confirmation">Repite tu contraseña</label><div class="register-password-control"><input id="account_password_confirmation" name="password_confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password_confirmation" aria-controls="account_password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div></div><div class="register-step-actions"><button type="button" class="back" data-register-back>← Atrás</button><button type="submit" class="btn market-login-submit">Crear cuenta y continuar →</button></div></fieldset>
+</div></form><div class="market-login-register"><span>¿Ya tienes una cuenta?</span><a href="{{ route('tienda.login') }}">Inicia sesión</a></div></div></div></section></div></section><script>
+document.querySelectorAll('[data-toggle-password]').forEach(function (button) {button.addEventListener('click', function () {const input = document.getElementById(this.dataset.togglePassword);const show = input.type === 'password';input.type = show ? 'text' : 'password';this.setAttribute('aria-pressed', String(show));this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');});});
+(function () {
+ const form=document.querySelector('[data-register-form]');
+ if(!form)return;
+ const card=form.closest('.account-data-card');
+ const steps=[...form.querySelectorAll('[data-register-step]')];
+ const stepOne=steps[0],stepTwo=steps[1];
+ const progress=form.querySelector('[data-register-progress-label]');
+ const dots=form.querySelectorAll('.register-progress-dots span');
+ const subtitle=card.querySelector('[data-register-subtitle]');
+ const addressTarget=form.querySelector('[data-register-address-fields]');
+ const addressNames=['line_1','line_2','city','state','country'];
+ addressNames.forEach(name=>{
+  const input=form.querySelector('[name="'+name+'"]');
+  const field=input&&input.closest('.field');
+  if(field)addressTarget.append(field);
+ });
+ const country=form.querySelector('#account_phone_country_code');
+ const phone=form.querySelector('#account_phone');
+ if(country&&phone){
+  const countryField=country.closest('.field'),phoneField=phone.closest('.field');
+  const phoneRow=document.createElement('div');
+  phoneRow.className='register-phone-row';
+  countryField.classList.add('register-country-field');
+  phoneRow.append(countryField,phoneField);
+  const grid=form.querySelector('[data-register-profile-fields]');
+  grid.after(phoneRow);
+ }
+ const allFields=[...form.querySelectorAll('input,select,textarea')];
+ allFields.forEach(field=>{field.dataset.registerInitiallyRequired=field.required?'true':'false';});
+ function showStep(number,moveFocus=true){
+  steps.forEach(step=>{
+   const active=Number(step.dataset.registerStep)===number;
+   step.hidden=!active;
+   step.setAttribute('aria-hidden',String(!active));
+   step.querySelectorAll('input,select,textarea').forEach(field=>{
+    field.required=active&&field.dataset.registerInitiallyRequired==='true';
+   });
+  });
+  progress.textContent='Paso '+number+' de 2';
+  dots.forEach((dot,index)=>{if(index===number-1)dot.setAttribute('aria-current','step');else dot.removeAttribute('aria-current');});
+  subtitle.textContent=number===1?'Cuéntanos quién eres.':'Define tu acceso.';
+  if(moveFocus){
+   const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
+   if(first)first.focus({preventScroll:true});
+   card.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }
+ }
+ form.querySelector('[data-register-next]').addEventListener('click',()=>{
+  if(!stepOne.checkValidity()){stepOne.reportValidity();return;}
+  showStep(2);
+ });
+ form.querySelector('[data-register-back]').addEventListener('click',()=>showStep(1));
+ form.addEventListener('submit',event=>{
+  showStep(1,false);
+  if(!stepOne.checkValidity()){
+   event.preventDefault();
+   showStep(1);
+   stepOne.reportValidity();
+   return;
+  }
+  showStep(2,false);
+  if(!stepTwo.checkValidity()){
+   event.preventDefault();
+   showStep(2);
+   stepTwo.reportValidity();
+  }
+ });
+ const errorKeys=JSON.parse(form.dataset.errorFields||'[]');
+ const firstError=errorKeys[0];
+ const stepTwoKeys=["line_1","line_2","city","state","country","password","password_confirmation"];
+ showStep(stepTwoKeys.includes(firstError)?2:1,false);
+})();
+</script>
 @endsection
