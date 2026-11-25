@@ -437,7 +437,8 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step{animation:register-step-in .18s ease both}
 @keyframes register-step-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .emerald-register .field label{margin:0 0 6px!important;color:#315b47!important;font-size:13px!important;font-weight:600!important;line-height:1.25}
-.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:48px!important;padding:0 13px!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;color:#173f30!important;font:500 15px Inter,system-ui,sans-serif!important;box-shadow:inset 0 1px 2px rgb(18 74 48 / 4%)!important;color-scheme:light}
+.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:48px!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;color:#173f30!important;font:500 15px Inter,system-ui,sans-serif!important;box-shadow:inset 0 1px 2px rgb(18 74 48 / 4%)!important;color-scheme:light}
+.emerald-register .field input,.emerald-register .field select{padding:0 13px!important}
 .emerald-register .field input::placeholder{color:#789385!important}
 .emerald-register .field input:focus,.emerald-register .field select:focus,.emerald-register .register-password-control:focus-within{border-color:#087b53!important;outline:0!important;box-shadow:0 0 0 3px rgb(8 123 83 / 17%)!important;background:#fff!important}
 .emerald-register .field:focus-within{outline:0!important;box-shadow:none!important;background:transparent!important}
