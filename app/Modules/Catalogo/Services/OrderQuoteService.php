@@ -30,11 +30,11 @@ final class OrderQuoteService
     {
         if ($quantity < 1 || $quantity > 20) return [];
         $ids = $items->pluck('catalog_item_id')->all();
-        $versions = DB::table('tienda_versiones_tarifas')->whereIn('catalog_item_id', $ids)
-            ->where('is_approved', true)->whereNotNull('approval_reference')
-            ->where('approval_reference', '<>', '')->where('currency', 'PEN')
-            ->where('valid_from', '<=', now())
-            ->where(fn ($q) => $q->whereNull('valid_until')->orWhere('valid_until', '>', now()))->get()->groupBy('catalog_item_id');
+        $versions = DB::table('tienda_versiones_tarifas')->whereIn('concepto_catalogo_id', $ids)
+            ->where('esta_aprobado', true)->whereNotNull('referencia_aprobacion')
+            ->where('referencia_aprobacion', '<>', '')->where('moneda', 'PEN')
+            ->where('vigente_desde', '<=', now())
+            ->where(fn ($q) => $q->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>', now()))->get()->groupBy('concepto_catalogo_id');
         $result = [];
         foreach ($items as $item) {
             $id = (int) $item->catalog_item_id;
@@ -53,7 +53,7 @@ final class OrderQuoteService
         // El catálogo institucional ya contiene importes oficiales. Una versión
         // aprobada vigente puede sustituirlos; no se exige duplicar su aprobación.
         $amount = $prices->isNotEmpty()
-            ? (string) $prices->first()->amount
+            ? (string) $prices->first()->monto
             : (string) ($item->reference_amount ?? $item->legacy_base_amount);
         if (! preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amount)) {
             return null;

@@ -44,7 +44,7 @@ final class PrepararCategoriasPosgrado
                         ->where('legacy_office_id', $oficinaId)->where('codigo', $codigo)->value('id');
                     DB::table('tienda_conceptos_catalogo')
                         ->where('legacy_office_id', $oficinaId)->whereNull('categoria_id')
-                        ->whereIn('category', [$codigo, self::ANTERIORES[$codigo]])
+                        ->whereIn('categoria_codigo', [$codigo, self::ANTERIORES[$codigo]])
                         ->update(['categoria_id' => $categoriaId]);
                 }
             }

@@ -81,6 +81,25 @@ if ($snapshot(array_values($tables)) !== $before) {
 if ($legacyDdl() !== $legacyBefore) {
     throw new RuntimeException('El renombrado alteró el DDL histórico SISPAGOS.');
 }
+
+// Simular rollback/upgrade de la migración nueva sobre datos y relaciones reales.
+$columnMigration = require __DIR__.'/../../database/migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php';
+$columnsBefore = $snapshot(array_values($tables));
+$columnMigration->down();
+if (! Schema::hasColumn('tienda_conceptos_catalogo', 'category')
+    || ! Schema::hasColumn('tienda_conceptos_catalogo', 'categoria_id')
+    || ! Schema::hasColumn('tienda_carritos', 'active_user_id')
+    || ! Schema::hasColumn('tienda_eventos_auditoria', 'subject_id')
+    || ! Schema::hasColumn('tienda_eventos_auditoria', 'correlation_id')) {
+    throw new RuntimeException('El rollback de columnas no restauró el esquema anterior.');
+}
+$columnMigration->up();
+if ($snapshot(array_values($tables)) !== $columnsBefore) {
+    throw new RuntimeException('El ciclo down/up de columnas alteró datos, índices, FK o columnas generadas.');
+}
+if ($legacyDdl() !== $legacyBefore) {
+    throw new RuntimeException('La migración de columnas alteró el DDL histórico SISPAGOS.');
+}
 foreach ($tables as $old => $new) {
     if (Schema::hasTable($old) || ! Schema::hasTable($new)) {
         throw new RuntimeException("Renombrado incompleto: {$old}");

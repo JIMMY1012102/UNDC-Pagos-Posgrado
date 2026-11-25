@@ -8,45 +8,45 @@
 
 SELECT
     o.id AS store_order_id,
-    o.code AS store_order_code,
+    o.codigo AS store_order_code,
     o.created_at AS order_created_at,
-    o.status AS order_status,
+    o.estado AS order_status,
     oi.id AS store_order_item_id,
     oi.legacy_concept_id AS id_concepto,
     c.codigo_concepto AS codigo_concepto_actual,
-    oi.concept_code AS codigo_concepto_al_comprar,
-    oi.concept_name AS concepto_al_comprar,
-    oi.quantity AS cantidad,
-    oi.unit_amount AS precio_unitario_al_comprar,
-    oi.total_amount AS importe_linea,
+    oi.codigo_concepto AS codigo_concepto_al_comprar,
+    oi.concepto_nombre AS concepto_al_comprar,
+    oi.cantidad AS cantidad,
+    oi.monto_unitario AS precio_unitario_al_comprar,
+    oi.monto_total AS importe_linea,
     oi.legacy_office_id AS oficina_id,
     ofi.oficina_nom AS oficina_actual,
-    oi.beneficiary_document_type AS beneficiario_documento_tipo,
-    oi.beneficiary_document_number AS beneficiario_documento_numero,
-    oi.beneficiary_first_names AS beneficiario_nombres,
-    oi.beneficiary_last_names AS beneficiario_apellidos,
-    o.total_amount AS importe_pedido,
-    o.currency AS moneda_pedido,
+    oi.beneficiario_tipo_documento AS beneficiario_documento_tipo,
+    oi.beneficiario_numero_documento AS beneficiario_documento_numero,
+    oi.beneficiario_nombres AS beneficiario_nombres,
+    oi.beneficiario_apellidos AS beneficiario_apellidos,
+    o.monto_total AS importe_pedido,
+    o.moneda AS moneda_pedido,
     p.id AS store_payment_transaction_id,
-    p.provider AS proveedor_cobro,
-    p.provider_transaction_reference AS referencia_proveedor,
-    p.amount AS importe_transaccion_pedido,
-    p.currency AS moneda_transaccion,
-    p.verified_at AS verificado_en,
+    p.proveedor AS proveedor_cobro,
+    p.referencia_transaccion_proveedor AS referencia_proveedor,
+    p.monto AS importe_transaccion_pedido,
+    p.moneda AS moneda_transaccion,
+    p.verificado_en AS verificado_en,
     CASE
-        WHEN applied.payment_transaction_id IS NOT NULL
-            AND p.verified_at IS NOT NULL
-            AND p.status = 'confirmed' THEN 'COBRO_APLICADO'
-        WHEN applied.payment_transaction_id IS NOT NULL THEN 'REVISAR_COBRO'
+        WHEN applied.transaccion_pago_id IS NOT NULL
+            AND p.verificado_en IS NOT NULL
+            AND p.estado = 'confirmed' THEN 'COBRO_APLICADO'
+        WHEN applied.transaccion_pago_id IS NOT NULL THEN 'REVISAR_COBRO'
         ELSE 'SIN_COBRO_APLICADO'
     END AS estado_cobro_tienda
 FROM tienda_pedidos AS o
-INNER JOIN tienda_detalles_pedido AS oi ON oi.order_id = o.id
+INNER JOIN tienda_detalles_pedido AS oi ON oi.pedido_id = o.id
 LEFT JOIN tm_conceptos AS c ON c.id_concepto = oi.legacy_concept_id
 LEFT JOIN tm_oficina AS ofi ON ofi.oficina_id = oi.legacy_office_id
-LEFT JOIN tienda_pagos_aplicados_pedidos AS applied ON applied.order_id = o.id
+LEFT JOIN tienda_pagos_aplicados_pedidos AS applied ON applied.pedido_id = o.id
 LEFT JOIN tienda_transacciones_pago AS p
-       ON p.id = applied.payment_transaction_id
+       ON p.id = applied.transaccion_pago_id
 -- Filtros de ejemplo (parametrizarlos en SISPAGOS; no concatenar desde navegador):
 -- WHERE oi.legacy_office_id = :office_id
 --   AND o.created_at >= :from_date

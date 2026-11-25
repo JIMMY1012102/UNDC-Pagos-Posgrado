@@ -10,7 +10,16 @@ final class BuyerProfileService
     /** @return array<string,mixed>|null */
     public function find(int $userId): ?array
     {
-        $profile = DB::table('tienda_perfiles_compradores')->where('user_id', $userId)->first();
+        $profile = DB::table('tienda_perfiles_compradores')
+            ->where('usuario_id', $userId)
+            ->first([
+                'id', 'usuario_id as user_id', 'nombres as first_names', 'apellidos as last_names',
+                'tipo_documento as document_type', 'numero_documento as document_number',
+                'telefono as phone', 'correo_contacto as contact_email',
+                'direccion_linea_1 as line_1', 'direccion_linea_2 as line_2',
+                'ciudad as city', 'region as state', 'pais as country',
+                'codigo_pais_telefono as phone_country_code',
+            ]);
 
         return $profile === null ? null : $this->present($profile);
     }
@@ -24,7 +33,6 @@ final class BuyerProfileService
                 ->every(static fn (string $key): bool => filled($profile[$key] ?? null));
     }
 
-    /** Checkout-only readiness. Deliberately does not alter the registration completeness contract. */
     public function isCheckoutReady(int $userId): bool
     {
         $profile = $this->find($userId);
@@ -42,16 +50,32 @@ final class BuyerProfileService
     {
         return DB::transaction(function () use ($userId, $input): array {
             $profile = DB::table('tienda_perfiles_compradores')
-                ->where('user_id', $userId)->lockForUpdate()->first();
+                ->where('usuario_id', $userId)->lockForUpdate()->first();
 
-            $data = array_intersect_key($input, array_flip([
-                'first_names','last_names','document_type','document_number',
-                'phone','contact_email','line_1','line_2','city','state','country','phone_country_code',
-            ]));
+            $columns = [
+                'first_names' => 'nombres',
+                'last_names' => 'apellidos',
+                'document_type' => 'tipo_documento',
+                'document_number' => 'numero_documento',
+                'phone' => 'telefono',
+                'contact_email' => 'correo_contacto',
+                'line_1' => 'direccion_linea_1',
+                'line_2' => 'direccion_linea_2',
+                'city' => 'ciudad',
+                'state' => 'region',
+                'country' => 'pais',
+                'phone_country_code' => 'codigo_pais_telefono',
+            ];
+            $data = [];
+            foreach ($columns as $inputKey => $column) {
+                if (array_key_exists($inputKey, $input)) {
+                    $data[$column] = $input[$inputKey];
+                }
+            }
 
             if ($profile === null) {
                 DB::table('tienda_perfiles_compradores')->insert(array_merge($data, [
-                    'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(),
+                    'usuario_id' => $userId, 'created_at' => now(), 'updated_at' => now(),
                 ]));
             } else {
                 DB::table('tienda_perfiles_compradores')->where('id', $profile->id)
