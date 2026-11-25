@@ -297,6 +297,9 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 @media(max-width:760px){.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
 @media(min-width:761px) and (max-height:700px){.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
 
+/* El atributo hidden debe prevalecer también cuando el layout móvil usa display:flex. */
+.emerald-register .register-step[hidden]{display:none!important}
+
 /* Registro en tres pasos: altura constante y composición sin scroll en escritorio. */
 @media (min-width:768px){
   body.market-login-view{height:100dvh;overflow:hidden}
