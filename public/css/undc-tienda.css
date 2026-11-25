@@ -397,7 +397,7 @@ body.light-mode .dialog-note { background: #edfcf8; }
 .official-catalog { margin-top: 14px; }
 
 .wrap {
-  width: min(100% - 48px, 1499px);
+  width: min(100% - 48px, var(--container-max, 1440px));
   margin: auto;
   padding: 36px 0 76px;
 }
