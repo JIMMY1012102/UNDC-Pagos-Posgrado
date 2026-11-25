@@ -8,7 +8,7 @@ class MarketPagesTest extends TestCase
 {
     public function test_catalog_does_not_render_cart_or_login_forms(): void
     {
-        $this->get('/tienda')->assertOk()->assertViewIs('tienda')
+        $this->get('/tienda/catalogo')->assertOk()->assertViewIs('tienda')
             ->assertSee('id="tusneCatalog"', false)
             ->assertDontSee('id="cartRows"', false)
             ->assertDontSee('id="marketLoginEmail"', false);

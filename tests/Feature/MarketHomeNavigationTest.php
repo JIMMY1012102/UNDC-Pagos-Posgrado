@@ -9,9 +9,10 @@ class MarketHomeNavigationTest extends TestCase
     public function test_store_home_contains_discovery_sections(): void
     {
         $this->get('/tienda')->assertOk()
-            ->assertSee('id="marketHome"', false)
-            ->assertSee('Elige, revisa y paga tu pedido')
-            ->assertSee('id="homeStory"', false);
+            ->assertSee('id="undc-track"', false)
+            ->assertSee('Tus metas avanzan.')
+            ->assertSee('id="q"', false)
+            ->assertSee('href="/tienda/catalogo"', false);
     }
 
     public function test_catalogue_is_a_separate_screen(): void

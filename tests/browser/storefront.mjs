@@ -197,42 +197,118 @@ async function scenario(viewport, name) {
   }
 }
 
-// Theme switches change paint only, never geometry or line breaks.
-async function responsiveLightHome(viewport) {
- const page=await browser.newPage({viewport,reducedMotion:'reduce'});
- const exceptions=[];page.on('pageerror',error=>exceptions.push(error.message));
- try {
-  await page.route('**/api/v1/tienda/catalogo/oficinas',route=>route.fulfill({json:{success:true,data:[{id:7,name:'Posgrado de prueba'}]}}));
-  await page.route('**/api/v1/tienda/catalogo?*',route=>route.fulfill({json:{success:true,data:[]}}));
-  await page.goto(origin+'/tienda',{waitUntil:'networkidle'});
-  await page.evaluate(()=>document.fonts.ready);
-  async function theme(value){
-   await page.locator('#accessibilityFloatingButton').click();
-   await page.locator('[data-accessibility-theme="'+value+'"]').click();
-   await page.keyboard.press('Escape');
-   await page.evaluate(()=>scrollTo(0,0));
-   await page.waitForFunction(value=>document.body.classList.contains('light-mode')===(value==='light'),value);
+// Responsive checks follow the current split home/catalogue experience.
+// The journey home intentionally has no legacy accessibility floating panel.
+async function responsiveHome(viewport) {
+  const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
+  const exceptions = [];
+  page.on('pageerror', error => exceptions.push(error.message));
+  try {
+    await page.goto(origin + '/tienda', { waitUntil: 'networkidle' });
+    await page.locator('#undc-track').waitFor();
+    await page.locator('.stage').waitFor();
+    await page.locator('.h1').waitFor();
+    await page.locator('#q').waitFor();
+    await page.locator('.bg img').first().evaluate(img => img.decode());
+    const bounds = await page.evaluate(() => {
+      const selectors = ['#undc-track', '.stage', '.hdr', '.h1', '.search'];
+      return Object.fromEntries(selectors.map(selector => {
+        const element = document.querySelector(selector);
+        const rect = element.getBoundingClientRect();
+        return [selector, { x: rect.x, right: rect.right, width: rect.width, height: rect.height }];
+      }));
+    });
+    for (const [selector, rect] of Object.entries(bounds)) {
+      assert.ok(rect.width > 0 && rect.height > 0, selector + ' debe tener dimensiones visibles');
+      assert.ok(rect.x >= -1 && rect.right <= viewport.width + 1,
+        selector + ' debe permanecer dentro del viewport: ' + JSON.stringify(rect));
+    }
+    assert.equal(await page.locator('a[href="/tienda/catalogo"]').count() > 0, true,
+      'La portada debe ofrecer acceso al catálogo independiente');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
+      'La portada no debe desbordarse horizontalmente');
+    assert.deepEqual(exceptions, [], 'La portada no debe lanzar errores JavaScript');
+    console.log('PASS home responsive ' + viewport.width + 'px: hero, búsqueda, navegación y sin overflow');
+  } catch (error) {
+    failures++;
+    console.error('FAIL home responsive ' + viewport.width + 'px: ' + error.stack);
+  } finally {
+    await page.close();
   }
-  async function geometry(){return page.evaluate(()=>{
-   const selectors=['.site-header','#undc-track','.stage','.bg','.copy','.h1','.serif','#storeHeroSearch','.quick','.below','#tramites','#cuenta','#respaldo'];
-   return Object.fromEntries(selectors.map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [selector,{x:r.x,y:r.y+scrollY,width:r.width,height:r.height,font:s.font,lineHeight:s.lineHeight,position:s.position,display:s.display}]}));
-  });}
-  await theme('dark');const dark=await geometry();
-  await theme('light');const light=await geometry();
-  for(const selector of Object.keys(dark)){
-   for(const key of ['x','y','width','height'])assert.ok(Math.abs(dark[selector][key]-light[selector][key])<1,selector+' '+key+' debe conservarse al cambiar de tema: '+JSON.stringify({dark:dark[selector],light:light[selector]}));
-   for(const key of ['font','lineHeight','position','display'])assert.equal(light[selector][key],dark[selector][key],selector+' '+key);
-  }
-  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'Sin desbordamiento horizontal');
-  assert.equal(await page.locator('.undc-hero-claro .h1').evaluate(e=>getComputedStyle(e).color),'rgb(11, 59, 36)');
-  await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('light-mode')),true,'La preferencia clara debe persistir');
-  assert.deepEqual(exceptions,[],'Sin errores JavaScript');
-  console.log('PASS light/dark layout parity '+viewport.width+'px: misma foto, texto, tamaños, posiciones y responsive');
- }catch(error){failures++;console.error('FAIL light home '+viewport.width+'px: '+error.stack);}
- finally{await page.close();}
 }
-for(const width of [320,375,768,1024,1366,1920])await responsiveLightHome({width,height:width<=768?844:768});
+
+// Theme switches are available on the catalogue shell, not on the immersive home.
+async function responsiveThemeCatalog(viewport) {
+  const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
+  const exceptions = [];
+  page.on('pageerror', error => exceptions.push(error.message));
+  try {
+    await page.route('**/api/v1/tienda/catalogo/oficinas', route => route.fulfill({ json: {
+      success: true, data: [{ id: 7, name: 'Posgrado de prueba' }],
+    } }));
+    await page.route('**/api/v1/tienda/catalogo?*', route => route.fulfill({ json: {
+      success: true, data: [
+        { id: 12, name: 'Examen de prueba', category: 'admision', reference_amount: '300.00' },
+        { id: 13, name: 'Biblioteca de prueba', category: 'servicios_administrativos', reference_amount: '10.00' },
+      ],
+    } }));
+    await page.goto(origin + '/tienda/catalogo', { waitUntil: 'networkidle' });
+    await page.locator('.catalog-product').first().waitFor();
+    await page.locator('#accessibilityFloatingButton').waitFor();
+
+    async function theme(value) {
+      await page.locator('#accessibilityFloatingButton').click();
+      await page.locator('[data-accessibility-theme="' + value + '"]').click();
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(value =>
+        document.body.classList.contains('light-mode') === (value === 'light'), value);
+    }
+    async function geometry() {
+      return page.evaluate(() => {
+        const selectors = ['.site-header', 'main.wrap', '#tusneCatalog',
+          '#catalogResultsTitle', '.catalog-product'];
+        return Object.fromEntries(selectors.map(selector => {
+          const element = document.querySelector(selector);
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return [selector, {
+            x: rect.x, y: rect.y + scrollY, width: rect.width, height: rect.height,
+            font: style.font, lineHeight: style.lineHeight, position: style.position,
+            display: style.display,
+          }];
+        }));
+      });
+    }
+    await theme('dark');
+    const dark = await geometry();
+    await theme('light');
+    const light = await geometry();
+    for (const selector of Object.keys(dark)) {
+      for (const key of ['x', 'y', 'width', 'height']) {
+        assert.ok(Math.abs(dark[selector][key] - light[selector][key]) < 1,
+          selector + ' ' + key + ' debe conservarse al cambiar de tema');
+      }
+      for (const key of ['font', 'lineHeight', 'position', 'display']) {
+        assert.equal(light[selector][key], dark[selector][key], selector + ' ' + key);
+      }
+    }
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2),
+      false, 'El catálogo no debe desbordarse horizontalmente');
+    assert.deepEqual(exceptions, [], 'El catálogo no debe lanzar errores JavaScript');
+    console.log('PASS catalogue theme parity ' + viewport.width + 'px: tema sin alterar geometría');
+  } catch (error) {
+    failures++;
+    console.error('FAIL catalogue theme parity ' + viewport.width + 'px: ' + error.stack);
+  } finally {
+    await page.close();
+  }
+}
+for (const width of [320, 375, 768, 1024, 1366, 1920]) {
+  const viewport = { width, height: width <= 768 ? 844 : 768 };
+  await responsiveHome(viewport);
+  await responsiveThemeCatalog(viewport);
+}
+
 
 await scenario({ width: 1440, height: 900 }, 'desktop');
 await scenario({ width: 1366, height: 768 }, 'laptop');
