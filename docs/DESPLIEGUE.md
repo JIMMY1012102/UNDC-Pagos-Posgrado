@@ -24,27 +24,57 @@ Eliminar los secretos de Actions `ORACLE_DEPLOY_KEY` y `ORACLE_KNOWN_HOSTS` y re
 
 ## Actualización de columnas de tienda (PR #138)
 
-La migración `2026_11_24_000001_rename_store_business_columns_to_spanish.php` solo renombra columnas propias de `tienda_*`. No se despliega mediante `deploy-oracle.yml`; la publicación Oracle continúa siendo manual y requiere autorización del responsable. Antes de aplicar esta migración en la demo, confirmar que el respaldo puede restaurarse y ejecutar en la carpeta exclusiva de la aplicación:
+La migración `2026_11_24_000001_rename_store_business_columns_to_spanish.php` solo renombra columnas propias de `tienda_*`. No se despliega mediante `deploy-oracle.yml`; la publicación Oracle continúa siendo manual y requiere autorización del responsable.
+
+### Comprobaciones previas
+
+1. Confirmar que la versión del motor es compatible con la probada en CI (MariaDB 10.11):
+   `SELECT VERSION();`. Si la versión difiere, validar compatibilidad antes de continuar.
+2. Respaldar la base y comprobar que el archivo existe y no está vacío. Se recomienda probar la restauración en una base temporal antes de intervenir la demo.
+3. Respaldar también `.env` y `storage/`; operar solo en `/var/www/undc-pagos`.
+
+### Publicación manual
+
+Ejecutar en una sesión SSH autorizada. Definir un nombre de respaldo único y revisar cada salida:
 
 ```bash
-# 1) Respaldo de la base de datos de la demo
-mysqldump --single-transaction --routines --triggers tesoreria_dev > backup_tesoreria_dev_antes_columnas_$(date +%F_%H%M%S).sql
-
-# 2) Modo mantenimiento y actualización de código (tras aprobar/fusionar el PR)
-cd /var/www/undc-pagos
-git status --short
-php artisan down
-git pull --ff-only origin main
-composer install --no-dev --optimize-autoloader
-
-# 3) Aplicar migraciones y reconstruir cachés
-php artisan migrate --force
-php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan queue:restart
+cd /var/www/undc-pagos &&
+BACKUP_FILE="backup_tesoreria_dev_antes_columnas_$(date +%F_%H%M%S).sql" &&
+mysqldump --single-transaction --routines --triggers tesoreria_dev > "$BACKUP_FILE" &&
+test -s "$BACKUP_FILE" &&
+SELECT_VERSION="SELECT VERSION();" &&
+mysql tesoreria_dev -Nse "$SELECT_VERSION" &&
+test -z "$(git status --porcelain)" &&
+php artisan down &&
+git pull --ff-only origin main &&
+composer install --no-dev --optimize-autoloader &&
+php artisan migrate --force &&
+php artisan optimize:clear &&
+php artisan config:cache &&
+php artisan route:cache &&
+php artisan view:cache &&
+php artisan queue:restart &&
 php artisan up
 ```
 
-Si cualquier paso falla, no continuar con la siguiente instrucción: mantener el modo mantenimiento, conservar los logs y restaurar el respaldo solo con el procedimiento autorizado. No ejecutar `migrate:rollback` indiscriminadamente ni modificar tablas `tm_*`. Verificar catálogo, carrito, perfil y pedidos en la demo con datos ficticios. Esta guía no autoriza desplegar ni fusionar el PR.
+El resultado de `SELECT VERSION();` debe revisarse y compararse con MariaDB 10.11 del CI antes de iniciar la publicación. `test -s` confirma que el dump no está vacío; no sustituye una prueba de restauración. La comprobación de `git status --porcelain` exige un clon limpio antes del pull. La cadena con `&&` impide ejecutar `php artisan up` si falla cualquier paso anterior; ante un error, el modo mantenimiento permanece activo.
+
+### Si migrate falla
+
+- Mantener la aplicación en modo mantenimiento y conservar la salida/logs del error.
+- **NO ejecutar `php artisan migrate:rollback`**: la migración fallida puede no estar registrada en `migrations`, y ese rollback revertiría la migración anterior que sí está registrada.
+- Revisar cuidadosamente `SHOW CREATE TABLE` de las tablas afectadas y el contenido de la tabla `migrations`.
+- La migración es reanudable: si cada columna está íntegramente en su estado antiguo o nuevo, volver a ejecutar `php artisan migrate --force`; la validación detecta conflictos (origen y destino presentes, o ambos ausentes) antes de aplicar DDL.
+- Si el esquema presenta un conflicto no resoluble con seguridad, o no se puede determinar el estado, detenerse y restaurar el respaldo validado mediante el procedimiento autorizado. No improvisar renombrados ni alterar tablas `tm_*`.
+
+### Checklist posterior
+
+- [ ] Login e inicio de sesión.
+- [ ] Registro de cuenta.
+- [ ] Catálogo y carrito.
+- [ ] Perfil del comprador.
+- [ ] Creación de un pedido de prueba.
+- [ ] Consulta de **Mis pedidos**.
+- [ ] Verificar logs, colas y respuesta HTTP.
+
+Esta guía no autoriza desplegar ni fusionar el PR.
