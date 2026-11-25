@@ -520,6 +520,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
             <h2>Identidad</h2>
             <div class="form-grid">
               <div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div>
+              <div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div>
             </div>
             <div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div>
           </fieldset>
