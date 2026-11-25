@@ -466,6 +466,11 @@ document.querySelectorAll('[data-toggle-password]').forEach(function (button) {b
    return;
   }
   showStep(2,false);
+  if(!stepTwo.checkValidity()){
+   event.preventDefault();
+   showStep(2);
+   stepTwo.reportValidity();
+  }
  });
  const errorKeys=JSON.parse(form.dataset.errorFields||'[]');
  const firstError=errorKeys[0];
