@@ -20,7 +20,8 @@
             :root { --container-max: 1440px; }
             @media (min-width: 1920px) { :root { --container-max: 1680px; } }
             .welcome-container { width: min(100%, var(--container-max)); margin-inline: auto; }
-        </style>\n    </head>
+        </style>
+    </head>
     <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
         <header class="welcome-container w-full text-sm mb-6 not-has-[nav]:hidden">
             @if (Route::has('login'))
