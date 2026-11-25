@@ -356,21 +356,39 @@ async function responsiveAccountPage(viewport, kind) {
       const noVerticalScroll = async step => {
         if (!desktop) return;
         const metrics = await page.evaluate(() => ({
-          viewport: innerHeight,
-          rootClient: document.documentElement.clientHeight,
-          rootScroll: document.documentElement.scrollHeight,
-          bodyScroll: document.body.scrollHeight,
+          viewport: innerHeight, rootClient: document.documentElement.clientHeight,
+          rootScroll: document.documentElement.scrollHeight, bodyScroll: document.body.scrollHeight,
         }));
         assert.ok(metrics.rootScroll <= metrics.rootClient + 1 && metrics.bodyScroll <= metrics.viewport + 1,
           'El registro no debe tener scroll vertical en el paso ' + step + ': ' + JSON.stringify(metrics));
-        const card = await page.locator('.account-data-card').boundingBox();
-        cardHeights.push(card.height);
+        const g = await page.evaluate(() => {
+          const rect = el => {const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,width:r.width};};
+          const body=rect(document.querySelector('.emerald-register-fields'));
+          const footer=rect(document.querySelector('[data-register-step]:not([hidden]) .register-step-actions'));
+          const heading=rect(document.querySelector('.market-login-heading'));
+          const progress=rect(document.querySelector('.register-progress'));
+          const first=rect(document.querySelector('[data-register-step]:not([hidden]) input:not([type=hidden]),[data-register-step]:not([hidden]) select'));
+          const controls=[...document.querySelectorAll('[data-register-step]:not([hidden]) input:not([type=hidden]),[data-register-step]:not([hidden]) select')].filter(e=>e.getClientRects().length).map(e=>({id:e.id,...rect(e)}));
+          const back=document.querySelector('[data-register-step]:not([hidden]) [data-register-back]');
+          const next=document.querySelector('[data-register-step]:not([hidden]) [data-register-next],[data-register-step]:not([hidden]) button[type=submit]');
+          return {body,footer,heading,progress,first,controls,back:back?{...rect(back),whiteSpace:getComputedStyle(back).whiteSpace}:null,next:next?rect(next):null};
+        });
+        for(const field of g.controls){
+          assert.ok(field.top>=g.body.top-1&&field.bottom<=g.body.bottom+1&&field.left>=g.body.left-1&&field.right<=g.body.right+1,
+            'Campo fuera del cuerpo paso '+step+': '+JSON.stringify({field,g}));
+          assert.ok(field.bottom<=g.footer.top+1||field.top>=g.footer.bottom-1,
+            'Campo intersecta la barra de botones paso '+step+': '+JSON.stringify({field,g}));
+        }
+        assert.ok(g.progress.top>=g.heading.bottom-1,'Stepper intersecta título paso '+step+': '+JSON.stringify(g));
+        assert.ok(g.progress.bottom<=g.first.top+1,'Stepper intersecta primer campo paso '+step+': '+JSON.stringify(g));
+        if(g.back){assert.equal(g.back.whiteSpace,'nowrap','Atrás debe estar en una sola línea');assert.ok(Math.abs(g.back.height-g.next.height)<=3,'Atrás y Continuar deben tener altura similar');}
+        const card=await page.locator('.account-data-card').boundingBox();cardHeights.push(card.height);
       };
       const captureStep = async step => {
-        if (viewport.width === 1366 && viewport.height === 768) {
+        if (viewport.width === 1366 && [590, 768].includes(viewport.height)) {
           mkdirSync('artifacts/registration-steps', { recursive: true });
           await page.screenshot({
-            path: 'artifacts/registration-steps/step-' + step + '.png',
+            path: 'artifacts/registration-steps/step-' + step + '-' + viewport.height + 'h.png',
             fullPage: false,
           });
         }
@@ -402,6 +420,7 @@ async function responsiveAccountPage(viewport, kind) {
       }
       assert.equal(await page.locator('#account_email').isVisible(), false, 'El correo pertenece al paso Contacto');
       assert.equal(await page.locator('#account_password').isVisible(), false, 'La contraseña pertenece al paso Acceso');
+      assert.equal(await page.locator('.field-error:visible').count(),0,'No mostrar errores al cargar Identidad');
       await noVerticalScroll(1);
       await captureStep(1);
 
@@ -415,6 +434,9 @@ async function responsiveAccountPage(viewport, kind) {
         assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar en Contacto y ubicación');
       }
       assert.equal(await page.locator('#account_password').isVisible(), false);
+      assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
+      assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
+      await noVerticalScroll(2);
       await page.locator('[data-register-step="2"] [data-register-next]').click();
       assert.match(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /obligatorio/i,
         'El correo debe mostrar un error en línea antes de avanzar');
@@ -535,7 +557,7 @@ await responsiveWelcome({ width: 1920, height: 1080 });
 
 // Registro real y shell de perfil con los mismos campos compartidos.
 for (const viewport of [
-  { width: 1366, height: 600 },
+  { width: 1366, height: 590 },
   { width: 1366, height: 768 },
   { width: 1440, height: 900 },
   { width: 1920, height: 1080 },
