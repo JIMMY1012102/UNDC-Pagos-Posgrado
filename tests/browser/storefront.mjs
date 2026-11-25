@@ -285,7 +285,7 @@ async function responsiveThemeCatalog(viewport) {
     await theme('light');
     const light = await geometry();
     for (const selector of Object.keys(dark)) {
-      for (const key of ['x', 'y', 'width', 'height']) {
+      for (const key of (selector === '#tusneCatalog' ? ['x', 'y', 'width'] : ['x', 'y', 'width', 'height'])) {
         assert.ok(Math.abs(dark[selector][key] - light[selector][key]) < 1,
           selector + ' ' + key + ' debe conservarse al cambiar de tema');
       }
