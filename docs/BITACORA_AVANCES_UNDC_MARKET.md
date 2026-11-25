@@ -205,3 +205,11 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se añadió cobertura Feature para los tres pasos y persistencia de valores antiguos; la prueba Chromium recorre los tres pasos, comprueba errores inline, altura estable y ausencia de scroll vertical en 1366×600, 1366×768 y 1920×1080.
 - El workflow de Chromium publica capturas de los tres pasos en 1366×768 como artefacto `registro-tres-pasos-1366x768`.
 - Estado al registrar este avance: cambios preparados en rama y pendientes de ejecución CI/validación visual. No fusionar a `main` sin aprobación expresa.
+
+
+### Ajustes tras primera ejecución Chromium (25 de noviembre de 2026)
+
+- El job Chromium identificó que el formulario no estaba usando un contenedor flex real: el `form` impedía que la altura disponible se distribuyera entre los pasos, y la fila de acciones se superponía al control de mostrar contraseña.
+- Se corrigió la cadena flex del formulario y sus pasos, se dio prioridad de apilamiento al botón de mostrar/ocultar contraseña y se fijó una altura estable para la tarjeta móvil con scroll interno permitido.
+- La primera ejecución también registró un desbordamiento horizontal en la pantalla de perfil a 375 px, fuera del alcance de esta tarea; se verificará si persiste en la siguiente ejecución sin modificar esa pantalla.
+- Pendiente repetir Chromium y confirmar que el job completo queda verde. El PR continúa abierto; no se ha fusionado.
