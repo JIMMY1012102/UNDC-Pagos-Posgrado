@@ -506,4 +506,12 @@ button{font-family:inherit}
 .journey,.jsec,.footin,.status{width:min(100%,var(--container-max,1440px))}
 @media(min-width:1600px){:root{--sh:max(640px,min(100svh,1800px))}.hdr{padding-inline:max(56px,calc((100vw - var(--container-max,1440px))/2))}.copy{width:min(100%,var(--container-max,1440px))}.journey,.jsec{padding-inline:clamp(56px,4vw,76px)}.h1,.h2{font-size:clamp(76px,5vw,108px)}.lead{max-width:620px;font-size:22px}.step{gap:clamp(56px,4vw,84px)}.sp{max-width:390px;font-size:18px}}
 @media(min-width:1920px){:root{--sh:max(640px,min(100svh,1800px))}.copy,.progin,.journey,.jsec,.footin,.status{max-width:var(--container-max,1680px)}.journey,.jsec,.footin,.status{width:min(100%,var(--container-max,1680px))}.hdr{padding-inline:max(32px,calc((100vw - var(--container-max,1680px))/2))}.h1,.h2{font-size:clamp(88px,4.8vw,116px)}}
-@media(min-width:2560px){.h1,.h2{font-size:116px}.lead{max-width:660px;font-size:23px}}
+@media(min-width:1600px){
+  .col{padding:clamp(72px,9svh,104px) 32px clamp(68px,8svh,92px)}
+  .h1,.h2{font-size:clamp(68px,min(5vw,8svh),96px);line-height:.96}
+  .serif{font-size:clamp(44px,min(4.2vw,7svh),80px)}
+  .lead{margin-top:clamp(16px,2.4svh,26px);font-size:clamp(18px,2.1svh,22px)}
+  .search{margin-top:clamp(20px,3.1svh,34px)}
+  .quick{margin-top:clamp(14px,2svh,22px)}
+}
+@media(min-width:2560px){.lead{max-width:660px}}
