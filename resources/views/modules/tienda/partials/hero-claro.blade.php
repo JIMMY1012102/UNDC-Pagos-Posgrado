@@ -101,28 +101,7 @@
       </div>
     </div>
 
-    <div class="prog">
-      <div class="progin">
-        <div class="cnt" aria-hidden="true">
-          <span class="fx abs s1">01 / 04</span>
-          <span class="fx abs s2">02 / 04</span>
-          <span class="fx abs s3">03 / 04</span>
-          <span class="fx abs s4">04 / 04</span>
-        </div>
-        <div class="hintbox" aria-hidden="true">
-          <div class="fx abs hint s1">
-            Desliza para descubrir
-            <i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></i>
-          </div>
-        </div>
-        <div class="bars" aria-hidden="true">
-          <span class="bar b1"><b></b></span>
-          <span class="bar b2"><b></b></span>
-          <span class="bar b3"><b></b></span>
-          <span class="bar b4"><b></b></span>
-        </div>
-      </div>
-    </div>
+    <div class="prog"><div class="progin"><div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div></div>
   </div>
 </div>
 
