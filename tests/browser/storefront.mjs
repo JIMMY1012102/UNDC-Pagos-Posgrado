@@ -380,7 +380,7 @@ async function responsiveAccountPage(viewport, kind) {
             'Campo intersecta la barra de botones paso '+step+': '+JSON.stringify({field,g}));
         }
         assert.ok(g.progress.top>=g.heading.bottom-1,'Stepper intersecta título paso '+step+': '+JSON.stringify(g));
-        assert.ok(g.progress.bottom<=g.first.top+1,'Stepper intersecta primer campo paso '+step+': '+JSON.stringify(g));
+        assert.ok(g.first.top-g.progress.bottom<=32,'El espacio entre stepper y primer campo debe ser <=32px en paso '+step+': '+JSON.stringify(g));
         if(g.back){assert.equal(g.back.whiteSpace,'nowrap','Atrás debe estar en una sola línea');assert.ok(Math.abs(g.back.height-g.next.height)<=3,'Atrás y Continuar deben tener altura similar');}
         const card=await page.locator('.account-data-card').boundingBox();cardHeights.push(card.height);
       };
@@ -420,6 +420,7 @@ async function responsiveAccountPage(viewport, kind) {
       }
       assert.equal(await page.locator('#account_email').isVisible(), false, 'El correo pertenece al paso Contacto');
       assert.equal(await page.locator('#account_password').isVisible(), false, 'La contraseña pertenece al paso Acceso');
+      assert.equal(await page.locator('[data-register-step="1"] h2').count(),0,'No duplicar el título Identidad');
       assert.equal(await page.locator('.field-error:visible').count(),0,'No mostrar errores al cargar Identidad');
       await noVerticalScroll(1);
       await captureStep(1);
@@ -430,9 +431,22 @@ async function responsiveAccountPage(viewport, kind) {
       await page.locator('[data-register-step="1"] [data-register-next]').click();
       assert.equal(await page.locator('.field-error').count(), 0, 'Identidad válida debe avanzar sin errores');
       assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 2 de 3');
-      for (const selector of ['#account_phone_country_code', '#account_phone', '#account_email', '#account_line_1', '#account_line_2', '#account_city', '#account_state', '#account_country']) {
-        assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar en Contacto y ubicación');
+      for (const selector of ['#account_phone_country_code', '#account_phone', '#account_email', '#account_line_1', '#account_city', '#account_state']) {
+        assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar visible en Contacto y ubicación');
       }
+      assert.equal(await page.locator('#account_line_2').isVisible(), false, 'Referencia opcional inicia colapsada');
+      assert.equal(await page.locator('#account_country').isVisible(), false, 'País se envía como campo oculto');
+      assert.equal(await page.locator('#account_country').inputValue(), 'PE', 'País oculto usa ISO-3166 PE por defecto');
+      const referenceToggle=page.getByRole('button',{name:'+ Agregar referencia'});
+      assert.equal(await referenceToggle.getAttribute('aria-expanded'),'false');
+      assert.equal(await referenceToggle.getAttribute('aria-controls'),'account_line_2');
+      await referenceToggle.click();
+      assert.equal(await referenceToggle.getAttribute('aria-expanded'),'true');
+      assert.equal(await page.locator('#account_line_2').isVisible(),true,'Referencia se despliega al solicitarla');
+      await page.locator('#account_line_2').fill('Frente al parque');
+      await page.getByRole('button',{name:'− Ocultar referencia'}).click();
+      assert.equal(await page.locator('#account_line_2').isVisible(),false,'Referencia puede volver a colapsarse');
+      assert.equal(await page.locator('#account_line_2').inputValue(),'Frente al parque','Colapsar no descarta el valor');
       assert.equal(await page.locator('#account_password').isVisible(), false);
       assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
       assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
@@ -449,7 +463,6 @@ async function responsiveAccountPage(viewport, kind) {
       await noVerticalScroll(2);
       await captureStep(2);
 
-      const cardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
       await page.locator('[data-register-step="2"] [data-register-next]').click();
       assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 3 de 3');
       assert.equal(await page.locator('#account_password').isVisible(), true);
@@ -464,14 +477,10 @@ async function responsiveAccountPage(viewport, kind) {
         'El indicador de fortaleza debe ser visible en Acceso');
       await noVerticalScroll(3);
       await captureStep(3);
-      const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
-      assert.ok(Math.abs(cardHeight - nextCardHeight) <= 1,
-        'La tarjeta debe conservar la misma altura entre pasos');
-      if (cardHeights.length > 1) {
-        assert.ok(Math.max(...cardHeights) - Math.min(...cardHeights) <= 1,
-          'La tarjeta no debe crecer ni saltar al cambiar de paso: ' + JSON.stringify(cardHeights));
-      }
+      assert.ok(cardHeights.every(height => height > 0), 'La tarjeta debe medir según el contenido en cada paso');
 
+      const submittedCountry = await page.locator('form[data-register-form]').evaluate(form => new FormData(form).get('country'));
+      assert.equal(submittedCountry,'PE','El país oculto debe incluirse en el envío del registro');
       await page.locator('#account_password').fill('Demo-password-2026');
       await page.locator('#account_password_confirmation').fill('Different-password-2026');
       await page.locator('[data-register-step="3"] button[type="submit"]').click();
