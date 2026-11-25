@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -86,15 +87,14 @@ DB::table('migrations')->where('migration', $migrationName)->delete();
 // Conflicto deliberado: origen y destino presentes a la vez. La validación
 // debe fallar antes de tocar cualquier otra columna pendiente.
 DB::statement('ALTER TABLE tienda_conceptos_catalogo ADD COLUMN categoria_codigo VARCHAR(255) NULL');
+$conflictSnapshot = $snapshot();
 $conflictExit = Artisan::call('migrate', ['--force' => true]);
 $conflictOutput = Artisan::output();
 if ($conflictExit === 0 || ! str_contains($conflictOutput, 'Conflicto en tienda_conceptos_catalogo')) {
     throw new RuntimeException("El conflicto de columnas no produjo el error esperado: {$conflictOutput}");
 }
-if (! Schema::hasColumn('tienda_perfiles_compradores', 'user_id')
-    || Schema::hasColumn('tienda_perfiles_compradores', 'usuario_id')
-    || ! Schema::hasColumn('tienda_pedidos', 'code')) {
-    throw new RuntimeException('La migración modificó columnas pendientes a pesar del conflicto de validación.');
+if ($snapshot() !== $conflictSnapshot) {
+    throw new RuntimeException('La migración modificó el esquema o los datos a pesar del conflicto de validación.');
 }
 DB::statement('ALTER TABLE tienda_conceptos_catalogo DROP COLUMN categoria_codigo');
 
@@ -127,6 +127,10 @@ if ((int) DB::table('tienda_carritos')->where('id', $cartId)->value('usuario_act
 }
 if (! DB::table('tienda_carritos')->where('id', $cartId)->where('usuario_activo_id', $user->id)->exists()) {
     throw new RuntimeException('El índice uq_cart_active_user no permite localizar correctamente el carrito activo.');
+}
+$activeIndex = DB::selectOne("SHOW INDEX FROM tienda_carritos WHERE Key_name = 'uq_cart_active_user'");
+if (! $activeIndex || $activeIndex->Column_name !== 'usuario_activo_id') {
+    throw new RuntimeException('El índice uq_cart_active_user no quedó asociado a usuario_activo_id.');
 }
 if ($snapshot() !== $before) {
     throw new RuntimeException('La reanudación parcial alteró DDL o datos respecto del esquema completo esperado.');

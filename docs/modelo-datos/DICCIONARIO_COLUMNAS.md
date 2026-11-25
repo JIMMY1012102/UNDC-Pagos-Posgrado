@@ -199,7 +199,7 @@ estados, monedas, códigos de proveedor ni claves JSON públicas.
 | | `occurred_at` | `ocurrido_en` |
 
 `tienda_categorias` ya tenía sus columnas de negocio en español (`codigo`,
-`nombre`, `orden`, `legacy_office_id`; no se altera.
+`nombre`, `orden`, `legacy_office_id)); no se altera.
 
 ## Columnas que se conservan
 
@@ -213,7 +213,7 @@ columna propia de negocio.
 - `tienda_conceptos_catalogo.categoria_codigo` es un código de clasificación;
   `categoria_id` sigue siendo la FK a `tienda_categorias.id`. Son conceptos
   distintos y ambos se conservan.
-- El índice único conserva el nombre técnico `uq_cart_active_user`, aunque su columna asociada ahora se llama `usuario_activo_id`.\n- `tienda_carritos.usuario_activo_id` sigue siendo una columna generada:
+- `tienda_carritos.usuario_activo_id` sigue siendo una columna generada:
   `CASE WHEN estado = 'active' THEN usuario_id ELSE NULL END`. El valor
   almacenado `active` no se traduce.
 - Estados como `pending`, `paid`, `cancelled`, `expired`, `active`,
