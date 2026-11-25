@@ -447,13 +447,34 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
       assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
       await noVerticalScroll(2);
-      const contactOverflow=await page.locator('[data-register-step="2"] .form-grid').evaluate(grid=>{
-        const overflow=grid.scrollHeight>grid.clientHeight+1;
-        grid.scrollTop=overflow?grid.scrollHeight:0;
-        grid.dispatchEvent(new Event('scroll'));
-        return {overflow,hasOverflow:grid.classList.contains('has-scroll-overflow'),
-          atEnd:grid.classList.contains('scroll-at-end'),opacity:getComputedStyle(grid,'::after').opacity};
+      const contactGrid=page.locator('[data-register-step="2"] .form-grid');
+      const contactOverflow=await contactGrid.evaluate(grid=>({
+        selector:'.register-step[data-register-step="2"] .form-grid',
+        overflowY:getComputedStyle(grid).overflowY,
+        scrollHeight:grid.scrollHeight,clientHeight:grid.clientHeight,
+        overflow:grid.scrollHeight>grid.clientHeight+1,
+        hasOverflow:grid.classList.contains('has-scroll-overflow')
+      }));
+      assert.equal(contactOverflow.overflowY,'auto',
+        'El contenedor real de scroll móvil debe ser .form-grid: '+JSON.stringify(contactOverflow));
+      await contactGrid.evaluate(grid=>grid.scrollTo({top:grid.scrollHeight,behavior:'instant'}));
+      await page.waitForFunction(()=>{
+        const grid=document.querySelector('[data-register-step="2"] .form-grid');
+        return !grid || grid.classList.contains('scroll-at-end');
       });
+      const contactEnd=await contactGrid.evaluate(grid=>({
+        maxScroll:Math.max(0,grid.scrollHeight-grid.clientHeight),scrollTop:grid.scrollTop,
+        hasOverflow:grid.classList.contains('has-scroll-overflow'),
+        atEnd:grid.classList.contains('scroll-at-end'),opacity:getComputedStyle(grid,'::after').opacity
+      }));
+      assert.equal(contactOverflow.hasOverflow,contactOverflow.overflow,
+        'El degradado solo debe activarse con overflow real: '+JSON.stringify(contactOverflow));
+      if(contactOverflow.overflow){
+        assert.ok(contactEnd.scrollTop>=contactEnd.maxScroll-2,
+          'La prueba debe desplazar .form-grid hasta su posición final: '+JSON.stringify(contactEnd));
+        assert.equal(contactEnd.atEnd,true,'El indicador debe ocultarse al final del scroll: '+JSON.stringify(contactEnd));
+        assert.equal(contactEnd.opacity,'0','El degradado no debe tapar el último campo al final');
+      }
       assert.equal(contactOverflow.hasOverflow,contactOverflow.overflow,
         'El degradado solo debe activarse con overflow real: '+JSON.stringify(contactOverflow));
       if(contactOverflow.overflow){
@@ -508,6 +529,11 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(accessGeometry.gradientOpacity,'0','El degradado debe estar oculto sin overflow');
       const passwordInputStyle=await page.locator('#account_password').evaluate(el=>({paddingRight:getComputedStyle(el).paddingRight,borderRadius:getComputedStyle(el).borderRadius}));
       assert.ok(parseFloat(passwordInputStyle.paddingRight)>=40,'El input debe reservar espacio para el ojo');
+      const autofillPadding=await page.locator('style').evaluateAll(nodes=>nodes.map(node=>node.textContent).join('\\n'));
+      assert.match(autofillPadding, /register-step\\s+\\.register-password-control\\s+input:autofill[\\s\\S]*?padding-right:\\s*44px;/,
+        'Autofill Firefox debe conservar los 44px del botón ojo');
+      assert.match(autofillPadding, /register-step\\s+\\.register-password-control\\s+input:-webkit-autofill[\\s\\S]*?padding-right:\\s*44px;/,
+        'Autofill Chromium debe conservar los 44px del botón ojo');
       await noVerticalScroll(3);
       await captureStep(3);
       const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
