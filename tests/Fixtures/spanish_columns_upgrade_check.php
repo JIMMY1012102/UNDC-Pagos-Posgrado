@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\Artisan;
+use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -84,12 +84,18 @@ if ((int) DB::table('tienda_carritos')->where('id', $cartId)->value('active_user
 $migrationName = '2026_11_24_000001_rename_store_business_columns_to_spanish';
 DB::table('migrations')->where('migration', $migrationName)->delete();
 
+$runMigrate = static function (): array {
+    $process = new Process([PHP_BINARY, base_path('artisan'), 'migrate', '--force'], base_path());
+    $process->run();
+
+    return [$process->getExitCode(), $process->getOutput().$process->getErrorOutput()];
+};
+
 // Conflicto deliberado: origen y destino presentes a la vez. La validación
 // debe fallar antes de tocar cualquier otra columna pendiente.
 DB::statement('ALTER TABLE tienda_conceptos_catalogo ADD COLUMN categoria_codigo VARCHAR(255) NULL');
 $conflictSnapshot = $snapshot();
-$conflictExit = Artisan::call('migrate', ['--force' => true]);
-$conflictOutput = Artisan::output();
+[$conflictExit, $conflictOutput] = $runMigrate();
 if ($conflictExit === 0 || ! str_contains($conflictOutput, 'Conflicto en tienda_conceptos_catalogo')) {
     throw new RuntimeException("El conflicto de columnas no produjo el error esperado: {$conflictOutput}");
 }
@@ -104,8 +110,7 @@ DB::statement('ALTER TABLE tienda_conceptos_catalogo RENAME COLUMN category TO c
 DB::statement('ALTER TABLE tienda_perfiles_compradores RENAME COLUMN user_id TO usuario_id');
 DB::statement('ALTER TABLE tienda_intentos_pago RENAME COLUMN order_id TO pedido_id');
 
-$migrateExit = Artisan::call('migrate', ['--force' => true]);
-$migrateOutput = Artisan::output();
+[$migrateExit, $migrateOutput] = $runMigrate();
 if ($migrateExit !== 0) {
     throw new RuntimeException("migrate --force no reanudó el esquema parcialmente aplicado: {$migrateOutput}");
 }
