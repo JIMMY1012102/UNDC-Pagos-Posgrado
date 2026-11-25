@@ -346,8 +346,13 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
   .emerald-register .register-progress{flex:0 0 auto;margin:0 0 8px;font-size:11px}
   .emerald-register .register-progress-dots{gap:8px}
   .emerald-register .register-progress-dots span{width:7px;height:7px}
-  .emerald-register .emerald-register-fields{flex:1;min-height:0}
-  .emerald-register .register-step{height:100%;min-height:0;display:flex;flex-direction:column}
+  .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
+  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
+  .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column;overflow:visible}
+  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
+  .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
+  .emerald-register .register-password-control{position:relative;z-index:3}
+  .emerald-register .register-password-control .eye{position:relative;z-index:4;pointer-events:auto}
   .emerald-register .register-step[hidden]{display:none!important}
   .emerald-register .emerald-register-fields h2{margin:0 0 8px;font-size:12px}
   .emerald-register .form-grid{gap:10px 12px}
@@ -382,7 +387,14 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
   .emerald-register .emerald-panel{height:auto;max-height:none;min-height:0;width:100%;max-width:none}
   .emerald-register .emerald-toolbar{margin-bottom:8px}
   .emerald-register .emerald-panel>.gb{display:block;overflow:hidden}
-  .emerald-register .account-data-card{height:auto;min-height:440px;max-height:calc(100dvh - 150px);overflow-y:auto;padding:24px 18px!important}
+  .emerald-register .account-data-card{display:flex;flex-direction:column;height:min(620px,calc(100dvh - 150px));min-height:440px;max-height:calc(100dvh - 150px);overflow-y:auto;padding:24px 18px!important}
+  .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
+  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
+  .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column}
+  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
+  .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
+  .emerald-register .register-password-control{position:relative;z-index:3}
+  .emerald-register .register-password-control .eye{position:relative;z-index:4;pointer-events:auto}
   .emerald-register .market-login-heading{margin-bottom:16px!important}
   .emerald-register .market-login-symbol{width:42px;height:42px}
   .emerald-register .market-login-heading h1{font-size:24px}
