@@ -104,7 +104,7 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 .market-login-view > header,.market-login-view > .footer{display:none}
 .market-login-view main.wrap{max-width:none;width:100%;margin:0;padding:0}
 .emerald-login{position:relative;isolation:isolate;overflow:hidden;min-height:100svh;padding:0!important;background:#031c13}
-.emerald-layout{position:relative;max-width:1360px;margin:auto;padding:28px;display:flex;align-items:center;gap:56px;min-height:100svh}
+.emerald-layout{position:relative;max-width:var(--container-max,1440px);margin:auto;padding:28px;display:flex;align-items:center;gap:56px;min-height:100svh}
 .emerald-intro{flex:1 1 540px!important}.emerald-panel{flex:1 1 440px;min-width:0;max-width:520px;width:100%;margin:auto}
 .emerald-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
 .emerald-toolbar a,.emerald-toolbar button{padding:10px 16px;border:1px solid #639c7e;border-radius:14px;background:transparent;color:#d7ff9a;font-size:14px;cursor:pointer}
@@ -133,7 +133,7 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 
 /* Compact viewport layout: shrink the content instead of clipping the form. */
 @media(min-width:761px){
-.emerald-layout{max-width:1200px;min-height:100svh;padding:16px 28px;gap:40px}
+.emerald-layout{max-width:var(--container-max,1440px);min-height:100svh;padding:16px 28px;gap:40px}
 .emerald-intro{align-self:center!important;justify-content:center!important;gap:12px!important}
 .emerald-intro .stage{height:340px!important;transform:none;margin:0}
 .emerald-intro .rig{inset:-55px -40px;transform:scale(.72) rotateX(16deg) rotateY(-6deg)!important}
@@ -255,7 +255,7 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 
 /* Larger left composition, with a height-aware compact variant. */
 @media(min-width:1001px){
-.emerald-layout{max-width:1280px;gap:48px}
+.emerald-layout{max-width:var(--container-max,1440px);gap:48px}
 .emerald-university-emblem{width:76px;height:88px}
 .emerald-intro>.in1 .sora{font-size:34px!important}
 .emerald-intro>.in1>span:last-child>span:last-child{font-size:17px!important}
