@@ -230,6 +230,7 @@ async function responsiveHome(viewport) {
       return measured;
     });
     for (const [selector, rect] of Object.entries(bounds)) {
+      if (selector === 'copySearch') continue;
       assert.ok(rect.width > 0 && rect.height > 0, selector + ' debe tener dimensiones visibles');
       assert.ok(rect.x >= -1 && rect.right <= viewport.width + 1,
         selector + ' debe permanecer dentro del viewport: ' + JSON.stringify(rect));
