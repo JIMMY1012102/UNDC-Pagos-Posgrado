@@ -1790,3 +1790,5 @@ html[data-accessibility-text] .cart-modern .cart-review-panel #cartRows .cart-se
  .wrap{width:min(calc(100% - 80px),var(--container-max,1680px))}
 }
 @media (min-width:2560px){.hero h1{font-size:calc(74px*var(--a11y-text-scale,1))}.hero p{max-width:760px}.concept-grid{gap:22px}.tusne-concept{padding:22px}}
+
+.market-login-layout{width:min(calc(100% - 48px),var(--container-max,1440px));max-width:var(--container-max,1440px);margin-inline:auto}
