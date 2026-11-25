@@ -374,7 +374,7 @@ async function responsiveAccountPage(viewport, kind) {
           return {body:bodyRect,footer:footerRect,heading,progress,first,scrollHeight:body.scrollHeight,clientHeight:body.clientHeight,back:back?{...rect(back),whiteSpace:getComputedStyle(back).whiteSpace}:null,next:next?rect(next):null};
         });
         assert.ok(g.progress.top>=g.heading.bottom-1,'Stepper intersecta encabezado paso '+step+': '+JSON.stringify(g));
-        assert.ok(g.first.top-g.progress.bottom<=32,'El primer campo debe quedar a <=32px del stepper en paso '+step+': '+JSON.stringify(g));
+        assert.ok(g.first.top>=g.progress.bottom-1&&g.first.top-g.progress.bottom<=32,'El primer campo debe quedar debajo del stepper, sin solaparse y a <=32px en paso '+step+': '+JSON.stringify(g));
         assert.ok(g.footer.top>=g.body.bottom-1,'El pie debe quedar después del cuerpo desplazable: '+JSON.stringify(g));
         if(g.back){assert.equal(g.back.whiteSpace,'nowrap','Atrás debe estar en una sola línea');assert.ok(Math.abs(g.back.height-g.next.height)<=3,'Atrás y Continuar deben tener altura similar');}
         if(step===2){
