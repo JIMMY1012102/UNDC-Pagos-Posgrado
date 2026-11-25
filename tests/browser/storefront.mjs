@@ -444,13 +444,24 @@ async function responsiveAccountPage(viewport, kind) {
       }
       assert.equal(await page.locator('#account_password').isVisible(), false);
       if (viewport.width === 375) {
-        const mobileGrid = await page.locator('[data-register-step="2"] .form-grid').evaluate(el => ({
+        const mobileGridLocator = page.locator('[data-register-step="2"] .form-grid');
+        const mobileGrid = await mobileGridLocator.evaluate(el => ({
           overflowY:getComputedStyle(el).overflowY,
           scrollHeight:el.scrollHeight, clientHeight:el.clientHeight,
+          gradientOpacity:getComputedStyle(el,'::after').opacity,
+          gradientPointerEvents:getComputedStyle(el,'::after').pointerEvents,
           bounds:(()=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};})()
         }));
         assert.equal(mobileGrid.overflowY, 'auto',
           '[data-register-step="2"] .form-grid overflowY calculado=' + mobileGrid.overflowY + '; esperado=auto; geometría=' + JSON.stringify(mobileGrid));
+        assert.equal(mobileGrid.gradientPointerEvents, 'none',
+          '[data-register-step="2"] .form-grid::after pointer-events calculado=' + mobileGrid.gradientPointerEvents + '; esperado=none; geometría=' + JSON.stringify(mobileGrid));
+        if (mobileGrid.scrollHeight > mobileGrid.clientHeight + 1) {
+          assert.equal(mobileGrid.gradientOpacity, '1',
+            '[data-register-step="2"] .form-grid::after opacity calculada=' + mobileGrid.gradientOpacity + '; esperado=1 con scroll pendiente; geometría=' + JSON.stringify(mobileGrid));
+          await mobileGridLocator.evaluate(el => { el.scrollTop = el.scrollHeight; });
+          await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-register-step="2"] .form-grid'),'::after').opacity === '0');
+        }
       }
       assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
       assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
@@ -482,6 +493,12 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_password_confirmation').isVisible(), true);
       assert.equal(await page.locator('#account_email').isVisible(), false);
       const eyeBox = await page.locator('[data-toggle-password="account_password"]').boundingBox();
+      const eyePadding = await page.locator('#account_password').evaluate(el => ({
+        paddingRight:getComputedStyle(el).paddingRight,
+        numericPaddingRight:parseFloat(getComputedStyle(el).paddingRight)
+      }));
+      assert.ok(eyePadding.numericPaddingRight >= 44,
+        '#account_password padding-right calculado=' + eyePadding.paddingRight + '; esperado=44px; selector=.register-password-control input');
       const passwordBox = await page.locator('#account_password').locator('xpath=ancestor::div[contains(@class,"register-password-control")]').boundingBox();
       assert.ok(eyeBox.x >= passwordBox.x && eyeBox.x + eyeBox.width <= passwordBox.x + passwordBox.width &&
         eyeBox.y >= passwordBox.y && eyeBox.y + eyeBox.height <= passwordBox.y + passwordBox.height,
