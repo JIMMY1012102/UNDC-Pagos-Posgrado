@@ -267,3 +267,13 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se conservan los arreglos de comportamiento de #147: +51 por defecto, errores tras interacción/blur o Continuar, botón Atrás sin salto de línea y altura equivalente al primario. No se modifica backend, controladores, atributos `name=""`, validación del servidor, pagos, credenciales ni tablas SISPAGOS.
 - Chromium comprueba ausencia de scroll vertical del documento en pasos 1, 2 y 3, acceso al campo País mediante scroll interno sin invadir el pie, controles visibles, +51, ausencia de errores al entrar, validación tras interacción, botón Atrás y flujo entre pasos. Se mantienen los casos móviles de 375 px y se generan capturas de los tres pasos a 1366×590 y 1366×768.
 - Estado: cambios frontend y pruebas preparados en rama; pendientes CI (cuatro jobs) y revisión del artefacto. PR nuevo sin merge y sin despliegue Oracle.
+
+
+## 10. Corrección mínima del scroll y el indicador del registro (25 de noviembre de 2026)
+
+- Se cerró el PR #150 sin fusionar por acumular cambios; este PR mínimo parte de `main` y limita el alcance a la vista de registro, pruebas Chromium y esta bitácora.
+- Se acota el degradado inferior al estado real de desbordamiento del cuerpo: solo aparece cuando `scrollHeight > clientHeight + 1` y desaparece al llegar al final; usa `pointer-events:none`. El paso 3 en escritorio no tiene scroll interno ni degradado.
+- El indicador de fortaleza reserva 18 px para mantener estable el cuerpo. En el bloque móvil, `.form-grid` declara `overflow-y:auto` fuera del media query de escritorio.
+- El input de contraseña reserva 44 px a la derecha para el botón ojo mediante una única declaración de padding en su selector específico; no se añaden reglas `!important` nuevas.
+- Las pruebas Chromium agregan comprobaciones de CSS calculado y geometría para el scroll móvil a 375 px, el paso 3 en escritorio y la altura del indicador. Se conservan todas las pruebas existentes.
+- Capturas previstas: pasos 1, 2 y 3 en 1366×590 y 1366×768, publicadas por el artefacto existente de registro. Estado de CI pendiente; no se declara ningún requisito HECHO hasta que los cuatro jobs del último commit estén verdes. Sin merge ni despliegue.
