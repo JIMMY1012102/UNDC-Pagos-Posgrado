@@ -395,21 +395,25 @@ async function responsiveAccountPage(viewport, kind) {
       });
     }
 
-    const geometry = await page.evaluate(() => {
-      const layout = document.querySelector('.market-login-layout').getBoundingClientRect();
-      const card = document.querySelector('.market-login-card').getBoundingClientRect();
-      return {
-        layout: { x: layout.x, right: layout.right, width: layout.width },
-        card: { x: card.x, right: card.right, width: card.width, height: card.height },
-        viewport: innerWidth,
-        scrollWidth: document.documentElement.scrollWidth,
-      };
-    });
-    assert.ok(geometry.layout.width > 0 && geometry.card.width > 0, 'El formulario debe tener dimensiones visibles');
-    assert.ok(geometry.card.x >= -1 && geometry.card.right <= viewport.width + 1,
-      'La tarjeta debe permanecer dentro del viewport: ' + JSON.stringify(geometry));
-    assert.ok(geometry.scrollWidth <= viewport.width + 2,
-      'El formulario no debe provocar desbordamiento horizontal: ' + JSON.stringify(geometry));
+    for (const theme of ['dark', 'light']) {
+      await page.evaluate(isLight => document.body.classList.toggle('light-mode', isLight), theme === 'light');
+      const geometry = await page.evaluate(() => {
+        const layout = document.querySelector('.market-login-layout').getBoundingClientRect();
+        const card = document.querySelector('.market-login-card').getBoundingClientRect();
+        return {
+          layout: { x: layout.x, right: layout.right, width: layout.width },
+          card: { x: card.x, right: card.right, width: card.width, height: card.height },
+          viewport: innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+        };
+      });
+      assert.ok(geometry.layout.width > 0 && geometry.card.width > 0,
+        'El formulario debe tener dimensiones visibles (' + theme + ')');
+      assert.ok(geometry.card.x >= -1 && geometry.card.right <= viewport.width + 1,
+        'La tarjeta debe permanecer dentro del viewport (' + theme + '): ' + JSON.stringify(geometry));
+      assert.ok(geometry.scrollWidth <= viewport.width + 2,
+        'El formulario no debe provocar desbordamiento horizontal (' + theme + '): ' + JSON.stringify(geometry));
+    }
     assert.deepEqual(exceptions, [], 'La vista de cuenta no debe lanzar errores JavaScript');
     console.log('PASS ' + kind + ' responsive ' + viewport.width + 'px');
   } catch (error) {
