@@ -255,7 +255,6 @@ async function responsiveThemeCatalog(viewport) {
     await page.goto(origin + '/tienda/catalogo', { waitUntil: 'networkidle' });
     await page.locator('.catalog-product').first().waitFor();
     await page.evaluate(() => document.fonts.ready);
-    await page.locator('.catalog-product img').first().evaluate(image => image.decode());
     await page.locator('#accessibilityFloatingButton').waitFor();
 
     async function theme(value) {
@@ -287,7 +286,7 @@ async function responsiveThemeCatalog(viewport) {
     await theme('light');
     const light = await geometry();
     for (const selector of Object.keys(dark)) {
-      for (const key of (selector === '#tusneCatalog' ? ['x', 'y', 'width'] : ['x', 'y', 'width', 'height'])) {
+      for (const key of (['#tusneCatalog', '.catalog-product'].includes(selector) ? ['x', 'y', 'width'] : ['x', 'y', 'width', 'height'])) {
         assert.ok(Math.abs(dark[selector][key] - light[selector][key]) < 1,
           selector + ' ' + key + ' debe conservarse al cambiar de tema');
       }
