@@ -221,3 +221,14 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - El mismo defecto permitía mostrar fieldsets inactivos en móvil y era consistente con el overflow horizontal secundario del test de perfil a 375 px (`scrollWidth:563`). Las capturas de los tres pasos a 1366×768 se revisaron y muestran la tarjeta completa dentro del viewport.
 - Se movió la regla `.register-step[hidden]{display:none!important}` al ámbito global de la vista, para que el atributo `hidden` prevalezca en todos los tamaños. No se modifican selectores del test, `name=""`, validaciones backend ni controladores.
 - PR #145 sigue abierto y sin merge; pendiente nueva ejecución completa de Chromium y revisión del artefacto.
+
+
+### Diagnóstico del run #763 y ajuste del overflow móvil (25 de noviembre de 2026)
+
+- El log completo del paso Chromium registró dos fallos a 375×812: `register responsive` y el fixture llamado `profile responsive`, ambos con `scrollWidth=563` frente a viewport 375 (188 px de exceso). Las aserciones son `tests/browser/storefront.mjs:483-485`.
+- El primer error de #760 (correo visible en el paso 1) ya no aparece en #763. El overflow sí persiste y ahora también aparece durante la comprobación register. El run #747 de main, commit `1154001a18dcada22c788c3d067824e9371685ee`, tiene `PASS register responsive 375px` y `PASS profile responsive 375px`; por tanto, no estaba presente en esa línea base.
+- El test denominado profile no visita la ruta real de perfil: carga `/tienda/registro` y transforma el DOM del registro en un shell de perfil para probar geometría. Su fallo es una regresión del CSS/DOM de registro compartido con ese fixture, no evidencia directa de que la pantalla real de perfil esté rota.
+- Causa identificada: el bloque móvil nuevo cambiaba `.emerald-register` de su `overflow:clip` base a `overflow:visible`. Esto dejaba que los elementos decorativos/posicionados que sobresalen del layout contribuyeran al ancho de desplazamiento del documento. La tarjeta y el layout medidos sí caben en el viewport (287 px y 319 px), pero el documento llega a 563 px.
+- Se conserva el scroll vertical móvil y se recorta únicamente el eje horizontal: `overflow-x:clip; overflow-y:visible` en el contenedor `.emerald-register`. La regla `[hidden]` permanece acotada a `.emerald-register .register-step`; no hay selectores globales genéricos nuevos.
+- No se alteran pruebas, tolerancias, retries, nombres de campos, controladores ni validación backend. Las capturas de #763 son tres PNG de 1366×768 (pasos 1, 2 y 3), inspeccionadas visualmente.
+- No se pudo ejecutar Chromium localmente en este entorno; la verificación requerida queda pendiente del próximo run completo de CI. No declarar corregido hasta que los cuatro jobs estén verdes.

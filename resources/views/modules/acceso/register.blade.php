@@ -379,7 +379,7 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 }
 @media(max-width:767px){
   body.market-login-view{height:auto;min-height:100dvh;overflow:auto}
-  .emerald-register{height:auto;min-height:100dvh;overflow:visible}
+  .emerald-register{height:auto;min-height:100dvh;overflow-x:clip;overflow-y:visible}
   .emerald-register .emerald-layout{
     height:auto;min-height:100dvh;overflow:visible;flex-direction:column;
     align-items:stretch;padding:18px 14px 28px!important;gap:14px
