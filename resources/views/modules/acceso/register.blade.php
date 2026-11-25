@@ -641,6 +641,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step .form-grid {
   position: relative;
   padding-bottom: 22px;
+  box-shadow: none !important;
 }
 .emerald-register .register-step .form-grid::after {
   content: "";
