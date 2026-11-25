@@ -290,6 +290,7 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 @media(min-width:2560px){.emerald-panel{max-width:560px}}
 
 
+.emerald-register{overflow:clip}
 .emerald-register .emerald-layout{align-items:flex-start;gap:clamp(28px,4vw,64px);padding-top:32px;padding-bottom:48px}
 .emerald-register .emerald-intro{position:sticky;top:24px;height:calc(100svh - 48px);min-height:560px;align-self:flex-start}
 .emerald-register .emerald-panel{flex:1 1 740px;max-width:760px;min-width:0}
