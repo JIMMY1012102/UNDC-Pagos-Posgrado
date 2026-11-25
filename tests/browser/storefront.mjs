@@ -317,6 +317,28 @@ async function responsiveThemeCatalog(viewport) {
     await page.close();
   }
 }
+async function responsiveWelcome(viewport) {
+  const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
+  try {
+    const response = await page.goto(origin + '/', { waitUntil: 'domcontentloaded' });
+    assert.equal(response?.status(), 200, 'La página raíz debe responder HTTP 200');
+    const geometry = await page.evaluate(() => ({
+      max: getComputedStyle(document.documentElement).getPropertyValue('--container-max').trim(),
+      header: document.querySelector('header.welcome-container').getBoundingClientRect().width,
+      content: document.querySelector('div.welcome-container').getBoundingClientRect().width,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    assert.equal(geometry.max, viewport.width >= 1920 ? '1680px' : '1440px',
+      'welcome.blade.php debe declarar el mismo --container-max que el layout Market');
+    assert.ok(geometry.header <= viewport.width && geometry.content <= viewport.width,
+      'El contenedor de bienvenida debe caber en el viewport');
+    assert.ok(geometry.scrollWidth <= viewport.width + 2, 'La bienvenida no debe desbordarse horizontalmente');
+    console.log('PASS welcome container ' + viewport.width + 'px: ' + geometry.max);
+  } finally {
+    await page.close();
+  }
+}
+
 async function responsiveAccountPage(viewport, kind) {
   const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
   const exceptions = [];
@@ -383,6 +405,8 @@ for (const width of [320, 375, 768, 1024, 1366, 1920]) {
 // Validación solicitada de la portada en sus alturas de escritorio reales.
 await responsiveHome({ width: 1600, height: 900 });
 await responsiveHome({ width: 1920, height: 1080 });
+await responsiveWelcome({ width: 1440, height: 900 });
+await responsiveWelcome({ width: 1920, height: 1080 });
 
 // Registro real y shell de perfil con los mismos campos compartidos.
 for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
