@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync, mkdirSync} from 'node:fs';
 
 // Browser smoke test of the current three-page frontend.
 // Backend + MariaDB journey is independently tested in PHP CI.
@@ -351,27 +351,96 @@ async function responsiveAccountPage(viewport, kind) {
     await page.locator('.account-data-card').waitFor();
 
     if (kind === 'register') {
+      const cardHeights = [];
+      const desktop = viewport.width >= 1024;
+      const noVerticalScroll = async step => {
+        if (!desktop) return;
+        const metrics = await page.evaluate(() => ({
+          viewport: innerHeight,
+          rootClient: document.documentElement.clientHeight,
+          rootScroll: document.documentElement.scrollHeight,
+          bodyScroll: document.body.scrollHeight,
+        }));
+        assert.ok(metrics.rootScroll <= metrics.rootClient + 1 && metrics.bodyScroll <= metrics.viewport + 1,
+          'El registro no debe tener scroll vertical en el paso ' + step + ': ' + JSON.stringify(metrics));
+        const card = await page.locator('.account-data-card').boundingBox();
+        cardHeights.push(card.height);
+      };
+      const captureStep = async step => {
+        if (viewport.width === 1366 && viewport.height === 768) {
+          mkdirSync('artifacts/registration-steps', { recursive: true });
+          await page.screenshot({
+            path: 'artifacts/registration-steps/step-' + step + '.png',
+            fullPage: false,
+          });
+        }
+      };
+
       await page.locator('.market-login-heading h1').waitFor({ state: 'visible' });
-      await page.locator('#account_first_names').waitFor({ state: 'visible' });
-      await page.locator('#account_email').waitFor({ state: 'visible' });
+      await page.locator('[data-register-step="1"]').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 1 de 3');
+      for (const selector of ['#account_first_names', '#account_last_names', '#account_document_type', '#account_document_number']) {
+        assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar en Identidad');
+      }
+      assert.equal(await page.locator('#account_email').isVisible(), false, 'El correo pertenece al paso Contacto');
+      assert.equal(await page.locator('#account_password').isVisible(), false, 'La contraseña pertenece al paso Acceso');
+      await noVerticalScroll(1);
+      await captureStep(1);
+
       await page.locator('#account_first_names').fill('Usuario QA');
       await page.locator('#account_last_names').fill('Prueba');
       await page.locator('#account_document_number').fill('12345678');
+      await page.locator('[data-register-step="1"] [data-register-next]').click();
+      assert.equal(await page.locator('.field-error').count(), 0, 'Identidad válida debe avanzar sin errores');
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 2 de 3');
+      for (const selector of ['#account_phone_country_code', '#account_phone', '#account_email', '#account_line_1', '#account_line_2', '#account_city', '#account_state', '#account_country']) {
+        assert.equal(await page.locator(selector).isVisible(), true, selector + ' debe estar en Contacto y ubicación');
+      }
+      assert.equal(await page.locator('#account_password').isVisible(), false);
+      await page.locator('[data-register-step="2"] [data-register-next]').click();
+      assert.match(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /obligatorio/i,
+        'El correo debe mostrar un error en línea antes de avanzar');
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 2 de 3');
       await page.locator('#account_email').fill('qa@example.test');
-      await page.getByRole('button', { name: 'Continuar →', exact: true }).click();
-      await page.locator('#account_password').waitFor({ state: 'visible' });
-      assert.equal(await page.locator('#account_email').isVisible(), false,
-        'El correo debe quedar oculto al pasar al paso 2');
-      assert.equal(await page.locator('#account_line_1').isVisible(), true,
-        'La dirección debe mostrarse en el paso 2');
-      await page.getByRole('button', { name: '← Atrás', exact: true }).click();
+      await noVerticalScroll(2);
+      await captureStep(2);
+
+      const cardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
+      await page.locator('[data-register-step="2"] [data-register-next]').click();
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 3 de 3');
+      assert.equal(await page.locator('#account_password').isVisible(), true);
+      assert.equal(await page.locator('#account_password_confirmation').isVisible(), true);
+      assert.equal(await page.locator('#account_email').isVisible(), false);
+      await noVerticalScroll(3);
+      await captureStep(3);
+      const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
+      assert.ok(Math.abs(cardHeight - nextCardHeight) <= 1,
+        'La tarjeta debe conservar la misma altura entre pasos');
+      if (cardHeights.length > 1) {
+        assert.ok(Math.max(...cardHeights) - Math.min(...cardHeights) <= 1,
+          'La tarjeta no debe crecer ni saltar al cambiar de paso: ' + JSON.stringify(cardHeights));
+      }
+
+      await page.locator('#account_password').fill('Demo-password-2026');
+      await page.locator('#account_password_confirmation').fill('Different-password-2026');
+      await page.locator('[data-register-step="3"] button[type="submit"]').click();
+      assert.match(await page.locator('#account_password_confirmation').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /no coinciden/i,
+        'La confirmación debe validar coincidencia en línea');
+      const eye = page.locator('[data-toggle-password="account_password"]');
+      await eye.click();
+      assert.equal(await page.locator('#account_password').getAttribute('type'), 'text',
+        'El botón ojo debe mostrar la contraseña');
+      await eye.click();
+      assert.equal(await page.locator('#account_password').getAttribute('type'), 'password',
+        'El botón ojo debe ocultar la contraseña');
+
+      await page.locator('[data-register-step="3"] [data-register-back]').click();
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 2 de 3');
+      assert.equal(await page.locator('#account_email').inputValue(), 'qa@example.test');
+      await page.locator('[data-register-step="2"] [data-register-back]').click();
+      assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 1 de 3');
       assert.equal(await page.locator('#account_first_names').inputValue(), 'Usuario QA',
-        'Volver atrás debe conservar los datos personales');
-      await page.getByRole('button', { name: 'Continuar →', exact: true }).click();
-      await page.locator('[data-register-form] button[type="submit"]').waitFor({ state: 'visible' });
-      await page.locator('input[type="password"]').first().waitFor({ state: 'visible' });
-      assert.equal(await page.locator('.back').isVisible(), true,
-        'El botón Atrás debe estar visible en el paso 2');
+        'Atrás debe conservar los datos de Identidad');
     }
 
     if (kind === 'profile') {
@@ -439,7 +508,10 @@ await responsiveWelcome({ width: 1920, height: 1080 });
 
 // Registro real y shell de perfil con los mismos campos compartidos.
 for (const viewport of [
+  { width: 1366, height: 600 },
+  { width: 1366, height: 768 },
   { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
   { width: 1024, height: 768 },
   { width: 768, height: 844 },
   { width: 375, height: 812 },
