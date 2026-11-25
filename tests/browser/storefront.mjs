@@ -654,10 +654,12 @@ async function responsiveAccountPage(viewport, kind) {
   }
 }
 
-for (const width of [320, 375, 768, 1024, 1366, 1920]) {
-  const viewport = { width, height: width <= 768 ? 844 : 768 };
-  await responsiveHome(viewport);
-  await responsiveThemeCatalog(viewport);
+if (!firefoxRegisterOnly) {
+  for (const width of [320, 375, 768, 1024, 1366, 1920]) {
+    const viewport = { width, height: width <= 768 ? 844 : 768 };
+    await responsiveHome(viewport);
+    await responsiveThemeCatalog(viewport);
+  }
 }
 
 if (firefoxRegisterOnly) {
