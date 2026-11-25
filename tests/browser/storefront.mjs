@@ -368,7 +368,7 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_first_names').inputValue(), 'Usuario QA',
         'Volver atrás debe conservar los datos personales');
       await page.getByRole('button', { name: 'Continuar →', exact: true }).click();
-      await page.locator('button[type="submit"]').waitFor({ state: 'visible' });
+      await page.locator('[data-register-form] button[type="submit"]').waitFor({ state: 'visible' });
       await page.locator('input[type="password"]').first().waitFor({ state: 'visible' });
       assert.equal(await page.locator('.back').isVisible(), true,
         'El botón Atrás debe estar visible en el paso 2');
