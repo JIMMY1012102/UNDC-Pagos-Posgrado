@@ -232,3 +232,14 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se conserva el scroll vertical móvil y se recorta únicamente el eje horizontal: `overflow-x:clip; overflow-y:visible` en el contenedor `.emerald-register`. La regla `[hidden]` permanece acotada a `.emerald-register .register-step`; no hay selectores globales genéricos nuevos.
 - No se alteran pruebas, tolerancias, retries, nombres de campos, controladores ni validación backend. Las capturas de #763 son tres PNG de 1366×768 (pasos 1, 2 y 3), inspeccionadas visualmente.
 - No se pudo ejecutar Chromium localmente en este entorno; la verificación requerida queda pendiente del próximo run completo de CI. No declarar corregido hasta que los cuatro jobs estén verdes.
+
+
+## 7. Pulido visual del registro en tres pasos (25 de noviembre de 2026)
+
+- Se abre una rama nueva desde main, que ya contiene el PR #145. El alcance se limita a la vista de registro, pruebas Chromium y esta bitácora.
+- Se aclara la tarjeta con fondo blanco, borde y sombra verde suave, radio de 24 px y padding amplio; encabezado compacto de una línea y progreso segmentado con estados accesibles (actual, completado y pendiente).
+- Se elevan legibilidad y contraste de etiquetas y controles, se unifican los botones primarios en verde institucional y se centra el grupo de campos manteniendo las acciones al pie.
+- El botón de mostrar contraseña queda anclado dentro del contenedor del input; se conserva su accesibilidad y se añade un indicador visual de fortaleza calculado solo en cliente. No se agregan reglas ni validaciones al backend.
+- Se incorpora ayuda bajo Identidad, transición breve con respeto a prefers-reduced-motion y reposicionamiento de los chips flotantes del panel izquierdo.
+- Se amplía Chromium para verificar progreso, ausencia de subtítulo duplicado, posición interna del botón ojo, fortaleza y separación de chips. Se mantienen las comprobaciones existentes de altura y ausencia de scroll vertical en 1366×600, 1366×768 y 1920×1080.
+- Verificación pendiente de CI y revisión de las tres capturas nuevas del artefacto registro-tres-pasos-1366x768. No se hará merge ni despliegue a Oracle sin autorización expresa.
