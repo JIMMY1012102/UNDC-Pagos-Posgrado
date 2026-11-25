@@ -622,6 +622,73 @@ body.light-mode .emerald-register .password-help{color:#537e68}
   }
 }
 
+
+/* Registro: indicador de overflow real, paso Acceso sin scroll y autofill consistente. */
+@media (min-width: 768px) {
+  .emerald-register .emerald-panel,
+  .emerald-register .account-data-card {
+    max-height: calc(100dvh - 48px) !important;
+  }
+  .emerald-register .register-step[data-register-step="3"] .form-grid {
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+}
+.emerald-register .register-step .form-grid {
+  position: relative;
+  padding-bottom: 22px;
+}
+.emerald-register .register-step .form-grid::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(5,42,28,0), rgba(5,42,28,.92));
+  transition: opacity .12s ease;
+}
+.emerald-register .register-step .form-grid.has-scroll-overflow:not(.scroll-at-end)::after {
+  opacity: 1;
+}
+.emerald-register .password-strength {
+  min-height: 18px;
+  margin-bottom: 0;
+}
+.emerald-register .register-password-control input {
+  min-width: 0;
+  padding-right: 44px !important;
+  border-radius: 9px !important;
+}
+.emerald-register .register-password-control input:autofill,
+.emerald-register .register-password-control input:-webkit-autofill,
+.emerald-register .register-password-control input:-webkit-autofill:hover,
+.emerald-register .register-password-control input:-webkit-autofill:focus {
+  border-radius: 9px !important;
+  padding-right: 44px !important;
+  background-clip: padding-box !important;
+  box-shadow: inset 0 0 0 1000px #103f2e !important;
+  -webkit-box-shadow: inset 0 0 0 1000px #103f2e !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff;
+}
+body.light-mode .emerald-register .register-password-control input:autofill,
+body.light-mode .emerald-register .register-password-control input:-webkit-autofill,
+body.light-mode .emerald-register .register-password-control input:-webkit-autofill:hover,
+body.light-mode .emerald-register .register-password-control input:-webkit-autofill:focus {
+  box-shadow: inset 0 0 0 1000px #f3faf6 !important;
+  -webkit-box-shadow: inset 0 0 0 1000px #f3faf6 !important;
+  -webkit-text-fill-color: #163e2e !important;
+  caret-color: #163e2e;
+}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -845,16 +912,39 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   }
   passwordField?.addEventListener('input',updatePasswordStrength);
   updatePasswordStrength();
+  const scrollGrids=[...form.querySelectorAll('.register-step .form-grid')];
+  function syncScrollIndicator(grid){
+    const hasOverflow=grid.scrollHeight>grid.clientHeight+1;
+    const atEnd=grid.scrollTop+grid.clientHeight>=grid.scrollHeight-2;
+    grid.classList.toggle('has-scroll-overflow',hasOverflow);
+    grid.classList.toggle('scroll-at-end',!hasOverflow||atEnd);
+  }
+  scrollGrids.forEach(grid=>{
+    grid.addEventListener('scroll',()=>syncScrollIndicator(grid),{passive:true});
+    if('ResizeObserver' in window){
+      const observer=new ResizeObserver(()=>syncScrollIndicator(grid));
+      observer.observe(grid);
+      if(grid.firstElementChild)observer.observe(grid.firstElementChild);
+    }
+  });
+  window.addEventListener('resize',()=>scrollGrids.forEach(syncScrollIndicator),{passive:true});
   allFields.forEach(field=>{
     field.dataset.registerInitiallyRequired=field.required?'true':'false';
+    const markTouched=()=>touchedFields.add(field);
+    field.addEventListener('pointerdown',markTouched);
     field.addEventListener('input',()=>{
-      if(field.id==='account_password')updateFieldError(byName('password_confirmation'));
-      if(touchedFields.has(field))updateFieldError(field);
+      markTouched();
+      if(field.id==='account_password'){
+        const confirmation=byName('password_confirmation');
+        if(confirmation?.closest('.field')?.querySelector('.field-error'))updateFieldError(confirmation);
+      }
+      if(field.closest('.field')?.querySelector('.field-error'))updateFieldError(field);
     });
-    field.addEventListener('change',()=>{if(touchedFields.has(field))updateFieldError(field);});
-    field.addEventListener('focus',()=>{field.dataset.registerFocused='true';});
+    field.addEventListener('change',()=>{
+      markTouched();
+      if(field.closest('.field')?.querySelector('.field-error'))updateFieldError(field);
+    });
     field.addEventListener('blur',()=>{
-      if(field.dataset.registerFocused==='true')touchedFields.add(field);
       if(touchedFields.has(field))updateFieldError(field);
     });
   });
@@ -911,6 +1001,8 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       else segment.removeAttribute('aria-current');
       segment.setAttribute('aria-label',['Identidad','Contacto','Acceso'][index]+(state==='complete'?', completado':state==='current'?', paso actual':', pendiente'));
     });
+    scrollGrids.forEach(syncScrollIndicator);
+    requestAnimationFrame(()=>scrollGrids.forEach(syncScrollIndicator));
     if(moveFocus){
       const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
       first?.focus({preventScroll:true});
