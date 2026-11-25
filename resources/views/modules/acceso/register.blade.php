@@ -494,7 +494,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step>h2{flex:0 0 auto;margin:0 0 8px!important;font-size:13px!important;line-height:1.15}
 .emerald-register .register-step .form-grid{flex:1 1 auto;min-height:0;align-content:start;align-items:start;gap:10px 12px!important}
 .emerald-register .register-step .field label{margin:0 0 4px!important;font-size:12px!important;line-height:1.15}
-.emerald-register .register-step .field input,.emerald-register .register-step .field select,.emerald-register .register-step .register-password-control{height:41px!important;min-height:41px!important;padding:0 10px!important;font-size:13px!important;border-radius:10px!important}
+.emerald-register .register-step .field input,.emerald-register .register-step .field select,.emerald-register .register-step .register-password-control{height:41px!important;min-height:41px!important;font-size:13px!important;border-radius:10px!important}
 .emerald-register .register-step .register-phone-row{grid-column:auto!important;grid-template-columns:minmax(92px,.42fr) minmax(0,1fr);gap:8px;align-self:start}
 .emerald-register .register-step-actions{position:static!important;z-index:auto!important;flex:0 0 44px;min-height:44px;margin:8px 0 0!important;padding:0!important;gap:10px!important}
 .emerald-register .register-step-actions .back{flex:0 0 104px;width:104px;min-width:104px;height:42px;min-height:42px!important;padding:0 10px!important;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;line-height:1!important;font-size:13px!important}
@@ -663,17 +663,17 @@ body.light-mode .emerald-register .password-help{color:#537e68}
   min-height: 18px;
   margin-bottom: 0;
 }
-.emerald-register .register-password-control input {
+.emerald-register .register-step .register-password-control input {
   min-width: 0;
-  padding-right: 44px !important;
-  border-radius: 9px !important;
+  padding-right: 44px;
+  border-radius: 9px;
 }
-.emerald-register .register-password-control input:autofill,
-.emerald-register .register-password-control input:-webkit-autofill,
-.emerald-register .register-password-control input:-webkit-autofill:hover,
-.emerald-register .register-password-control input:-webkit-autofill:focus {
+.emerald-register .register-step .register-password-control input:autofill,
+.emerald-register .register-step .register-password-control input:-webkit-autofill,
+.emerald-register .register-step .register-password-control input:-webkit-autofill:hover,
+.emerald-register .register-step .register-password-control input:-webkit-autofill:focus {
   border-radius: 9px !important;
-  padding-right: 44px !important;
+  padding-right: 44px;
   background-clip: padding-box !important;
   box-shadow: inset 0 0 0 1000px #103f2e !important;
   -webkit-box-shadow: inset 0 0 0 1000px #103f2e !important;
@@ -915,8 +915,10 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   updatePasswordStrength();
   const scrollGrids=[...form.querySelectorAll('.register-step .form-grid')];
   function syncScrollIndicator(grid){
-    const hasOverflow=grid.scrollHeight>grid.clientHeight+1;
-    const atEnd=grid.scrollTop+grid.clientHeight>=grid.scrollHeight-2;
+    // En móvil y escritorio el cuerpo desplazable del paso es .form-grid.
+    const maxScroll=Math.max(0,grid.scrollHeight-grid.clientHeight);
+    const hasOverflow=maxScroll>1;
+    const atEnd=grid.scrollTop>=maxScroll-2;
     grid.classList.toggle('has-scroll-overflow',hasOverflow);
     grid.classList.toggle('scroll-at-end',!hasOverflow||atEnd);
   }
@@ -925,8 +927,13 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     if('ResizeObserver' in window){
       const observer=new ResizeObserver(()=>syncScrollIndicator(grid));
       observer.observe(grid);
-      if(grid.firstElementChild)observer.observe(grid.firstElementChild);
+      [...grid.children].forEach(child=>observer.observe(child));
     }
+    if('MutationObserver' in window){
+      const observer=new MutationObserver(()=>syncScrollIndicator(grid));
+      observer.observe(grid,{childList:true,subtree:true,characterData:true});
+    }
+    syncScrollIndicator(grid);
   });
   window.addEventListener('resize',()=>scrollGrids.forEach(syncScrollIndicator),{passive:true});
   allFields.forEach(field=>{
