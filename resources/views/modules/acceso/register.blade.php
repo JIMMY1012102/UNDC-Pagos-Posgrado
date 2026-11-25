@@ -437,7 +437,8 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step{animation:register-step-in .18s ease both}
 @keyframes register-step-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .emerald-register .field label{margin:0 0 6px!important;color:#315b47!important;font-size:13px!important;font-weight:600!important;line-height:1.25}
-.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:48px!important;padding:0 13px!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;color:#173f30!important;font:500 15px Inter,system-ui,sans-serif!important;box-shadow:inset 0 1px 2px rgb(18 74 48 / 4%)!important;color-scheme:light}
+.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:48px!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;color:#173f30!important;font:500 15px Inter,system-ui,sans-serif!important;box-shadow:inset 0 1px 2px rgb(18 74 48 / 4%)!important;color-scheme:light}
+.emerald-register .field input:not(#account_password):not(#account_password_confirmation),.emerald-register .field select{padding:0 13px!important}
 .emerald-register .field input::placeholder{color:#789385!important}
 .emerald-register .field input:focus,.emerald-register .field select:focus,.emerald-register .register-password-control:focus-within{border-color:#087b53!important;outline:0!important;box-shadow:0 0 0 3px rgb(8 123 83 / 17%)!important;background:#fff!important}
 .emerald-register .field:focus-within{outline:0!important;box-shadow:none!important;background:transparent!important}
@@ -446,11 +447,11 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step-help{margin:16px 0 0;color:#617c6d;font-size:12px;line-height:1.35}
 .emerald-register .password-help{display:block;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.3}
 .emerald-register .register-password-control{position:relative!important;display:block!important;padding:0 48px 0 13px!important}
-.emerald-register .register-password-control input{display:block;width:100%;height:100%!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;color:#173f30!important}
+.emerald-register .register-password-control input{display:block;width:100%;height:100%!important;padding:0 44px 0 13px;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;color:#173f30!important}
 .emerald-register .register-password-control .eye{position:absolute!important;z-index:5;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:38px!important;height:38px!important;border:0;border-radius:9px;background:transparent;color:#287653;cursor:pointer}
 .emerald-register .register-password-control .eye:hover{background:#edf7f1}
 .emerald-register .register-password-control .eye:focus-visible{outline:3px solid #087b53!important;outline-offset:1px}
-.emerald-register .password-strength{display:flex;align-items:center;gap:9px;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.2}
+.emerald-register .password-strength{display:flex;align-items:center;gap:9px;min-height:18px;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.2}
 .emerald-register .password-strength-bars{display:flex;gap:3px;width:72px;flex:0 0 72px}
 .emerald-register .password-strength-bars i{height:4px;flex:1;border-radius:5px;background:#dfe9e3}
 .emerald-register .password-strength[data-level="1"] .password-strength-bars i:nth-child(-n+1){background:#d97770}
@@ -569,6 +570,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
     display: none !important;
   }
   .emerald-register .register-step .form-grid {
+    position: relative;
     flex: 1 1 auto;
     min-height: 0;
     align-content: start;
@@ -579,7 +581,27 @@ body.light-mode .emerald-register .password-help{color:#537e68}
     scrollbar-width: thin;
     scrollbar-color: #83c9a5 transparent;
     padding: 0 8px 14px 0;
-    box-shadow: inset 0 -12px 12px -14px rgba(131, 201, 165, .85);
+  }
+  .emerald-register .register-step .form-grid::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    display: block;
+    grid-column: 1 / -1;
+    height: 18px;
+    margin-top: -18px;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,.96));
+    transition: opacity .12s ease;
+  }
+  .emerald-register .register-step .form-grid.has-scroll-gradient::after { opacity: 1; }
+  @media (min-width: 768px) {
+    .emerald-register .register-step[data-register-step="3"] .form-grid {
+      overflow: visible;
+      flex: 0 0 auto;
+    }
+    .emerald-register .register-step[data-register-step="3"] .form-grid::after { display: none; }
   }
   .emerald-register .register-step .form-grid::-webkit-scrollbar { width: 6px; }
   .emerald-register .register-step .form-grid::-webkit-scrollbar-thumb {
@@ -613,6 +635,10 @@ body.light-mode .emerald-register .password-help{color:#537e68}
   .emerald-register .register-progress-segments li { white-space: nowrap; }
 }
 @media (max-width: 767px) {
+  .emerald-register .register-step .form-grid {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
   .emerald-register .register-step > h2 { display: none !important; }
   .emerald-register .register-step-actions { flex-direction: row !important; }
   .emerald-register .register-step-actions .back {
@@ -893,6 +919,20 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     if(firstInvalid)firstInvalid.focus({preventScroll:true});
     return !firstInvalid;
   }
+  function updateScrollGradient(){
+    const activeStep=steps.find(step=>!step.hidden);
+    card.querySelectorAll('.register-step .form-grid').forEach(grid=>{
+      const isDesktop=window.innerWidth>=768;
+      const isDesktopStepThree=isDesktop&&activeStep?.dataset.registerStep==='3'&&grid.closest('.register-step')===activeStep;
+      const hasOverflow=!isDesktopStepThree&&grid.scrollHeight>grid.clientHeight+1;
+      const atEnd=grid.scrollTop+grid.clientHeight>=grid.scrollHeight-1;
+      grid.classList.toggle('has-scroll-gradient',hasOverflow&&!atEnd);
+    });
+  }
+  card.querySelectorAll('.register-step .form-grid').forEach(grid=>{
+    grid.addEventListener('scroll',updateScrollGradient,{passive:true});
+  });
+  window.addEventListener('resize',updateScrollGradient);
   function showStep(number,moveFocus=true){
     steps.forEach((step,index)=>{
       const active=index===number-1;
@@ -911,6 +951,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       else segment.removeAttribute('aria-current');
       segment.setAttribute('aria-label',['Identidad','Contacto','Acceso'][index]+(state==='complete'?', completado':state==='current'?', paso actual':', pendiente'));
     });
+    updateScrollGradient();
     if(moveFocus){
       const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
       first?.focus({preventScroll:true});
