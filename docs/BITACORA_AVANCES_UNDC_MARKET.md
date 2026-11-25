@@ -213,3 +213,11 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se corrigió la cadena flex del formulario y sus pasos, se dio prioridad de apilamiento al botón de mostrar/ocultar contraseña y se fijó una altura estable para la tarjeta móvil con scroll interno permitido.
 - La primera ejecución también registró un desbordamiento horizontal en la pantalla de perfil a 375 px, fuera del alcance de esta tarea; se verificará si persiste en la siguiente ejecución sin modificar esa pantalla.
 - Pendiente repetir Chromium y confirmar que el job completo queda verde. El PR continúa abierto; no se ha fusionado.
+
+
+### Diagnóstico y corrección de Chromium en móvil (25 de noviembre de 2026)
+
+- En el run #760, el primer fallo real fue `tests/browser/storefront.mjs:385`: a 375 px el correo aparecía visible durante el paso 1. La causa fue una regla CSS de escritorio que ocultaba `[hidden]` ubicada dentro de `@media (min-width:768px)`, mientras que el bloque móvil redefinía `.register-step` con `display:flex` sin restaurar la ocultación.
+- El mismo defecto permitía mostrar fieldsets inactivos en móvil y era consistente con el overflow horizontal secundario del test de perfil a 375 px (`scrollWidth:563`). Las capturas de los tres pasos a 1366×768 se revisaron y muestran la tarjeta completa dentro del viewport.
+- Se movió la regla `.register-step[hidden]{display:none!important}` al ámbito global de la vista, para que el atributo `hidden` prevalezca en todos los tamaños. No se modifican selectores del test, `name=""`, validaciones backend ni controladores.
+- PR #145 sigue abierto y sin merge; pendiente nueva ejecución completa de Chromium y revisión del artefacto.
