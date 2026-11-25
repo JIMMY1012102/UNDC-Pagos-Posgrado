@@ -36,9 +36,7 @@
       <div class="copy">
 
         <div class="fx abs col s1">
-          <div class="tag"><i></i>Posgrado / UNDC</div>
-          <h1 class="h1">Tus metas avanzan.</h1>
-          <p class="serif">Tus trámites también.</p>
+          <h1 class="h1">Tus metas avanzan, tus trámites también</h1>
           <p class="lead">Encuentra y paga tus trámites de posgrado en un solo lugar.</p>
           <form class="search" action="/tienda" method="GET">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
