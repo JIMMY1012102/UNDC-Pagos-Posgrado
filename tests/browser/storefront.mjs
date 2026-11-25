@@ -212,11 +212,22 @@ async function responsiveHome(viewport) {
     await page.locator('.bg img').first().evaluate(img => img.decode());
     const bounds = await page.evaluate(() => {
       const selectors = ['#undc-track', '.stage', '.hdr', '.h1', '.search'];
-      return Object.fromEntries(selectors.map(selector => {
+      const measured = Object.fromEntries(selectors.map(selector => {
         const element = document.querySelector(selector);
         const rect = element.getBoundingClientRect();
-        return [selector, { x: rect.x, right: rect.right, width: rect.width, height: rect.height }];
+        return [selector, { x: rect.x, right: rect.right, y: rect.y, bottom: rect.bottom, width: rect.width, height: rect.height }];
       }));
+      const title = document.querySelector('.s1 .h1').getBoundingClientRect();
+      const search = document.querySelector('.s1 .search').getBoundingClientRect();
+      const stage = document.querySelector('.stage').getBoundingClientRect();
+      measured.copySearch = {
+        titleBottom: title.bottom, searchTop: search.top,
+        stageTop: stage.top, stageBottom: stage.bottom,
+        separated: title.bottom <= search.top,
+        titleInside: title.top >= stage.top && title.bottom <= stage.bottom,
+        searchInside: search.top >= stage.top && search.bottom <= stage.bottom,
+      };
+      return measured;
     });
     for (const [selector, rect] of Object.entries(bounds)) {
       assert.ok(rect.width > 0 && rect.height > 0, selector + ' debe tener dimensiones visibles');
@@ -225,6 +236,9 @@ async function responsiveHome(viewport) {
     }
     assert.equal(await page.locator('a[href="/tienda/catalogo"]').count() > 0, true,
       'La portada debe ofrecer acceso al catálogo independiente');
+    assert.equal(bounds.copySearch.separated, true, 'El título de portada no debe chocar con el buscador');
+    assert.equal(bounds.copySearch.titleInside, true, 'El título debe permanecer dentro del escenario');
+    assert.equal(bounds.copySearch.searchInside, true, 'El buscador debe permanecer dentro del escenario');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2), false,
       'La portada no debe desbordarse horizontalmente');
     assert.deepEqual(exceptions, [], 'La portada no debe lanzar errores JavaScript');
@@ -303,10 +317,77 @@ async function responsiveThemeCatalog(viewport) {
     await page.close();
   }
 }
+async function responsiveAccountPage(viewport, kind) {
+  const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
+  const exceptions = [];
+  page.on('pageerror', error => exceptions.push(error.message));
+  try {
+    const response = await page.goto(origin + '/tienda/registro', { waitUntil: 'domcontentloaded' });
+    assert.equal(response?.status(), 200, 'El registro debe responder HTTP 200');
+    await page.locator('.market-login-layout').waitFor();
+    await page.locator('.account-data-card').waitFor();
+
+    if (kind === 'profile') {
+      // La ruta real de perfil exige una sesión autenticada. Se reutiliza el
+      // mismo layout y los campos compartidos del formulario real de registro
+      // para comprobar el shell responsive sin crear usuarios ni escribir datos.
+      await page.evaluate(() => {
+        const card = document.querySelector('.account-data-card');
+        const heading = card.querySelector('.market-login-heading h1');
+        heading.textContent = 'PERFIL DEL COMPRADOR';
+        const form = card.querySelector('form');
+        form.querySelectorAll('input[type="password"]').forEach(input => input.closest('.field')?.remove());
+        const email = form.querySelector('#account_email');
+        email.readOnly = true;
+        email.value = 'qa@example.test';
+        const submit = form.querySelector('button[type="submit"]');
+        submit.textContent = 'Guardar perfil →';
+        const logout = document.createElement('form');
+        logout.innerHTML = '<button class="back" type="button">← Regresar</button>';
+        card.insertBefore(logout, heading.closest('.market-login-heading'));
+      });
+    }
+
+    const geometry = await page.evaluate(() => {
+      const layout = document.querySelector('.market-login-layout').getBoundingClientRect();
+      const card = document.querySelector('.market-login-card').getBoundingClientRect();
+      return {
+        layout: { x: layout.x, right: layout.right, width: layout.width },
+        card: { x: card.x, right: card.right, width: card.width, height: card.height },
+        viewport: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      };
+    });
+    assert.ok(geometry.layout.width > 0 && geometry.card.width > 0, 'El formulario debe tener dimensiones visibles');
+    assert.ok(geometry.card.x >= -1 && geometry.card.right <= viewport.width + 1,
+      'La tarjeta debe permanecer dentro del viewport: ' + JSON.stringify(geometry));
+    assert.ok(geometry.scrollWidth <= viewport.width + 2,
+      'El formulario no debe provocar desbordamiento horizontal: ' + JSON.stringify(geometry));
+    assert.deepEqual(exceptions, [], 'La vista de cuenta no debe lanzar errores JavaScript');
+    console.log('PASS ' + kind + ' responsive ' + viewport.width + 'px');
+  } catch (error) {
+    failures++;
+    console.error('FAIL ' + kind + ' responsive ' + viewport.width + 'px: ' + error.stack);
+    await page.screenshot({ path: '/tmp/undc-account-' + kind + '-' + viewport.width + '.png', fullPage: true }).catch(() => {});
+  } finally {
+    await page.close();
+  }
+}
+
 for (const width of [320, 375, 768, 1024, 1366, 1920]) {
   const viewport = { width, height: width <= 768 ? 844 : 768 };
   await responsiveHome(viewport);
   await responsiveThemeCatalog(viewport);
+}
+
+// Validación solicitada de la portada en sus alturas de escritorio reales.
+await responsiveHome({ width: 1600, height: 900 });
+await responsiveHome({ width: 1920, height: 1080 });
+
+// Registro real y shell de perfil con los mismos campos compartidos.
+for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+  await responsiveAccountPage(viewport, 'register');
+  await responsiveAccountPage(viewport, 'profile');
 }
 
 
