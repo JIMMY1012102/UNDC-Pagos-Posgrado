@@ -14,7 +14,7 @@ body.market-login-view{margin:0;font-family:'Inter',system-ui,sans-serif;backgro
 .btn{transition:transform .25s ease,box-shadow .25s ease;cursor:pointer}
 .btn:hover{transform:translateY(-3px)}
 .btn:active{transform:translateY(0) scale(.98)}
-.btn:focus-visible,.field:focus-within,.eye:focus-visible,.lnk:focus-visible,{outline:3px solid #b6f36b;outline-offset:3px}
+.btn:focus-visible,.field:focus-within,.eye:focus-visible,.lnk:focus-visible{outline:3px solid #b6f36b;outline-offset:3px}
 .field{display:flex;align-items:center;gap:12px;height:62px;padding:0 16px;border-radius:18px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);transition:border-color .25s,background .25s,box-shadow .25s}
 .field:hover{border-color:rgba(255,255,255,.32)}
 .field:focus-within{border-color:#b6f36b;background:rgba(182,243,107,.08);box-shadow:0 0 0 5px rgba(182,243,107,.14),0 12px 30px -12px rgba(182,243,107,.5)}
