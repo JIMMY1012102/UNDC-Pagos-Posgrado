@@ -693,10 +693,9 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     ['phone_country_code','phone','email','contact_email','line_1','line_2','city','state','country'],
     ['password','password_confirmation']
   ];
-  let initialStep=1;
-  for(let index=0;index<groups.length;index++){
-    if(errorKeys.some(key=>groups[index].includes(key))){initialStep=index+1;break;}
-  }
+  const firstError=errorKeys[0];
+  const firstErrorStep=groups.findIndex(group=>group.includes(firstError));
+  const initialStep=firstErrorStep<0?1:firstErrorStep+1;
   errorKeys.forEach(key=>{
     const field=byName(key);
     const message=errorMessages[key]?.[0];
