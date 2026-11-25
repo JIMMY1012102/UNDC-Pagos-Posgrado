@@ -350,6 +350,30 @@ async function responsiveAccountPage(viewport, kind) {
     await page.locator('.market-login-layout').waitFor();
     await page.locator('.account-data-card').waitFor();
 
+    if (kind === 'register') {
+      await page.locator('.market-login-heading h1').waitFor({ state: 'visible' });
+      await page.locator('#account_first_names').waitFor({ state: 'visible' });
+      await page.locator('#account_email').waitFor({ state: 'visible' });
+      await page.locator('#account_first_names').fill('Usuario QA');
+      await page.locator('#account_last_names').fill('Prueba');
+      await page.locator('#account_document_number').fill('12345678');
+      await page.locator('#account_email').fill('qa@example.test');
+      await page.getByRole('button', { name: 'Continuar →', exact: true }).click();
+      await page.locator('#account_password').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('#account_email').isVisible(), false,
+        'El correo debe quedar oculto al pasar al paso 2');
+      assert.equal(await page.locator('#account_line_1').isVisible(), true,
+        'La dirección debe mostrarse en el paso 2');
+      await page.getByRole('button', { name: '← Atrás', exact: true }).click();
+      assert.equal(await page.locator('#account_first_names').inputValue(), 'Usuario QA',
+        'Volver atrás debe conservar los datos personales');
+      await page.getByRole('button', { name: 'Continuar →', exact: true }).click();
+      await page.locator('button[type="submit"]').waitFor({ state: 'visible' });
+      await page.locator('input[type="password"]').first().waitFor({ state: 'visible' });
+      assert.equal(await page.locator('.back').isVisible(), true,
+        'El botón Atrás debe estar visible en el paso 2');
+    }
+
     if (kind === 'profile') {
       // La ruta real de perfil exige una sesión autenticada. Se reutiliza el
       // mismo layout y los campos compartidos del formulario real de registro
@@ -410,7 +434,12 @@ await responsiveWelcome({ width: 1440, height: 900 });
 await responsiveWelcome({ width: 1920, height: 1080 });
 
 // Registro real y shell de perfil con los mismos campos compartidos.
-for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1024, height: 768 },
+  { width: 768, height: 844 },
+  { width: 375, height: 812 },
+]) {
   await responsiveAccountPage(viewport, 'register');
   await responsiveAccountPage(viewport, 'profile');
 }
