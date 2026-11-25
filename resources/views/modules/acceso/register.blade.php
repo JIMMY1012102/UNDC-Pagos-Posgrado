@@ -648,6 +648,54 @@ body.light-mode .emerald-register .password-help{color:#537e68}
   }
 }
 
+
+/* Paso 3: una sola superficie visual por control de contraseña. */
+.emerald-register [data-register-step="3"] .field:has(> .register-password-control){
+  display:flex;flex-direction:column;align-items:stretch;min-width:0
+}
+.emerald-register [data-register-step="3"] .field:has(> .register-password-control)>label{
+  display:block;order:1;margin:0 0 6px!important;color:#315b47!important;
+  font-size:13px!important;font-weight:600!important;line-height:1.25;opacity:1;visibility:visible
+}
+.emerald-register [data-register-step="3"] .register-password-control{
+  order:2;position:relative!important;display:flex!important;align-items:center;
+  width:100%;min-width:0;height:48px!important;min-height:0!important;
+  padding:0 48px 0 13px!important;border:1.5px solid #a9c8b6!important;
+  border-radius:12px!important;background:#fff!important;box-shadow:none!important;
+  transition:border-color .18s,box-shadow .18s,background .18s
+}
+.emerald-register [data-register-step="3"] .register-password-control>input,
+.emerald-register [data-register-step="3"] .register-password-control>input:autofill,
+.emerald-register [data-register-step="3"] .register-password-control>input:-webkit-autofill{
+  display:block;flex:1 1 auto;width:100%;min-width:0;height:100%!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  outline:0!important;background:transparent!important;box-shadow:none!important;
+  color:#173f30!important;appearance:none;-webkit-appearance:none;
+  -webkit-text-fill-color:#173f30!important
+}
+.emerald-register [data-register-step="3"] .register-password-control>input:autofill,
+.emerald-register [data-register-step="3"] .register-password-control>input:-webkit-autofill{
+  -webkit-box-shadow:0 0 0 1000px transparent inset!important;
+  box-shadow:none!important
+}
+.emerald-register [data-register-step="3"] .register-password-control:focus-within{
+  border-color:#087b53!important;background:#fff!important;
+  box-shadow:0 0 0 3px rgb(8 123 83 / 17%)!important
+}
+.emerald-register [data-register-step="3"] .register-password-control:has(>input[aria-invalid="true"]){
+  border-color:#d97770!important;background:#fffafa!important;
+  box-shadow:0 0 0 2px rgb(217 119 112 / 10%)!important
+}
+.emerald-register [data-register-step="3"] .register-password-control .eye{
+  position:absolute!important;right:5px;top:50%;transform:translateY(-50%);
+  z-index:2
+}
+.emerald-register [data-register-step="3"] .field:has(> .register-password-control)>.field-error{
+  order:3;margin:5px 0 0!important
+}
+.emerald-register [data-register-step="3"] .field:has(> .register-password-control)>.password-help{order:4}
+.emerald-register [data-register-step="3"] .field:has(> .register-password-control)>.password-strength{order:5}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
