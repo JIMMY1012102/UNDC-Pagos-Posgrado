@@ -265,20 +265,34 @@ return new class extends Migration
             throw new RuntimeException("Controlador no compatible con el renombrado de columnas: {$driver}");
         }
 
-        // Validar todo antes del primer DDL para evitar renombrados parciales.
+        // Primera pasada: validar y clasificar todo el esquema sin ejecutar DDL.
+        $pending = [];
         foreach ($tables as $table => $columns) {
             if (! Schema::hasTable($table)) {
                 throw new RuntimeException("No existe la tabla esperada: {$table}");
             }
 
             foreach ($columns as $source => $target) {
-                if (! Schema::hasColumn($table, $source) || Schema::hasColumn($table, $target)) {
-                    throw new RuntimeException("No se puede renombrar {$table}.{$source} a {$target}: revisa el esquema antes de continuar.");
+                $hasSource = Schema::hasColumn($table, $source);
+                $hasTarget = Schema::hasColumn($table, $target);
+
+                if ($hasSource && $hasTarget) {
+                    throw new RuntimeException("Conflicto en {$table}: existen tanto la columna de origen '{$source}' como la de destino '{$target}'. No se modificó el esquema.");
                 }
+
+                if (! $hasSource && ! $hasTarget) {
+                    throw new RuntimeException("Esquema incompleto en {$table}: no existe ni la columna de origen '{$source}' ni la de destino '{$target}'. No se modificó el esquema.");
+                }
+
+                if ($hasSource) {
+                    $pending[$table][$source] = $target;
+                }
+                // Si solo existe el destino, esta columna ya fue aplicada.
             }
         }
 
-        foreach ($tables as $table => $columns) {
+        // Segunda pasada: ejecutar exclusivamente los renombrados pendientes.
+        foreach ($pending as $table => $columns) {
             Schema::table($table, function ($blueprint) use ($columns): void {
                 foreach ($columns as $source => $target) {
                     $blueprint->renameColumn($source, $target);

@@ -120,7 +120,7 @@ jobs:
       - name: Verificar reversión de nombres sin pérdida de datos ni relaciones
         run: php tests/Fixtures/spanish_table_names_check.php
 
-      - name: Simular upgrade/downgrade de columnas con datos en MariaDB 10.11
+      - name: Simular fallo parcial y ciclo upgrade/downgrade de columnas en MariaDB 10.11
         run: php tests/Fixtures/spanish_columns_upgrade_check.php
 
       - name: Probar recorrido HTTP completo con MariaDB real
