@@ -252,8 +252,6 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 
 .emerald-register{overflow:clip}
 .emerald-register .field:focus-within{outline:0;box-shadow:none;background:transparent}
-.emerald-register .emerald-layout{align-items:flex-start;gap:clamp(28px,4vw,64px);padding-top:32px;padding-bottom:48px}
-.emerald-register .emerald-intro{position:sticky;top:24px;height:calc(100svh - 48px);min-height:560px;align-self:flex-start}
 .emerald-register .emerald-panel{flex:0 1 610px;max-width:610px;min-width:0}
 .emerald-register .market-login-card{width:100%;max-width:none}
 .emerald-register .market-login-heading{margin-bottom:20px}
@@ -294,9 +292,9 @@ body.light-mode .emerald-register .register-password-control .eye{color:#197950}
 body.light-mode .emerald-register .register-progress{color:#367864}
 body.light-mode .emerald-register .register-progress-dots span{background:#c5dfd0}
 body.light-mode .emerald-register .register-progress-dots span[aria-current="step"]{background:#087b53}
-@media(max-width:1000px) and (min-width:761px){.emerald-register .emerald-layout{gap:24px;padding-inline:20px}.emerald-register .emerald-intro{min-width:0;flex-basis:40%!important}.emerald-register .emerald-panel{flex:0 1 60%;max-width:none}.emerald-register .emerald-intro .stage{transform:scale(.72);margin:-48px -70px}}
-@media(max-width:760px){.emerald-register .emerald-layout{align-items:stretch;gap:24px;padding:24px 16px}.emerald-register .emerald-intro{position:relative;top:auto;height:auto;min-height:0}.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
-@media(min-width:761px) and (max-height:700px){.emerald-register .emerald-layout{padding-top:12px}.emerald-register .emerald-intro{min-height:500px;height:calc(100svh - 24px)}.emerald-register .emerald-intro .stage{height:290px!important}.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
+@media(max-width:1000px) and (min-width:761px){}
+@media(max-width:760px){.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
+@media(min-width:761px) and (max-height:700px){.emerald-register .emerald-intro .stage{height:290px!important}.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
