@@ -252,8 +252,8 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 
 .emerald-register{overflow:clip}
 .emerald-register .field:focus-within{outline:0;box-shadow:none;background:transparent}
-.emerald-register   .emerald-layout{max-width:var(--container-max,1440px);align-items:flex-start  !important;padding-top:28px !important}
-.emerald-register .emerald-panel{flex:0 1 520px;max-width:520px;min-width:0}
+.emerald-register   .emerald-layout{max-width:var(--container-max,1440px);align-items:center  !important;padding-top:28px !important;padding-bottom:28px !important;}
+.emerald-register .emerald-panel{flex:0 1 500px;max-width:500px;min-width:0}
 .emerald-register .market-login-card{width:100%;max-width:none}
 .emerald-register .market-login-heading{margin-bottom:20px}
 .emerald-register .market-login-heading h1{text-transform:none}
@@ -295,13 +295,13 @@ body.light-mode .emerald-register .register-progress-dots span{background:#c5dfd
 body.light-mode .emerald-register .register-progress-dots span[aria-current="step"]{background:#087b53}
 @media(max-width:1000px) and (min-width:761px){}
 @media(max-width:760px){.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
-@media(min-width:761px) and (max-height:700px){.emerald-register .emerald-intro .stage{height:290px!important}.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
+@media(min-width:761px) and (max-height:700px){.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
 <div class="emerald-layout market-login-layout">
 
-<section class="emerald-intro" style="flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:space-between">
+<section  class="emerald-intro" style="flex:1 1  540px;min-width:0;display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:space-between">
 <div class="in1" style="display:flex;align-items:center;gap:16px;padding-top:8px">
 <img class="emerald-university-emblem" src="{{ asset('logo-undc-128.png') }}" srcset="{{ asset('logo-undc-128.png') }} 1x, {{ asset('logo-undc-256.png') }} 2x" alt="Emblema de la Universidad Nacional de Cañete" width="64" height="64">
 <span><span class="sora" style="display:block;font-weight:800;font-size:30px;letter-spacing:.5px">UNDC <span style="color:#6ee7b7">MARKET</span></span><span style="display:block;margin-top:2px;color:#cfeee0;font-size:15px">Tienda virtual de pagos de la UNDC</span></span>
@@ -394,7 +394,7 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 <h1 class="sora in2" style="margin:0;font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-1.5px">Tus trámites,<br><span style="background:linear-gradient(90deg,#6ee7b7,#b6f36b);-webkit-background-clip:text;background-clip:text;color:transparent">a un solo clic.</span></h1>
 </section>
 
-<section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Ingresa tus datos personales</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
+<section class="emerald-panel emerald-register-panel"><div class="emerald-toolbar"><a href="/tienda">← Regresar</a></div><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Ingresa tus datos personales</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
 <div class="register-progress" data-register-progress aria-live="polite"><span data-register-progress-label>Paso 1 de 2</span><span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span></span></div>
 <div class="emerald-register-fields">
 <fieldset class="register-step" data-register-step="1"><h2>Datos personales y de contacto</h2><div class="form-grid"><div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div></div><div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div></fieldset>
