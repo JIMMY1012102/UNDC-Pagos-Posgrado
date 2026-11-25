@@ -81,6 +81,7 @@ if ($snapshot(array_values($tables)) !== $before) {
 if ($legacyDdl() !== $legacyBefore) {
     throw new RuntimeException('El renombrado alteró el DDL histórico SISPAGOS.');
 }
+
 foreach ($tables as $old => $new) {
     if (Schema::hasTable($old) || ! Schema::hasTable($new)) {
         throw new RuntimeException("Renombrado incompleto: {$old}");

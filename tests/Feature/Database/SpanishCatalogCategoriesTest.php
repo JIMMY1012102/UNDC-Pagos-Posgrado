@@ -12,6 +12,8 @@ class SpanishCatalogCategoriesTest extends TestCase
 
     public function test_translation_preserves_publications_across_offices_and_can_be_reversed(): void
     {
+        $columnMigration = require database_path('migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php');
+        $columnMigration->down();
         $categories = [
             'admission' => 'admision',
             'tuition' => 'matricula_pensiones',
@@ -57,5 +59,6 @@ class SpanishCatalogCategoriesTest extends TestCase
         foreach ($expected as $id => $row) {
             $this->assertSame($row, (array) DB::table('tienda_conceptos_catalogo')->find($id));
         }
+        $columnMigration->up();
     }
 }

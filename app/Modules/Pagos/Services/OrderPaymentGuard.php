@@ -13,7 +13,7 @@ final class OrderPaymentGuard
     {
         $blocked = [];
         foreach (['tienda_intentos_pago', 'tienda_transacciones_pago', 'tienda_pagos_aplicados_pedidos'] as $table) {
-            $blocked = array_merge($blocked, DB::table($table)->whereIn('order_id', $ids)->distinct()->pluck('order_id')->all());
+            $blocked = array_merge($blocked, DB::table($table)->whereIn('pedido_id', $ids)->distinct()->pluck('pedido_id')->all());
         }
         return array_unique($blocked);
     }
@@ -22,12 +22,12 @@ final class OrderPaymentGuard
     public function unresolvedOrderIds(array $ids): array
     {
         if ($ids === []) return [];
-        $unresolved = DB::table('tienda_intentos_pago')->whereIn('order_id', $ids)
-            ->whereNotIn('status', AttemptStatus::terminalValues())->distinct()->pluck('order_id')->all();
-        $unresolved = array_merge($unresolved, DB::table('tienda_transacciones_pago')->whereIn('order_id', $ids)
-            ->whereNotIn('status', TransactionStatus::terminalValues())->distinct()->pluck('order_id')->all());
+        $unresolved = DB::table('tienda_intentos_pago')->whereIn('pedido_id', $ids)
+            ->whereNotIn('estado', AttemptStatus::terminalValues())->distinct()->pluck('pedido_id')->all();
+        $unresolved = array_merge($unresolved, DB::table('tienda_transacciones_pago')->whereIn('pedido_id', $ids)
+            ->whereNotIn('estado', TransactionStatus::terminalValues())->distinct()->pluck('pedido_id')->all());
         $unresolved = array_merge($unresolved, DB::table('tienda_pagos_aplicados_pedidos')
-            ->whereIn('order_id', $ids)->distinct()->pluck('order_id')->all());
+            ->whereIn('pedido_id', $ids)->distinct()->pluck('pedido_id')->all());
         return array_values(array_unique($unresolved));
     }
 
@@ -35,7 +35,7 @@ final class OrderPaymentGuard
     public function canModify(int $orderId): bool
     {
         foreach (['tienda_intentos_pago', 'tienda_transacciones_pago', 'tienda_pagos_aplicados_pedidos'] as $table) {
-            if (DB::table($table)->where('order_id', $orderId)->exists()) {
+            if (DB::table($table)->where('pedido_id', $orderId)->exists()) {
                 return false;
             }
         }
@@ -47,17 +47,17 @@ final class OrderPaymentGuard
     /** A pending order with unresolved provider evidence is shown for review, not as expired. */
     public function hasUnresolvedPayment(int $orderId): bool
     {
-        if (DB::table('tienda_intentos_pago')->where('order_id', $orderId)
-            ->whereNotIn('status', AttemptStatus::terminalValues())->exists()) {
+        if (DB::table('tienda_intentos_pago')->where('pedido_id', $orderId)
+            ->whereNotIn('estado', AttemptStatus::terminalValues())->exists()) {
             return true;
         }
 
-        if (DB::table('tienda_transacciones_pago')->where('order_id', $orderId)
-            ->whereNotIn('status', TransactionStatus::terminalValues())->exists()) {
+        if (DB::table('tienda_transacciones_pago')->where('pedido_id', $orderId)
+            ->whereNotIn('estado', TransactionStatus::terminalValues())->exists()) {
             return true;
         }
 
-        return DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->exists();
+        return DB::table('tienda_pagos_aplicados_pedidos')->where('pedido_id', $orderId)->exists();
     }
 
     /**
@@ -69,17 +69,17 @@ final class OrderPaymentGuard
         return $orders
             ->whereNotExists(function (Builder $query): void {
                 $query->selectRaw('1')->from('tienda_intentos_pago')
-                    ->whereColumn('tienda_intentos_pago.order_id', 'tienda_pedidos.id')
-                    ->whereNotIn('tienda_intentos_pago.status', AttemptStatus::terminalValues());
+                    ->whereColumn('tienda_intentos_pago.pedido_id', 'tienda_pedidos.id')
+                    ->whereNotIn('tienda_intentos_pago.estado', AttemptStatus::terminalValues());
             })
             ->whereNotExists(function (Builder $query): void {
                 $query->selectRaw('1')->from('tienda_transacciones_pago')
-                    ->whereColumn('tienda_transacciones_pago.order_id', 'tienda_pedidos.id')
-                    ->whereNotIn('tienda_transacciones_pago.status', TransactionStatus::terminalValues());
+                    ->whereColumn('tienda_transacciones_pago.pedido_id', 'tienda_pedidos.id')
+                    ->whereNotIn('tienda_transacciones_pago.estado', TransactionStatus::terminalValues());
             })
             ->whereNotExists(function (Builder $query): void {
                 $query->selectRaw('1')->from('tienda_pagos_aplicados_pedidos')
-                    ->whereColumn('tienda_pagos_aplicados_pedidos.order_id', 'tienda_pedidos.id');
+                    ->whereColumn('tienda_pagos_aplicados_pedidos.pedido_id', 'tienda_pedidos.id');
             });
     }
 }

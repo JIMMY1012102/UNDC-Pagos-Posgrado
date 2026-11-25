@@ -48,3 +48,8 @@ Ensayar primero en una copia de desarrollo autorizada. Después de la migración
 ## Verificación automatizada
 
 Las pruebas SQLite verifican los 23 nombres, conservación de columnas y datos, relaciones y rechazo de colisiones antes de modificar tablas. La CI MariaDB verifica el esquema completo antes y después de revertir y reaplicar el renombrado, las 12 FK al legado y la firma de las seis tablas históricas. Las pruebas existentes de negocio usan los nombres en español.
+
+
+## Columnas
+
+El renombrado de columnas se realiza mediante una migración posterior e independiente. Ver [diccionario de columnas](./modelo-datos/DICCIONARIO_COLUMNAS.md) para la lista por tabla, los nombres técnicos conservados y las reglas de compatibilidad API.

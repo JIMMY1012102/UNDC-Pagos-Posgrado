@@ -33,11 +33,11 @@ class CompletePurchaseJourneyTest extends TestCase
         );
         DB::table('tienda_configuracion_oficinas')->updateOrInsert(
             ['legacy_office_id' => 7],
-            ['slug' => 'posgrado-e2e', 'catalog_enabled' => true]
+            ['slug' => 'posgrado-e2e', 'catalogo_habilitado' => true]
         );
         DB::table('tienda_conceptos_catalogo')->updateOrInsert(
             ['legacy_office_id' => 7, 'legacy_concept_id' => 1001],
-            ['slug' => 'e2e-test', 'is_published' => true]
+            ['slug' => 'e2e-test', 'esta_publicado' => true]
         );
     }
 
@@ -80,7 +80,7 @@ class CompletePurchaseJourneyTest extends TestCase
             ->assertJsonPath('data.checkout_enabled', false)
             ->assertJsonPath('data.total_amount', null);
 
-        $this->assertDatabaseHas('tienda_carritos', ['user_id' => $buyer->id, 'token_hash' => null]);
+        $this->assertDatabaseHas('tienda_carritos', ['usuario_id' => $buyer->id, 'token_hash' => null]);
         $this->assertDatabaseCount('tienda_pedidos', 0);
         $this->assertDatabaseCount('tienda_transacciones_pago', 0);
         $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
@@ -90,7 +90,7 @@ class CompletePurchaseJourneyTest extends TestCase
         $this->flushSession();
         $this->actingAs($buyer->fresh())->getJson('/api/v1/tienda/precompra/resumen')
             ->assertJsonPath('data.next_step', 'review');
-        $this->assertSame(1, DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->count());
+        $this->assertSame(1, DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->count());
     }
 
     public function test_invalid_expired_and_reused_tokens_cannot_claim_a_cart(): void
@@ -102,7 +102,7 @@ class CompletePurchaseJourneyTest extends TestCase
 
         $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
         DB::table('tienda_carritos')->where('token_hash', hash('sha256', $token))
-            ->update(['expires_at' => now()->subSecond()]);
+            ->update(['vence_en' => now()->subSecond()]);
         $this->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $token])
             ->assertNotFound();
 
@@ -136,7 +136,7 @@ class CompletePurchaseJourneyTest extends TestCase
             ->assertJsonPath('data.profile.document_number', '00000001')
             ->assertJsonPath('data.cart.items_count', 0);
 
-        $this->assertSame(1, DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->count());
+        $this->assertSame(1, DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->count());
     }
 
     public function test_one_buyers_claimed_cart_is_not_accessible_from_another_account(): void
@@ -163,9 +163,9 @@ class CompletePurchaseJourneyTest extends TestCase
         ])->assertOk();
         $itemId = DB::table('tienda_conceptos_catalogo')->where('slug', 'e2e-test')->value('id');
         $source = DB::table('tienda_carritos')->insertGetId([
-            'user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay(),
+            'usuario_id' => $buyer->id, 'estado' => 'active', 'moneda' => 'PEN', 'vence_en' => now()->addDay(),
         ]);
-        DB::table('tienda_detalles_carrito')->insert(['cart_id' => $source, 'catalog_item_id' => $itemId, 'quantity' => 2]);
+        DB::table('tienda_detalles_carrito')->insert(['carrito_id' => $source, 'concepto_catalogo_id' => $itemId, 'cantidad' => 2]);
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $source])->assertCreated()->json('data.code');
         $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
         $cartId = $this->postJson($url)->assertOk()->json('data.cart_id');
@@ -179,7 +179,7 @@ class CompletePurchaseJourneyTest extends TestCase
         $replacement = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cartId])->assertCreated()->json('data');
         $this->assertNotSame($code, $replacement['code']);
         $this->assertEquals(45.00, $replacement['total_amount']);
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'cancelled', 'total_amount' => '30.00']);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $code, 'estado' => 'cancelled', 'monto_total' => '30.00']);
         $this->assertDatabaseCount('tienda_pedidos', 2);
         $this->assertDatabaseCount('tienda_transacciones_pago', 0);
     }
@@ -199,7 +199,7 @@ class CompletePurchaseJourneyTest extends TestCase
         $this->assertSame($owned['id'], $merged['id']);
         $this->assertSame(5, $merged['items_count']);
         $this->expectException(\Illuminate\Database\QueryException::class);
-        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+        DB::table('tienda_carritos')->insert(['usuario_id' => $buyer->id, 'estado' => 'active']);
     }
 
 }

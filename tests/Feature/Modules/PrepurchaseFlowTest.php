@@ -28,8 +28,8 @@ class PrepurchaseFlowTest extends TestCase
         });
         DB::table('tm_oficina')->insert(['oficina_id' => 7, 'oficina_nom' => 'Posgrado demo', 'estado' => 1]);
         DB::table('tm_conceptos')->insert(['id_concepto' => 12, 'codigo_concepto' => 'DEMO', 'concepto' => 'Prueba', 'costo' => 10]);
-        DB::table('tienda_configuracion_oficinas')->insert(['legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalog_enabled' => 1]);
-        DB::table('tienda_conceptos_catalogo')->insert(['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'publicado', 'is_published' => 1]);
+        DB::table('tienda_configuracion_oficinas')->insert(['legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalogo_habilitado' => 1]);
+        DB::table('tienda_conceptos_catalogo')->insert(['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'publicado', 'esta_publicado' => 1]);
     }
 
     public function test_public_tienda_screen_does_not_require_authentication(): void
@@ -67,7 +67,7 @@ class PrepurchaseFlowTest extends TestCase
             ->assertJsonPath('data.cart.items_count', 2)
             ->assertJsonPath('data.total_amount', null);
 
-        $this->assertDatabaseHas('tienda_carritos', ['user_id' => $buyer->id, 'token_hash' => null]);
+        $this->assertDatabaseHas('tienda_carritos', ['usuario_id' => $buyer->id, 'token_hash' => null]);
         $this->assertDatabaseCount('tienda_pedidos', 0);
         $this->assertDatabaseCount('tienda_perfiles_compradores', 1);
         $this->postJson('/api/v1/tienda/precompra/vincular-carrito', [
@@ -78,7 +78,7 @@ class PrepurchaseFlowTest extends TestCase
     public function test_cart_claim_requires_owner_auth_and_expires_safely(): void
     {
         $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
-        DB::table('tienda_carritos')->where('token_hash', hash('sha256', $token))->update(['expires_at' => now()->subMinute()]);
+        DB::table('tienda_carritos')->where('token_hash', hash('sha256', $token))->update(['vence_en' => now()->subMinute()]);
         $this->actingAs(User::factory()->create())->postJson('/api/v1/tienda/precompra/vincular-carrito', ['cart_token' => $token])->assertNotFound();
         $this->assertDatabaseCount('tienda_pedidos', 0);
     }
@@ -109,7 +109,7 @@ class PrepurchaseFlowTest extends TestCase
         $merged = $carts->claim($second['token'], $buyer->id);
         $this->assertSame($owned['id'], $merged['id']);
         $this->assertSame(5, $merged['items_count']);
-        $this->assertSame(1, DB::table('tienda_carritos')->where('user_id', $buyer->id)->where('status', 'active')->count());
+        $this->assertSame(1, DB::table('tienda_carritos')->where('usuario_id', $buyer->id)->where('estado', 'active')->count());
         $this->assertNull($carts->find($second['token']));
         $this->assertSame($merged['id'], $carts->forBuyer($buyer->id)['id']);
     }
@@ -132,8 +132,8 @@ class PrepurchaseFlowTest extends TestCase
     public function test_database_rejects_second_active_cart_but_allows_anonymous_carts(): void
     {
         $buyer = User::factory()->create();
-        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+        DB::table('tienda_carritos')->insert(['usuario_id' => $buyer->id, 'estado' => 'active']);
         $this->expectException(\Illuminate\Database\QueryException::class);
-        DB::table('tienda_carritos')->insert(['user_id' => $buyer->id, 'status' => 'active']);
+        DB::table('tienda_carritos')->insert(['usuario_id' => $buyer->id, 'estado' => 'active']);
     }
 }

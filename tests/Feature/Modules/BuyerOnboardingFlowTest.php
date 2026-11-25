@@ -59,7 +59,7 @@ class BuyerOnboardingFlowTest extends TestCase
         ])->assertOk();
 
         \Illuminate\Support\Facades\DB::table('tienda_perfiles_compradores')
-            ->where('user_id', $buyer->id)->update(['document_number' => null]);
+            ->where('usuario_id', $buyer->id)->update(['numero_documento' => null]);
 
         $this->actingAs($buyer)->getJson('/api/v1/acceso/estado')
             ->assertJsonPath('data.profile_complete', false)

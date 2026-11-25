@@ -23,13 +23,13 @@ class OrderFlowTest extends TestCase
         });
         DB::table('tm_oficina')->insert(['oficina_id' => 7, 'oficina_nom' => 'Posgrado prueba', 'estado' => 1]);
         DB::table('tm_conceptos')->insert(['id_concepto' => 12, 'codigo_concepto' => 'DEMO', 'concepto' => 'Concepto prueba', 'costo' => '999.00']);
-        DB::table('tienda_configuracion_oficinas')->insert(['legacy_office_id' => 7, 'slug' => 'prueba', 'catalog_enabled' => true]);
-        DB::table('tienda_conceptos_catalogo')->insert(['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'concepto', 'is_published' => true]);
-        DB::table('tienda_versiones_tarifas')->insert(['catalog_item_id' => 101, 'amount' => '25.10', 'currency' => 'PEN', 'valid_from' => now()->subDay(), 'is_approved' => $approved, 'approval_reference' => 'PRUEBA-NO-REAL']);
+        DB::table('tienda_configuracion_oficinas')->insert(['legacy_office_id' => 7, 'slug' => 'prueba', 'catalogo_habilitado' => true]);
+        DB::table('tienda_conceptos_catalogo')->insert(['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'concepto', 'esta_publicado' => true]);
+        DB::table('tienda_versiones_tarifas')->insert(['concepto_catalogo_id' => 101, 'monto' => '25.10', 'moneda' => 'PEN', 'vigente_desde' => now()->subDay(), 'esta_aprobado' => $approved, 'referencia_aprobacion' => 'PRUEBA-NO-REAL']);
         $buyer = User::factory()->create();
-        DB::table('tienda_perfiles_compradores')->insert(['user_id' => $buyer->id, 'first_names' => 'Persona', 'last_names' => 'Prueba', 'document_type' => 'DNI', 'document_number' => '00000000']);
-        $id = DB::table('tienda_carritos')->insertGetId(['user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay()]);
-        DB::table('tienda_detalles_carrito')->insert(['cart_id' => $id, 'catalog_item_id' => 101, 'quantity' => 2]);
+        DB::table('tienda_perfiles_compradores')->insert(['usuario_id' => $buyer->id, 'nombres' => 'Persona', 'apellidos' => 'Prueba', 'tipo_documento' => 'DNI', 'numero_documento' => '00000000']);
+        $id = DB::table('tienda_carritos')->insertGetId(['usuario_id' => $buyer->id, 'estado' => 'active', 'moneda' => 'PEN', 'vence_en' => now()->addDay()]);
+        DB::table('tienda_detalles_carrito')->insert(['carrito_id' => $id, 'concepto_catalogo_id' => 101, 'cantidad' => 2]);
         $this->actingAs($buyer);
         return [$buyer, $id];
     }
@@ -40,8 +40,8 @@ class OrderFlowTest extends TestCase
         $this->postJson('/api/v1/tienda/pedidos/cotizar', ['cart_id' => $cart])->assertOk()->assertJsonPath('data.total_amount', '50.20');
         $response = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart, 'total_amount' => '0.01', 'status' => 'paid', 'user_id' => 999]);
         $response->assertCreated()->assertJsonPath('data.status', 'pending')->assertJsonPath('data.payment_enabled', false);
-        $this->assertDatabaseHas('tienda_pedidos', ['user_id' => $buyer->id, 'status' => 'pending', 'total_amount' => '50.20', 'paid_at' => null]);
-        $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 2, 'unit_amount' => '25.10']);
+        $this->assertDatabaseHas('tienda_pedidos', ['usuario_id' => $buyer->id, 'estado' => 'pending', 'monto_total' => '50.20', 'pagado_en' => null]);
+        $this->assertDatabaseHas('tienda_detalles_pedido', ['cantidad' => 2, 'monto_unitario' => '25.10']);
         $this->assertDatabaseCount('tienda_transacciones_pago', 0);
         $this->assertDatabaseCount('tienda_intentos_pago', 0);
     }
@@ -50,12 +50,12 @@ class OrderFlowTest extends TestCase
     {
         [$buyer, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update(['first_names' => 'Cambio']);
-        DB::table('tienda_versiones_tarifas')->update(['amount' => '80.00']);
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update(['nombres' => 'Cambio']);
+        DB::table('tienda_versiones_tarifas')->update(['monto' => '80.00']);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated()->assertJsonPath('data.code', $code)->assertJsonPath('data.buyer_name', 'Persona Prueba');
         $this->assertDatabaseCount('tienda_pedidos', 1);
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'total_amount' => '50.20']);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $code, 'monto_total' => '50.20']);
     }
 
     public function test_official_catalog_price_generates_order_without_duplicate_approval(): void
@@ -65,8 +65,8 @@ class OrderFlowTest extends TestCase
             ->assertOk()->assertJsonPath('data.total_amount', '1998.00');
         $response = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart, 'total_amount' => '0.01', 'status' => 'paid']);
         $response->assertCreated()->assertJsonPath('data.status', 'pending')->assertJsonPath('data.payment_enabled', false);
-        $this->assertDatabaseHas('tienda_pedidos', ['user_id' => $buyer->id, 'total_amount' => '1998.00', 'paid_at' => null]);
-        $this->assertDatabaseHas('tienda_versiones_tarifas', ['catalog_item_id' => 101, 'is_approved' => false]);
+        $this->assertDatabaseHas('tienda_pedidos', ['usuario_id' => $buyer->id, 'monto_total' => '1998.00', 'pagado_en' => null]);
+        $this->assertDatabaseHas('tienda_versiones_tarifas', ['concepto_catalogo_id' => 101, 'esta_aprobado' => false]);
         $this->assertDatabaseCount('tienda_intentos_pago', 0);
         DB::table('tm_conceptos')->update(['costo' => '1.00']);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
@@ -78,7 +78,7 @@ class OrderFlowTest extends TestCase
     public function test_ambiguous_tariffs_and_invalid_catalog_prices_are_blocked(): void
     {
         [, $cart] = $this->buyerCart();
-        DB::table('tienda_versiones_tarifas')->insert(['catalog_item_id' => 101, 'amount' => '30.00', 'currency' => 'PEN', 'valid_from' => now()->subDay(), 'is_approved' => true, 'approval_reference' => 'OTRA-PRUEBA']);
+        DB::table('tienda_versiones_tarifas')->insert(['concepto_catalogo_id' => 101, 'monto' => '30.00', 'moneda' => 'PEN', 'vigente_desde' => now()->subDay(), 'esta_aprobado' => true, 'referencia_aprobacion' => 'OTRA-PRUEBA']);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
         DB::table('tienda_versiones_tarifas')->delete();
         foreach (['0.00', '-10.00', null] as $amount) {
@@ -86,7 +86,7 @@ class OrderFlowTest extends TestCase
             $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
         }
         $this->assertDatabaseCount('tienda_pedidos', 0);
-        $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'status' => 'active']);
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'estado' => 'active']);
     }
 
     public function test_ownership_is_enforced_for_cart_detail_and_history(): void
@@ -106,7 +106,7 @@ class OrderFlowTest extends TestCase
         $this->travel(25)->hours();
         $this->getJson('/api/v1/tienda/pedidos/'.$code.'?status=paid')->assertOk()->assertJsonPath('data.status', 'expired')->assertJsonPath('data.paid_at', null);
         $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonCount(1, 'data.history');
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $code, 'estado' => 'pending']);
         $this->artisan('market:expire')->assertSuccessful();
         $this->artisan('market:expire')->assertSuccessful();
         $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonCount(2, 'data.history');
@@ -118,7 +118,7 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $before = DB::table('tienda_pedidos')->where('code', $code)->first();
+        $before = DB::table('tienda_pedidos')->where('codigo', $code)->first();
         $this->travel(25)->hours();
         DB::enableQueryLog();
         DB::flushQueryLog();
@@ -135,7 +135,7 @@ class OrderFlowTest extends TestCase
         foreach ($queries as $query) {
             $this->assertDoesNotMatchRegularExpression('/\b(insert|update|delete|replace)\b|for update/i', $query['query']);
         }
-        $this->assertEquals($before, DB::table('tienda_pedidos')->where('code', $code)->first());
+        $this->assertEquals($before, DB::table('tienda_pedidos')->where('codigo', $code)->first());
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
         $this->travelBack();
     }
@@ -146,25 +146,25 @@ class OrderFlowTest extends TestCase
         $carts = app(\App\Modules\Pedidos\Services\CartService::class);
         $anonymous = $carts->create();
         DB::table('tienda_carritos')->where('id', $cart)->update([
-            'expires_at' => now()->subSecond(), 'token_hash' => hash('sha256', 'retired-token'),
+            'vence_en' => now()->subSecond(), 'token_hash' => hash('sha256', 'retired-token'),
         ]);
 
         $this->assertSame($anonymous['cart']['id'], $carts->claim($anonymous['token'], $buyer->id)['id']);
-        $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'status' => 'expired', 'token_hash' => null]);
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $cart, 'estado' => 'expired', 'token_hash' => null]);
     }
 
     public function test_ineligible_unpublished_expired_cart_and_incomplete_profile_are_blocked(): void
     {
         [$buyer, $cart] = $this->buyerCart();
-        DB::table('tienda_conceptos_catalogo')->update(['requires_eligibility_check' => true]);
+        DB::table('tienda_conceptos_catalogo')->update(['requiere_verificacion_elegibilidad' => true]);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
-        DB::table('tienda_conceptos_catalogo')->update(['requires_eligibility_check' => false, 'is_published' => false]);
+        DB::table('tienda_conceptos_catalogo')->update(['requiere_verificacion_elegibilidad' => false, 'esta_publicado' => false]);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
-        DB::table('tienda_conceptos_catalogo')->update(['is_published' => true]);
-        DB::table('tienda_carritos')->where('id', $cart)->update(['expires_at' => now()->subMinute()]);
+        DB::table('tienda_conceptos_catalogo')->update(['esta_publicado' => true]);
+        DB::table('tienda_carritos')->where('id', $cart)->update(['vence_en' => now()->subMinute()]);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertNotFound();
-        DB::table('tienda_carritos')->where('id', $cart)->update(['expires_at' => now()->addDay()]);
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update(['document_number' => null]);
+        DB::table('tienda_carritos')->where('id', $cart)->update(['vence_en' => now()->addDay()]);
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update(['numero_documento' => null]);
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertUnprocessable();
         $this->assertDatabaseCount('tienda_pedidos', 0);
     }
@@ -200,8 +200,8 @@ class OrderFlowTest extends TestCase
         $updated = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $newCart])->assertCreated()
             ->assertJsonPath('data.total_amount', fn ($amount) => (float) $amount === 75.30)->json('data');
         $this->assertNotSame($order['code'], $updated['code']);
-        $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 2, 'total_amount' => '50.20']);
-        $this->assertDatabaseHas('tienda_detalles_pedido', ['quantity' => 3, 'total_amount' => '75.30']);
+        $this->assertDatabaseHas('tienda_detalles_pedido', ['cantidad' => 2, 'monto_total' => '50.20']);
+        $this->assertDatabaseHas('tienda_detalles_pedido', ['cantidad' => 3, 'monto_total' => '75.30']);
         $this->postJson($url)->assertStatus(409);
         $this->assertDatabaseCount('tienda_pedidos', 2);
     }
@@ -213,11 +213,11 @@ class OrderFlowTest extends TestCase
         $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
         $this->actingAs(User::factory()->create())->postJson($url)->assertNotFound();
         $this->actingAs($buyer);
-        $active = DB::table('tienda_carritos')->insertGetId(['user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN']);
-        DB::table('tienda_detalles_carrito')->insert(['cart_id' => $active, 'catalog_item_id' => 101, 'quantity' => 1]);
+        $active = DB::table('tienda_carritos')->insertGetId(['usuario_id' => $buyer->id, 'estado' => 'active', 'moneda' => 'PEN']);
+        DB::table('tienda_detalles_carrito')->insert(['carrito_id' => $active, 'concepto_catalogo_id' => 101, 'cantidad' => 1]);
         $this->postJson($url)->assertStatus(409);
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
-        $this->assertDatabaseHas('tienda_detalles_carrito', ['cart_id' => $active, 'quantity' => 1]);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $code, 'estado' => 'pending']);
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['carrito_id' => $active, 'cantidad' => 1]);
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
     }
 
@@ -225,27 +225,27 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $query = DB::table('tienda_pedidos')->where('code', $code);
+        $query = DB::table('tienda_pedidos')->where('codigo', $code);
         $id = (int) $query->value('id');
         $url = '/api/v1/tienda/pedidos/'.$code.'/modificar';
-        foreach ([['status' => 'paid'], ['status' => 'cancelled'], ['status' => 'confirmed'],
-            ['status' => 'pending', 'paid_at' => now()],
-            ['status' => 'pending', 'paid_at' => null, 'confirmed_at' => now()],
-            ['status' => 'pending', 'confirmed_at' => null, 'expires_at' => now()->subMinute()]] as $state) {
+        foreach ([['estado' => 'paid'], ['estado' => 'cancelled'], ['estado' => 'confirmed'],
+            ['estado' => 'pending', 'pagado_en' => now()],
+            ['estado' => 'pending', 'pagado_en' => null, 'confirmado_en' => now()],
+            ['estado' => 'pending', 'confirmado_en' => null, 'vence_en' => now()->subMinute()]] as $state) {
             (clone $query)->update($state);
             $this->postJson($url)->assertStatus(409);
         }
-        (clone $query)->update(['status' => 'pending', 'expires_at' => now()->addDay()]);
+        (clone $query)->update(['estado' => 'pending', 'vence_en' => now()->addDay()]);
         DB::table('tienda_intentos_pago')->insert([
-            'order_id' => $id, 'channel' => 'gateway', 'provider' => 'demo', 'status' => 'initiated',
-            'idempotency_key' => 'test-only', 'requested_amount' => '50.20', 'currency' => 'PEN', 'started_at' => now(),
+            'pedido_id' => $id, 'canal' => 'gateway', 'proveedor' => 'demo', 'estado' => 'initiated',
+            'idempotency_key' => 'test-only', 'monto_solicitado' => '50.20', 'moneda' => 'PEN', 'iniciado_en' => now(),
         ]);
         $this->getJson('/api/v1/tienda/pedidos/'.$code)->assertOk()->assertJsonPath('data.can_modify', false);
         $this->postJson($url)->assertStatus(409);
         DB::table('tienda_intentos_pago')->delete();
         DB::table('tienda_transacciones_pago')->insert([
-            'order_id' => $id, 'provider' => 'demo', 'status' => 'pending_verification',
-            'amount' => '50.20', 'currency' => 'PEN', 'observed_at' => now(),
+            'pedido_id' => $id, 'proveedor' => 'demo', 'estado' => 'pending_verification',
+            'monto' => '50.20', 'moneda' => 'PEN', 'observado_en' => now(),
         ]);
         $this->postJson($url)->assertStatus(409);
         $this->assertDatabaseCount('tienda_carritos', 1);
@@ -259,8 +259,8 @@ class OrderFlowTest extends TestCase
         $created = app(\App\Modules\Pedidos\Services\CartService::class)->create();
         app(\App\Modules\Pedidos\Services\CartService::class)->add($created['token'], 101, 1);
         $this->postJson('/api/v1/tienda/pedidos/'.$code.'/modificar', ['cart_token' => $created['token']])->assertStatus(409);
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $code, 'status' => 'pending']);
-        $this->assertDatabaseHas('tienda_detalles_carrito', ['cart_id' => $created['cart']['id'], 'quantity' => 1]);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $code, 'estado' => 'pending']);
+        $this->assertDatabaseHas('tienda_detalles_carrito', ['carrito_id' => $created['cart']['id'], 'cantidad' => 1]);
     }
 
 
@@ -272,8 +272,8 @@ class OrderFlowTest extends TestCase
         $this->travel(25)->hours();
         $this->artisan('market:expire')->assertSuccessful();
         $this->artisan('market:expire')->assertSuccessful();
-        $this->assertDatabaseHas('tienda_pedidos', ['cart_id' => $cart, 'status' => 'expired', 'paid_at' => null]);
-        $this->assertDatabaseHas('tienda_carritos', ['id' => $anonymous['cart']['id'], 'status' => 'expired', 'token_hash' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['carrito_id' => $cart, 'estado' => 'expired', 'pagado_en' => null]);
+        $this->assertDatabaseHas('tienda_carritos', ['id' => $anonymous['cart']['id'], 'estado' => 'expired', 'token_hash' => null]);
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 2);
         $this->travelBack();
     }
@@ -285,20 +285,20 @@ class OrderFlowTest extends TestCase
         $first = $orders->create($buyer->id, $cart);
         for ($i = 0; $i < 10; $i++) {
             $nextCart = DB::table('tienda_carritos')->insertGetId([
-                'user_id' => $buyer->id, 'status' => 'active', 'currency' => 'PEN', 'expires_at' => now()->addDay(),
+                'usuario_id' => $buyer->id, 'estado' => 'active', 'moneda' => 'PEN', 'vence_en' => now()->addDay(),
             ]);
             DB::table('tienda_detalles_carrito')->insert([
-                'cart_id' => $nextCart, 'catalog_item_id' => 101, 'quantity' => 2,
+                'carrito_id' => $nextCart, 'concepto_catalogo_id' => 101, 'cantidad' => 2,
             ]);
             $first = $orders->create($buyer->id, $nextCart);
         }
-        $orderIds = DB::table('tienda_pedidos')->where('user_id', $buyer->id)->pluck('id');
-        DB::table('tienda_pedidos')->whereIn('id', $orderIds)->update(['expires_at' => now()->subMinute()]);
+        $orderIds = DB::table('tienda_pedidos')->where('usuario_id', $buyer->id)->pluck('id');
+        DB::table('tienda_pedidos')->whereIn('id', $orderIds)->update(['vence_en' => now()->subMinute()]);
         foreach ($orderIds as $orderId) {
             DB::table('tienda_intentos_pago')->insert([
-                'order_id' => $orderId, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
-                'idempotency_key' => 'listing-review-'.$orderId, 'requested_amount' => '50.20',
-                'currency' => 'PEN', 'started_at' => now()->subMinutes(2),
+                'pedido_id' => $orderId, 'canal' => 'gateway', 'proveedor' => 'test', 'estado' => 'initiated',
+                'idempotency_key' => 'listing-review-'.$orderId, 'monto_solicitado' => '50.20',
+                'moneda' => 'PEN', 'iniciado_en' => now()->subMinutes(2),
             ]);
         }
         DB::enableQueryLog();
@@ -321,7 +321,7 @@ class OrderFlowTest extends TestCase
         $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
         $row = (array) DB::table('tienda_pedidos')->first();
         unset($row['id']);
-        $row['code'] = 'DUPLICATE-TEST';
+        $row['codigo'] = 'DUPLICATE-TEST';
         $this->expectException(\Illuminate\Database\QueryException::class);
         DB::table('tienda_pedidos')->insert($row);
     }
@@ -330,24 +330,24 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         DB::table('tienda_intentos_pago')->insert([
-            'order_id' => $orderId, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
-            'idempotency_key' => 'expiry-open-test', 'requested_amount' => '50.20', 'currency' => 'PEN', 'started_at' => now(),
+            'pedido_id' => $orderId, 'canal' => 'gateway', 'proveedor' => 'test', 'estado' => 'initiated',
+            'idempotency_key' => 'expiry-open-test', 'monto_solicitado' => '50.20', 'moneda' => 'PEN', 'iniciado_en' => now(),
         ]);
 
         $this->travel(25)->hours();
         $this->artisan('market:expire')->assertSuccessful();
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 1);
 
-        DB::table('tienda_intentos_pago')->where('order_id', $orderId)->update(['status' => 'future_unknown_status']);
+        DB::table('tienda_intentos_pago')->where('pedido_id', $orderId)->update(['estado' => 'future_unknown_status']);
         $this->artisan('market:expire')->assertSuccessful();
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
 
-        DB::table('tienda_intentos_pago')->where('order_id', $orderId)->update(['status' => 'expired']);
+        DB::table('tienda_intentos_pago')->where('pedido_id', $orderId)->update(['estado' => 'expired']);
         $this->artisan('market:expire')->assertSuccessful();
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'expired', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'expired', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_historial_estados_pedido', 2);
         $this->travelBack();
     }
@@ -356,24 +356,24 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-ONCE',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-ONCE',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
 
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame(['result' => 'applied', 'order_id' => $orderId], $service->apply($transactionId));
         $this->assertSame(['result' => 'already_applied', 'order_id' => $orderId], $service->apply($transactionId));
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
-        $this->assertNotNull(DB::table('tienda_pedidos')->where('id', $orderId)->value('paid_at'));
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'paid']);
+        $this->assertNotNull(DB::table('tienda_pedidos')->where('id', $orderId)->value('pagado_en'));
         $this->assertDatabaseHas('tienda_pagos_aplicados_pedidos', [
-            'order_id' => $orderId, 'payment_transaction_id' => $transactionId,
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $transactionId,
         ]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 1);
         $this->assertDatabaseHas('tienda_historial_estados_pedido', [
-            'order_id' => $orderId, 'from_status' => 'pending', 'to_status' => 'paid',
+            'pedido_id' => $orderId, 'estado_anterior' => 'pending', 'estado_nuevo' => 'paid',
         ]);
     }
 
@@ -381,41 +381,41 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $mismatchId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-MISMATCH',
-            'status' => 'authorized', 'amount' => '50.21', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-MISMATCH',
+            'estado' => 'authorized', 'monto' => '50.21', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
 
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame('mismatch', $service->apply($mismatchId)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $orderId, 'payment_transaction_id' => $mismatchId, 'kind' => 'mismatch', 'status' => 'open',
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $mismatchId, 'tipo' => 'mismatch', 'estado' => 'open',
         ]);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
 
         $currencyMismatchId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-CURRENCY',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'USD',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-CURRENCY',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'USD',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $this->assertSame('mismatch', $service->apply($currencyMismatchId)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $orderId, 'payment_transaction_id' => $currencyMismatchId, 'kind' => 'mismatch', 'status' => 'open',
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $currencyMismatchId, 'tipo' => 'mismatch', 'estado' => 'open',
         ]);
 
-        DB::table('tienda_pedidos')->where('id', $orderId)->update(['status' => 'expired', 'expires_at' => now()->subMinute()]);
+        DB::table('tienda_pedidos')->where('id', $orderId)->update(['estado' => 'expired', 'vence_en' => now()->subMinute()]);
         $lateId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-LATE',
-            'status' => 'settled', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-LATE',
+            'estado' => 'settled', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $this->assertSame('late_payment', $service->apply($lateId)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $orderId, 'payment_transaction_id' => $lateId, 'kind' => 'late_payment', 'status' => 'open',
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $lateId, 'tipo' => 'late_payment', 'estado' => 'open',
         ]);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'expired', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'expired', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
     }
 
@@ -423,41 +423,41 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $first = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-FIRST',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-FIRST',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $second = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-SECOND',
-            'status' => 'settled', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-SECOND',
+            'estado' => 'settled', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
 
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
         $this->assertSame('applied', $service->apply($first)['result']);
         $this->assertSame('duplicate_charge', $service->apply($second)['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $orderId, 'payment_transaction_id' => $second, 'kind' => 'duplicate_charge', 'status' => 'open',
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $second, 'tipo' => 'duplicate_charge', 'estado' => 'open',
         ]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 1);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'paid']);
     }
 
     public function test_authorized_status_without_server_verification_does_not_mark_order_paid(): void
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'UNVERIFIED-ONLY',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN', 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'UNVERIFIED-ONLY',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN', 'observado_en' => now(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
         $this->assertSame('not_verified', $result['result']);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
     }
 
@@ -466,30 +466,30 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $order = DB::table('tienda_pedidos')->where('code', $code)->first();
-        $expiresAt = \Illuminate\Support\Carbon::parse($order->expires_at);
+        $order = DB::table('tienda_pedidos')->where('codigo', $code)->first();
+        $expiresAt = \Illuminate\Support\Carbon::parse($order->vence_en);
         $attemptId = DB::table('tienda_intentos_pago')->insertGetId([
-            'order_id' => $order->id, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
-            'idempotency_key' => 'started-before-expiry', 'requested_amount' => '50.20', 'currency' => 'PEN',
-            'started_at' => $expiresAt->copy()->subMinute(),
+            'pedido_id' => $order->id, 'canal' => 'gateway', 'proveedor' => 'test', 'estado' => 'initiated',
+            'idempotency_key' => 'started-before-expiry', 'monto_solicitado' => '50.20', 'moneda' => 'PEN',
+            'iniciado_en' => $expiresAt->copy()->subMinute(),
         ]);
 
         $this->travel(26)->hours();
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $order->id, 'payment_attempt_id' => $attemptId, 'provider' => 'test',
-            'provider_transaction_reference' => 'VERIFIED-AFTER-EXPIRY', 'status' => 'authorized',
-            'amount' => '50.20', 'currency' => 'PEN', 'verification_source' => 'test-server-query',
-            'observed_at' => now(), 'verified_at' => now(),
+            'pedido_id' => $order->id, 'intento_pago_id' => $attemptId, 'proveedor' => 'test',
+            'referencia_transaccion_proveedor' => 'VERIFIED-AFTER-EXPIRY', 'estado' => 'authorized',
+            'monto' => '50.20', 'moneda' => 'PEN', 'fuente_verificacion' => 'test-server-query',
+            'observado_en' => now(), 'verificado_en' => now(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
         $this->assertSame('applied', $result['result']);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'status' => 'paid']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'estado' => 'paid']);
         $this->assertDatabaseHas('tienda_pagos_aplicados_pedidos', [
-            'order_id' => $order->id, 'payment_transaction_id' => $transactionId,
+            'pedido_id' => $order->id, 'transaccion_pago_id' => $transactionId,
         ]);
         $this->assertDatabaseHas('tienda_historial_estados_pedido', [
-            'order_id' => $order->id, 'from_status' => 'pending', 'to_status' => 'paid',
+            'pedido_id' => $order->id, 'estado_anterior' => 'pending', 'estado_nuevo' => 'paid',
         ]);
         $this->travelBack();
     }
@@ -498,27 +498,27 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $order = DB::table('tienda_pedidos')->where('code', $code)->first();
+        $order = DB::table('tienda_pedidos')->where('codigo', $code)->first();
 
         $this->travel(26)->hours();
         $attemptId = DB::table('tienda_intentos_pago')->insertGetId([
-            'order_id' => $order->id, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
-            'idempotency_key' => 'started-after-expiry', 'requested_amount' => '50.20', 'currency' => 'PEN',
-            'started_at' => now(),
+            'pedido_id' => $order->id, 'canal' => 'gateway', 'proveedor' => 'test', 'estado' => 'initiated',
+            'idempotency_key' => 'started-after-expiry', 'monto_solicitado' => '50.20', 'moneda' => 'PEN',
+            'iniciado_en' => now(),
         ]);
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $order->id, 'payment_attempt_id' => $attemptId, 'provider' => 'test',
-            'provider_transaction_reference' => 'VERIFIED-STARTED-LATE', 'status' => 'authorized',
-            'amount' => '50.20', 'currency' => 'PEN', 'verification_source' => 'test-server-query',
-            'observed_at' => now(), 'verified_at' => now(),
+            'pedido_id' => $order->id, 'intento_pago_id' => $attemptId, 'proveedor' => 'test',
+            'referencia_transaccion_proveedor' => 'VERIFIED-STARTED-LATE', 'estado' => 'authorized',
+            'monto' => '50.20', 'moneda' => 'PEN', 'fuente_verificacion' => 'test-server-query',
+            'observado_en' => now(), 'verificado_en' => now(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
         $this->assertSame('late_payment', $result['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $order->id, 'payment_transaction_id' => $transactionId, 'kind' => 'late_payment', 'status' => 'open',
+            'pedido_id' => $order->id, 'transaccion_pago_id' => $transactionId, 'tipo' => 'late_payment', 'estado' => 'open',
         ]);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
         $this->travelBack();
     }
@@ -527,11 +527,11 @@ class OrderFlowTest extends TestCase
     {
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         DB::table('tienda_intentos_pago')->insert([
-            'order_id' => $orderId, 'channel' => 'gateway', 'provider' => 'test', 'status' => 'initiated',
-            'idempotency_key' => 'review-after-expiry', 'requested_amount' => '50.20', 'currency' => 'PEN',
-            'started_at' => now(),
+            'pedido_id' => $orderId, 'canal' => 'gateway', 'proveedor' => 'test', 'estado' => 'initiated',
+            'idempotency_key' => 'review-after-expiry', 'monto_solicitado' => '50.20', 'moneda' => 'PEN',
+            'iniciado_en' => now(),
         ]);
 
         $this->travel(25)->hours();
@@ -542,7 +542,7 @@ class OrderFlowTest extends TestCase
         $this->getJson('/api/v1/tienda/pedidos')->assertOk()
             ->assertJsonPath('data.items.0.status', 'payment_in_review')
             ->assertJsonPath('data.items.0.payment_enabled', false);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending']);
         $this->travelBack();
     }
 
@@ -552,11 +552,11 @@ class OrderFlowTest extends TestCase
         [$buyer, $cart] = $this->buyerCart();
         $response = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated();
         $this->assertDatabaseHas('tienda_pedidos', [
-            'code' => $response->json('data.code'),
-            'buyer_address_line_1' => null,
-            'buyer_address_city' => null,
-            'buyer_address_state' => null,
-            'buyer_address_country' => 'PE',
+            'codigo' => $response->json('data.code'),
+            'comprador_direccion_linea_1' => null,
+            'comprador_direccion_ciudad' => null,
+            'comprador_direccion_region' => null,
+            'comprador_direccion_pais' => 'PE',
         ]);
     }
 
@@ -571,35 +571,35 @@ class OrderFlowTest extends TestCase
             ->assertJsonPath('errors.profile.0', 'Para continuar con el pago, completa tu dirección y teléfono (incluido el código de país) en tu perfil.');
         $this->assertDatabaseCount('tienda_pedidos', 0);
 
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
-            'line_1' => 'Av. Prueba 123', 'line_2' => 'Interior 2',
-            'city' => 'Mala', 'state' => 'Lima', 'country' => 'PE',
-            'phone_country_code' => '+51', 'phone' => '987654321',
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update([
+            'direccion_linea_1' => 'Av. Prueba 123', 'direccion_linea_2' => 'Interior 2',
+            'ciudad' => 'Mala', 'region' => 'Lima', 'pais' => 'PE',
+            'codigo_pais_telefono' => '+51', 'telefono' => '987654321',
         ]);
         $order = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])
             ->assertCreated()->json('data');
         $this->assertDatabaseHas('tienda_pedidos', [
-            'code' => $order['code'],
-            'buyer_address_line_1' => 'Av. Prueba 123',
-            'buyer_address_line_2' => 'Interior 2',
-            'buyer_address_city' => 'Mala',
-            'buyer_address_state' => 'Lima',
-            'buyer_address_country' => 'PE',
-            'buyer_phone_country_code' => '+51',
-            'buyer_phone' => '987654321',
+            'codigo' => $order['code'],
+            'comprador_direccion_linea_1' => 'Av. Prueba 123',
+            'comprador_direccion_linea_2' => 'Interior 2',
+            'comprador_direccion_ciudad' => 'Mala',
+            'comprador_direccion_region' => 'Lima',
+            'comprador_direccion_pais' => 'PE',
+            'comprador_codigo_pais_telefono' => '+51',
+            'comprador_telefono' => '987654321',
         ]);
 
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update(['line_1' => 'Dirección modificada']);
-        $this->assertDatabaseHas('tienda_pedidos', ['code' => $order['code'], 'buyer_address_line_1' => 'Av. Prueba 123']);
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update(['direccion_linea_1' => 'Dirección modificada']);
+        $this->assertDatabaseHas('tienda_pedidos', ['codigo' => $order['code'], 'comprador_direccion_linea_1' => 'Av. Prueba 123']);
     }
 
 
     public function test_legacy_invalid_phone_blocks_enabled_checkout_but_not_disabled_checkout(): void
     {
         [$buyer, $cart] = $this->buyerCart();
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
-            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
-            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '+51 987 654 321',
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update([
+            'direccion_linea_1' => 'Av. Prueba 123', 'ciudad' => 'Mala', 'region' => 'Lima',
+            'pais' => 'PE', 'codigo_pais_telefono' => '+51', 'telefono' => '+51 987 654 321',
         ]);
         $profiles = app(\App\Modules\Usuarios\Services\BuyerProfileService::class);
         $this->assertTrue($profiles->isComplete($buyer->id));
@@ -618,9 +618,9 @@ class OrderFlowTest extends TestCase
     public function test_correcting_legacy_phone_through_profile_api_enables_checkout_and_snapshots_normalized_number(): void
     {
         [$buyer, $cart] = $this->buyerCart();
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
-            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
-            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '+51 987 654 321',
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update([
+            'direccion_linea_1' => 'Av. Prueba 123', 'ciudad' => 'Mala', 'region' => 'Lima',
+            'pais' => 'PE', 'codigo_pais_telefono' => '+51', 'telefono' => '+51 987 654 321',
         ]);
         $this->actingAs($buyer)->putJson('/api/v1/acceso/perfil', [
             'first_names' => 'Persona', 'last_names' => 'Prueba',
@@ -634,17 +634,17 @@ class OrderFlowTest extends TestCase
         config(['payments.payme_enabled' => true]);
         $order = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->assertCreated()->json('data');
         $this->assertDatabaseHas('tienda_pedidos', [
-            'code' => $order['code'], 'buyer_phone_country_code' => '+51',
-            'buyer_phone' => '987654321', 'buyer_address_line_1' => 'Av. Prueba 123',
+            'codigo' => $order['code'], 'comprador_codigo_pais_telefono' => '+51',
+            'comprador_telefono' => '987654321', 'comprador_direccion_linea_1' => 'Av. Prueba 123',
         ]);
     }
 
     public function test_checkout_readiness_rejects_unknown_iso_country_inserted_directly(): void
     {
         [$buyer] = $this->buyerCart();
-        DB::table('tienda_perfiles_compradores')->where('user_id', $buyer->id)->update([
-            'line_1' => 'Av. Prueba 123', 'city' => 'Mala', 'state' => 'Lima',
-            'country' => 'ZZ', 'phone_country_code' => '+51', 'phone' => '987654321',
+        DB::table('tienda_perfiles_compradores')->where('usuario_id', $buyer->id)->update([
+            'direccion_linea_1' => 'Av. Prueba 123', 'ciudad' => 'Mala', 'region' => 'Lima',
+            'pais' => 'ZZ', 'codigo_pais_telefono' => '+51', 'telefono' => '987654321',
         ]);
         $this->assertFalse(app(\App\Modules\Usuarios\Services\BuyerProfileService::class)->isCheckoutReady($buyer->id));
     }
@@ -667,17 +667,17 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-REVERSED',
-            'status' => 'reversed', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-REVERSED',
+            'estado' => 'reversed', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
 
         $this->assertSame('not_verified', $result['result']);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
         $this->travelBack();
     }
@@ -687,22 +687,22 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-APPLIED-THEN-REVERSED',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-APPLIED-THEN-REVERSED',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
 
         $this->assertSame('applied', $service->apply($transactionId)['result']);
-        $paidAt = DB::table('tienda_pedidos')->where('id', $orderId)->value('paid_at');
-        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['status' => 'reversed']);
+        $paidAt = DB::table('tienda_pedidos')->where('id', $orderId)->value('pagado_en');
+        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['estado' => 'reversed']);
 
         $this->assertSame('not_verified', $service->apply($transactionId)['result']);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid', 'paid_at' => $paidAt]);
-        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->count());
-        $this->assertSame(0, DB::table('tienda_incidencias_pago')->where('payment_transaction_id', $transactionId)->count());
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'paid', 'pagado_en' => $paidAt]);
+        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('pedido_id', $orderId)->count());
+        $this->assertSame(0, DB::table('tienda_incidencias_pago')->where('transaccion_pago_id', $transactionId)->count());
         $this->travelBack();
     }
 
@@ -711,20 +711,20 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'AUTHORIZED-THEN-SETTLED',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'AUTHORIZED-THEN-SETTLED',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
 
         $this->assertSame('applied', $service->apply($transactionId)['result']);
-        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['status' => 'settled']);
+        DB::table('tienda_transacciones_pago')->where('id', $transactionId)->update(['estado' => 'settled']);
 
         $this->assertSame('already_applied', $service->apply($transactionId)['result']);
-        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('order_id', $orderId)->count());
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'paid']);
+        $this->assertSame(1, DB::table('tienda_pagos_aplicados_pedidos')->where('pedido_id', $orderId)->count());
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'paid']);
         $this->travelBack();
     }
 
@@ -733,21 +733,21 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
-        DB::table('tienda_pedidos')->where('id', $orderId)->update(['status' => 'cancelled']);
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
+        DB::table('tienda_pedidos')->where('id', $orderId)->update(['estado' => 'cancelled']);
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'VERIFIED-CANCELLED-ORDER',
-            'status' => 'authorized', 'amount' => '50.20', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'VERIFIED-CANCELLED-ORDER',
+            'estado' => 'authorized', 'monto' => '50.20', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
 
         $this->assertSame('late_payment', $result['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $orderId, 'payment_transaction_id' => $transactionId, 'kind' => 'late_payment', 'status' => 'open',
+            'pedido_id' => $orderId, 'transaccion_pago_id' => $transactionId, 'tipo' => 'late_payment', 'estado' => 'open',
         ]);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'cancelled']);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
         $this->travelBack();
     }
@@ -757,18 +757,18 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
 
         foreach (['declined', 'expired', 'cancelled'] as $status) {
             $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-                'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'TERMINAL-'.$status,
-                'status' => $status, 'amount' => '50.20', 'currency' => 'PEN',
-                'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+                'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'TERMINAL-'.$status,
+                'estado' => $status, 'monto' => '50.20', 'moneda' => 'PEN',
+                'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
             ]);
 
             $this->assertSame('not_verified', $service->apply($transactionId)['result']);
-            $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+            $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         }
 
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
@@ -782,21 +782,21 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $order = DB::table('tienda_pedidos')->where('code', $code)->first();
-        $expiresAt = \Illuminate\Support\Carbon::parse($order->expires_at);
+        $order = DB::table('tienda_pedidos')->where('codigo', $code)->first();
+        $expiresAt = \Illuminate\Support\Carbon::parse($order->vence_en);
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $order->id, 'payment_attempt_id' => null, 'provider' => 'test',
-            'provider_transaction_reference' => 'OBSERVED-BEFORE-EXPIRY', 'status' => 'authorized',
-            'amount' => '50.20', 'currency' => 'PEN', 'verification_source' => 'test-server-query',
-            'verified_at' => now(), 'observed_at' => $expiresAt->copy()->subMinute(),
+            'pedido_id' => $order->id, 'intento_pago_id' => null, 'proveedor' => 'test',
+            'referencia_transaccion_proveedor' => 'OBSERVED-BEFORE-EXPIRY', 'estado' => 'authorized',
+            'monto' => '50.20', 'moneda' => 'PEN', 'fuente_verificacion' => 'test-server-query',
+            'verificado_en' => now(), 'observado_en' => $expiresAt->copy()->subMinute(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
 
         $this->assertSame('applied', $result['result']);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'status' => 'paid']);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'estado' => 'paid']);
         $this->assertDatabaseHas('tienda_pagos_aplicados_pedidos', [
-            'order_id' => $order->id, 'payment_transaction_id' => $transactionId,
+            'pedido_id' => $order->id, 'transaccion_pago_id' => $transactionId,
         ]);
         $this->travelBack();
     }
@@ -806,22 +806,22 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $order = DB::table('tienda_pedidos')->where('code', $code)->first();
-        $expiresAt = \Illuminate\Support\Carbon::parse($order->expires_at);
+        $order = DB::table('tienda_pedidos')->where('codigo', $code)->first();
+        $expiresAt = \Illuminate\Support\Carbon::parse($order->vence_en);
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $order->id, 'payment_attempt_id' => null, 'provider' => 'test',
-            'provider_transaction_reference' => 'OBSERVED-AFTER-EXPIRY', 'status' => 'authorized',
-            'amount' => '50.20', 'currency' => 'PEN', 'verification_source' => 'test-server-query',
-            'verified_at' => now(), 'observed_at' => $expiresAt->copy()->addMinute(),
+            'pedido_id' => $order->id, 'intento_pago_id' => null, 'proveedor' => 'test',
+            'referencia_transaccion_proveedor' => 'OBSERVED-AFTER-EXPIRY', 'estado' => 'authorized',
+            'monto' => '50.20', 'moneda' => 'PEN', 'fuente_verificacion' => 'test-server-query',
+            'verificado_en' => now(), 'observado_en' => $expiresAt->copy()->addMinute(),
         ]);
 
         $result = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class)->apply($transactionId);
 
         $this->assertSame('late_payment', $result['result']);
         $this->assertDatabaseHas('tienda_incidencias_pago', [
-            'order_id' => $order->id, 'payment_transaction_id' => $transactionId, 'kind' => 'late_payment', 'status' => 'open',
+            'pedido_id' => $order->id, 'transaccion_pago_id' => $transactionId, 'tipo' => 'late_payment', 'estado' => 'open',
         ]);
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'status' => 'pending', 'paid_at' => null]);
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $order->id, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
         $this->travelBack();
     }
@@ -831,19 +831,19 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-            'order_id' => $orderId, 'provider' => 'test', 'provider_transaction_reference' => 'REPEATED-MISMATCH',
-            'status' => 'authorized', 'amount' => '50.21', 'currency' => 'PEN',
-            'verification_source' => 'test-server-query', 'verified_at' => now(), 'observed_at' => now(),
+            'pedido_id' => $orderId, 'proveedor' => 'test', 'referencia_transaccion_proveedor' => 'REPEATED-MISMATCH',
+            'estado' => 'authorized', 'monto' => '50.21', 'moneda' => 'PEN',
+            'fuente_verificacion' => 'test-server-query', 'verificado_en' => now(), 'observado_en' => now(),
         ]);
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
 
         $this->assertSame('mismatch', $service->apply($transactionId)['result']);
         $this->assertSame('mismatch', $service->apply($transactionId)['result']);
         $this->assertSame(1, DB::table('tienda_incidencias_pago')
-            ->where('payment_transaction_id', $transactionId)->where('kind', 'mismatch')->where('status', 'open')->count());
-        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+            ->where('transaccion_pago_id', $transactionId)->where('tipo', 'mismatch')->where('estado', 'open')->count());
+        $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);
         $this->travelBack();
     }
@@ -864,7 +864,7 @@ class OrderFlowTest extends TestCase
         $this->travelTo(\Illuminate\Support\Carbon::parse('2026-01-15 12:00:00'));
         [, $cart] = $this->buyerCart();
         $code = $this->postJson('/api/v1/tienda/pedidos', ['cart_id' => $cart])->json('data.code');
-        $orderId = (int) DB::table('tienda_pedidos')->where('code', $code)->value('id');
+        $orderId = (int) DB::table('tienda_pedidos')->where('codigo', $code)->value('id');
         $service = app(\App\Modules\Pagos\Services\ApplyVerifiedPaymentService::class);
 
         foreach ([
@@ -872,14 +872,14 @@ class OrderFlowTest extends TestCase
             ['reference' => '   ', 'source' => 'test-server-query'],
         ] as $evidence) {
             $transactionId = DB::table('tienda_transacciones_pago')->insertGetId([
-                'order_id' => $orderId, 'provider' => 'test',
-                'provider_transaction_reference' => $evidence['reference'], 'status' => 'authorized',
-                'amount' => '50.20', 'currency' => 'PEN', 'verification_source' => $evidence['source'],
-                'verified_at' => now(), 'observed_at' => now(),
+                'pedido_id' => $orderId, 'proveedor' => 'test',
+                'referencia_transaccion_proveedor' => $evidence['reference'], 'estado' => 'authorized',
+                'monto' => '50.20', 'moneda' => 'PEN', 'fuente_verificacion' => $evidence['source'],
+                'verificado_en' => now(), 'observado_en' => now(),
             ]);
 
             $this->assertSame('not_verified', $service->apply($transactionId)['result']);
-            $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'status' => 'pending', 'paid_at' => null]);
+            $this->assertDatabaseHas('tienda_pedidos', ['id' => $orderId, 'estado' => 'pending', 'pagado_en' => null]);
         }
 
         $this->assertDatabaseCount('tienda_pagos_aplicados_pedidos', 0);

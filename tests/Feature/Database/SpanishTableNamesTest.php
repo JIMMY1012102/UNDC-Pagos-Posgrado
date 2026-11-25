@@ -42,6 +42,8 @@ class SpanishTableNamesTest extends TestCase
 
     public function test_all_business_tables_are_in_spanish_and_round_trip_preserves_rows_and_foreign_keys(): void
     {
+        $columnMigration = require database_path('migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php');
+        $columnMigration->down();
         $user = User::factory()->create();
         $profile = DB::table('tienda_perfiles_compradores')->insertGetId([
             'user_id' => $user->id, 'document_type' => 'DNI', 'document_number' => '00000000',
@@ -71,10 +73,13 @@ class SpanishTableNamesTest extends TestCase
             $this->assertSame($columns[$new], Schema::getColumnListing($new));
             $this->assertFalse(Schema::hasTable($old));
         }
+        $columnMigration->up();
     }
 
     public function test_a_destination_collision_is_rejected_before_any_table_is_renamed(): void
     {
+        $columnMigration = require database_path('migrations/2026_11_24_000001_rename_store_business_columns_to_spanish.php');
+        $columnMigration->down();
         $migration = require database_path('migrations/2026_11_09_000001_rename_store_business_tables_to_spanish.php');
         $migration->down();
         // Colisión en la ÚLTIMA tabla: la validación debe proteger también la primera.
@@ -96,6 +101,7 @@ class SpanishTableNamesTest extends TestCase
         } finally {
             Schema::dropIfExists('tienda_eventos_auditoria');
             $migration->up();
+            $columnMigration->up();
         }
     }
 }

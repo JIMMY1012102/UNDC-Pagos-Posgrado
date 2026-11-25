@@ -30,12 +30,12 @@ final class PublishedCatalogQuery
             ->get([
                 'publication.id as catalog_item_id',
                 'publication.slug',
-                'publication.description',
-                'publication.requirements',
-                DB::raw('COALESCE(category.codigo, publication.category) as category'),
+                'publication.descripcion as description',
+                'publication.requisitos as requirements',
+                DB::raw('COALESCE(category.codigo, publication.categoria_codigo) as category'),
                 'publication.categoria_id',
                 'category.nombre as category_name',
-                'publication.requires_eligibility_check',
+                'publication.requiere_verificacion_elegibilidad as requires_eligibility_check',
                 'office.oficina_id as legacy_office_id',
                 'office.oficina_nom as office_name',
                 'concept.id_concepto as legacy_concept_id',
@@ -57,7 +57,7 @@ final class PublishedCatalogQuery
     public function quoteItems(array $ids): Collection
     {
         return $this->availablePublications()->whereIn('publication.id', $ids)->get([
-            'publication.id as catalog_item_id', 'publication.requires_eligibility_check',
+            'publication.id as catalog_item_id', 'publication.requiere_verificacion_elegibilidad as requires_eligibility_check',
             'publication.legacy_concept_id', 'publication.legacy_office_id',
             'concept.codigo_concepto', 'concept.concepto as name', 'concept.costo as reference_amount',
         ])->keyBy('catalog_item_id');
@@ -73,8 +73,8 @@ final class PublishedCatalogQuery
             ->join('tienda_configuracion_oficinas as settings', 'settings.legacy_office_id', '=', 'publication.legacy_office_id')
             ->join('tm_oficina as office', 'office.oficina_id', '=', 'publication.legacy_office_id')
             ->join('tm_conceptos as concept', 'concept.id_concepto', '=', 'publication.legacy_concept_id')
-            ->where('settings.catalog_enabled', true)
-            ->where('publication.is_published', true)
+            ->where('settings.catalogo_habilitado', true)
+            ->where('publication.esta_publicado', true)
             ->where('office.estado', 1)
             ->whereNotNull('concept.costo')
             ->where('concept.costo', '>=', 0);

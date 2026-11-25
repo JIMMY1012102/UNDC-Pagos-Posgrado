@@ -25,9 +25,9 @@ erDiagram
   tienda_categorias ||--o{ tienda_conceptos_catalogo : "categoria_id y oficina"
   tm_oficina ||--o{ tienda_conceptos_catalogo : "legacy_office_id"
   tm_conceptos ||--o{ tienda_conceptos_catalogo : "legacy_concept_id"
-  tienda_conceptos_catalogo ||--o{ tienda_versiones_tarifas : "catalog_item_id"
-  tienda_conceptos_catalogo ||--o{ tienda_detalles_carrito : "catalog_item_id"
-  tienda_conceptos_catalogo ||--o{ tienda_detalles_pedido : "catalog_item_id"
+  tienda_conceptos_catalogo ||--o{ tienda_versiones_tarifas : "concepto_catalogo_id"
+  tienda_conceptos_catalogo ||--o{ tienda_detalles_carrito : "concepto_catalogo_id"
+  tienda_conceptos_catalogo ||--o{ tienda_detalles_pedido : "concepto_catalogo_id"
 ```
 
 Las tablas externas enlazadas aparecen solo como referencias para interpretar claves foráneas; la propiedad permanece en su módulo correspondiente. Los campos completos deben revisarse en las migraciones y en MariaDB; este ER resume las PK y relaciones, no todos los atributos. 

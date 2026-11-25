@@ -158,3 +158,8 @@ La migración `database/migrations/2026_10_25_000005_add_store_legacy_foreign_ke
 **Precaución:** en una base real los cambios de DDL deben acordarse en ventana autorizada, revisando copias, privilegios, motores, compatibilidad, referencias y posibles bloqueos de metadatos. Aunque la migración solo altera tablas nuevas, una FK restringe el borrado/actualización de un maestro histórico referenciado: es un cambio conductual que debe aprobar Tesorería.
 
 [Tabla completa de equivalencias y condiciones del cambio de nombres](./NOMBRES_TABLAS_ESPANOL.md).
+
+
+## Nombres físicos de columnas
+
+Las columnas de negocio de `tienda_*` usan snake_case en español. El inventario exacto, las excepciones y la distinción entre `categoria_codigo` y `categoria_id` están en [el diccionario de columnas](./modelo-datos/DICCIONARIO_COLUMNAS.md). Las seis tablas históricas `tm_*` permanecen intactas.

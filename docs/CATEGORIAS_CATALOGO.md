@@ -19,7 +19,7 @@ Por decisión del proyecto, **6.22 Constancia de similitud de Posgrado (Turnitin
 
 `tienda_conceptos_catalogo.categoria_id` es una FK nullable hacia `tienda_categorias.id`. Una FK simple permite seleccionar valores relacionados en phpMyAdmin y una segunda FK compuesta obliga a que la categoría y el concepto publicado pertenezcan a la misma oficina. No se puede borrar una categoría utilizada. Los ID `legacy_office_id` siguen siendo INT firmados.
 
-La consulta del catálogo usa el código y nombre de la categoría seleccionada. Si no hay `categoria_id`, conserva la lectura de `category` y sus códigos anteriores por compatibilidad. Cuando se edite en phpMyAdmin se debe usar **`categoria_id`**; el campo anterior no es el selector. El catálogo sigue sin habilitar cobros.
+La consulta del catálogo usa el código y nombre de la categoría seleccionada. Si no hay `categoria_id`, conserva la lectura de `categoria_codigo` y sus códigos anteriores por compatibilidad. La API continúa exponiendo la clave JSON `category`; no se renombra el contrato público. Cuando se edite en phpMyAdmin se debe usar **`categoria_id`**; `categoria_codigo` es el código de respaldo, no el selector. El catálogo sigue sin habilitar cobros.
 
 La migración y el seeder reconocen oficinas cuyo nombre contiene Posgrado o Postgrado, sin suponer un ID fijo ni crear oficinas. Crean las seis opciones para cada oficina de Posgrado existente y vinculan publicaciones que ya tienen uno de los seis códigos conocidos. Conservan los conceptos sin clasificar y sus campos. La carga es repetible, conserva las ediciones manuales de las categorías y no modifica `tm_*`.
 

@@ -17,12 +17,12 @@ final class OrderService
 
     public function quote(int $userId, int $cartId): array
     {
-        $cart = ActiveCartQuery::make()->where('id', $cartId)->where('user_id', $userId)->first();
+        $cart = ActiveCartQuery::make()->where('id', $cartId)->where('usuario_id', $userId)->first();
         abort_unless($cart, 404);
-        $lines = DB::table('tienda_detalles_carrito')->where('cart_id', $cartId)->orderBy('id')->get();
+        $lines = DB::table('tienda_detalles_carrito')->where('carrito_id', $cartId)->orderBy('id')->get();
         $items = []; $total = 0;
         foreach ($lines as $line) {
-            $item = $line->beneficiary_id === null ? $this->prices->line((int) $line->catalog_item_id, (int) $line->quantity) : null;
+            $item = $line->beneficiario_id === null ? $this->prices->line((int) $line->concepto_catalogo_id, (int) $line->cantidad) : null;
             if (! $item) {
                 throw ValidationException::withMessages(['tariff' => 'Uno o más conceptos no tienen un importe oficial válido o requieren validación académica. No se generó el pedido.']);
             }
@@ -44,11 +44,11 @@ final class OrderService
     {
         return DB::transaction(function () use ($userId, $cartId): array {
             // Serializar doble clic/reintentos sobre el mismo carrito.
-            $cart = DB::table('tienda_carritos')->where('id', $cartId)->where('user_id', $userId)->lockForUpdate()->first();
+            $cart = DB::table('tienda_carritos')->where('id', $cartId)->where('usuario_id', $userId)->lockForUpdate()->first();
             abort_unless($cart, 404);
-            $existing = DB::table('tienda_pedidos')->where('cart_id', $cartId)->where('user_id', $userId)->first();
+            $existing = DB::table('tienda_pedidos')->where('carrito_id', $cartId)->where('usuario_id', $userId)->first();
             if ($existing) {
-                return $this->show($userId, $existing->code);
+                return $this->show($userId, $existing->codigo);
             }
             if (! $this->profiles->isComplete($userId)) {
                 throw ValidationException::withMessages(['profile' => 'Completa tus datos antes de generar el pedido.']);
@@ -63,35 +63,37 @@ final class OrderService
             $now = now();
             $code = 'UNDC-'.Str::upper((string) Str::ulid());
             $id = DB::table('tienda_pedidos')->insertGetId([
-                'code' => $code, 'user_id' => $userId, 'cart_id' => $cartId,
-                'status' => 'pending', 'currency' => 'PEN', 'total_amount' => self::money($quote['total_cents']),
-                'buyer_first_names' => $profile['first_names'], 'buyer_last_names' => $profile['last_names'],
-                'buyer_document_type' => $profile['document_type'], 'buyer_document_number' => $profile['document_number'],
-                'buyer_email' => $email, 'buyer_phone' => $profile['phone'],
-                'buyer_phone_country_code' => $profile['phone_country_code'] ?? null,
-                'buyer_address_line_1' => $profile['line_1'] ?? null,
-                'buyer_address_line_2' => $profile['line_2'] ?? null,
-                'buyer_address_city' => $profile['city'] ?? null,
-                'buyer_address_state' => $profile['state'] ?? null,
-                'buyer_address_country' => $profile['country'] ?? null,
-                'expires_at' => $now->copy()->addHours(24), 'created_at' => $now, 'updated_at' => $now,
+                'codigo' => $code, 'usuario_id' => $userId, 'carrito_id' => $cartId,
+                'estado' => 'pending', 'moneda' => 'PEN', 'monto_total' => self::money($quote['total_cents']),
+                'comprador_nombres' => $profile['first_names'], 'comprador_apellidos' => $profile['last_names'],
+                'comprador_tipo_documento' => $profile['document_type'], 'comprador_numero_documento' => $profile['document_number'],
+                'comprador_correo' => $email, 'comprador_telefono' => $profile['phone'],
+                'comprador_codigo_pais_telefono' => $profile['phone_country_code'] ?? null,
+                'comprador_direccion_linea_1' => $profile['line_1'] ?? null,
+                'comprador_direccion_linea_2' => $profile['line_2'] ?? null,
+                'comprador_direccion_ciudad' => $profile['city'] ?? null,
+                'comprador_direccion_region' => $profile['state'] ?? null,
+                'comprador_direccion_pais' => $profile['country'] ?? null,
+                'vence_en' => $now->copy()->addHours(24), 'created_at' => $now, 'updated_at' => $now,
             ]);
             foreach ($quote['items'] as $line) {
-                $data = $line;
-                unset($data['unit_cents'], $data['total_cents']);
-                DB::table('tienda_detalles_pedido')->insert($data + [
-                    'order_id' => $id, 'unit_amount' => self::money($line['unit_cents']),
-                    'total_amount' => self::money($line['total_cents']),
-                    'beneficiary_first_names' => $profile['first_names'], 'beneficiary_last_names' => $profile['last_names'],
-                    'beneficiary_document_type' => $profile['document_type'], 'beneficiary_document_number' => $profile['document_number'],
+                DB::table('tienda_detalles_pedido')->insert([
+                    'pedido_id' => $id, 'concepto_catalogo_id' => $line['catalog_item_id'],
+                    'legacy_concept_id' => $line['legacy_concept_id'], 'legacy_office_id' => $line['legacy_office_id'],
+                    'beneficiario_id' => null,
+                    'codigo_concepto' => $line['concept_code'], 'concepto_nombre' => $line['concept_name'],
+                    'cantidad' => $line['quantity'], 'monto_unitario' => self::money($line['unit_cents']),
+                    'monto_total' => self::money($line['total_cents']),
+                    'beneficiario_nombres' => $profile['first_names'], 'beneficiario_apellidos' => $profile['last_names'],
+                    'beneficiario_tipo_documento' => $profile['document_type'], 'beneficiario_numero_documento' => $profile['document_number'],
                     'created_at' => $now, 'updated_at' => $now,
                 ]);
             }
             DB::table('tienda_historial_estados_pedido')->insert([
-                'order_id' => $id, 'actor_user_id' => $userId, 'to_status' => 'pending',
-                'reason' => 'Pedido generado con importes oficiales verificados. No acredita pago ni inicia trámite académico.', 'occurred_at' => $now,
+                'pedido_id' => $id, 'usuario_actor_id' => $userId, 'estado_nuevo' => 'pending',
+                'motivo' => 'Pedido generado con importes oficiales verificados. No acredita pago ni inicia trámite académico.', 'ocurrido_en' => $now,
             ]);
-            DB::table('tienda_carritos')->where('id', $cartId)->update(['status' => 'converted', 'updated_at' => $now]);
+            DB::table('tienda_carritos')->where('id', $cartId)->update(['estado' => 'converted', 'updated_at' => $now]);
             return $this->show($userId, $code);
         });
     }
@@ -107,19 +109,19 @@ final class OrderService
         return DB::transaction(function () use ($userId, $code): array {
             // Serialize replacements for the same buyer; preserve create() lock order.
             DB::table('users')->where('id', $userId)->lockForUpdate()->first();
-            $source = DB::table('tienda_pedidos')->where('user_id', $userId)->where('code', $code)->first();
+            $source = DB::table('tienda_pedidos')->where('usuario_id', $userId)->where('codigo', $code)->first();
             abort_unless($source, 404);
-            DB::table('tienda_carritos')->where('id', $source->cart_id)->lockForUpdate()->first();
+            DB::table('tienda_carritos')->where('id', $source->carrito_id)->lockForUpdate()->first();
             $order = DB::table('tienda_pedidos')->where('id', $source->id)->lockForUpdate()->first();
 
-            if ($order->status === 'cancelled') {
-                $event = DB::table('tienda_historial_estados_pedido')->where('order_id', $order->id)
-                    ->where('to_status', 'cancelled')->latest('id')->first();
-                $context = $event ? json_decode($event->context ?? '{}', true) : [];
+            if ($order->estado === 'cancelled') {
+                $event = DB::table('tienda_historial_estados_pedido')->where('pedido_id', $order->id)
+                    ->where('estado_nuevo', 'cancelled')->latest('id')->first();
+                $context = $event ? json_decode($event->contexto ?? '{}', true) : [];
                 $action = $context['action'] ?? null;
                 if ($action === 'modify_order') {
                     $cart = ActiveCartQuery::make()->where('id', $context['replacement_cart_id'] ?? 0)
-                        ->where('user_id', $userId)->first();
+                        ->where('usuario_id', $userId)->first();
                     if ($cart) {
                         return ['cart_id' => (int) $cart->id];
                     }
@@ -127,39 +129,39 @@ final class OrderService
                 abort(409, 'Este pedido ya no se puede modificar.');
             }
 
-            abort_unless($order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
-                && ($order->expires_at === null || now()->lt($order->expires_at))
+            abort_unless($order->estado === 'pending' && $order->pagado_en === null && $order->confirmado_en === null
+                && ($order->vence_en === null || now()->lt($order->vence_en))
                 && $this->payments->canModify((int) $order->id), 409,
                 'Solo puedes modificar un pedido pendiente, vigente y sin pagos iniciados.');
 
             // Do not overwrite another selection that the buyer has already started.
-            $active = ActiveCartQuery::make()->where('user_id', $userId)
+            $active = ActiveCartQuery::make()->where('usuario_id', $userId)
                 ->whereExists(fn ($q) => $q->selectRaw('1')->from('tienda_detalles_carrito')
-                    ->whereColumn('cart_id', 'tienda_carritos.id'))->exists();
+                    ->whereColumn('carrito_id', 'tienda_carritos.id'))->exists();
             abort_if($active, 409, 'Ya tienes otra selección en tu carrito. Revísala antes de modificar este pedido.');
 
-            DB::table('tienda_carritos')->where('user_id', $userId)->where('status', 'active')
-                ->update(['status' => 'expired', 'updated_at' => now()]);
+            DB::table('tienda_carritos')->where('usuario_id', $userId)->where('estado', 'active')
+                ->update(['estado' => 'expired', 'updated_at' => now()]);
             $now = now();
             $cartId = DB::table('tienda_carritos')->insertGetId([
-                'user_id' => $userId, 'token_hash' => null, 'status' => 'active', 'currency' => $order->currency,
-                'expires_at' => $now->copy()->addDay(), 'created_at' => $now, 'updated_at' => $now,
+                'usuario_id' => $userId, 'token_hash' => null, 'estado' => 'active', 'moneda' => $order->moneda,
+                'vence_en' => $now->copy()->addDay(), 'created_at' => $now, 'updated_at' => $now,
             ]);
-            $lines = DB::table('tienda_detalles_pedido')->where('order_id', $order->id)->orderBy('id')->get();
+            $lines = DB::table('tienda_detalles_pedido')->where('pedido_id', $order->id)->orderBy('id')->get();
             foreach ($lines as $line) {
                 DB::table('tienda_detalles_carrito')->insert([
-                    'cart_id' => $cartId, 'catalog_item_id' => $line->catalog_item_id,
-                    'beneficiary_id' => $line->beneficiary_id, 'quantity' => $line->quantity,
+                    'carrito_id' => $cartId, 'concepto_catalogo_id' => $line->concepto_catalogo_id,
+                    'beneficiario_id' => $line->beneficiario_id, 'cantidad' => $line->cantidad,
                     'created_at' => $now, 'updated_at' => $now,
                 ]);
             }
             DB::table('tienda_pedidos')->where('id', $order->id)->update([
-                'status' => 'cancelled', 'cancelled_at' => $now, 'updated_at' => $now,
+                'estado' => 'cancelled', 'cancelado_en' => $now, 'updated_at' => $now,
             ]);
             DB::table('tienda_historial_estados_pedido')->insert([
-                'order_id' => $order->id, 'actor_user_id' => $userId, 'from_status' => 'pending', 'to_status' => 'cancelled',
-                'reason' => 'El comprador volvió al carrito para modificar su selección. Se generará un nuevo pedido al confirmar.',
-                'context' => json_encode(['action' => 'modify_order', 'replacement_cart_id' => $cartId]), 'occurred_at' => $now,
+                'pedido_id' => $order->id, 'usuario_actor_id' => $userId, 'estado_anterior' => 'pending', 'estado_nuevo' => 'cancelled',
+                'motivo' => 'El comprador volvió al carrito para modificar su selección. Se generará un nuevo pedido al confirmar.',
+                'contexto' => json_encode(['action' => 'modify_order', 'replacement_cart_id' => $cartId]), 'ocurrido_en' => $now,
             ]);
 
             return ['cart_id' => $cartId];
@@ -168,51 +170,52 @@ final class OrderService
 
     public function show(int $userId, string $code): array
     {
-        $order = DB::table('tienda_pedidos')->where('user_id', $userId)->where('code', $code)->first();
+        $order = DB::table('tienda_pedidos')->where('usuario_id', $userId)->where('codigo', $code)->first();
         abort_unless($order, 404);
         return $this->present($order);
     }
 
     private function present(object $order, ?array $items = null, ?array $history = null, ?bool $canModify = null, ?bool $hasUnresolvedPayment = null): array
     {
-        $isPastExpiry = $order->status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
-            && $order->expires_at !== null && now()->gte($order->expires_at);
+        $isPastExpiry = $order->estado === 'pending' && $order->pagado_en === null && $order->confirmado_en === null
+            && $order->vence_en !== null && now()->gte($order->vence_en);
         $status = $isPastExpiry
             ? (($hasUnresolvedPayment ?? $this->payments->hasUnresolvedPayment((int) $order->id)) ? 'payment_in_review' : 'expired')
-            : $order->status;
+            : $order->estado;
 
         return [
-            'code' => $order->code, 'status' => $status, 'currency' => $order->currency,
-            'total_amount' => $order->total_amount, 'created_at' => $order->created_at, 'expires_at' => $order->expires_at,
-            'paid_at' => $order->paid_at, 'buyer_name' => $order->buyer_first_names.' '.$order->buyer_last_names,
-            'buyer_email' => $order->buyer_email, 'payment_enabled' => PricingPolicy::status()['checkout_enabled'] && $status === 'pending' && $order->paid_at === null && ($order->expires_at === null || now()->lt($order->expires_at)),
-            'can_modify' => $status === 'pending' && $order->paid_at === null && $order->confirmed_at === null
+            'code' => $order->codigo, 'status' => $status, 'currency' => $order->moneda,
+            'total_amount' => $order->monto_total, 'created_at' => $order->created_at, 'expires_at' => $order->vence_en,
+            'paid_at' => $order->pagado_en, 'buyer_name' => $order->comprador_nombres.' '.$order->comprador_apellidos,
+            'buyer_email' => $order->comprador_correo, 'payment_enabled' => PricingPolicy::status()['checkout_enabled'] && $status === 'pending' && $order->pagado_en === null && ($order->vence_en === null || now()->lt($order->vence_en)),
+            'can_modify' => $status === 'pending' && $order->pagado_en === null && $order->confirmado_en === null
                 && ($canModify ?? $this->payments->canModify((int) $order->id)),
-            'items' => $items ?? DB::table('tienda_detalles_pedido')->where('order_id', $order->id)->orderBy('id')
-                ->get(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all(),
-            'history' => $history ?? DB::table('tienda_historial_estados_pedido')->where('order_id', $order->id)->orderBy('id')
-                ->get(['to_status', 'reason', 'occurred_at'])->all(),
+            'items' => $items ?? DB::table('tienda_detalles_pedido')->where('pedido_id', $order->id)->orderBy('id')
+                ->get(['concepto_nombre as concept_name', 'codigo_concepto as concept_code', 'cantidad as quantity', 'monto_unitario as unit_amount', 'monto_total as total_amount'])->all(),
+            'history' => $history ?? DB::table('tienda_historial_estados_pedido')->where('pedido_id', $order->id)->orderBy('id')
+                ->get(['estado_nuevo as to_status', 'motivo as reason', 'ocurrido_en as occurred_at'])->all(),
         ];
     }
 
     public function listing(int $userId, int $page): array
     {
         $page = max(1, $page);
-        $orders = DB::table('tienda_pedidos')->where('user_id', $userId)->latest('id')
+        $orders = DB::table('tienda_pedidos')->where('usuario_id', $userId)->latest('id')
             ->offset(($page - 1) * 10)->limit(11)->get();
         $hasMore = $orders->count() > 10;
         $orders = $orders->take(10);
         $ids = $orders->pluck('id')->all();
-        $items = DB::table('tienda_detalles_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
-        $history = DB::table('tienda_historial_estados_pedido')->whereIn('order_id', $ids)->orderBy('id')->get()->groupBy('order_id');
+        $items = DB::table('tienda_detalles_pedido')->whereIn('pedido_id', $ids)->orderBy('id')->get()->groupBy('pedido_id');
+        $history = DB::table('tienda_historial_estados_pedido')->whereIn('pedido_id', $ids)->orderBy('id')
+            ->get(['pedido_id', 'estado_nuevo as to_status', 'motivo as reason', 'ocurrido_en as occurred_at'])->groupBy('pedido_id');
         $blocked = $this->payments->blockedOrderIds($ids);
-        $expiredPendingIds = $orders->filter(fn ($order) => $order->status === 'pending'
-            && $order->paid_at === null && $order->confirmed_at === null
-            && $order->expires_at !== null && now()->gte($order->expires_at))->pluck('id')->all();
+        $expiredPendingIds = $orders->filter(fn ($order) => $order->estado === 'pending'
+            && $order->pagado_en === null && $order->confirmado_en === null
+            && $order->vence_en !== null && now()->gte($order->vence_en))->pluck('id')->all();
         $unresolved = $this->payments->unresolvedOrderIds($expiredPendingIds);
         return ['items' => $orders->map(fn ($order) => $this->present($order,
-            ($items->get($order->id) ?? collect())->map(fn ($line) => (object) collect((array) $line)->only(['concept_name', 'concept_code', 'quantity', 'unit_amount', 'total_amount'])->all())->all(),
-            ($history->get($order->id) ?? collect())->map(fn ($event) => (object) collect((array) $event)->only(['to_status', 'reason', 'occurred_at'])->all())->all(),
+            ($items->get($order->id) ?? collect())->map(fn ($line) => (object) ['concept_name' => $line->concepto_nombre, 'concept_code' => $line->codigo_concepto, 'quantity' => $line->cantidad, 'unit_amount' => $line->monto_unitario, 'total_amount' => $line->monto_total])->all(),
+            ($history->get($order->id) ?? collect())->map(fn ($event) => (object) ['to_status' => $event->to_status, 'reason' => $event->reason, 'occurred_at' => $event->occurred_at])->all(),
             ! in_array($order->id, $blocked), in_array($order->id, $unresolved)))->all(), 'page' => $page, 'has_more' => $hasMore];
     }
 
@@ -223,16 +226,16 @@ final class OrderService
         do {
             $changed = DB::transaction(function () use ($userId): int {
                 $now = now();
-                $query = DB::table('tienda_pedidos')->where('status', 'pending')->whereNull('paid_at')->whereNull('confirmed_at')
-                    ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
-                    ->where('expires_at', '<=', $now);
+                $query = DB::table('tienda_pedidos')->where('estado', 'pending')->whereNull('pagado_en')->whereNull('confirmado_en')
+                    ->when($userId !== null, fn ($q) => $q->where('usuario_id', $userId))
+                    ->where('vence_en', '<=', $now);
                 $ids = $this->payments->excludeOrdersWithUnresolvedPayments($query)
                     ->orderBy('id')->limit(200)->lockForUpdate()->pluck('id');
                 if ($ids->isEmpty()) return 0;
-                DB::table('tienda_pedidos')->whereIn('id', $ids)->update(['status' => 'expired', 'updated_at' => $now]);
+                DB::table('tienda_pedidos')->whereIn('id', $ids)->update(['estado' => 'expired', 'updated_at' => $now]);
                 DB::table('tienda_historial_estados_pedido')->insert($ids->map(fn ($id) => [
-                    'order_id' => $id, 'from_status' => 'pending', 'to_status' => 'expired',
-                    'reason' => 'Venció el plazo del pedido sin confirmación de pago.', 'occurred_at' => $now,
+                    'pedido_id' => $id, 'estado_anterior' => 'pending', 'estado_nuevo' => 'expired',
+                    'motivo' => 'Venció el plazo del pedido sin confirmación de pago.', 'ocurrido_en' => $now,
                 ])->all());
                 return $ids->count();
             }, 3);

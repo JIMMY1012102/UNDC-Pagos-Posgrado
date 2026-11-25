@@ -26,28 +26,28 @@ final class ApplyVerifiedPaymentService
             }
 
             $order = DB::table('tienda_pedidos')
-                ->where('id', $transaction->order_id)->lockForUpdate()->first();
+                ->where('id', $transaction->pedido_id)->lockForUpdate()->first();
 
             if (! $order) {
                 throw new InvalidArgumentException('El pedido asociado no existe.');
             }
 
-            $status = TransactionStatus::tryFrom((string) $transaction->status);
-            $hasServerVerification = $transaction->verified_at !== null
-                && is_string($transaction->verification_source)
-                && trim($transaction->verification_source) !== ''
-                && is_string($transaction->provider_transaction_reference)
-                && trim($transaction->provider_transaction_reference) !== '';
+            $status = TransactionStatus::tryFrom((string) $transaction->estado);
+            $hasServerVerification = $transaction->verificado_en !== null
+                && is_string($transaction->fuente_verificacion)
+                && trim($transaction->fuente_verificacion) !== ''
+                && is_string($transaction->referencia_transaccion_proveedor)
+                && trim($transaction->referencia_transaccion_proveedor) !== '';
 
             if (! $hasServerVerification || ! $status?->isPayable()) {
                 return ['result' => 'not_verified', 'order_id' => (int) $order->id];
             }
 
             $existing = DB::table('tienda_pagos_aplicados_pedidos')
-                ->where('order_id', $order->id)->first();
+                ->where('pedido_id', $order->id)->first();
 
             if ($existing) {
-                if ((int) $existing->payment_transaction_id === (int) $transaction->id) {
+                if ((int) $existing->transaccion_pago_id === (int) $transaction->id) {
                     return ['result' => 'already_applied', 'order_id' => (int) $order->id];
                 }
 
@@ -62,8 +62,8 @@ final class ApplyVerifiedPaymentService
             }
 
             if (
-                $transaction->currency !== $order->currency
-                || self::toCents((string) $transaction->amount) !== self::toCents((string) $order->total_amount)
+                $transaction->moneda !== $order->moneda
+                || self::toCents((string) $transaction->monto) !== self::toCents((string) $order->monto_total)
             ) {
                 $this->recordIncident(
                     (int) $order->id,
@@ -75,20 +75,20 @@ final class ApplyVerifiedPaymentService
                 return ['result' => 'mismatch', 'order_id' => (int) $order->id];
             }
 
-            $paymentStartedAt = $transaction->payment_attempt_id !== null
-                ? DB::table('tienda_intentos_pago')->where('id', $transaction->payment_attempt_id)->value('started_at')
-                : $transaction->observed_at;
+            $paymentStartedAt = $transaction->intento_pago_id !== null
+                ? DB::table('tienda_intentos_pago')->where('id', $transaction->intento_pago_id)->value('iniciado_en')
+                : $transaction->observado_en;
             if ($paymentStartedAt === null) {
                 return ['result' => 'not_verified', 'order_id' => (int) $order->id];
             }
 
-            $startedAfterExpiry = $order->expires_at !== null
-                && \Illuminate\Support\Carbon::parse($paymentStartedAt)->greaterThan(\Illuminate\Support\Carbon::parse($order->expires_at));
+            $startedAfterExpiry = $order->vence_en !== null
+                && \Illuminate\Support\Carbon::parse($paymentStartedAt)->greaterThan(\Illuminate\Support\Carbon::parse($order->vence_en));
 
             if (
                 $startedAfterExpiry
-                || ! in_array($order->status, ['pending', 'expired'], true)
-                || $order->paid_at !== null
+                || ! in_array($order->estado, ['pending', 'expired'], true)
+                || $order->pagado_en !== null
             ) {
                 $this->recordIncident(
                     (int) $order->id,
@@ -102,23 +102,23 @@ final class ApplyVerifiedPaymentService
 
             $now = now();
             DB::table('tienda_pagos_aplicados_pedidos')->insert([
-                'order_id' => $order->id,
-                'payment_transaction_id' => $transaction->id,
-                'claimed_at' => $now,
+                'pedido_id' => $order->id,
+                'transaccion_pago_id' => $transaction->id,
+                'aplicado_en' => $now,
             ]);
 
             DB::table('tienda_pedidos')->where('id', $order->id)->update([
-                'status' => 'paid',
-                'paid_at' => $now,
+                'estado' => 'paid',
+                'pagado_en' => $now,
                 'updated_at' => $now,
             ]);
 
             DB::table('tienda_historial_estados_pedido')->insert([
-                'order_id' => $order->id,
-                'from_status' => $order->status,
-                'to_status' => 'paid',
-                'reason' => 'Pago aplicado después de verificar servidor-servidor la referencia, el monto y la moneda; el inicio ocurrió antes del vencimiento.',
-                'occurred_at' => $now,
+                'pedido_id' => $order->id,
+                'estado_anterior' => $order->estado,
+                'estado_nuevo' => 'paid',
+                'motivo' => 'Pago aplicado después de verificar servidor-servidor la referencia, el monto y la moneda; el inicio ocurrió antes del vencimiento.',
+                'ocurrido_en' => $now,
             ]);
 
             return ['result' => 'applied', 'order_id' => (int) $order->id];
@@ -128,18 +128,18 @@ final class ApplyVerifiedPaymentService
     private function recordIncident(int $orderId, int $transactionId, IncidentKind $kind, string $description): void
     {
         $exists = DB::table('tienda_incidencias_pago')
-            ->where('payment_transaction_id', $transactionId)
-            ->where('kind', $kind->value)
-            ->where('status', 'open')
+            ->where('transaccion_pago_id', $transactionId)
+            ->where('tipo', $kind->value)
+            ->where('estado', 'open')
             ->exists();
 
         if (! $exists) {
             DB::table('tienda_incidencias_pago')->insert([
-                'order_id' => $orderId,
-                'payment_transaction_id' => $transactionId,
-                'kind' => $kind->value,
-                'status' => 'open',
-                'description' => $description,
+                'pedido_id' => $orderId,
+                'transaccion_pago_id' => $transactionId,
+                'tipo' => $kind->value,
+                'estado' => 'open',
+                'descripcion' => $description,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

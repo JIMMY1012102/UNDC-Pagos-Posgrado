@@ -24,13 +24,13 @@ final class GoogleIdentityService
 
         return DB::transaction(function () use ($subject, $email, $google): User {
             $identity = DB::table('tienda_identidades_oauth')
-                ->where('provider', 'google')
+                ->where('proveedor', 'google')
                 ->where('provider_subject', $subject)
                 ->lockForUpdate()
                 ->first();
 
             if ($identity !== null) {
-                $user = User::query()->find($identity->user_id);
+                $user = User::query()->find($identity->usuario_id);
 
                 if ($user === null || strcasecmp($user->email, $email) !== 0) {
                     throw new RuntimeException('GOOGLE_IDENTITY_CONFLICT');
@@ -52,8 +52,8 @@ final class GoogleIdentityService
             ]);
 
             DB::table('tienda_identidades_oauth')->insert([
-                'user_id' => $user->id,
-                'provider' => 'google',
+                'usuario_id' => $user->id,
+                'proveedor' => 'google',
                 'provider_subject' => $subject,
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -28,9 +28,9 @@ final class CartService
         $token = bin2hex(random_bytes(32));
         $id = DB::table('tienda_carritos')->insertGetId([
             'token_hash' => hash('sha256', $token),
-            'status' => 'active',
-            'currency' => 'PEN',
-            'expires_at' => now()->addDay(),
+            'estado' => 'active',
+            'moneda' => 'PEN',
+            'vence_en' => now()->addDay(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -60,28 +60,28 @@ final class CartService
 
             $existing = $this->activeCart(null, true, $userId);
             if ($existing) {
-                $lines = DB::table('tienda_detalles_carrito')->where('cart_id', $cart->id)->orderBy('id')->get();
+                $lines = DB::table('tienda_detalles_carrito')->where('carrito_id', $cart->id)->orderBy('id')->get();
                 foreach ($lines as $line) {
-                    $target = DB::table('tienda_detalles_carrito')->where('cart_id', $existing->id)
-                        ->where('catalog_item_id', $line->catalog_item_id)->where('beneficiary_id', $line->beneficiary_id)->first();
+                    $target = DB::table('tienda_detalles_carrito')->where('carrito_id', $existing->id)
+                        ->where('concepto_catalogo_id', $line->concepto_catalogo_id)->where('beneficiario_id', $line->beneficiario_id)->first();
                     if ($target) {
-                        $quantity = (int) $target->quantity + (int) $line->quantity;
+                        $quantity = (int) $target->cantidad + (int) $line->cantidad;
                         // Preserve both selections on overflow; never silently truncate.
                         if ($quantity > self::MAX_QUANTITY) {
                             throw \Illuminate\Validation\ValidationException::withMessages(['quantity' => 'La selección combinada supera 20 unidades. Ajusta el carrito antes de vincularlo.']);
                         }
-                        DB::table('tienda_detalles_carrito')->where('id', $target->id)->update(['quantity' => $quantity, 'updated_at' => now()]);
+                        DB::table('tienda_detalles_carrito')->where('id', $target->id)->update(['cantidad' => $quantity, 'updated_at' => now()]);
                         DB::table('tienda_detalles_carrito')->where('id', $line->id)->delete();
                     } else {
-                        DB::table('tienda_detalles_carrito')->where('id', $line->id)->update(['cart_id' => $existing->id, 'updated_at' => now()]);
+                        DB::table('tienda_detalles_carrito')->where('id', $line->id)->update(['carrito_id' => $existing->id, 'updated_at' => now()]);
                     }
                 }
-                DB::table('tienda_carritos')->where('id', $cart->id)->update(['status' => 'merged', 'token_hash' => null, 'updated_at' => now()]);
+                DB::table('tienda_carritos')->where('id', $cart->id)->update(['estado' => 'merged', 'token_hash' => null, 'updated_at' => now()]);
                 return $this->snapshot((int) $existing->id);
             }
 
             DB::table('tienda_carritos')->where('id', $cart->id)->update([
-                'user_id'  => $userId,
+                'usuario_id'  => $userId,
                 'token_hash' => null,
                 'updated_at' => now(),
             ]);
@@ -94,16 +94,16 @@ final class CartService
     {
         $now = now();
 
-        return DB::table('tienda_carritos')->where('status', 'active')
-            ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
-            ->where('expires_at', '<=', $now)
-            ->update(['status' => 'expired', 'token_hash' => null, 'updated_at' => $now]);
+        return DB::table('tienda_carritos')->where('estado', 'active')
+            ->when($userId !== null, fn ($q) => $q->where('usuario_id', $userId))
+            ->where('vence_en', '<=', $now)
+            ->update(['estado' => 'expired', 'token_hash' => null, 'updated_at' => $now]);
     }
 
     /** @return array<string,mixed>|null */
     public function forBuyer(int $userId): ?array
     {
-        $cart = ActiveCartQuery::make()->where('user_id', $userId)
+        $cart = ActiveCartQuery::make()->where('usuario_id', $userId)
             ->latest('id')->first();
 
         return $cart ? $this->snapshot((int) $cart->id) : null;
@@ -126,27 +126,27 @@ final class CartService
             }
 
             $line = DB::table('tienda_detalles_carrito')
-                ->where('cart_id', $cart->id)
-                ->where('catalog_item_id', $catalogId)
-                ->whereNull('beneficiary_id')
+                ->where('carrito_id', $cart->id)
+                ->where('concepto_catalogo_id', $catalogId)
+                ->whereNull('beneficiario_id')
                 ->lockForUpdate()
                 ->first();
 
             if ($line) {
-                if ((int) $line->quantity + $quantity > self::MAX_QUANTITY) {
+                if ((int) $line->cantidad + $quantity > self::MAX_QUANTITY) {
                     throw new QuantityLimitExceeded();
                 }
 
                 DB::table('tienda_detalles_carrito')->where('id', $line->id)->update([
-                    'quantity' => (int) $line->quantity + $quantity,
+                    'cantidad' => (int) $line->cantidad + $quantity,
                     'updated_at' => now(),
                 ]);
             } else {
                 DB::table('tienda_detalles_carrito')->insert([
-                    'cart_id' => $cart->id,
-                    'catalog_item_id' => $catalogId,
-                    'beneficiary_id' => null,
-                    'quantity' => $quantity,
+                    'carrito_id' => $cart->id,
+                    'concepto_catalogo_id' => $catalogId,
+                    'beneficiario_id' => null,
+                    'cantidad' => $quantity,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -166,7 +166,7 @@ final class CartService
             }
 
             DB::table('tienda_detalles_carrito')
-                ->where('cart_id', $cart->id)
+                ->where('carrito_id', $cart->id)
                 ->where('id', $lineId)
                 ->delete();
 
@@ -182,8 +182,8 @@ final class CartService
 
         $query = ActiveCartQuery::make()
             ->when($token !== null,
-                fn ($q) => $q->where('token_hash', hash('sha256', $token))->whereNull('user_id'),
-                fn ($q) => $q->where('user_id', $userId));
+                fn ($q) => $q->where('token_hash', hash('sha256', $token))->whereNull('usuario_id'),
+                fn ($q) => $q->where('usuario_id', $userId));
 
         return ($lock ? $query->lockForUpdate() : $query)->latest('id')->first();
     }
@@ -192,13 +192,13 @@ final class CartService
     private function snapshot(int $id): array
     {
         $lines = DB::table('tienda_detalles_carrito as line')
-            ->join('tienda_conceptos_catalogo as catalog', 'catalog.id', '=', 'line.catalog_item_id')
-            ->where('line.cart_id', $id)
+            ->join('tienda_conceptos_catalogo as catalog', 'catalog.id', '=', 'line.concepto_catalogo_id')
+            ->where('line.carrito_id', $id)
             ->orderBy('line.id')
             ->get([
                 'line.id',
-                'line.catalog_item_id',
-                'line.quantity',
+                'line.concepto_catalogo_id as catalog_item_id',
+                'line.cantidad as quantity',
                 'catalog.slug',
             ])
             ->map(static fn (object $item): array => [
