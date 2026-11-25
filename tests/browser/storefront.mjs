@@ -561,8 +561,8 @@ async function responsiveAccountPage(viewport, kind) {
       assert.ok(cardHeight > 0 && nextCardHeight > 0,
         'La tarjeta debe conservar dimensiones válidas en cada paso');
 
-      const passwordGroup = page.locator('#account_password').locator('xpath=ancestor::div[contains(@class,"field")]');
-      const confirmationGroup = page.locator('#account_password_confirmation').locator('xpath=ancestor::div[contains(@class,"field")]');
+      const passwordGroup = page.locator('#account_password').locator('xpath=../..');
+      const confirmationGroup = page.locator('#account_password_confirmation').locator('xpath=../..');
       await page.locator('#account_password').focus();
       await page.locator('#account_password_confirmation').focus();
       assert.equal(await passwordGroup.locator('.field-error:visible').count(), 1,
