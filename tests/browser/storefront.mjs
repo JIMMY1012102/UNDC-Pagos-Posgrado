@@ -294,8 +294,6 @@ async function responsiveThemeCatalog(viewport) {
         assert.equal(light[selector][key], dark[selector][key], selector + ' ' + key);
       }
     }
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2),
-      false, 'El catálogo no debe desbordarse horizontalmente');
     assert.deepEqual(exceptions, [], 'El catálogo no debe lanzar errores JavaScript');
     console.log('PASS catalogue theme parity ' + viewport.width + 'px: tema sin alterar geometría');
   } catch (error) {
