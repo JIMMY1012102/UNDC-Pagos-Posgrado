@@ -14,7 +14,7 @@ body.market-login-view{margin:0;font-family:'Inter',system-ui,sans-serif;backgro
 .btn{transition:transform .25s ease,box-shadow .25s ease;cursor:pointer}
 .btn:hover{transform:translateY(-3px)}
 .btn:active{transform:translateY(0) scale(.98)}
-.btn:focus-visible,.field:focus-within,.eye:focus-visible,.lnk:focus-visible,.sw:focus-visible{outline:3px solid #b6f36b;outline-offset:3px}
+.btn:focus-visible,.field:focus-within,.eye:focus-visible,.lnk:focus-visible,{outline:3px solid #b6f36b;outline-offset:3px}
 .field{display:flex;align-items:center;gap:12px;height:62px;padding:0 16px;border-radius:18px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);transition:border-color .25s,background .25s,box-shadow .25s}
 .field:hover{border-color:rgba(255,255,255,.32)}
 .field:focus-within{border-color:#b6f36b;background:rgba(182,243,107,.08);box-shadow:0 0 0 5px rgba(182,243,107,.14),0 12px 30px -12px rgba(182,243,107,.5)}
@@ -24,7 +24,7 @@ body.market-login-view{margin:0;font-family:'Inter',system-ui,sans-serif;backgro
 .eye:hover{background:rgba(255,255,255,.12)}
 .lnk{color:#b6f36b;font-weight:600;transition:color .2s}
 .lnk:hover{color:#e6ffb3}
-.sw{width:46px;height:26px;border-radius:13px;border:0;padding:3px;cursor:pointer;transition:background .25s;display:flex;align-items:center}
+
 .knob{width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.3,1.4,.5,1);box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .aur{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
 .a1{width:640px;height:640px;background:#0f9a64;opacity:.55;left:-180px;top:-200px;animation:drift1 16s ease-in-out infinite}
@@ -114,17 +114,8 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 .emerald-login .market-login-symbol svg{width:32px;height:32px}
 .emerald-login h1{font:800 34px Sora,Inter,sans-serif;color:#fff;margin:18px 0 8px;letter-spacing:-.5px}
 .emerald-login .market-login-heading p{font-size:15px;color:#cfeee0;margin:0}
-.emerald-login .market-login-password{display:block;margin:0}
-.emerald-login .market-login-password label{display:block;color:#d3f3e4;font-size:14px;font-weight:600;margin:16px 0 8px}
-.emerald-login .market-login-input{display:flex;height:62px;gap:12px;padding:0 16px;border-radius:18px;background:rgb(255 255 255 / 6%);border:1.5px solid rgb(255 255 255 / 16%)}
-.emerald-login .market-login-input:focus-within{border-color:#b6f36b;outline:3px solid #b6f36b;outline-offset:3px}
-.emerald-login .market-login-input svg{width:22px;height:22px;color:#9be8c4;flex-shrink:0}
-.emerald-login .market-login-input input{width:100%;min-width:0;border:0;background:transparent;color:#fff;outline:0;font:16px Inter,system-ui;height:100%;padding:0}
 .emerald-login input::placeholder{color:#85bda3}.emerald-login input:autofill{box-shadow:0 0 0 1000px #103f2e inset;-webkit-text-fill-color:#fff}
-.emerald-login .market-login-forgot{display:block;margin:12px 0 18px auto;color:#b6f36b;background:none;border:0;opacity:.65;font-size:14px}
 .emerald-login .market-login-submit{width:100%;height:62px;border-radius:18px;border:0;background:linear-gradient(90deg,#b6f36b,#6ee7b7);color:#04281c;font-size:18px;font-weight:700;box-shadow:0 20px 44px -10px rgb(182 243 107 / 35%)}
-.emerald-login .market-login-divider{margin:24px 0;color:#9be8c4}.emerald-login .market-login-divider span{background:#073020;color:#9be8c4;padding:0 14px}
-.emerald-login .market-login-google{height:58px;background:rgb(255 255 255 / 7%);border:1.5px solid rgb(255 255 255 / 28%);border-radius:18px;color:#fff;font-size:16px}
 .emerald-login .market-login-register{margin:24px 0 0;color:#cfeee0;font-size:15px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.emerald-login .market-login-register a{color:#b6f36b;font-weight:700}
 .emerald-login .eye{flex-shrink:0}.emerald-login a:focus-visible,.emerald-login button:focus-visible{outline:3px solid #b6f36b;outline-offset:4px}
 @media(max-width:1000px){.emerald-layout{gap:28px}.emerald-intro .stage{transform:scale(.8);margin:-40px -50px}.emerald-intro h1{font-size:40px!important}.emerald-intro .float{padding:10px}.emerald-intro .sora{font-size:24px!important}}
@@ -148,12 +139,7 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 .emerald-login .market-login-symbol svg{width:26px;height:26px}
 .emerald-login h1{font-size:28px;margin:12px 0 6px}
 .emerald-login .market-login-heading p{font-size:14px}
-.emerald-login .market-login-password label{margin:12px 0 6px}
-.emerald-login .market-login-input{height:48px;border-radius:14px}
-.emerald-login .market-login-forgot{margin:8px 0 12px;min-height:24px}
 .emerald-login .market-login-submit{height:48px;border-radius:14px;font-size:16px}
-.emerald-login .market-login-divider{margin:16px 0}
-.emerald-login .market-login-google{height:46px;border-radius:14px;font-size:15px}
 .emerald-login .market-login-register{margin:16px 0 0;font-size:14px}
 }
 @media(min-width:761px) and (max-height:700px){
@@ -165,14 +151,8 @@ body.market-login-view{background:#031c13;color:#fff;font-family:Inter,system-ui
 .emerald-login .market-login-heading{margin-bottom:10px}
 .emerald-login .market-login-symbol{width:40px;height:40px}
 .emerald-login h1{font-size:26px;margin-top:8px}
-.emerald-login .market-login-divider{margin:12px 0}
 .emerald-login .market-login-register{margin-top:12px}
 }
-
-
-/* Keep autofill and text consistent with the active login palette. */
-.emerald-login .market-login-input input{flex:1;width:0;-webkit-text-fill-color:currentColor}
-.emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #103f2e inset;-webkit-text-fill-color:#fff;border-radius:8px}
 body.light-mode .emerald-login{background:linear-gradient(125deg,#d6f5e5 0%,#ebfaf2 52%,#c3ead4 100%);color:#124e39}
 body.light-mode .emerald-login .aur{opacity:.1}
 body.light-mode .emerald-login .gridbg{background-image:linear-gradient(rgb(13 105 70 / 6%) 1px,transparent 1px),linear-gradient(90deg,rgb(13 105 70 / 6%) 1px,transparent 1px)}
@@ -188,16 +168,7 @@ body.light-mode .emerald-login .gb::before{display:none}
 body.light-mode .emerald-login .market-login-card{background:#fff;color:#174f3b}
 body.light-mode .emerald-login .market-login-heading h1{color:#124e39}
 body.light-mode .emerald-login .market-login-heading p,body.light-mode .emerald-login .market-login-register{color:#4b6f5f}
-body.light-mode .emerald-login .market-login-input{background:#f3faf6;border-color:#a7d1ba;box-shadow:none}
-body.light-mode .emerald-login .market-login-input input{background:transparent;color:#163e2e;-webkit-text-fill-color:#163e2e}
-body.light-mode .emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){box-shadow:0 0 0 1000px #f3faf6 inset;-webkit-text-fill-color:#163e2e}
-body.light-mode .emerald-login .market-login-input input::placeholder{color:#547562;-webkit-text-fill-color:#547562}
-body.light-mode .emerald-login .market-login-input svg,body.light-mode .emerald-login .eye{color:#197950}
-body.light-mode .emerald-login .market-login-forgot{color:#466c58;opacity:1}
 body.light-mode .emerald-login .market-login-submit{background:#087c53;color:#fff;box-shadow:0 8px 20px rgb(8 124 83 / 18%)}
-body.light-mode .emerald-login .market-login-divider,body.light-mode .emerald-login .market-login-divider span{background:transparent;color:#52705f}
-body.light-mode .emerald-login .market-login-divider::before,body.light-mode .emerald-login .market-login-divider::after{background:#d1e5d9}
-body.light-mode .emerald-login .market-login-google{background:#fff;color:#214e38;border-color:#a7d1ba;box-shadow:none}
 body.light-mode .emerald-login .market-login-register a{color:#08764e}
 
 
@@ -235,22 +206,11 @@ body[data-accessibility-color] .emerald-login .orb{display:none}
 body[data-accessibility-color] .emerald-login .gb::before{display:none}
 body[data-accessibility-color] .emerald-login .gb{overflow:visible;border:1px solid var(--a11y-border);padding:1px}
 body[data-accessibility-color] .emerald-login .float{background:var(--a11y-surface)!important;border:1px solid var(--a11y-border)!important}
-body[data-accessibility-color] .emerald-login .float svg,
-body[data-accessibility-color] .emerald-login .market-login-input svg,
-body[data-accessibility-color] .emerald-login .market-login-symbol svg{color:var(--a11y-ink)!important}
-body[data-accessibility-color] .emerald-login .market-login-input input,
-body[data-accessibility-color] .emerald-login .market-login-input input:is(:autofill,:-webkit-autofill){
-color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;
-box-shadow:0 0 0 1000px var(--a11y-surface) inset!important;caret-color:var(--a11y-ink);
-}
-body[data-accessibility-color] .emerald-login .market-login-input input::placeholder{color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;opacity:.75}
 body[data-accessibility-color] .emerald-login .market-login-heading h1,
 body[data-accessibility-color] .emerald-login .emerald-intro h1,
 body[data-accessibility-color] .emerald-login .emerald-intro h1 span{
 color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!important;background:none!important;
 }
-body[data-accessibility-color] .emerald-login .market-login-divider::before,
-body[data-accessibility-color] .emerald-login .market-login-divider::after{background:var(--a11y-border)!important}
 
 
 /* Larger left composition, with a height-aware compact variant. */
@@ -291,6 +251,7 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 
 
 .emerald-register{overflow:clip}
+.emerald-register .field:focus-within{outline:0;box-shadow:none;background:transparent}
 .emerald-register .emerald-layout{align-items:flex-start;gap:clamp(28px,4vw,64px);padding-top:32px;padding-bottom:48px}
 .emerald-register .emerald-intro{position:sticky;top:24px;height:calc(100svh - 48px);min-height:560px;align-self:flex-start}
 .emerald-register .emerald-panel{flex:1 1 740px;max-width:760px;min-width:0}
@@ -421,12 +382,4 @@ body.light-mode .emerald-register .register-password-control .eye{color:#197950}
 </section>
 
 <section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><a class="back" href="{{ route('tienda.login') }}">← Regresar</a><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p>Completa tus datos para continuar.</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}">@csrf<div class="emerald-register-fields"><h2>Datos personales</h2><div class="form-grid">@include('modules.acceso.partials.profile-fields')</div><h2>Acceso</h2><div class="form-grid"><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div><div class="field"><label for="account_password">Contraseña (mínimo 12 caracteres)</label><div class="register-password-control"><input id="account_password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div><div class="field"><label for="account_password_confirmation">Repite tu contraseña</label><div class="register-password-control"><input id="account_password_confirmation" name="password_confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password_confirmation" aria-controls="account_password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div></div></div><button type="submit" class="btn market-login-submit">Crear cuenta y continuar →</button></form><div class="market-login-register"><span>¿Ya tienes una cuenta?</span><a href="{{ route('tienda.login') }}">Inicia sesión</a></div></div></div></section></div></section><script>document.querySelectorAll('[data-toggle-password]').forEach(function (button) {button.addEventListener('click', function () {const input = document.getElementById(this.dataset.togglePassword);const show = input.type === 'password';input.type = show ? 'text' : 'password';this.setAttribute('aria-pressed', String(show));this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');});});</script>
-document.getElementById('toggleLoginPassword').addEventListener('click', function () {
-    const input = document.getElementById('marketLoginPassword');
-    const show = input.type === 'password';
-    input.type = show ? 'text' : 'password';
-    this.setAttribute('aria-pressed', String(show));
-    this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
-});
-</script>
 @endsection
