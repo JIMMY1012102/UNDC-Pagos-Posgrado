@@ -522,6 +522,57 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-progress-track{height:4px}
 .emerald-register .register-step-actions .back{min-width:104px;white-space:nowrap;word-break:keep-all}
 }
+
+/* Seguimiento compacto: tarjeta intrínseca, cuerpo superior y pie reservado. */
+.emerald-register .emerald-layout{min-height:100dvh;align-items:center!important;padding-block:clamp(12px,2.5dvh,28px)!important}
+.emerald-register .emerald-panel{align-self:center;max-height:calc(100dvh - 24px);min-height:0}
+.emerald-register .gb{max-height:calc(100dvh - 24px);display:flex;min-height:0}
+.emerald-register .account-data-card{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 28px);height:auto!important;padding:22px 26px!important}
+.emerald-register .market-login-heading{flex:0 0 auto;margin:0 0 12px!important}
+.emerald-register .market-login-heading .market-login-symbol{width:42px;height:42px}
+.emerald-register .market-login-heading h1{font-size:25px!important;margin:7px 0 0!important}
+.emerald-register .register-progress{flex:0 0 auto;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;margin:0 0 12px!important}
+.emerald-register .register-progress-count{font-size:12px!important;white-space:nowrap}
+.emerald-register .register-progress-segments{gap:8px}
+.emerald-register .register-progress-segments li{font-size:12px!important;gap:5px}
+.emerald-register .register-progress-track{height:5px}
+.emerald-register form{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+.emerald-register .emerald-register-fields{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+.emerald-register .register-step{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;height:auto!important;overflow-y:auto;overflow-x:hidden;padding:0 2px 2px 0}
+.emerald-register .register-step>h2{display:none!important}
+.emerald-register .register-step .form-grid{flex:0 0 auto;align-content:start!important;align-items:start;gap:12px 14px!important}
+.emerald-register .register-step .field label{font-size:12px!important;margin-bottom:5px!important}
+.emerald-register .register-step .field input,.emerald-register .register-step .field select{height:42px!important;min-height:42px!important}
+.emerald-register .register-step-help{flex:0 0 auto;margin:9px 0 0!important;font-size:11px!important}
+.emerald-register .register-step-actions{flex:0 0 auto;margin:12px 0 0!important;padding:0!important;gap:10px!important}
+.emerald-register .register-step-actions .back{flex:0 0 112px;width:112px;min-width:112px;height:46px!important;min-height:46px!important;white-space:nowrap;word-break:keep-all}
+.emerald-register .register-step-actions .register-step-next,.emerald-register .register-step-actions .market-login-submit{height:46px!important;min-height:46px!important}
+.emerald-register .register-phone-row{grid-column:1/-1!important;grid-template-columns:minmax(105px,.34fr) minmax(0,1fr)!important;gap:12px!important}
+.emerald-register .register-email-row,.emerald-register .register-address-row{grid-column:1/-1!important}
+.emerald-register .register-city-row{grid-column:1/-1!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.emerald-register .register-reference-toggle{grid-column:1/-1;justify-self:start;padding:0;border:0;background:transparent;color:#087b53;font:600 12px Inter,system-ui,sans-serif;text-decoration:underline;cursor:pointer}
+.emerald-register .register-reference-field{grid-column:1/-1}
+.emerald-register .register-reference-field[hidden]{display:none!important}
+.emerald-register .register-country-hidden{display:none!important}
+@media(max-height:650px) and (min-width:761px){
+ .emerald-register .account-data-card{padding:14px 20px!important}
+ .emerald-register .market-login-heading{margin-bottom:7px!important}
+ .emerald-register .market-login-heading .market-login-symbol{width:34px;height:34px}
+ .emerald-register .market-login-heading h1{font-size:22px!important}
+ .emerald-register .register-progress{margin-bottom:7px!important}
+ .emerald-register .register-step .form-grid{gap:8px 12px!important}
+ .emerald-register .register-step .field input,.emerald-register .register-step .field select{height:37px!important;min-height:37px!important}
+ .emerald-register .register-step-actions{margin-top:7px!important}
+}
+@media(max-width:760px){
+ .emerald-register .account-data-card{max-height:none;padding:24px 20px!important}
+ .emerald-register .gb,.emerald-register .emerald-panel{max-height:none}
+ .emerald-register .register-step{overflow:visible}
+ .emerald-register .register-step-actions{flex-direction:row!important}
+ .emerald-register .register-step-actions .back{flex-basis:104px;width:104px;min-width:104px}
+ .emerald-register .register-city-row{grid-template-columns:minmax(0,1fr)}
+}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -642,7 +693,6 @@ body.light-mode .emerald-register .password-help{color:#537e68}
         </div>
         <div class="emerald-register-fields">
           <fieldset class="register-step" data-register-step="1">
-            <h2>Identidad</h2>
             <div class="form-grid">
               <div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div>
               <div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div>
@@ -651,7 +701,6 @@ body.light-mode .emerald-register .password-help{color:#537e68}
             <div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div>
           </fieldset>
           <fieldset class="register-step" data-register-step="2" hidden>
-            <h2>Contacto y ubicación</h2>
             <div class="form-grid" data-register-contact-grid></div>
             <div class="register-step-actions">
               <button type="button" class="back" data-register-back>← Atrás</button>
@@ -659,7 +708,6 @@ body.light-mode .emerald-register .password-help{color:#537e68}
             </div>
           </fieldset>
           <fieldset class="register-step" data-register-step="3" hidden>
-            <h2>Acceso</h2>
             <div class="form-grid">
               <div class="field">
                 <label for="account_password">Contraseña</label>
@@ -710,7 +758,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   const progress=form.querySelector('[data-register-progress-label]');
   const segments=form.querySelectorAll('[data-register-progress-segment]');
   const contactGrid=form.querySelector('[data-register-contact-grid]');
-  const addressNames=['line_1','line_2','city','state','country'];
+  const addressNames=['line_1','line_2','city','state'];
   const byName=name=>form.querySelector('[name="'+name+'"]');
   const phoneCountry=byName('phone_country_code');
   const phone=byName('phone');
@@ -723,10 +771,35 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   }
   const email=byName('email');
   if(email)contactGrid.append(email.closest('.field'));
-  addressNames.forEach(name=>{
-    const field=byName(name)?.closest('.field');
-    if(field)contactGrid.append(field);
-  });
+  const addressField=name=>byName(name)?.closest('.field');
+  const address=addressField('line_1');
+  const reference=addressField('line_2');
+  const city=addressField('city');
+  const state=addressField('state');
+  if(address){address.classList.add('register-address-row');contactGrid.append(address);}
+  if(reference){
+    reference.classList.add('register-reference-field');
+    reference.hidden=true;
+    const toggle=document.createElement('button');
+    toggle.type='button';toggle.className='register-reference-toggle';
+    toggle.textContent='+ Agregar referencia';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-controls',reference.querySelector('input')?.id||'account_line_2');
+    toggle.addEventListener('click',()=>{
+      const expanded=toggle.getAttribute('aria-expanded')==='true';
+      toggle.setAttribute('aria-expanded',String(!expanded));
+      reference.hidden=expanded;
+      toggle.textContent=expanded?'+ Agregar referencia':'− Ocultar referencia';
+      if(!expanded)reference.querySelector('input')?.focus();
+    });
+    contactGrid.append(toggle,reference);
+  }
+  if(city&&state){
+    const locationRow=document.createElement('div');locationRow.className='register-city-row';
+    locationRow.append(city,state);contactGrid.append(locationRow);
+  }else [city,state].filter(Boolean).forEach(field=>contactGrid.append(field));
+  const country=byName('country');
+  if(country&&!country.value.trim())country.value='PE';
   const allFields=[...form.querySelectorAll('input,select,textarea')];
   const touchedFields=new WeakSet();
   const passwordField=byName('password');
