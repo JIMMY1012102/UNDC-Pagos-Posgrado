@@ -175,7 +175,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: registro-tres-pasos-1366x768
+          name: registro-compacto-1366x590-y-1366x768
           path: artifacts/registration-steps/*.png
           if-no-files-found: warn
           retention-days: 14
