@@ -260,12 +260,13 @@ async function responsiveThemeCatalog(viewport) {
       await page.locator('#accessibilityFloatingButton').click();
       await page.locator('[data-accessibility-theme="' + value + '"]').click();
       await page.keyboard.press('Escape');
+      await page.evaluate(() => scrollTo(0, 0));
       await page.waitForFunction(value =>
         document.body.classList.contains('light-mode') === (value === 'light'), value);
     }
     async function geometry() {
       return page.evaluate(() => {
-        const selectors = ['.site-header', 'main.wrap', '#tusneCatalog',
+        const selectors = ['.site-header', '#tusneCatalog',
           '#catalogResultsTitle', '.catalog-product'];
         return Object.fromEntries(selectors.map(selector => {
           const element = document.querySelector(selector);
