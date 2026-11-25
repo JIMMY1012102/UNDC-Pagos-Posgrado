@@ -15,15 +15,12 @@
         <b>UNDC MARKET</b>
       </a>
       <nav class="nav" aria-label="Principal">
-        <a href="/tienda/catalogo">Explorar trámites
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
-        </a>
+        <a href="/tienda/catalogo">Explorar trámites</a>
         <a href="#como-funciona">Cómo funciona</a>
         <a href="/tienda/mis-pedidos">Mis pedidos</a>
         <a href="#respaldo">Ayuda</a>
       </nav>
       <div class="tools">
-        <button class="es" type="button" aria-label="Idioma: español">ES</button>
         <a class="cart" href="/tienda/carrito" aria-label="Mi carrito, 0 elementos">
           <i>0</i>
           Mi carrito
