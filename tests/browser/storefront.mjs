@@ -1,11 +1,13 @@
-import { chromium } from 'playwright';
+import { chromium, firefox } from 'playwright';
 import assert from 'node:assert/strict';
 import {readFileSync, mkdirSync} from 'node:fs';
 
 // Browser smoke test of the current three-page frontend.
 // Backend + MariaDB journey is independently tested in PHP CI.
 const origin = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
-const browser = await chromium.launch({ headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined });
+const firefoxRegisterOnly = process.env.REGISTER_FIREFOX_ONLY === '1';
+const browserEngine = firefoxRegisterOnly ? firefox : chromium;
+const browser = await browserEngine.launch({ headless: true, executablePath: firefoxRegisterOnly ? undefined : (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined) });
 let failures = 0;
 
 async function scenario(viewport, name) {
@@ -492,6 +494,31 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_password').isVisible(), true);
       assert.equal(await page.locator('#account_password_confirmation').isVisible(), true);
       assert.equal(await page.locator('#account_email').isVisible(), false);
+      assert.equal(await page.locator('.field-error:visible').count(), 0,
+        'No mostrar errores al entrar al paso Acceso sin interacción ni respuesta de servidor');
+      const passwordGroups = await page.locator('[data-register-step="3"] .form-grid > .field').evaluateAll(groups => groups.map(group => {
+        const label = group.querySelector(':scope > label');
+        const input = group.querySelector('.register-password-control input');
+        const wrapper = group.querySelector('.register-password-control');
+        const labelStyle = getComputedStyle(label);
+        const inputStyle = getComputedStyle(input);
+        const wrapperStyle = getComputedStyle(wrapper);
+        const labelRect = label.getBoundingClientRect();
+        const bordered = [wrapperStyle, inputStyle].filter(style => ['Top','Right','Bottom','Left'].some(side => parseFloat(style['border'+side+'Width']) > 0)).length;
+        return { labelText:label.textContent.trim(), labelDisplay:labelStyle.display, labelVisibility:labelStyle.visibility,
+          labelOpacity:labelStyle.opacity, labelHeight:labelRect.height, wrapperBorder:wrapperStyle.borderTopWidth,
+          inputBorders:[inputStyle.borderTopWidth,inputStyle.borderRightWidth,inputStyle.borderBottomWidth,inputStyle.borderLeftWidth],
+          inputBackground:inputStyle.backgroundColor, borderedElements:bordered };
+      }));
+      assert.equal(passwordGroups.length, 2, 'Deben existir dos grupos de contraseña');
+      for (const group of passwordGroups) {
+        assert.notEqual(group.labelDisplay, 'none', group.labelText + ' debe estar visible');
+        assert.equal(group.labelVisibility, 'visible', group.labelText + ' debe ser visible');
+        assert.ok(Number(group.labelOpacity) > 0 && group.labelHeight > 0, group.labelText + ' debe tener geometría visible: ' + JSON.stringify(group));
+        assert.equal(group.borderedElements, 1, group.labelText + ' debe tener un solo elemento con borde: ' + JSON.stringify(group));
+        assert.ok(group.inputBorders.every(width => parseFloat(width) === 0), group.labelText + ' input debe ser transparente y sin borde: ' + JSON.stringify(group));
+        assert.equal(group.inputBackground, 'rgba(0, 0, 0, 0)', group.labelText + ' input debe tener fondo transparente');
+      }
       const eyeBox = await page.locator('[data-toggle-password="account_password"]').boundingBox();
       const eyePadding = await page.locator('#account_password').evaluate(el => ({
         paddingRight:getComputedStyle(el).paddingRight,
@@ -526,14 +553,36 @@ async function responsiveAccountPage(viewport, kind) {
       }
       await noVerticalScroll(3);
       await captureStep(3);
+      if (firefoxRegisterOnly) {
+        mkdirSync('artifacts/registration-firefox', { recursive: true });
+        await page.screenshot({ path:'artifacts/registration-firefox/step-3-1366x' + viewport.height + '.png', fullPage:false });
+      }
       const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
       assert.ok(cardHeight > 0 && nextCardHeight > 0,
         'La tarjeta debe conservar dimensiones válidas en cada paso');
 
+      const passwordGroup = page.locator('#account_password').locator('xpath=ancestor::div[contains(@class,"field")]');
+      const confirmationGroup = page.locator('#account_password_confirmation').locator('xpath=ancestor::div[contains(@class,"field")]');
+      await page.locator('#account_password').focus();
+      await page.locator('#account_password_confirmation').focus();
+      assert.equal(await passwordGroup.locator('.field-error:visible').count(), 1,
+        'El blur de la contraseña tocada debe mostrar un único error en su grupo');
+      assert.equal(await passwordGroup.locator('.field-error').innerText(), 'Este campo es obligatorio.');
+      const passwordErrorOrder = await passwordGroup.evaluate(group => {
+        const error=group.querySelector('.field-error'), help=group.querySelector('.password-help'), strength=group.querySelector('[data-password-strength]');
+        return {errorInside:group.contains(error), beforeHelp:!!(error.compareDocumentPosition(help)&Node.DOCUMENT_POSITION_FOLLOWING), beforeStrength:!!(error.compareDocumentPosition(strength)&Node.DOCUMENT_POSITION_FOLLOWING)};
+      });
+      assert.deepEqual(passwordErrorOrder,{errorInside:true,beforeHelp:true,beforeStrength:true},'El error de contraseña debe ir tras el control y antes de ayuda/fortaleza');
       await page.locator('#account_password').fill('Demo-password-2026');
+      await page.locator('#account_password_confirmation').fill('');
+      await page.locator('[data-register-step="3"] button[type="submit"]').click();
+      assert.equal(await confirmationGroup.locator('.field-error:visible').count(), 1,
+        'El submit debe mostrar un único error de confirmación dentro de su grupo');
+      assert.equal(await confirmationGroup.locator('.field-error').innerText(), 'Este campo es obligatorio.');
       await page.locator('#account_password_confirmation').fill('Different-password-2026');
       await page.locator('[data-register-step="3"] button[type="submit"]').click();
-      assert.match(await page.locator('#account_password_confirmation').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /no coinciden/i,
+      assert.equal(await confirmationGroup.locator('.field-error:visible').count(), 1);
+      assert.match(await confirmationGroup.locator('.field-error').innerText(), /no coinciden/i,
         'La confirmación debe validar coincidencia en línea');
       const eye = page.locator('[data-toggle-password="account_password"]');
       await eye.click();
@@ -611,6 +660,11 @@ for (const width of [320, 375, 768, 1024, 1366, 1920]) {
   await responsiveThemeCatalog(viewport);
 }
 
+if (firefoxRegisterOnly) {
+  for (const viewport of [{ width:1366, height:590 }, { width:1366, height:768 }]) {
+    await responsiveAccountPage(viewport, 'register');
+  }
+} else {
 // Validación solicitada de la portada en sus alturas de escritorio reales.
 await responsiveHome({ width: 1600, height: 900 });
 await responsiveHome({ width: 1920, height: 1080 });
@@ -635,6 +689,7 @@ for (const viewport of [
 await scenario({ width: 1440, height: 900 }, 'desktop');
 await scenario({ width: 1366, height: 768 }, 'laptop');
 await scenario({ width: 390, height: 844 }, 'mobile');
+}
 await browser.close();
 if (failures > 0) process.exit(1);
 

@@ -180,3 +180,52 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  firefox-register:
+    name: Registro Firefox · paso 3 (1366x590 y 1366x768)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+      - name: Preparar PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, curl, fileinfo, pdo_sqlite, sqlite3, zip
+          coverage: none
+          tools: composer:v2
+      - name: Instalar Laravel y configurar entorno local efímero
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          echo 'SESSION_DRIVER=file' >> .env
+          echo 'CACHE_STORE=file' >> .env
+          echo 'DB_CONNECTION=sqlite' >> .env
+          touch database/database.sqlite
+      - name: Preparar Node y Firefox
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar Playwright y Firefox
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps firefox
+      - name: Iniciar Laravel y verificar solo el registro en Firefox
+        run: |
+          SESSION_DRIVER=file CACHE_STORE=file DB_CONNECTION=sqlite DB_DATABASE=database/database.sqlite php artisan serve --host=127.0.0.1 --port=8000 > /tmp/undc-serve-firefox.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/tienda/registro >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/tienda/registro >/dev/null || { cat /tmp/undc-serve-firefox.log; exit 1; }
+          REGISTER_FIREFOX_ONLY=1 node tests/browser/storefront.mjs
+      - name: Publicar capturas Firefox del paso 3
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: registro-firefox-paso3-1366x590-768
+          path: artifacts/registration-firefox/*.png
+          if-no-files-found: warn
+          retention-days: 14
+

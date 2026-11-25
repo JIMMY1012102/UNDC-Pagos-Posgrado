@@ -451,6 +451,15 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-password-control .eye{position:absolute!important;z-index:5;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:38px!important;height:38px!important;border:0;border-radius:9px;background:transparent;color:#287653;cursor:pointer}
 .emerald-register .register-password-control .eye:hover{background:#edf7f1}
 .emerald-register .register-password-control .eye:focus-visible{outline:3px solid #087b53!important;outline-offset:1px}
+/* El control de contraseña tiene una sola superficie: el wrapper. */
+.emerald-register .register-step[data-register-step="3"] .field label{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;position:static!important;color:#315b47!important;line-height:1.25!important}
+.emerald-register .register-step[data-register-step="3"] .register-password-control{display:flex!important;align-items:center!important;position:relative!important;border:1.5px solid #a9c8b6!important;border-radius:12px!important;background:#fff!important;box-shadow:none!important;min-width:0}
+.emerald-register .register-step[data-register-step="3"] .register-password-control:focus-within{border-color:#087b53!important;background:#fff!important;box-shadow:0 0 0 3px rgb(8 123 83 / 17%)!important}
+.emerald-register .register-step[data-register-step="3"] .register-password-control:has(input[aria-invalid="true"]){border-color:#d97770!important;background:#fffafa!important;box-shadow:0 0 0 2px rgb(217 119 112 / 10%)!important}
+.emerald-register .register-step[data-register-step="3"] .register-password-control input,
+.emerald-register .register-step[data-register-step="3"] .register-password-control input:autofill,
+.emerald-register .register-step[data-register-step="3"] .register-password-control input:-webkit-autofill{flex:1 1 auto;min-width:0;width:100%;height:100%!important;padding:0 44px 0 13px!important;border:0!important;border-radius:0!important;background:transparent!important;background-color:transparent!important;box-shadow:none!important;-webkit-box-shadow:none!important;outline:0!important;color:#173f30!important;-webkit-text-fill-color:#173f30!important;appearance:none;-webkit-appearance:none}
+.emerald-register .register-step[data-register-step="3"] .register-password-control input:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline:0!important}
 .emerald-register .password-strength{display:flex;align-items:center;gap:9px;min-height:18px;margin:7px 0 0;color:#617c6d;font-size:12px;line-height:1.2}
 .emerald-register .password-strength-bars{display:flex;gap:3px;width:72px;flex:0 0 72px}
 .emerald-register .password-strength-bars i{height:4px;flex:1;border-radius:5px;background:#dfe9e3}
@@ -893,6 +902,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     const wrapper=field.closest('.field');
     if(!wrapper)return;
     let error=wrapper.querySelector('.field-error');
+    wrapper.querySelectorAll('.field-error').forEach((duplicate,index)=>{if(index>0)duplicate.remove();});
     const message=field.validity.valid?'':(
       field.validity.valueMissing?'Este campo es obligatorio.':
       field.validity.typeMismatch?'Ingresa un correo electrónico válido.':
@@ -900,7 +910,10 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       field.validationMessage||'Revisa este campo.'
     );
     if(message){
-      if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';error.setAttribute('aria-live','polite');wrapper.append(error);}
+      if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';error.setAttribute('aria-live','polite');}
+      const help=wrapper.querySelector('.password-help, .password-strength');
+      if(help&&error.nextElementSibling!==help)wrapper.insertBefore(error,help);
+      else if(!help&&error.parentElement!==wrapper)wrapper.append(error);
       error.textContent=message;
       field.setAttribute('aria-invalid','true');
       field.setAttribute('aria-describedby',error.id);
@@ -999,7 +1012,11 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       const wrapper=field.closest('.field');
       if(wrapper){
         let error=wrapper.querySelector('.field-error');
-        if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';wrapper.append(error);}
+        wrapper.querySelectorAll('.field-error').forEach((duplicate,index)=>{if(index>0)duplicate.remove();});
+        if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';}
+        const help=wrapper.querySelector('.password-help, .password-strength');
+        if(help&&error.nextElementSibling!==help)wrapper.insertBefore(error,help);
+        else if(!help&&error.parentElement!==wrapper)wrapper.append(error);
         error.textContent=message;
         field.setAttribute('aria-invalid','true');
         field.setAttribute('aria-describedby',error.id);
