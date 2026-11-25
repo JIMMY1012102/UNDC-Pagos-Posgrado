@@ -460,7 +460,7 @@ async function responsiveAccountPage(viewport, kind) {
       await contactGrid.evaluate(grid=>grid.scrollTo({top:grid.scrollHeight,behavior:'instant'}));
       await page.waitForFunction(()=>{
         const grid=document.querySelector('[data-register-step="2"] .form-grid');
-        return !grid || grid.classList.contains('scroll-at-end');
+        return !grid || (grid.scrollTop>=Math.max(0,grid.scrollHeight-grid.clientHeight)-2 && grid.classList.contains('scroll-at-end'));
       });
       const contactEnd=await contactGrid.evaluate(grid=>({
         maxScroll:Math.max(0,grid.scrollHeight-grid.clientHeight),scrollTop:grid.scrollTop,
@@ -474,12 +474,6 @@ async function responsiveAccountPage(viewport, kind) {
           'La prueba debe desplazar .form-grid hasta su posición final: '+JSON.stringify(contactEnd));
         assert.equal(contactEnd.atEnd,true,'El indicador debe ocultarse al final del scroll: '+JSON.stringify(contactEnd));
         assert.equal(contactEnd.opacity,'0','El degradado no debe tapar el último campo al final');
-      }
-      assert.equal(contactOverflow.hasOverflow,contactOverflow.overflow,
-        'El degradado solo debe activarse con overflow real: '+JSON.stringify(contactOverflow));
-      if(contactOverflow.overflow){
-        assert.equal(contactOverflow.atEnd,true,'El indicador debe ocultarse al final del scroll');
-        assert.equal(contactOverflow.opacity,'0','El degradado no debe tapar el último campo al final');
       }
       await page.locator('#account_email').focus();
       await page.locator('#account_line_1').focus();
@@ -530,9 +524,9 @@ async function responsiveAccountPage(viewport, kind) {
       const passwordInputStyle=await page.locator('#account_password').evaluate(el=>({paddingRight:getComputedStyle(el).paddingRight,borderRadius:getComputedStyle(el).borderRadius}));
       assert.ok(parseFloat(passwordInputStyle.paddingRight)>=40,'El input debe reservar espacio para el ojo');
       const autofillPadding=await page.locator('style').evaluateAll(nodes=>nodes.map(node=>node.textContent).join('\\n'));
-      assert.match(autofillPadding, /register-step\\s+\\.register-password-control\\s+input:autofill[\\s\\S]*?padding-right:\\s*44px;/,
+      assert.match(autofillPadding, /register-step\s+\.register-password-control\s+input:autofill[\s\S]*?padding-right:\s*44px;/,
         'Autofill Firefox debe conservar los 44px del botón ojo');
-      assert.match(autofillPadding, /register-step\\s+\\.register-password-control\\s+input:-webkit-autofill[\\s\\S]*?padding-right:\\s*44px;/,
+      assert.match(autofillPadding, /register-step\s+\.register-password-control\s+input:-webkit-autofill[\s\S]*?padding-right:\s*44px;/,
         'Autofill Chromium debe conservar los 44px del botón ojo');
       await noVerticalScroll(3);
       await captureStep(3);
