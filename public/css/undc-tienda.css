@@ -1784,7 +1784,7 @@ html[data-accessibility-text] .cart-modern .cart-review-panel #cartRows .cart-se
 @media (min-width:1920px){
  .top-inner,.nav{max-width:var(--container-max,1680px)}
  .hero-inner{width:min(calc(100% - 80px),var(--container-max,1680px));gap:56px}
- .hero-art{transform:translate(-38px,-88px) scale(1.04);transform-origin:center}
+ /* La ilustración conserva su flujo adaptable; no necesita un desplazamiento fijo. */
  .tusne-results,.concept-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
  .category-showcase{grid-template-columns:repeat(6,minmax(0,1fr))}
  .wrap{width:min(calc(100% - 80px),var(--container-max,1680px))}
