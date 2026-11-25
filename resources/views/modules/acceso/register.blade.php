@@ -252,7 +252,8 @@ color:var(--a11y-ink)!important;-webkit-text-fill-color:var(--a11y-ink)!importan
 
 .emerald-register{overflow:clip}
 .emerald-register .field:focus-within{outline:0;box-shadow:none;background:transparent}
-.emerald-register .emerald-panel{flex:0 1 610px;max-width:610px;min-width:0}
+.emerald-register   .emerald-layout{max-width:var(--container-max,1440px);align-items:flex-start  !important;padding-top:28px !important}
+.emerald-register .emerald-panel{flex:0 1 520px;max-width:520px;min-width:0}
 .emerald-register .market-login-card{width:100%;max-width:none}
 .emerald-register .market-login-heading{margin-bottom:20px}
 .emerald-register .market-login-heading h1{text-transform:none}
@@ -393,7 +394,7 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 <h1 class="sora in2" style="margin:0;font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-1.5px">Tus trámites,<br><span style="background:linear-gradient(90deg,#6ee7b7,#b6f36b);-webkit-background-clip:text;background-clip:text;color:transparent">a un solo clic.</span></h1>
 </section>
 
-<section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Cuéntanos quién eres.</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
+<section class="emerald-panel emerald-register-panel"><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Ingresa tus datos personales</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
 <div class="register-progress" data-register-progress aria-live="polite"><span data-register-progress-label>Paso 1 de 2</span><span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span></span></div>
 <div class="emerald-register-fields">
 <fieldset class="register-step" data-register-step="1"><h2>Datos personales y de contacto</h2><div class="form-grid"><div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div></div><div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div></fieldset>
@@ -440,7 +441,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function (button) {b
   });
   progress.textContent='Paso '+number+' de 2';
   dots.forEach((dot,index)=>{if(index===number-1)dot.setAttribute('aria-current','step');else dot.removeAttribute('aria-current');});
-  subtitle.textContent=number===1?'Cuéntanos quién eres.':'Define tu acceso.';
+  subtitle.textContent=number===1?'Ingresa tus datos personales':'Define tu acceso.';
   if(moveFocus){
    const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
    if(first)first.focus({preventScroll:true});
