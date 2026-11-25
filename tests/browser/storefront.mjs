@@ -254,6 +254,8 @@ async function responsiveThemeCatalog(viewport) {
     } }));
     await page.goto(origin + '/tienda/catalogo', { waitUntil: 'networkidle' });
     await page.locator('.catalog-product').first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    await page.locator('.catalog-product img').first().evaluate(image => image.decode());
     await page.locator('#accessibilityFloatingButton').waitFor();
 
     async function theme(value) {
