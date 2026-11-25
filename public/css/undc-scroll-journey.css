@@ -1,5 +1,5 @@
 
-:root{--sh:max(640px,min(100svh,1200px))}
+:root{--sh:max(640px,min(100svh,1800px))}
 html{scroll-behavior:smooth}
 body{margin:0;background:#f4f8f1;color:#0b3b24;font-family:Inter,system-ui,sans-serif}
 a{color:#0b3b24}a:hover{color:#256b2c}
