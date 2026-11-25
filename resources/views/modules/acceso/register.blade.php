@@ -476,6 +476,52 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 @media (min-width:768px){.emerald-register .emerald-intro .stage{position:relative}.emerald-register .emerald-intro .float{max-width:190px;z-index:4}.emerald-register .emerald-intro .fa{left:0;right:auto;top:12px;bottom:auto}.emerald-register .emerald-intro .fb{left:auto;right:0;top:calc(50% - 30px);bottom:auto}.emerald-register .emerald-intro .fc{left:0;right:auto;top:auto;bottom:12px}}
 @media (prefers-reduced-motion:reduce){.emerald-register .register-step,.emerald-register .register-progress-track{animation:none!important;transition:none!important}}
 
+
+/* Corrección de geometría del registro: encabezado, cuerpo y acciones son filas independientes. */
+@media (min-width:768px){
+.emerald-register .emerald-panel{height:min(calc(100dvh - 24px),700px);max-height:calc(100dvh - 24px)}
+.emerald-register .account-data-card{padding:20px 22px!important}
+.emerald-register .account-data-card>form{display:flex;flex:1 1 auto;min-height:0;flex-direction:column}
+.emerald-register .market-login-heading{flex:0 0 34px;min-height:34px;margin:0 0 6px!important;gap:9px!important}
+.emerald-register .market-login-symbol{width:32px!important;height:32px!important;flex-basis:32px}
+.emerald-register .market-login-heading h1{font-size:19px!important;line-height:1.1!important}
+.emerald-register .register-progress{flex:0 0 auto;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;margin:0 0 10px!important;font-size:11px!important;line-height:1.1}
+.emerald-register .register-progress-segments{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.emerald-register .register-progress-segments li{display:flex;flex-direction:row;align-items:center;gap:5px;font-size:11px;white-space:nowrap}
+.emerald-register .register-progress-track{height:4px;flex:1;min-width:8px}
+.emerald-register .emerald-register-fields{display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+.emerald-register .register-step{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;height:auto;overflow:visible}
+.emerald-register .register-step>h2{flex:0 0 auto;margin:0 0 8px!important;font-size:13px!important;line-height:1.15}
+.emerald-register .register-step .form-grid{flex:1 1 auto;min-height:0;align-content:start;align-items:start;gap:10px 12px!important}
+.emerald-register .register-step .field label{margin:0 0 4px!important;font-size:12px!important;line-height:1.15}
+.emerald-register .register-step .field input,.emerald-register .register-step .field select,.emerald-register .register-step .register-password-control{height:41px!important;min-height:41px!important;padding:0 10px!important;font-size:13px!important;border-radius:10px!important}
+.emerald-register .register-step .register-phone-row{grid-column:auto!important;grid-template-columns:minmax(92px,.42fr) minmax(0,1fr);gap:8px;align-self:start}
+.emerald-register .register-step-actions{position:static!important;z-index:auto!important;flex:0 0 44px;min-height:44px;margin:8px 0 0!important;padding:0!important;gap:10px!important}
+.emerald-register .register-step-actions .back{flex:0 0 104px;width:104px;min-width:104px;height:42px;min-height:42px!important;padding:0 10px!important;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;line-height:1!important;font-size:13px!important}
+.emerald-register .register-step-actions .register-step-next,.emerald-register .register-step-actions .market-login-submit{flex:1 1 auto;height:42px!important;min-height:42px!important}
+.emerald-register .market-login-register{flex:0 0 auto;margin:6px 0 0!important;font-size:11px}
+.emerald-register .register-step-help{margin:8px 0 0;font-size:11px}
+}
+@media (min-width:768px) and (max-height:620px){
+.emerald-register .account-data-card{padding:14px 20px!important}
+.emerald-register .market-login-heading{flex-basis:30px;min-height:30px;margin-bottom:4px!important}
+.emerald-register .market-login-symbol{width:28px!important;height:28px!important;flex-basis:28px}
+.emerald-register .market-login-heading h1{font-size:18px!important}
+.emerald-register .register-progress{margin-bottom:6px!important}
+.emerald-register .register-step>h2{margin-bottom:5px!important}
+.emerald-register .register-step .form-grid{gap:8px 10px!important}
+.emerald-register .register-step .field label{font-size:11px!important}
+.emerald-register .register-step .field input,.emerald-register .register-step .field select,.emerald-register .register-step .register-password-control{height:38px!important;min-height:38px!important}
+.emerald-register .register-step-actions{margin-top:5px!important}
+.emerald-register .market-login-register{margin-top:3px!important}
+}
+@media (max-width:767px){
+.emerald-register .register-progress{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
+.emerald-register .register-progress-segments{gap:6px}
+.emerald-register .register-progress-segments li{font-size:11px;gap:4px}
+.emerald-register .register-progress-track{height:4px}
+.emerald-register .register-step-actions .back{min-width:104px;white-space:nowrap;word-break:keep-all}
+}
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -668,6 +714,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   const byName=name=>form.querySelector('[name="'+name+'"]');
   const phoneCountry=byName('phone_country_code');
   const phone=byName('phone');
+  if(phoneCountry&&!phoneCountry.value.trim())phoneCountry.value='+51';
   if(phoneCountry&&phone){
     const phoneRow=document.createElement('div');
     phoneRow.className='register-phone-row';
@@ -681,6 +728,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     if(field)contactGrid.append(field);
   });
   const allFields=[...form.querySelectorAll('input,select,textarea')];
+  const touchedFields=new WeakSet();
   const passwordField=byName('password');
   const strength=card.querySelector('[data-password-strength]');
   const strengthLabel=card.querySelector('[data-password-strength-label]');
@@ -701,12 +749,16 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
     field.dataset.registerInitiallyRequired=field.required?'true':'false';
     field.addEventListener('input',()=>{
       if(field.id==='account_password')updateFieldError(byName('password_confirmation'));
-      updateFieldError(field);
+      if(touchedFields.has(field))updateFieldError(field);
     });
-    field.addEventListener('change',()=>updateFieldError(field));
+    field.addEventListener('change',()=>{if(touchedFields.has(field))updateFieldError(field);});
+    field.addEventListener('blur',()=>{
+      if(field.value.trim()!=='')touchedFields.add(field);
+      if(touchedFields.has(field))updateFieldError(field);
+    });
   });
-  function updateFieldError(field){
-    if(!field)return;
+  function updateFieldError(field,force=false){
+    if(!field||(!force&&!touchedFields.has(field)))return;
     if(field.id==='account_password_confirmation'){
       const password=byName('password')?.value||'';
       field.setCustomValidity(field.value&&field.value!==password?'Las contraseñas no coinciden.':'');
@@ -734,7 +786,7 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
   function validateStep(step){
     let firstInvalid=null;
     step.querySelectorAll('input,select,textarea').forEach(field=>{
-      updateFieldError(field);
+      updateFieldError(field,true);
       if(!field.validity.valid&&!firstInvalid)firstInvalid=field;
     });
     if(firstInvalid)firstInvalid.focus({preventScroll:true});
