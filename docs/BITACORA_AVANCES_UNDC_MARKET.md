@@ -195,3 +195,13 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se adaptan los servicios de catálogo, carrito, perfil, pedidos y pagos; se conservan alias de salida en la consulta SQL de solo lectura SISPAGOS.
 - Se agregó una prueba de columnas y se amplió el fixture MariaDB para probar rollback/upgrade con filas existentes, incluyendo la columna generada del carrito. La verificación final depende de todos los jobs CI.
 - Referencia normativa: [diccionario físico de columnas](./modelo-datos/DICCIONARIO_COLUMNAS.md). Despliegue Oracle sigue manual y sujeto a autorización; ver [DESPLIEGUE.md](./DESPLIEGUE.md).
+
+
+## 6. Registro en tres pasos sin scroll (25 de noviembre de 2026)
+
+- Se inició la rama `feat/registro-tres-pasos-sin-scroll` desde `main`, siguiendo `AGENTS.md`, `docs/DESARROLLO_LOCAL.md`, `docs/ARQUITECTURA.md` y `docs/MODULOS.md`.
+- Se reorganiza `/tienda/registro` en tres etapas: Identidad; Contacto y ubicación; Acceso. Se conservan los nombres de campos existentes, `password_confirmation`, validación de servidor y valores `old()`; no se modifican controladores ni esquema.
+- La vista contiene los estilos del registro y el JavaScript del stepper inline; no se encontró una hoja de estilos o archivo JS separado que gobierne esta pantalla. Se compactó el layout de escritorio a `100dvh`, con tarjeta de altura estable, validación inline y vista móvil adaptable.
+- Se añadió cobertura Feature para los tres pasos y persistencia de valores antiguos; la prueba Chromium recorre los tres pasos, comprueba errores inline, altura estable y ausencia de scroll vertical en 1366×600, 1366×768 y 1920×1080.
+- El workflow de Chromium publica capturas de los tres pasos en 1366×768 como artefacto `registro-tres-pasos-1366x768`.
+- Estado al registrar este avance: cambios preparados en rama y pendientes de ejecución CI/validación visual. No fusionar a `main` sin aprobación expresa.
