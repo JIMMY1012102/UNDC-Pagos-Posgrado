@@ -1,5 +1,5 @@
 
-:root{--sh:max(640px,min(100vh,840px))}
+:root{--sh:max(640px,min(100svh,1200px))}
 html{scroll-behavior:smooth}
 body{margin:0;background:#f4f8f1;color:#0b3b24;font-family:Inter,system-ui,sans-serif}
 a{color:#0b3b24}a:hover{color:#256b2c}
@@ -501,3 +501,10 @@ button{font-family:inherit}
   .bars { gap: 5px; }
   .bar { width: 22px; height: 3px; }
 }
+
+.hdr{padding-inline:max(24px,calc((100vw - var(--container-max,1440px))/2))}
+.copy,.progin,.journey,.jsec,.footin,.status{max-width:var(--container-max,1440px)}
+.journey,.jsec,.footin,.status{width:min(100%,var(--container-max,1440px))}
+@media(min-width:1600px){.copy{width:min(100%,var(--container-max,1440px))}.journey,.jsec{padding-inline:clamp(56px,4vw,76px)}.h1,.h2{font-size:clamp(76px,5vw,108px)}.lead{max-width:620px;font-size:22px}.step{gap:clamp(56px,4vw,84px)}.sp{max-width:390px;font-size:18px}}
+@media(min-width:1920px){.copy,.progin,.journey,.jsec,.footin,.status{max-width:var(--container-max,1680px)}.journey,.jsec,.footin,.status{width:min(100%,var(--container-max,1680px))}.hdr{padding-inline:max(32px,calc((100vw - var(--container-max,1680px))/2))}.h1,.h2{font-size:clamp(88px,4.8vw,116px)}}
+@media(min-width:2560px){.h1,.h2{font-size:116px}.lead{max-width:660px;font-size:23px}}

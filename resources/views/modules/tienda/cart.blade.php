@@ -169,6 +169,12 @@ body[data-accessibility-color] .cart-motion-glow{display:none}
 @media(prefers-reduced-motion:reduce){body.market-cart-stage *,body.market-cart-stage *::before,body.market-cart-stage *::after{animation:none!important;transition:none!important}}
 
 .market-cart-stage main.wrap,.market-cart-stage .site-header{position:relative;z-index:1}
+
+.market-cart-stage .top-inner,.market-cart-stage main.wrap{max-width:var(--container-max,1440px)}
+@media(min-width:1600px){.market-cart-stage .payment-preview-grid{grid-template-columns:minmax(0,1fr) minmax(360px,390px);gap:36px}.market-cart-stage .cart-review-panel{padding:clamp(28px,2vw,40px)}}
+@media(min-width:1920px){.market-cart-stage .top-inner,.market-cart-stage main.wrap{max-width:var(--container-max,1680px)}.market-cart-stage .payment-preview-grid{grid-template-columns:minmax(0,1fr) minmax(390px,430px);gap:42px}}
+@media(min-width:2560px){.market-cart-stage .cart-service-row{padding:24px;gap:22px}}
+
 </style>
 <div class="cart-motion-glow" aria-hidden="true"></div><div class="cart-motion-glow second" aria-hidden="true"></div>
 <div class="page-grid cart-view"><div>

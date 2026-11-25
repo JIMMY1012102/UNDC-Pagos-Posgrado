@@ -429,6 +429,14 @@ body[data-market-page="catalog"] .immersive-hero .kinetic-word,
 body[data-market-page="catalog"] .immersive-hero .market-hero-photo{transform:none!important}
 }
 
+
+body[data-market-page="catalog"] .site-header .top-inner,body[data-market-page="catalog"] main.wrap,body[data-market-page="catalog"] .store-footer-inner,body[data-market-page="catalog"] .store-tiles-wrap{max-width:var(--container-max,1440px)}
+body[data-market-page="catalog"] .market-hero-content,body[data-market-page="catalog"] .institutional-hero .market-hero-content,body[data-market-page="catalog"] .immersive-hero .market-hero-content{width:100%;max-width:var(--container-max,1440px);margin-inline:auto;padding-inline:clamp(24px,3vw,56px);box-sizing:border-box}
+body[data-market-page="catalog"] .institutional-hero .market-hero-slides,body[data-market-page="catalog"] .immersive-hero .market-hero-slides{max-width:min(820px,62%);width:62%}
+@media(min-width:1600px){body[data-market-page="catalog"] .tusne-results{gap:24px}body[data-market-page="catalog"] .catalog-product-name{font-size:calc(17px*var(--a11y-text-scale,1))}}
+@media(min-width:1920px){body[data-market-page="catalog"] .site-header .top-inner,body[data-market-page="catalog"] main.wrap,body[data-market-page="catalog"] .store-footer-inner,body[data-market-page="catalog"] .store-tiles-wrap{max-width:var(--container-max,1680px)}body[data-market-page="catalog"] .tusne-results{grid-template-columns:repeat(4,minmax(0,1fr));gap:26px}body[data-market-page="catalog"] .institutional-hero .market-hero-slides,body[data-market-page="catalog"] .immersive-hero .market-hero-slides{max-width:900px;width:58%}}
+@media(min-width:2560px){body[data-market-page="catalog"] .tusne-results{gap:30px}}
+
 </style>
 <link rel="stylesheet" href="{{ asset('css/undc-market-home.css') }}?v={{ filemtime(public_path('css/undc-market-home.css')) }}">
 @if($isMarketHome ?? true)

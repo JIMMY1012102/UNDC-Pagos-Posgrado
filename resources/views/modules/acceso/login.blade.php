@@ -282,6 +282,13 @@ body[data-accessibility-color] .emerald-login .market-login-divider::after{backg
 @media(min-width:761px){
 .emerald-intro>.in1{position:relative;top:-24px}
 }
+
+.emerald-layout{max-width:var(--container-max,1440px)}
+.market-login-view .market-login-layout{width:min(calc(100% - 56px),var(--container-max,1440px));max-width:var(--container-max,1440px);margin-inline:auto}
+@media(min-width:1600px){.emerald-layout{gap:clamp(48px,4vw,72px)}.emerald-panel{max-width:500px}}
+@media(min-width:1920px){.emerald-layout{max-width:var(--container-max,1680px)}.emerald-panel{max-width:540px}.emerald-intro h1{font-size:clamp(48px,3.2vw,64px)}}
+@media(min-width:2560px){.emerald-panel{max-width:560px}}
+
 </style>
 <section class="screen visible emerald-login" data-screen="login" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>

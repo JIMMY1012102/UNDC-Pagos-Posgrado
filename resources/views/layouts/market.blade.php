@@ -3,6 +3,7 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="description" content="Tienda virtual de conceptos de Posgrado — Universidad Nacional de Cañete">
+<style>:root{--container-max:1440px}@media(min-width:1920px){:root{--container-max:1680px}}</style>
 <title>@yield('title', 'UNDC MARKET · Tienda virtual de pagos')</title>
 <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('logo-undc-64.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">

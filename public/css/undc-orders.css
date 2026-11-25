@@ -46,3 +46,6 @@ body.commerce-view > .site-header .top,
 body.commerce-view > .site-header .top-inner{overflow:visible}
 body.commerce-view > .site-header .account-menu[open]{z-index:2}
 body.commerce-view > .site-header .account-dropdown{z-index:3}
+
+@media(min-width:1600px){.orders-workspace{max-width:var(--container-max,1440px);margin-inline:auto}.orders-panel{padding:clamp(32px,2.5vw,44px)}}
+@media(min-width:1920px){.orders-workspace{max-width:var(--container-max,1680px)}}

@@ -172,6 +172,11 @@ body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-prog
 body.light-mode.market-orders-view:not([data-accessibility-color]) .payment-progress li[aria-current] span{background:#0a7a4f;color:#fff}
 body.light-mode.market-orders-view:not([data-accessibility-color]) .orders-footer{background:#062e22;color:#c3dfd3;border-color:#062e22;border-radius:18px;padding:14px 20px}
 
+
+.market-orders-view .top-inner,.market-orders-view main.wrap{max-width:var(--container-max,1440px)}
+@media(min-width:1600px){.market-orders-view .order-detail-grid{grid-template-columns:minmax(0,1fr) minmax(380px,410px);gap:36px}.market-orders-view .orders-workspace{max-width:var(--container-max,1440px);margin-inline:auto}}
+@media(min-width:1920px){.market-orders-view .top-inner,.market-orders-view main.wrap,.market-orders-view .orders-workspace{max-width:var(--container-max,1680px)}.market-orders-view .order-detail-grid{grid-template-columns:minmax(0,1fr) minmax(410px,460px);gap:44px}}
+
 </style>
 <div class="order-ready-glow" aria-hidden="true"></div><div class="order-ready-glow second" aria-hidden="true"></div>
 <div class="payment-preview orders-workspace">
