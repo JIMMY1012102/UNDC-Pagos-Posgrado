@@ -47,9 +47,9 @@
             </button>
           </form>
           <div class="quick">
-            <a href="/tienda/catalogo?q=matrícula">Matrícula ↗</a>
-            <a href="/tienda/catalogo?q=pensiones">Pensiones ↗</a>
-            <a href="/tienda/catalogo?q=constancias">Constancias ↗</a>
+            <a href="/tienda/catalogo?q=matrícula">Matrícula</a>
+            <a href="/tienda/catalogo?q=pensiones">Pensiones</a>
+            <a href="/tienda/catalogo?q=constancias">Constancias</a>
           </div>
         </div>
 
