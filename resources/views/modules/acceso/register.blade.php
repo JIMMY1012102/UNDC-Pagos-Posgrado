@@ -352,7 +352,7 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
   .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
   .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
   .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column;overflow:visible}
-  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
+  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
   .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
   .emerald-register .register-password-control{position:relative;z-index:3}
   .emerald-register .register-password-control .eye{position:relative;z-index:4;pointer-events:auto}
@@ -665,7 +665,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 }
 .emerald-register .register-step .register-password-control input {
   min-width: 0;
-  padding-right: 44px;
+  padding-right: 44px !important;
   border-radius: 9px;
 }
 .emerald-register .register-step .register-password-control input:autofill,
@@ -673,7 +673,7 @@ body.light-mode .emerald-register .password-help{color:#537e68}
 .emerald-register .register-step .register-password-control input:-webkit-autofill:hover,
 .emerald-register .register-step .register-password-control input:-webkit-autofill:focus {
   border-radius: 9px !important;
-  padding-right: 44px;
+  padding-right: 44px !important;
   background-clip: padding-box !important;
   box-shadow: inset 0 0 0 1000px #103f2e !important;
   -webkit-box-shadow: inset 0 0 0 1000px #103f2e !important;
