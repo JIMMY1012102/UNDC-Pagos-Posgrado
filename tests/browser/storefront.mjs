@@ -451,12 +451,19 @@ async function responsiveAccountPage(viewport, kind) {
       const contactOverflow=await contactGrid.evaluate(grid=>({
         selector:'.register-step[data-register-step="2"] .form-grid',
         overflowY:getComputedStyle(grid).overflowY,
+        wrapperOverflowY:getComputedStyle(grid.closest('.emerald-register-fields')).overflowY,
+        cardScrollHeight:grid.closest('.account-data-card').scrollHeight,
+        cardClientHeight:grid.closest('.account-data-card').clientHeight,
         scrollHeight:grid.scrollHeight,clientHeight:grid.clientHeight,
         overflow:grid.scrollHeight>grid.clientHeight+1,
         hasOverflow:grid.classList.contains('has-scroll-overflow')
       }));
       assert.equal(contactOverflow.overflowY,'auto',
         'El contenedor real de scroll móvil debe ser .form-grid: '+JSON.stringify(contactOverflow));
+      assert.equal(contactOverflow.wrapperOverflowY,'hidden',
+        '.emerald-register-fields no debe competir como segundo contenedor de scroll: '+JSON.stringify(contactOverflow));
+      assert.ok(contactOverflow.cardScrollHeight<=contactOverflow.cardClientHeight+1,
+        'La tarjeta no debe desplazar el formulario completo: '+JSON.stringify(contactOverflow));
       await contactGrid.evaluate(grid=>grid.scrollTo({top:grid.scrollHeight,behavior:'instant'}));
       await page.waitForFunction(()=>{
         const grid=document.querySelector('[data-register-step="2"] .form-grid');
