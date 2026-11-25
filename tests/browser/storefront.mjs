@@ -371,7 +371,8 @@ async function responsiveAccountPage(viewport, kind) {
           const bodyRect=rect(body), footerRect=rect(footer);
           const back=document.querySelector('[data-register-step]:not([hidden]) [data-register-back]');
           const next=document.querySelector('[data-register-step]:not([hidden]) [data-register-next],[data-register-step]:not([hidden]) button[type=submit]');
-          return {body:bodyRect,footer:footerRect,heading,progress,first,scrollHeight:body.scrollHeight,clientHeight:body.clientHeight,back:back?{...rect(back),whiteSpace:getComputedStyle(back).whiteSpace}:null,next:next?rect(next):null};
+          const strength=rect(document.querySelector('[data-register-step="3"] [data-password-strength]'));
+          return {body:bodyRect,footer:footerRect,heading,progress,first,strength,scrollTop:body.scrollTop,scrollHeight:body.scrollHeight,clientHeight:body.clientHeight,hasOverflow:body.classList.contains('has-scroll-overflow'),scrollAtEnd:body.classList.contains('scroll-at-end'),back:back?{...rect(back),whiteSpace:getComputedStyle(back).whiteSpace}:null,next:next?rect(next):null};
         });
         assert.ok(g.progress.top>=g.heading.bottom-1,'Stepper intersecta encabezado paso '+step+': '+JSON.stringify(g));
         assert.ok(g.first.top>=g.progress.bottom-1&&g.first.top-g.progress.bottom<=32,'El primer campo debe quedar debajo del stepper, sin solaparse y a <=32px en paso '+step+': '+JSON.stringify(g));
@@ -448,8 +449,12 @@ async function responsiveAccountPage(viewport, kind) {
       await noVerticalScroll(2);
       await page.locator('#account_email').focus();
       await page.locator('#account_line_1').focus();
+      assert.equal(await page.locator('.field-error:visible').count(),0,
+        'Tab hacia un campo aún no tocado no debe mostrar errores');
+      await page.locator('#account_email').click();
+      await page.locator('#account_line_1').focus();
       assert.match(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /obligatorio/i,
-        'El correo puede mostrar error al salir después de tocarlo');
+        'Un campo vacío tocado debe mostrar error al salir');
       await page.locator('[data-register-step="2"] [data-register-next]').click();
       assert.ok(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').isVisible(),
         'Continuar debe mantener la validación en línea');
@@ -471,12 +476,34 @@ async function responsiveAccountPage(viewport, kind) {
         'El botón ojo debe quedar dentro del contenedor del input');
       assert.equal(await page.locator('[data-password-strength]').isVisible(), true,
         'El indicador de fortaleza debe ser visible en Acceso');
+      assert.equal(await page.locator('.field-error:visible').count(),0,
+        'Entrar a Acceso no debe mostrar errores de contraseña sin interacción');
+      const accessGeometry=await page.evaluate(()=>{
+        const body=document.querySelector('[data-register-step="3"] .form-grid');
+        const strength=document.querySelector('[data-password-strength]').getBoundingClientRect();
+        const footer=document.querySelector('[data-register-step="3"] .register-step-actions').getBoundingClientRect();
+        return {scrollHeight:body.scrollHeight,clientHeight:body.clientHeight,overflowClass:body.classList.contains('has-scroll-overflow'),
+          strength:{top:strength.top,bottom:strength.bottom,height:strength.height},footer:{top:footer.top,bottom:footer.bottom},
+          gradientOpacity:getComputedStyle(body,'::after').opacity};
+      });
+      assert.ok(accessGeometry.scrollHeight<=accessGeometry.clientHeight+1,
+        'Acceso no debe tener scroll interno innecesario: '+JSON.stringify(accessGeometry));
+      assert.equal(accessGeometry.overflowClass,false,'El degradado no debe aparecer sin overflow real');
+      assert.ok(accessGeometry.strength.height>=18,'La altura del indicador de fortaleza debe estar reservada');
+      assert.ok(accessGeometry.strength.bottom<accessGeometry.footer.top,
+        'Fortaleza no debe intersectar los botones: '+JSON.stringify(accessGeometry));
+      assert.equal(accessGeometry.gradientOpacity,'0','El degradado debe estar oculto sin overflow');
+      const passwordInputStyle=await page.locator('#account_password').evaluate(el=>({paddingRight:getComputedStyle(el).paddingRight,borderRadius:getComputedStyle(el).borderRadius}));
+      assert.ok(parseFloat(passwordInputStyle.paddingRight)>=40,'El input debe reservar espacio para el ojo');
       await noVerticalScroll(3);
       await captureStep(3);
       const nextCardHeight = await page.locator('.account-data-card').evaluate(el => el.getBoundingClientRect().height);
       assert.ok(cardHeight > 0 && nextCardHeight > 0,
         'La tarjeta debe conservar dimensiones válidas en cada paso');
 
+      const autofillRules=await page.locator('style').evaluateAll(nodes=>nodes.map(node=>node.textContent).join('\n'));
+      assert.match(autofillRules, /:autofill/, 'Debe existir estilo de autofill Firefox');
+      assert.match(autofillRules, /:-webkit-autofill/, 'Debe existir estilo de autofill Chromium');
       await page.locator('#account_password').fill('Demo-password-2026');
       await page.locator('#account_password_confirmation').fill('Different-password-2026');
       await page.locator('[data-register-step="3"] button[type="submit"]').click();
