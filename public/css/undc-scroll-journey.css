@@ -37,7 +37,6 @@ button{font-family:inherit}
 .nav a{font:600 18px/1 'Inter Tight',sans-serif;text-decoration:none;display:flex;align-items:center;gap:8px}
 .nav a:hover{text-decoration:underline;text-underline-offset:6px}
 .tools{display:flex;align-items:center;gap:18px}
-.es{width:46px;height:46px;border-radius:12px;border:1px solid #c9d8ca;background:#fff;font:700 16px 'Inter Tight',sans-serif;color:#0b3b24}
 .cart{display:flex;align-items:center;gap:12px;height:52px;padding:0 24px 0 14px;border-radius:999px;background:#0b3b24;color:#fff;text-decoration:none;font:700 17px 'Inter Tight',sans-serif}
 .cart:hover{color:#fff;background:#14522f}
 .cart i{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-style:normal;font-size:15px}
@@ -343,12 +342,6 @@ button{font-family:inherit}
 .nav { gap: clamp(14px, 1.65vw, 24px); }
 .nav a { font-size: 14px; gap: 6px; }
 .tools { gap: 12px; }
-.es {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  font-size: 13px;
-}
 .cart {
   height: 42px;
   gap: 9px;
@@ -430,8 +423,7 @@ button{font-family:inherit}
   .brand b { font-size: 21px; }
   .logo { width: 36px; height: 36px; font-size: 17px; }
   .nav { display: none; }
-  .es { display: inline-flex; align-items: center; justify-content: center; }
-  .login span { display: inline; }
+.login span { display: inline; }
   .cart { height: 40px; font-size: 13px; padding-inline: 9px 12px; }
   .login { font-size: 13px; }
   .col { padding: 76px 20px 72px; }
@@ -457,8 +449,7 @@ button{font-family:inherit}
   .brand b { font-size: 17px; }
   .logo { width: 32px; height: 32px; border-radius: 9px; font-size: 15px; }
   .tools { gap: 7px; }
-  .es { width: 34px; height: 34px; font-size: 12px; }
-  .cart { height: 36px; gap: 6px; padding: 0 9px; font-size: 12px; }
+.cart { height: 36px; gap: 6px; padding: 0 9px; font-size: 12px; }
   .cart i { width: 21px; height: 21px; font-size: 11px; }
   .login { gap: 0; }
   .login span { display: none; }
@@ -504,3 +495,7 @@ button{font-family:inherit}
 #undc-track[data-scene="1"] .dots i:nth-child(1),#undc-track[data-scene="2"] .dots i:nth-child(2),#undc-track[data-scene="3"] .dots i:nth-child(3),#undc-track[data-scene="4"] .dots i:nth-child(4){background:#0b3b24;transform:scale(1.3)}
 @media(max-width:900px){.progin{padding:0 20px 16px}}
 @media(max-width:600px){.progin{padding:0 14px 14px}.dots{gap:7px}.dots i{width:6px;height:6px}}
+
+/* Tipografía solicitada para el titular y subtítulo del primer bloque. */
+.col.s1 .h1{font-family:'Inter Tight',sans-serif;font-style:normal;font-weight:800;text-transform:none;color:#0b3b24}
+.col.s1 .lead{font-size:14px}
