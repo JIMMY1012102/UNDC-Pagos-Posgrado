@@ -100,8 +100,8 @@ button{font-family:inherit}
 @keyframes nudge{0%,100%{translate:0 0}50%{translate:0 5px}}
 
 .below{position:relative;z-index:1;overflow-x:clip;background:linear-gradient(180deg,#f4f8f1 0,#eef5f1 30%,#f0f6f6 62%,#f4f8f1 100%)}
-.journey{position:relative;max-width:1200px;margin:0 auto;padding:130px 56px 0;box-sizing:border-box}
-.jsec{position:relative;max-width:1200px;margin:0 auto;padding:120px 56px 0;box-sizing:border-box}
+.journey{position:relative;max-width:var(--container-max,1440px);margin:0 auto;padding:130px 56px 0;box-sizing:border-box}
+.jsec{position:relative;max-width:var(--container-max,1440px);margin:0 auto;padding:120px 56px 0;box-sizing:border-box}
 .orb{position:absolute;width:560px;height:560px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(213,242,58,.3),rgba(213,242,58,0) 66%);translate:0 calc(var(--c,0) * 140px)}
 .orb.g{background:radial-gradient(circle,rgba(120,190,160,.28),rgba(120,190,160,0) 66%);translate:0 calc(var(--c,0) * -110px)}
 
@@ -278,14 +278,14 @@ button{font-family:inherit}
 .band .b-ghost{background:transparent;border-color:rgba(255,255,255,.5);color:#fff}
 .band .b-ghost:hover{background:rgba(255,255,255,.12);color:#fff}
 .foot{margin-top:110px;background:#0b3b24;color:#d6e6d9}
-.footin{max-width:1200px;margin:0 auto;padding:56px 56px 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px 48px}
+.footin{max-width:var(--container-max,1440px);margin:0 auto;padding:56px 56px 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px 48px}
 .footin .brand{color:#fff}
 .footin .logo{background:#d5f23a;color:#0b3b24}
 .footin p{margin:16px 0 0;max-width:380px;font:400 15px/1.6 Inter,sans-serif;color:#bcd2c4}
 .flinks{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start}
 .flinks a{color:#fff;font:600 16px 'Inter Tight',sans-serif;text-decoration:none}
 .flinks a:hover{text-decoration:underline;color:#d5f23a}
-.status{max-width:1200px;margin:0 auto;padding:0 56px 44px;box-sizing:border-box}
+.status{max-width:var(--container-max,1440px);margin:0 auto;padding:0 56px 44px;box-sizing:border-box}
 .status div{display:inline-flex;align-items:center;gap:12px;padding:12px 18px;border-radius:14px;background:rgba(213,242,58,.12);border:1px solid rgba(213,242,58,.35);font:500 14px/1.5 Inter,sans-serif;color:#e4f2c0}
 .status i{width:8px;height:8px;flex:none;border-radius:50%;background:#d5f23a;animation:pulse 2s ease-in-out infinite}
 
