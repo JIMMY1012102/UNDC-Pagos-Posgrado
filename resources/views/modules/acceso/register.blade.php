@@ -752,8 +752,9 @@ document.querySelectorAll('[data-toggle-password]').forEach(function(button){
       if(touchedFields.has(field))updateFieldError(field);
     });
     field.addEventListener('change',()=>{if(touchedFields.has(field))updateFieldError(field);});
+    field.addEventListener('focus',()=>{field.dataset.registerFocused='true';});
     field.addEventListener('blur',()=>{
-      if(field.value.trim()!=='')touchedFields.add(field);
+      if(field.dataset.registerFocused==='true')touchedFields.add(field);
       if(touchedFields.has(field))updateFieldError(field);
     });
   });
