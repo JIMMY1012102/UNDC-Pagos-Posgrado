@@ -195,3 +195,40 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - Se adaptan los servicios de catálogo, carrito, perfil, pedidos y pagos; se conservan alias de salida en la consulta SQL de solo lectura SISPAGOS.
 - Se agregó una prueba de columnas y se amplió el fixture MariaDB para probar rollback/upgrade con filas existentes, incluyendo la columna generada del carrito. La verificación final depende de todos los jobs CI.
 - Referencia normativa: [diccionario físico de columnas](./modelo-datos/DICCIONARIO_COLUMNAS.md). Despliegue Oracle sigue manual y sujeto a autorización; ver [DESPLIEGUE.md](./DESPLIEGUE.md).
+
+
+## 6. Registro en tres pasos sin scroll (25 de noviembre de 2026)
+
+- Se inició la rama `feat/registro-tres-pasos-sin-scroll` desde `main`, siguiendo `AGENTS.md`, `docs/DESARROLLO_LOCAL.md`, `docs/ARQUITECTURA.md` y `docs/MODULOS.md`.
+- Se reorganiza `/tienda/registro` en tres etapas: Identidad; Contacto y ubicación; Acceso. Se conservan los nombres de campos existentes, `password_confirmation`, validación de servidor y valores `old()`; no se modifican controladores ni esquema.
+- La vista contiene los estilos del registro y el JavaScript del stepper inline; no se encontró una hoja de estilos o archivo JS separado que gobierne esta pantalla. Se compactó el layout de escritorio a `100dvh`, con tarjeta de altura estable, validación inline y vista móvil adaptable.
+- Se añadió cobertura Feature para los tres pasos y persistencia de valores antiguos; la prueba Chromium recorre los tres pasos, comprueba errores inline, altura estable y ausencia de scroll vertical en 1366×600, 1366×768 y 1920×1080.
+- El workflow de Chromium publica capturas de los tres pasos en 1366×768 como artefacto `registro-tres-pasos-1366x768`.
+- Estado al registrar este avance: cambios preparados en rama y pendientes de ejecución CI/validación visual. No fusionar a `main` sin aprobación expresa.
+
+
+### Ajustes tras primera ejecución Chromium (25 de noviembre de 2026)
+
+- El job Chromium identificó que el formulario no estaba usando un contenedor flex real: el `form` impedía que la altura disponible se distribuyera entre los pasos, y la fila de acciones se superponía al control de mostrar contraseña.
+- Se corrigió la cadena flex del formulario y sus pasos, se dio prioridad de apilamiento al botón de mostrar/ocultar contraseña y se fijó una altura estable para la tarjeta móvil con scroll interno permitido.
+- La primera ejecución también registró un desbordamiento horizontal en la pantalla de perfil a 375 px, fuera del alcance de esta tarea; se verificará si persiste en la siguiente ejecución sin modificar esa pantalla.
+- Pendiente repetir Chromium y confirmar que el job completo queda verde. El PR continúa abierto; no se ha fusionado.
+
+
+### Diagnóstico y corrección de Chromium en móvil (25 de noviembre de 2026)
+
+- En el run #760, el primer fallo real fue `tests/browser/storefront.mjs:385`: a 375 px el correo aparecía visible durante el paso 1. La causa fue una regla CSS de escritorio que ocultaba `[hidden]` ubicada dentro de `@media (min-width:768px)`, mientras que el bloque móvil redefinía `.register-step` con `display:flex` sin restaurar la ocultación.
+- El mismo defecto permitía mostrar fieldsets inactivos en móvil y era consistente con el overflow horizontal secundario del test de perfil a 375 px (`scrollWidth:563`). Las capturas de los tres pasos a 1366×768 se revisaron y muestran la tarjeta completa dentro del viewport.
+- Se movió la regla `.register-step[hidden]{display:none!important}` al ámbito global de la vista, para que el atributo `hidden` prevalezca en todos los tamaños. No se modifican selectores del test, `name=""`, validaciones backend ni controladores.
+- PR #145 sigue abierto y sin merge; pendiente nueva ejecución completa de Chromium y revisión del artefacto.
+
+
+### Diagnóstico del run #763 y ajuste del overflow móvil (25 de noviembre de 2026)
+
+- El log completo del paso Chromium registró dos fallos a 375×812: `register responsive` y el fixture llamado `profile responsive`, ambos con `scrollWidth=563` frente a viewport 375 (188 px de exceso). Las aserciones son `tests/browser/storefront.mjs:483-485`.
+- El primer error de #760 (correo visible en el paso 1) ya no aparece en #763. El overflow sí persiste y ahora también aparece durante la comprobación register. El run #747 de main, commit `1154001a18dcada22c788c3d067824e9371685ee`, tiene `PASS register responsive 375px` y `PASS profile responsive 375px`; por tanto, no estaba presente en esa línea base.
+- El test denominado profile no visita la ruta real de perfil: carga `/tienda/registro` y transforma el DOM del registro en un shell de perfil para probar geometría. Su fallo es una regresión del CSS/DOM de registro compartido con ese fixture, no evidencia directa de que la pantalla real de perfil esté rota.
+- Causa identificada: el bloque móvil nuevo cambiaba `.emerald-register` de su `overflow:clip` base a `overflow:visible`. Esto dejaba que los elementos decorativos/posicionados que sobresalen del layout contribuyeran al ancho de desplazamiento del documento. La tarjeta y el layout medidos sí caben en el viewport (287 px y 319 px), pero el documento llega a 563 px.
+- Se conserva el scroll vertical móvil y se recorta únicamente el eje horizontal: `overflow-x:clip; overflow-y:visible` en el contenedor `.emerald-register`. La regla `[hidden]` permanece acotada a `.emerald-register .register-step`; no hay selectores globales genéricos nuevos.
+- No se alteran pruebas, tolerancias, retries, nombres de campos, controladores ni validación backend. Las capturas de #763 son tres PNG de 1366×768 (pasos 1, 2 y 3), inspeccionadas visualmente.
+- No se pudo ejecutar Chromium localmente en este entorno; la verificación requerida queda pendiente del próximo run completo de CI. No declarar corregido hasta que los cuatro jobs estén verdes.

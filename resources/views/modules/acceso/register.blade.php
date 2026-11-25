@@ -296,6 +296,126 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 @media(max-width:1000px) and (min-width:761px){}
 @media(max-width:760px){.emerald-register .emerald-panel{flex:auto;width:100%;max-width:none}.emerald-register .form-grid{grid-template-columns:minmax(0,1fr);gap:12px}.emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}.emerald-register .market-login-card{padding:26px 20px}.emerald-register .market-login-heading{margin-bottom:18px}.emerald-register .register-step-actions{flex-direction:column-reverse;align-items:stretch}.emerald-register .register-step-actions .back{justify-content:center}}
 @media(min-width:761px) and (max-height:700px){.emerald-register .market-login-card{padding:22px 26px}.emerald-register .form-grid{gap:10px 14px}.emerald-register .field input,.emerald-register .field select,.emerald-register .register-password-control{height:42px}}
+
+/* El atributo hidden debe prevalecer también cuando el layout móvil usa display:flex. */
+.emerald-register .register-step[hidden]{display:none!important}
+
+/* Registro en tres pasos: altura constante y composición sin scroll en escritorio. */
+@media (min-width:768px){
+  body.market-login-view{height:100dvh;overflow:hidden}
+  .emerald-register{height:100dvh;min-height:0;overflow:hidden}
+  .emerald-register .emerald-layout{
+    height:100dvh;min-height:0;overflow:hidden;align-items:center!important;
+    padding:clamp(8px,1.8vh,18px) clamp(20px,2.2vw,36px)!important;
+    gap:clamp(24px,3vw,52px)
+  }
+  .emerald-register .emerald-intro{
+    min-height:0;align-self:stretch!important;justify-content:space-between!important;
+    gap:8px!important;padding-block:clamp(4px,1vh,12px)
+  }
+  .emerald-register .emerald-intro>.in1{top:0}
+  .emerald-register .emerald-intro .stage{
+    height:clamp(230px,42dvh,430px)!important;min-height:0;flex:0 1 auto;
+    margin:0!important;overflow:visible
+  }
+  .emerald-register .emerald-intro .rig{
+    inset:-55px -40px;transform:scale(clamp(.52,calc(.40 + .00013 * 100vw),.68)) rotateX(16deg) rotateY(-6deg)!important
+  }
+  .emerald-register .emerald-intro>h1{
+    align-self:center;margin:0!important;font-size:clamp(30px,2.7vw,48px)!important;
+    line-height:1.04!important;text-align:center
+  }
+  .emerald-register .emerald-panel{
+    height:min(calc(100dvh - 28px),700px);max-height:calc(100dvh - 28px);
+    min-height:0;display:flex;flex-direction:column;align-self:center
+  }
+  .emerald-register .emerald-toolbar{flex:0 0 auto;margin:0 0 8px}
+  .emerald-register .emerald-toolbar a{min-height:38px;padding:7px 13px}
+  .emerald-register .emerald-panel>.gb{flex:1;min-height:0;display:flex}
+  .emerald-register .account-data-card{
+    width:100%;height:100%;min-height:0;display:flex;flex-direction:column;
+    overflow:hidden;padding:clamp(14px,2.2vh,22px) clamp(18px,2vw,26px)!important
+  }
+  .emerald-register .market-login-heading{
+    flex:0 0 auto;display:flex;flex-direction:row;align-items:center;justify-content:center;
+    gap:10px;margin:0 0 8px!important;text-align:left
+  }
+  .emerald-register .market-login-symbol{
+    width:38px!important;height:38px!important;flex:0 0 38px;border-radius:12px!important
+  }
+  .emerald-register .market-login-symbol svg{width:21px!important;height:21px!important}
+  .emerald-register .market-login-heading h1{font-size:clamp(20px,2vw,24px)!important;line-height:1.15;margin:0 0 2px!important}
+  .emerald-register .market-login-heading p{font-size:12px!important;line-height:1.2;min-height:0;white-space:nowrap}
+  .emerald-register .register-progress{flex:0 0 auto;margin:0 0 8px;font-size:11px}
+  .emerald-register .register-progress-dots{gap:8px}
+  .emerald-register .register-progress-dots span{width:7px;height:7px}
+  .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
+  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
+  .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column;overflow:visible}
+  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
+  .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
+  .emerald-register .register-password-control{position:relative;z-index:3}
+  .emerald-register .register-password-control .eye{position:relative;z-index:4;pointer-events:auto}
+  .emerald-register .register-step[hidden]{display:none!important}
+  .emerald-register .emerald-register-fields h2{margin:0 0 8px;font-size:12px}
+  .emerald-register .form-grid{gap:10px 12px}
+  .emerald-register .field label{margin:0 0 4px;font-size:11px;line-height:1.2}
+  .emerald-register .field input,.emerald-register .field select,
+  .emerald-register .register-password-control{height:40px;padding:0 11px;border-radius:11px;font-size:13px}
+  .emerald-register .register-phone-row{gap:12px}
+  .emerald-register .register-password-control{padding-right:4px}
+  .emerald-register .register-password-control .eye{width:34px;height:34px;flex-basis:34px}
+  .emerald-register .register-password-control .eye svg{width:18px;height:18px}
+  .emerald-register .password-help{display:block;margin:3px 0 0;color:#a9d9c1;font-size:10px;line-height:1.1}
+  .emerald-register .register-step-actions{flex:0 0 auto;margin-top:auto;padding-top:10px;gap:10px}
+  .emerald-register .register-step-actions .back{min-height:40px;margin:0;padding:7px 12px}
+  .emerald-register .register-step-next,.emerald-register .market-login-submit{
+    height:42px;min-height:42px;border-radius:12px;font-size:14px
+  }
+  .emerald-register .market-login-register{flex:0 0 auto;margin:8px 0 0;font-size:12px}
+  .emerald-register .field-error{display:block;margin:3px 0 0;color:#ffb4a8;font-size:10px;line-height:1.15}
+  .emerald-register .field [aria-invalid="true"],
+  .emerald-register .register-password-control:has([aria-invalid="true"]){border-color:#ff8d80}
+}
+@media(max-width:767px){
+  body.market-login-view{height:auto;min-height:100dvh;overflow:auto}
+  .emerald-register{height:auto;min-height:100dvh;overflow-x:clip;overflow-y:visible}
+  .emerald-register .emerald-layout{
+    height:auto;min-height:100dvh;overflow:visible;flex-direction:column;
+    align-items:stretch;padding:18px 14px 28px!important;gap:14px
+  }
+  .emerald-register .emerald-intro{flex:auto!important;width:100%;gap:8px!important}
+  .emerald-register .emerald-intro .stage{display:none!important}
+  .emerald-register .emerald-intro>h1{font-size:26px!important;text-align:left}
+  .emerald-register .emerald-panel{height:auto;max-height:none;min-height:0;width:100%;max-width:none}
+  .emerald-register .emerald-toolbar{margin-bottom:8px}
+  .emerald-register .emerald-panel>.gb{display:block;overflow:hidden}
+  .emerald-register .account-data-card{display:flex;flex-direction:column;height:min(620px,calc(100dvh - 150px));min-height:440px;max-height:calc(100dvh - 150px);overflow-y:auto;padding:24px 18px!important}
+  .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
+  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
+  .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column}
+  .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
+  .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
+  .emerald-register .register-password-control{position:relative;z-index:3}
+  .emerald-register .register-password-control .eye{position:relative;z-index:4;pointer-events:auto}
+  .emerald-register .market-login-heading{margin-bottom:16px!important}
+  .emerald-register .market-login-symbol{width:42px;height:42px}
+  .emerald-register .market-login-heading h1{font-size:24px}
+  .emerald-register .register-progress{margin-bottom:14px}
+  .emerald-register .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .emerald-register .field label{margin-bottom:5px;font-size:12px}
+  .emerald-register .field input,.emerald-register .field select,
+  .emerald-register .register-password-control{height:42px;font-size:14px}
+  .emerald-register .register-step-actions{margin-top:18px}
+  .emerald-register .register-step-actions .back{margin:0}
+  .emerald-register .market-login-register{margin-top:14px}
+}
+@media(max-width:480px){
+  .emerald-register .form-grid{grid-template-columns:minmax(0,1fr)}
+  .emerald-register .register-phone-row{grid-template-columns:minmax(100px,.38fr) minmax(0,1fr);gap:10px}
+}
+body.light-mode .emerald-register .password-help{color:#537e68}
+
 </style>
 <section class="screen visible emerald-login emerald-register" data-screen="register" aria-labelledby="marketLoginTitle">
 <div aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div><div class="gridbg"></div></div>
@@ -394,84 +514,218 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
 <h1 class="sora in2" style="margin:0;font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-1.5px">Tus trámites,<br><span style="background:linear-gradient(90deg,#6ee7b7,#b6f36b);-webkit-background-clip:text;background-clip:text;color:transparent">a un solo clic.</span></h1>
 </section>
 
-<section class="emerald-panel emerald-register-panel"><div class="emerald-toolbar"><a href="/tienda">← Regresar</a></div><div class="gb in3"><div class="market-login-card account-data-card"><div class="market-login-heading"><span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Ingresa tus datos personales</p></div></div>@include('modules.acceso.partials.errors')<form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())'>@csrf
-<div class="register-progress" data-register-progress aria-live="polite"><span data-register-progress-label>Paso 1 de 2</span><span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span></span></div>
-<div class="emerald-register-fields">
-<fieldset class="register-step" data-register-step="1"><h2>Datos personales y de contacto</h2><div class="form-grid"><div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div><div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div></div><div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div></fieldset>
-<fieldset class="register-step" data-register-step="2"><h2>Dirección y acceso</h2><div class="form-grid"><div class="register-address-fields" data-register-address-fields></div><div class="field"><label for="account_password">Contraseña (mínimo 12 caracteres)</label><div class="register-password-control"><input id="account_password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div><div class="field"><label for="account_password_confirmation">Repite tu contraseña</label><div class="register-password-control"><input id="account_password_confirmation" name="password_confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><button class="eye" type="button" data-toggle-password="account_password_confirmation" aria-controls="account_password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false">◉</button></div></div></div><div class="register-step-actions"><button type="button" class="back" data-register-back>← Atrás</button><button type="submit" class="btn market-login-submit">Crear cuenta y continuar →</button></div></fieldset>
-</div></form><div class="market-login-register"><span>¿Ya tienes una cuenta?</span><a href="{{ route('tienda.login') }}">Inicia sesión</a></div></div></div></section></div></section><script>
-document.querySelectorAll('[data-toggle-password]').forEach(function (button) {button.addEventListener('click', function () {const input = document.getElementById(this.dataset.togglePassword);const show = input.type === 'password';input.type = show ? 'text' : 'password';this.setAttribute('aria-pressed', String(show));this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');});});
-(function () {
- const form=document.querySelector('[data-register-form]');
- if(!form)return;
- const card=form.closest('.account-data-card');
- const steps=[...form.querySelectorAll('[data-register-step]')];
- const stepOne=steps[0],stepTwo=steps[1];
- const progress=form.querySelector('[data-register-progress-label]');
- const dots=form.querySelectorAll('.register-progress-dots span');
- const subtitle=card.querySelector('[data-register-subtitle]');
- const addressTarget=form.querySelector('[data-register-address-fields]');
- const addressNames=['line_1','line_2','city','state','country'];
- addressNames.forEach(name=>{
-  const input=form.querySelector('[name="'+name+'"]');
-  const field=input&&input.closest('.field');
-  if(field)addressTarget.append(field);
- });
- const country=form.querySelector('#account_phone_country_code');
- const phone=form.querySelector('#account_phone');
- if(country&&phone){
-  const countryField=country.closest('.field'),phoneField=phone.closest('.field');
-  const phoneRow=document.createElement('div');
-  phoneRow.className='register-phone-row';
-  countryField.classList.add('register-country-field');
-  phoneRow.append(countryField,phoneField);
-  const grid=form.querySelector('[data-register-profile-fields]');
-  grid.after(phoneRow);
- }
- const allFields=[...form.querySelectorAll('input,select,textarea')];
- allFields.forEach(field=>{field.dataset.registerInitiallyRequired=field.required?'true':'false';});
- function showStep(number,moveFocus=true){
-  steps.forEach(step=>{
-   const active=Number(step.dataset.registerStep)===number;
-   step.hidden=!active;
-   step.setAttribute('aria-hidden',String(!active));
-   step.querySelectorAll('input,select,textarea').forEach(field=>{
-    field.required=active&&field.dataset.registerInitiallyRequired==='true';
-   });
+
+<section class="emerald-panel emerald-register-panel">
+  <div class="emerald-toolbar"><a href="{{ route('tienda.login') }}">← Regresar</a></div>
+  <div class="gb in3">
+    <div class="market-login-card account-data-card">
+      <div class="market-login-heading">
+        <span class="market-login-symbol"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+        <div><h1 id="marketLoginTitle" tabindex="-1">Crea tu cuenta</h1><p data-register-subtitle>Completa tus datos para crear tu cuenta.</p></div>
+      </div>
+      @include('modules.acceso.partials.errors')
+      <form method="post" action="{{ route('tienda.registro.store') }}" data-register-form data-error-fields='@json($errors->keys())' data-error-messages='@json($errors->messages())'>
+        @csrf
+        <div class="register-progress" data-register-progress aria-live="polite">
+          <span data-register-progress-label>Paso 1 de 3</span>
+          <span class="register-progress-dots" aria-hidden="true"><span aria-current="step"></span><span></span><span></span></span>
+        </div>
+        <div class="emerald-register-fields">
+          <fieldset class="register-step" data-register-step="1">
+            <h2>Identidad</h2>
+            <div class="form-grid">
+              <div class="register-profile-fields" data-register-profile-fields>@include('modules.acceso.partials.profile-fields')</div>
+              <div class="field"><label for="account_email">Correo electrónico</label><input id="account_email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" maxlength="254" required></div>
+            </div>
+            <div class="register-step-actions"><button type="button" class="btn register-step-next" data-register-next>Continuar →</button></div>
+          </fieldset>
+          <fieldset class="register-step" data-register-step="2" hidden>
+            <h2>Contacto y ubicación</h2>
+            <div class="form-grid" data-register-contact-grid></div>
+            <div class="register-step-actions">
+              <button type="button" class="back" data-register-back>← Atrás</button>
+              <button type="button" class="btn register-step-next" data-register-next>Continuar →</button>
+            </div>
+          </fieldset>
+          <fieldset class="register-step" data-register-step="3" hidden>
+            <h2>Acceso</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="account_password">Contraseña</label>
+                <div class="register-password-control">
+                  <input id="account_password" name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+                  <button class="eye" type="button" data-toggle-password="account_password" aria-controls="account_password" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <small class="password-help">Mínimo 12 caracteres</small>
+              </div>
+              <div class="field">
+                <label for="account_password_confirmation">Confirmar contraseña</label>
+                <div class="register-password-control">
+                  <input id="account_password_confirmation" name="password_confirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+                  <button class="eye" type="button" data-toggle-password="account_password_confirmation" aria-controls="account_password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+              </div>
+            </div>
+            <div class="register-step-actions">
+              <button type="button" class="back" data-register-back>← Atrás</button>
+              <button type="submit" class="btn market-login-submit">Crear cuenta</button>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+      <div class="market-login-register"><span>¿Ya tienes una cuenta?</span><a href="{{ route('tienda.login') }}">Inicia sesión</a></div>
+    </div>
+  </div>
+</section></div></section><script>
+document.querySelectorAll('[data-toggle-password]').forEach(function(button){
+  button.addEventListener('click',function(){
+    const input=document.getElementById(this.dataset.togglePassword);
+    const show=input.type==='password';
+    input.type=show?'text':'password';
+    this.setAttribute('aria-pressed',String(show));
+    this.setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña');
   });
-  progress.textContent='Paso '+number+' de 2';
-  dots.forEach((dot,index)=>{if(index===number-1)dot.setAttribute('aria-current','step');else dot.removeAttribute('aria-current');});
-  subtitle.textContent=number===1?'Ingresa tus datos personales':'Define tu acceso.';
-  if(moveFocus){
-   const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
-   if(first)first.focus({preventScroll:true});
-   card.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+});
+(function(){
+  const form=document.querySelector('[data-register-form]');
+  if(!form)return;
+  form.noValidate=true;
+  const card=form.closest('.account-data-card');
+  const steps=[...form.querySelectorAll('[data-register-step]')];
+  const progress=form.querySelector('[data-register-progress-label]');
+  const dots=form.querySelectorAll('.register-progress-dots span');
+  const subtitle=card.querySelector('[data-register-subtitle]');
+  const contactGrid=form.querySelector('[data-register-contact-grid]');
+  const addressNames=['line_1','line_2','city','state','country'];
+  const byName=name=>form.querySelector('[name="'+name+'"]');
+  const phoneCountry=byName('phone_country_code');
+  const phone=byName('phone');
+  if(phoneCountry&&phone){
+    const phoneRow=document.createElement('div');
+    phoneRow.className='register-phone-row';
+    phoneRow.append(phoneCountry.closest('.field'),phone.closest('.field'));
+    contactGrid.append(phoneRow);
   }
- }
- form.querySelector('[data-register-next]').addEventListener('click',()=>{
-  if(!stepOne.checkValidity()){stepOne.reportValidity();return;}
-  showStep(2);
- });
- form.querySelector('[data-register-back]').addEventListener('click',()=>showStep(1));
- form.addEventListener('submit',event=>{
-  showStep(1,false);
-  if(!stepOne.checkValidity()){
-   event.preventDefault();
-   showStep(1);
-   stepOne.reportValidity();
-   return;
+  const email=byName('email');
+  if(email)contactGrid.append(email.closest('.field'));
+  addressNames.forEach(name=>{
+    const field=byName(name)?.closest('.field');
+    if(field)contactGrid.append(field);
+  });
+  const allFields=[...form.querySelectorAll('input,select,textarea')];
+  allFields.forEach(field=>{
+    field.dataset.registerInitiallyRequired=field.required?'true':'false';
+    field.addEventListener('input',()=>{
+      if(field.id==='account_password')updateFieldError(byName('password_confirmation'));
+      updateFieldError(field);
+    });
+    field.addEventListener('change',()=>updateFieldError(field));
+  });
+  function updateFieldError(field){
+    if(!field)return;
+    if(field.id==='account_password_confirmation'){
+      const password=byName('password')?.value||'';
+      field.setCustomValidity(field.value&&field.value!==password?'Las contraseñas no coinciden.':'');
+    }
+    const wrapper=field.closest('.field');
+    if(!wrapper)return;
+    let error=wrapper.querySelector('.field-error');
+    const message=field.validity.valid?'':(
+      field.validity.valueMissing?'Este campo es obligatorio.':
+      field.validity.typeMismatch?'Ingresa un correo electrónico válido.':
+      field.validity.tooShort?'Debe tener al menos '+field.minLength+' caracteres.':
+      field.validationMessage||'Revisa este campo.'
+    );
+    if(message){
+      if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';error.setAttribute('aria-live','polite');wrapper.append(error);}
+      error.textContent=message;
+      field.setAttribute('aria-invalid','true');
+      field.setAttribute('aria-describedby',error.id);
+    }else{
+      error?.remove();
+      field.removeAttribute('aria-invalid');
+      field.removeAttribute('aria-describedby');
+    }
   }
-  showStep(2,false);
-  if(!stepTwo.checkValidity()){
-   event.preventDefault();
-   showStep(2);
-   stepTwo.reportValidity();
+  function validateStep(step){
+    let firstInvalid=null;
+    step.querySelectorAll('input,select,textarea').forEach(field=>{
+      updateFieldError(field);
+      if(!field.validity.valid&&!firstInvalid)firstInvalid=field;
+    });
+    if(firstInvalid)firstInvalid.focus({preventScroll:true});
+    return !firstInvalid;
   }
- });
- const errorKeys=JSON.parse(form.dataset.errorFields||'[]');
- const firstError=errorKeys[0];
- const stepTwoKeys=["line_1","line_2","city","state","country","password","password_confirmation"];
- showStep(stepTwoKeys.includes(firstError)?2:1,false);
+  function showStep(number,moveFocus=true){
+    steps.forEach((step,index)=>{
+      const active=index===number-1;
+      step.hidden=!active;
+      step.setAttribute('aria-hidden',String(!active));
+      step.querySelectorAll('input,select,textarea').forEach(field=>{
+        field.required=active&&field.dataset.registerInitiallyRequired==='true';
+      });
+    });
+    progress.textContent='Paso '+number+' de 3';
+    dots.forEach((dot,index)=>{
+      if(index===number-1)dot.setAttribute('aria-current','step');
+      else dot.removeAttribute('aria-current');
+    });
+    subtitle.textContent=['Identidad','Contacto y ubicación','Acceso'][number-1];
+    if(moveFocus){
+      const first=steps[number-1].querySelector('input:not([type="hidden"]),select,textarea');
+      first?.focus({preventScroll:true});
+    }
+  }
+  form.querySelectorAll('[data-register-next]').forEach((button,index)=>{
+    button.addEventListener('click',()=>{
+      if(validateStep(steps[index]))showStep(index+2);
+    });
+  });
+  form.querySelectorAll('[data-register-back]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const current=steps.findIndex(step=>!step.hidden);
+      showStep(Math.max(1,current));
+    });
+  });
+  form.addEventListener('submit',event=>{
+    for(let index=0;index<steps.length;index++){
+      const step=steps[index];
+      step.querySelectorAll('input,select,textarea').forEach(field=>{
+        field.required=field.dataset.registerInitiallyRequired==='true';
+      });
+      if(!validateStep(step)){
+        event.preventDefault();
+        showStep(index+1);
+        validateStep(step);
+        return;
+      }
+    }
+  });
+  const errorKeys=JSON.parse(form.dataset.errorFields||'[]');
+  const errorMessages=JSON.parse(form.dataset.errorMessages||'{}');
+  const groups=[
+    ['first_names','last_names','document_type','document_number'],
+    ['phone_country_code','phone','email','contact_email','line_1','line_2','city','state','country'],
+    ['password','password_confirmation']
+  ];
+  const firstError=errorKeys[0];
+  const firstErrorStep=groups.findIndex(group=>group.includes(firstError));
+  const initialStep=firstErrorStep<0?1:firstErrorStep+1;
+  errorKeys.forEach(key=>{
+    const field=byName(key);
+    const message=errorMessages[key]?.[0];
+    if(field&&message){
+      const wrapper=field.closest('.field');
+      if(wrapper){
+        let error=wrapper.querySelector('.field-error');
+        if(!error){error=document.createElement('span');error.className='field-error';error.id=field.id+'-error';wrapper.append(error);}
+        error.textContent=message;
+        field.setAttribute('aria-invalid','true');
+        field.setAttribute('aria-describedby',error.id);
+      }
+    }
+  });
+  showStep(initialStep,false);
 })();
 </script>
 @endsection
