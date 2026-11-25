@@ -33,11 +33,11 @@ class CartApiTest extends TestCase
             ['id_concepto' => 13, 'codigo_concepto' => 'OCULTO', 'concepto' => 'No visible', 'costo' => 10],
         ]);
         DB::table('tienda_configuracion_oficinas')->insert([
-            'legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalog_enabled' => 1,
+            'legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalogo_habilitado' => 1,
         ]);
         DB::table('tienda_conceptos_catalogo')->insert([
-            ['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'publicado', 'is_published' => 1],
-            ['id' => 102, 'legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'is_published' => 0],
+            ['id' => 101, 'legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'publicado', 'esta_publicado' => 1],
+            ['id' => 102, 'legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'esta_publicado' => 0],
         ]);
     }
 
@@ -102,7 +102,7 @@ class CartApiTest extends TestCase
     {
         $token = $this->postJson('/api/v1/tienda/carritos')->json('data.token');
         DB::table('tienda_carritos')->where('token_hash', hash('sha256', $token))
-            ->update(['expires_at' => now()->subMinute()]);
+            ->update(['vence_en' => now()->subMinute()]);
         $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
     }
     public function test_withdrawn_concept_keeps_cart_line_without_a_stale_reference_price(): void
@@ -112,7 +112,7 @@ class CartApiTest extends TestCase
         $this->withToken($token)->postJson('/api/v1/tienda/carritos/actual/items', [
             'catalog_item_id' => 101, 'quantity' => 1,
         ])->assertOk();
-        DB::table('tienda_conceptos_catalogo')->where('id', 101)->update(['is_published' => false]);
+        DB::table('tienda_conceptos_catalogo')->where('id', 101)->update(['esta_publicado' => false]);
         $this->withToken($token)->getJson('/api/v1/tienda/carritos/actual')
             ->assertOk()->assertJsonCount(1, 'data.items')
             ->assertJsonPath('data.items.0.name', null)
@@ -162,7 +162,7 @@ class CartApiTest extends TestCase
         $first = User::factory()->create();
         $second = User::factory()->create();
         $firstCart = $this->ownedCart($first);
-        $line = DB::table('tienda_detalles_carrito')->where('cart_id', $firstCart['cart']['id'])->value('id');
+        $line = DB::table('tienda_detalles_carrito')->where('carrito_id', $firstCart['cart']['id'])->value('id');
         $this->actingAs($second)->postJson('/api/v1/tienda/carritos/actual/items', [
             'catalog_item_id' => 101, 'quantity' => 1, 'user_id' => $first->id,
             'cart_id' => $firstCart['cart']['id'],
@@ -179,13 +179,13 @@ class CartApiTest extends TestCase
         $created = $this->ownedCart($buyer);
         $this->actingAs($buyer);
         foreach (['expired', 'converted'] as $status) {
-            DB::table('tienda_carritos')->where('id', $created['cart']['id'])->update(['status' => $status]);
+            DB::table('tienda_carritos')->where('id', $created['cart']['id'])->update(['estado' => $status]);
             $this->postJson('/api/v1/tienda/carritos/actual/items', [
                 'catalog_item_id' => 101, 'quantity' => 1,
             ])->assertNotFound();
         }
         DB::table('tienda_carritos')->where('id', $created['cart']['id'])
-            ->update(['status' => 'active', 'expires_at' => now()->subMinute()]);
+            ->update(['estado' => 'active', 'vence_en' => now()->subMinute()]);
         $this->getJson('/api/v1/tienda/carritos/actual')->assertNotFound();
         $this->deleteJson('/api/v1/tienda/carritos/actual/items/1')->assertNotFound();
     }

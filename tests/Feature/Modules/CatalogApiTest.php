@@ -38,13 +38,13 @@ class CatalogApiTest extends TestCase
             ['id_concepto' => 13, 'codigo_concepto' => 'NO-PUBLICADO', 'concepto' => 'Concepto oculto', 'costo' => 25.00],
         ]);
         DB::table('tienda_configuracion_oficinas')->insert([
-            ['legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalog_enabled' => 1],
-            ['legacy_office_id' => 8, 'slug' => 'inactiva', 'catalog_enabled' => 1],
+            ['legacy_office_id' => 7, 'slug' => 'posgrado-demo', 'catalogo_habilitado' => 1],
+            ['legacy_office_id' => 8, 'slug' => 'inactiva', 'catalogo_habilitado' => 1],
         ]);
         DB::table('tienda_conceptos_catalogo')->insert([
-            ['legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'demo', 'is_published' => 1],
-            ['legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'is_published' => 0],
-            ['legacy_office_id' => 8, 'legacy_concept_id' => 12, 'slug' => 'suspendido', 'is_published' => 1],
+            ['legacy_office_id' => 7, 'legacy_concept_id' => 12, 'slug' => 'demo', 'esta_publicado' => 1],
+            ['legacy_office_id' => 7, 'legacy_concept_id' => 13, 'slug' => 'oculto', 'esta_publicado' => 0],
+            ['legacy_office_id' => 8, 'legacy_concept_id' => 12, 'slug' => 'suspendido', 'esta_publicado' => 1],
         ]);
     }
 
@@ -91,7 +91,7 @@ class CatalogApiTest extends TestCase
             ->assertJsonPath('data.0.name', 'Posgrado ficticio');
 
         DB::table('tienda_configuracion_oficinas')->where('legacy_office_id', 7)
-            ->update(['catalog_enabled' => false]);
+            ->update(['catalogo_habilitado' => false]);
         $this->travel(121)->seconds();
         $this->getJson('/api/v1/tienda/catalogo/oficinas')
             ->assertOk()->assertJsonCount(0, 'data');
@@ -101,7 +101,7 @@ class CatalogApiTest extends TestCase
     {
         $this->prepareFixture();
         DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-            ->update(['category' => 'admision']);
+            ->update(['categoria_codigo' => 'admision']);
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')
             ->assertOk()->assertJsonPath('data.0.category', 'admision')
             ->assertJsonPath('data.0.checkout_enabled', false)
@@ -121,7 +121,7 @@ class CatalogApiTest extends TestCase
         foreach ($categories as $old => $new) {
             foreach ([$old, $new] as $stored) {
                 DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-                    ->update(['category' => $stored]);
+                    ->update(['categoria_codigo' => $stored]);
                 Cache::forget('catalogo.publico.v1.oficina.7');
                 $this->getJson('/api/v1/tienda/catalogo?office_id=7')
                     ->assertOk()->assertJsonPath('data.0.category', $new);
@@ -129,7 +129,7 @@ class CatalogApiTest extends TestCase
         }
         foreach ([null, '', 'personalizada'] as $category) {
             DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
-                ->update(['category' => $category]);
+                ->update(['categoria_codigo' => $category]);
             Cache::forget('catalogo.publico.v1.oficina.7');
             $this->getJson('/api/v1/tienda/catalogo?office_id=7')
                 ->assertOk()->assertJsonPath('data.0.category', $category);
@@ -166,11 +166,11 @@ class CatalogApiTest extends TestCase
             ]);
             DB::table('tienda_conceptos_catalogo')->insert([
                 'legacy_office_id' => 7, 'legacy_concept_id' => 100 + $index,
-                'slug' => 'extra-'.$index, 'is_published' => true,
-                'requires_eligibility_check' => $index === 55,
+                'slug' => 'extra-'.$index, 'esta_publicado' => true,
+                'requiere_verificacion_elegibilidad' => $index === 55,
             ]);
         }
-        $ids = DB::table('tienda_conceptos_catalogo')->where('is_published', true)
+        $ids = DB::table('tienda_conceptos_catalogo')->where('esta_publicado', true)
             ->where('legacy_office_id', 7)->pluck('id')->all();
         $service = app(\App\Modules\Catalogo\Services\CatalogService::class);
         DB::enableQueryLog();
@@ -193,14 +193,14 @@ class CatalogApiTest extends TestCase
         $this->prepareFixture();
         $id = (int) DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->value('id');
         DB::table('tienda_versiones_tarifas')->insert([
-            'catalog_item_id' => $id, 'amount' => '23.45', 'currency' => 'PEN',
-            'is_approved' => true, 'approval_reference' => 'DEMO-APPROVAL',
-            'valid_from' => now()->subDay(),
+            'concepto_catalogo_id' => $id, 'monto' => '23.45', 'moneda' => 'PEN',
+            'esta_aprobado' => true, 'referencia_aprobacion' => 'DEMO-APPROVAL',
+            'vigente_desde' => now()->subDay(),
         ]);
         $service = app(\App\Modules\Catalogo\Services\CatalogService::class);
         $this->assertSame('23.45', $service->forOffice(7)->first()['reference_amount']);
         $this->assertSame('23.45', $service->referencesFor([$id])[$id]['reference_amount']);
-        DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['requires_eligibility_check' => true]);
+        DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['requiere_verificacion_elegibilidad' => true]);
         $this->assertSame('10.00', $service->referencesFor([$id])[$id]['reference_amount']);
         Cache::forget('catalogo.publico.v1.oficina.7');
         $this->assertFalse($service->forOffice(7)->first()['orderable']);
@@ -223,7 +223,7 @@ class CatalogApiTest extends TestCase
         }
         // A different office must never reuse office 7's entries.
         $this->getJson('/api/v1/tienda/catalogo?office_id=8')->assertOk()->assertJsonCount(0, 'data');
-        DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->update(['is_published' => false]);
+        DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->update(['esta_publicado' => false]);
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertJsonCount(1, 'data');
         $this->travel(121)->seconds();
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertJsonCount(0, 'data');
@@ -241,9 +241,9 @@ class CatalogApiTest extends TestCase
         $this->assertArrayNotHasKey('pricing_status', $cached);
         config(['payments.payme_enabled' => true]); // Test configuration only; no payment action.
         DB::table('tienda_versiones_tarifas')->insert([
-            'catalog_item_id' => $id, 'amount' => '23.45', 'currency' => 'PEN',
-            'is_approved' => true, 'approval_reference' => 'DEMO-APPROVAL',
-            'valid_from' => now()->subDay(),
+            'concepto_catalogo_id' => $id, 'monto' => '23.45', 'moneda' => 'PEN',
+            'esta_aprobado' => true, 'referencia_aprobacion' => 'DEMO-APPROVAL',
+            'vigente_desde' => now()->subDay(),
         ]);
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()
             ->assertJsonPath('data.0.checkout_enabled', true)

@@ -20,3 +20,31 @@ Antes de ejecutar `git pull` en Oracle, inspeccionar la carpeta exclusiva `/var/
 La demo es HTTP con **datos ficticios exclusivamente**. Sin Google OAuth real, datos estudiantiles personales, pasarela real, webhooks ni base institucional. No modificar Wachihualito, RSU-CNI o PerúCompras.
 
 Eliminar los secretos de Actions `ORACLE_DEPLOY_KEY` y `ORACLE_KNOWN_HOSTS` y revocar en Oracle la clave pública de despliegue `undc-github-actions` si aún permanecen. Conservar las claves normales de administración.
+
+
+## Actualización de columnas de tienda (PR #138)
+
+La migración `2026_11_24_000001_rename_store_business_columns_to_spanish.php` solo renombra columnas propias de `tienda_*`. No se despliega mediante `deploy-oracle.yml`; la publicación Oracle continúa siendo manual y requiere autorización del responsable. Antes de aplicar esta migración en la demo, confirmar que el respaldo puede restaurarse y ejecutar en la carpeta exclusiva de la aplicación:
+
+```bash
+# 1) Respaldo de la base de datos de la demo
+mysqldump --single-transaction --routines --triggers tesoreria_dev > backup_tesoreria_dev_antes_columnas_$(date +%F_%H%M%S).sql
+
+# 2) Modo mantenimiento y actualización de código (tras aprobar/fusionar el PR)
+cd /var/www/undc-pagos
+git status --short
+php artisan down
+git pull --ff-only origin main
+composer install --no-dev --optimize-autoloader
+
+# 3) Aplicar migraciones y reconstruir cachés
+php artisan migrate --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:restart
+php artisan up
+```
+
+Si cualquier paso falla, no continuar con la siguiente instrucción: mantener el modo mantenimiento, conservar los logs y restaurar el respaldo solo con el procedimiento autorizado. No ejecutar `migrate:rollback` indiscriminadamente ni modificar tablas `tm_*`. Verificar catálogo, carrito, perfil y pedidos en la demo con datos ficticios. Esta guía no autoriza desplegar ni fusionar el PR.

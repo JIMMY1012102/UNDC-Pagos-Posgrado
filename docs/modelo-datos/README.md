@@ -16,3 +16,8 @@
 
 
 [Equivalencias inglés → español](../NOMBRES_TABLAS_ESPANOL.md).
+
+
+## Diccionario físico de columnas
+
+Consulta [DICCIONARIO_COLUMNAS.md](./DICCIONARIO_COLUMNAS.md) para las equivalencias completas de columnas propias de las tablas `tienda_*`, las excepciones técnicas y la compatibilidad del contrato JSON/API.

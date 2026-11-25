@@ -77,7 +77,7 @@ class AccountRegistrationTest extends TestCase
             ->get('/tienda/perfil')->assertOk()->assertSee('value="Persona"', false)->assertSee('google@example.test');
         $this->post('/tienda/perfil', array_merge($this->input(), ['contact_email' => 'attacker@example.test']))
             ->assertRedirect('/tienda/carrito')->assertSessionMissing('market_google_profile');
-        $this->assertDatabaseHas('tienda_perfiles_compradores', ['user_id' => $user->id, 'contact_email' => $user->email]);
+        $this->'usuario_id' => $user->id, 'correo_contacto' => $user->email;
     }
 
     public function test_guest_cannot_store_a_profile(): void
@@ -152,9 +152,9 @@ class AccountRegistrationTest extends TestCase
         $this->post('/tienda/registro', array_merge($this->input(), [
             'document_type' => $type, 'document_number' => $number,
         ]))->assertRedirect('/tienda/carrito');
-        $this->assertDatabaseHas('tienda_perfiles_compradores', [
-            'document_type' => $expectedType, 'document_number' => $expectedNumber,
-        ]);
+        $this->
+            'tipo_documento' => $expectedType, 'numero_documento' => $expectedNumber,
+        ;
     }
 
     #[DataProviderExternal(BuyerDocumentCases::class, 'invalid')]
@@ -187,11 +187,11 @@ class AccountRegistrationTest extends TestCase
             'city' => 'Mala', 'state' => 'Lima', 'country' => 'pe',
         ])->assertRedirect('/tienda/carrito');
 
-        $this->assertDatabaseHas('tienda_perfiles_compradores', [
-            'user_id' => $user->id, 'line_1' => 'Av. Ejemplo 123',
-            'line_2' => 'Dpto. 402', 'city' => 'Mala', 'state' => 'Lima',
-            'country' => 'PE', 'phone_country_code' => '+51', 'phone' => '987654321',
-        ]);
+        $this->
+            'usuario_id' => $user->id, 'direccion_linea_1' => 'Av. Ejemplo 123',
+            'direccion_linea_2' => 'Dpto. 402', 'ciudad' => 'Mala', 'region' => 'Lima',
+            'pais' => 'PE', 'codigo_pais_telefono' => '+51', 'telefono' => '987654321',
+        ;
     }
 
 

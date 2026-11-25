@@ -29,9 +29,9 @@ class BuyerProfileApiTest extends TestCase
         ])->assertOk()->assertJsonPath('data.identity_verified', false);
 
         $this->assertDatabaseHas('tienda_perfiles_compradores', [
-            'user_id' => $buyer->id, 'document_number' => '00000000',
+            'usuario_id' => $buyer->id, 'numero_documento' => '00000000',
         ]);
-        $this->assertDatabaseMissing('tienda_perfiles_compradores', ['user_id' => $other->id]);
+        $this->assertDatabaseMissing('tienda_perfiles_compradores', ['usuario_id' => $other->id]);
 
         $this->actingAs($other)->getJson('/api/v1/acceso/perfil')
             ->assertOk()->assertJsonPath('data', null);
@@ -82,7 +82,7 @@ class BuyerProfileApiTest extends TestCase
         ])->assertOk()->assertJsonPath('data.document_type', $expectedType)
             ->assertJsonPath('data.document_number', $expectedNumber)->assertJsonPath('data.first_names', 'Persona');
         $this->assertDatabaseHas('tienda_perfiles_compradores', [
-            'user_id' => $buyer->id, 'document_type' => $expectedType, 'document_number' => $expectedNumber,
+            'usuario_id' => $buyer->id, 'tipo_documento' => $expectedType, 'numero_documento' => $expectedNumber,
         ]);
     }
     public function test_address_and_phone_fields_are_saved_normalized_and_returned_by_profile_api(): void

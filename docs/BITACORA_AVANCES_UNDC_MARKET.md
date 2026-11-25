@@ -185,3 +185,13 @@ El 5 de noviembre se preparó el PDF **Línea de tiempo UNDC MARKET**, con 34 hi
 [Ver PDF en Drive](https://drive.google.com/file/d/16dlsYmUMgm8cw6YZ8oLOykfyankSW8MX/view).
 
 Esta bitácora añade las horas verificables de Git; no modifica retroactivamente las fechas del PDF. Para próximos avances, registrar fecha/hora de Lima, descripción, commit y validación real, diferenciando implementación, prueba y despliegue.
+
+
+## 5. Refactor de columnas de negocio (24–25 de noviembre de 2026)
+
+- Se aprobó una migración nueva y reversible para traducir columnas propias de las 23 tablas de negocio `tienda_*`; `tienda_categorias` ya estaba en español y no necesita renombres.
+- La migración se incorpora en la rama `refactor/columnas-en-espanol`, basada en `main` (`558e014`). El PR #138 se abrió como borrador hacia `main`; no está fusionado ni implica despliegue Oracle.
+- Se preservan `tm_*`, migraciones históricas, estados y monedas almacenados y claves JSON/API/frontend. `category` físico pasa a `categoria_codigo`, sin confundirlo con `categoria_id`; auditoría usa `sujeto_id` y `correlacion_id`.
+- Se adaptan los servicios de catálogo, carrito, perfil, pedidos y pagos; se conservan alias de salida en la consulta SQL de solo lectura SISPAGOS.
+- Se agregó una prueba de columnas y se amplió el fixture MariaDB para probar rollback/upgrade con filas existentes, incluyendo la columna generada del carrito. La verificación final depende de todos los jobs CI.
+- Referencia normativa: [diccionario físico de columnas](./modelo-datos/DICCIONARIO_COLUMNAS.md). Despliegue Oracle sigue manual y sujeto a autorización; ver [DESPLIEGUE.md](./DESPLIEGUE.md).
