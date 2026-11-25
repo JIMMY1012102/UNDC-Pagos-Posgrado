@@ -437,9 +437,13 @@ async function responsiveAccountPage(viewport, kind) {
       assert.equal(await page.locator('#account_phone_country_code').inputValue(),'+51','El código de país debe iniciar en +51');
       assert.equal(await page.locator('.field-error:visible').count(),0,'Entrar a Contacto no debe mostrar errores sin interacción');
       await noVerticalScroll(2);
-      await page.locator('[data-register-step="2"] [data-register-next]').click();
+      await page.locator('#account_email').focus();
+      await page.locator('#account_line_1').focus();
       assert.match(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').innerText(), /obligatorio/i,
-        'El correo debe mostrar un error en línea antes de avanzar');
+        'El correo puede mostrar error al salir después de tocarlo');
+      await page.locator('[data-register-step="2"] [data-register-next]').click();
+      assert.ok(await page.locator('#account_email').locator('xpath=ancestor::div[contains(@class,"field")]').locator('.field-error').isVisible(),
+        'Continuar debe mantener la validación en línea');
       assert.equal(await page.locator('[data-register-progress-label]').innerText(), 'Paso 2 de 3');
       await page.locator('#account_email').fill('qa@example.test');
       await noVerticalScroll(2);
