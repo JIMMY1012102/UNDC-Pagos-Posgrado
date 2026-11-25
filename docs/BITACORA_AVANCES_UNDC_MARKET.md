@@ -277,3 +277,21 @@ Esta bitácora añade las horas verificables de Git; no modifica retroactivament
 - El input de contraseña reserva 44 px a la derecha para el botón ojo mediante una única declaración de padding en su selector específico; no se añaden reglas `!important` nuevas.
 - Las pruebas Chromium agregan comprobaciones de CSS calculado y geometría para el scroll móvil a 375 px, el paso 3 en escritorio y la altura del indicador. Se conservan todas las pruebas existentes.
 - Capturas previstas: pasos 1, 2 y 3 en 1366×590 y 1366×768, publicadas por el artefacto existente de registro. Estado de CI pendiente; no se declara ningún requisito HECHO hasta que los cuatro jobs del último commit estén verdes. Sin merge ni despliegue.
+
+
+## 11. Fusión del PR #151 con Chromium en rojo (25 de noviembre de 2026)
+
+- El PR #151 se fusionó mediante **Squash and merge** por autorización explícita del responsable, aceptando el riesgo de validar visualmente en despliegue. No se realizó despliegue a Oracle.
+- Commit squash en `main`: `41697dc615a75169b0116d292f74322798784d42`.
+- En el run #827, los tres jobs Laravel UTC, Laravel America/Lima y MariaDB + SISPAGOS finalizaron en verde. El job Chromium finalizó en rojo.
+- Líneas FAIL/AssertionError del log Chromium:
+```
+2026-11-25T21:25:50.1251478Z FAIL register responsive 1366px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:51.2763837Z FAIL register responsive 1366px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:52.3025270Z FAIL register responsive 1440px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:53.3204098Z FAIL register responsive 1920px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:54.3407742Z FAIL register responsive 1024px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:55.3115952Z FAIL register responsive 768px: AssertionError [ERR_ASSERTION]: #account_password padding-right calculado=10px; esperado=44px; selector=.register-password-control input
+2026-11-25T21:25:56.1495069Z FAIL register responsive 375px: AssertionError [ERR_ASSERTION]: [data-register-step="2"] .form-grid::after pointer-events calculado=auto; esperado=none; geometría={"overflowY":"auto","scrollHeight":556,"clientHeight":329,"gradientOpacity":"1","gradientPointerEvents":"auto","bounds":{"top":383.484375,"bottom":712.09375,"height":328.609375}}
+```
+- Esta anotación se realiza en un PR separado de documentación, sin modificar código funcional, pruebas ni configuraciones.
