@@ -392,7 +392,7 @@ body.light-mode .emerald-register .register-progress-dots span[aria-current="ste
   .emerald-register .emerald-panel>.gb{display:block;overflow:hidden}
   .emerald-register .account-data-card{display:flex;flex-direction:column;height:min(620px,calc(100dvh - 150px));min-height:440px;max-height:calc(100dvh - 150px);overflow-y:auto;padding:24px 18px!important}
   .emerald-register .account-data-card>form{display:flex;flex:1;min-height:0;flex-direction:column}
-  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0}
+  .emerald-register .emerald-register-fields{display:flex;flex:1;min-height:0;overflow:hidden!important}
   .emerald-register .register-step{height:100%;min-height:0;flex:1;display:flex;flex-direction:column}
   .emerald-register .register-step .form-grid{flex:1;min-height:0;align-content:start}
   .emerald-register .register-step-actions{position:relative;z-index:1;flex:0 0 auto}
