@@ -36,13 +36,14 @@ class ModuleStructureTest extends TestCase
             'auth.google.redirect' => [GoogleAuthController::class, 'redirect'],
             'auth.google.callback' => [GoogleAuthController::class, 'callback'],
             'auth.logout' => [GoogleAuthController::class, 'logout'],
-            'api.asistente.mensajes.store' => [AssistantController::class, '__invoke'],
+            'api.asistente.mensajes.store' => [AssistantController::class, null],
         ];
 
         foreach ($actions as $name => [$controller, $method]) {
             $route = app('router')->getRoutes()->getByName($name);
             $this->assertNotNull($route, $name);
-            $this->assertSame($controller.'@'.$method, $route->getActionName(), $name);
+            $expectedAction = $method === null ? $controller : $controller.'@'.$method;
+            $this->assertSame($expectedAction, $route->getActionName(), $name);
             $this->assertInstanceOf($controller, app($controller));
         }
     }
