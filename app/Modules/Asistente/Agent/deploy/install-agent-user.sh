@@ -125,6 +125,13 @@ echo
 echo "Agente instalado en modo usuario y respondiendo en 127.0.0.1:\${PORT}."
 echo "Entorno privado: \${ENV_FILE}"
 echo "Logs: \${LOG_FILE}"
-echo "Arranque automático: crontab @reboot (si el daemon cron está activo)."
+if ps -eo comm | grep -Eq '^(cron|crond)
+echo "Comprobar: curl http://127.0.0.1:\${PORT}/health"
+echo "No se abrió ningún puerto público ni se ejecutaron migraciones."
+; then
+    echo "Arranque automático: crontab @reboot (daemon cron detectado)."
+else
+    echo "AVISO: no se detecta cron/crond activo. El agente funciona ahora, pero el arranque tras reinicio requiere que el administrador active cron o que lo inicies manualmente."
+fi
 echo "Comprobar: curl http://127.0.0.1:\${PORT}/health"
 echo "No se abrió ningún puerto público ni se ejecutaron migraciones."
