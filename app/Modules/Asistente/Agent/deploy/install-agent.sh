@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Install the private FastAPI/MCP agent on a Linux systemd host.
-# Run as root from the checked-out project. This script does not deploy Laravel.
-
+# Installs only the private FastAPI/MCP process. It does not deploy Laravel.
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../" && pwd)}"
 VENV_DIR="/opt/undc-asistente/venv"
 ENV_DIR="/etc/undc-asistente"
@@ -53,8 +51,9 @@ install -d -m 0755 -o root -g root /opt/undc-asistente
 python3.11 -m venv "${VENV_DIR}"
 "${VENV_DIR}/bin/python" -m pip install --upgrade pip
 "${VENV_DIR}/bin/pip" install -r "${PROJECT_ROOT}/app/Modules/Asistente/Agent/requirements.txt"
+"${VENV_DIR}/bin/pip" check
 
-# Write the Python process secrets as a root-owned, group-readable systemd EnvironmentFile.
+# Store Python secrets outside the repository.
 python3.11 - "${ENV_FILE}" <<'PY'
 import os, pathlib, sys
 path = pathlib.Path(sys.argv[1])
@@ -63,15 +62,15 @@ keys = ("GEMINI_API_KEY", "GEMINI_MODEL", "GEMINI_FALLBACK_MODELS",
         "ASSISTANT_MAX_TOOL_ROUNDS")
 for key in keys:
     value = os.environ.get(key, "")
-    if any(ch in value for ch in "\\r\\n") or '"' in value:
+    if any(ch in value for ch in "\r\n") or '"' in value:
         raise SystemExit(f"Valor no permitido para {key}")
-content = "".join(f'{key}="{os.environ.get(key, "")}"\\n' for key in keys)
+content = "".join(f'{key}="{os.environ.get(key, "")}"\n' for key in keys)
 path.write_text(content, encoding="utf-8")
 os.chmod(path, 0o640)
 PY
 chown root:"${SERVICE_GROUP}" "${ENV_FILE}"
 
-# Keep Laravel and FastAPI on the exact same generated token.
+# Put the exact same token in Laravel's private .env.
 python3.11 - "${PROJECT_ROOT}/.env" <<'PY'
 import os, pathlib, re, sys
 path = pathlib.Path(sys.argv[1])
@@ -86,9 +85,9 @@ for key, value in updates.items():
     if pattern.search(text):
         text = pattern.sub(lambda _: line, text, count=1)
     else:
-        if text and not text.endswith("\\n"):
-            text += "\\n"
-        text += line + "\\n"
+        if text and not text.endswith("\n"):
+            text += "\n"
+        text += line + "\n"
 path.write_text(text, encoding="utf-8")
 PY
 
@@ -130,7 +129,6 @@ systemctl is-active --quiet undc-asistente-agent.service || {
 }
 curl --fail --silent "http://127.0.0.1:${PORT}/health" >/dev/null || fail "El health check local falló."
 
-# Cache Laravel configuration as the deployment owner so cache permissions stay correct.
 runuser -u "${SERVICE_USER}" -- sh -c "cd '${PROJECT_ROOT}' && php artisan config:cache"
 
 echo
