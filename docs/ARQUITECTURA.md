@@ -1,6 +1,6 @@
 # UNDC Market — arquitectura modular basada en DDD ligero
 
-**Estado: propuesta implementada en rama de desarrollo, no desplegada.** Un Laravel, una MariaDB y ocho módulos; los siete módulos de negocio existentes conservan sus **44 tablas** y Asistente no agrega tablas.
+**Estado: implementación integrada en main; pendiente de despliegue en los entornos.** Un Laravel, una MariaDB y ocho módulos; los siete módulos de negocio existentes conservan sus **44 tablas** y Asistente no agrega tablas.
 
 | Módulo real (`app/Modules/`) | Tablas | Alcance |
 |---|---:|---|
