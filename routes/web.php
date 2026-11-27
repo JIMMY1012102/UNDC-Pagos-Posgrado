@@ -20,9 +20,8 @@ Route::get('/tienda', function (\Illuminate\Http\Request $request) {
     return view('tienda', ['isMarketHome' => true]);
 })->name('tienda');
 
-
-// Seven bounded contexts in one Laravel deployment.
-foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
+// Eight bounded contexts in one Laravel deployment.
+foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad', 'Asistente'] as $module) {
     require app_path("Modules/{$module}/routes.php");
 }
 

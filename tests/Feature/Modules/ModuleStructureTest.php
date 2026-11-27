@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Modules;
 
+use App\Modules\Asistente\Http\Controllers\AssistantController;
 use App\Modules\Usuarios\Http\Controllers\AccountController;
 use App\Modules\Usuarios\Http\Controllers\BuyerProfileController;
 use App\Modules\Usuarios\Http\Controllers\GoogleAuthController;
@@ -11,7 +12,7 @@ class ModuleStructureTest extends TestCase
 {
     public function test_each_business_module_has_an_independent_route_file(): void
     {
-        foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad'] as $module) {
+        foreach (['Sispagos', 'Catalogo', 'Usuarios', 'Pedidos', 'Pagos', 'Tesoreria', 'Seguridad', 'Asistente'] as $module) {
             $this->assertFileExists(app_path("Modules/{$module}/routes.php"));
         }
     }
@@ -35,6 +36,7 @@ class ModuleStructureTest extends TestCase
             'auth.google.redirect' => [GoogleAuthController::class, 'redirect'],
             'auth.google.callback' => [GoogleAuthController::class, 'callback'],
             'auth.logout' => [GoogleAuthController::class, 'logout'],
+            'api.asistente.mensajes.store' => [AssistantController::class, '__invoke'],
         ];
 
         foreach ($actions as $name => [$controller, $method]) {
