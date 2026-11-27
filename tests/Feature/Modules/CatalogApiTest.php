@@ -238,7 +238,9 @@ class CatalogApiTest extends TestCase
         $id = (int) DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->value('id');
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()
             ->assertJsonPath('data.0.checkout_enabled', false);
-        $cached = Cache::get('catalogo.publico.v2.oficina.7')->first();
+        $cachedItems = Cache::get('catalogo.publico.v2.oficina.7');
+        $this->assertIsArray($cachedItems);
+        $cached = $cachedItems[0];
         $this->assertArrayNotHasKey('checkout_enabled', $cached);
         $this->assertArrayNotHasKey('pricing_status', $cached);
         config(['payments.payme_enabled' => true]); // Test configuration only; no payment action.
