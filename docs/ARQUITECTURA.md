@@ -1,6 +1,6 @@
 # UNDC Market — arquitectura modular basada en DDD ligero
 
-**Estado: propuesta implementada en rama de desarrollo, no desplegada.** Un Laravel, una MariaDB y ocho módulos; los siete módulos de negocio existentes conservan sus **44 tablas** y Asistente no agrega tablas.
+**Estado: implementación integrada en main; pendiente de despliegue en los entornos.** Un Laravel, una MariaDB y ocho módulos; los siete módulos de negocio existentes conservan sus **44 tablas** y Asistente no agrega tablas.
 
 | Módulo real (`app/Modules/`) | Tablas | Alcance |
 |---|---:|---|
@@ -11,7 +11,7 @@
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
 | Tesoreria | 6 | Conciliación, validación, certificados y auditoría |
 | Seguridad | 13 | Roles y permisos Spatie, sesiones y soporte de Laravel |
-| Asistente | 0 | API conversacional y adaptador de proveedor Gemini; sin persistencia |
+| Asistente | 0 | API conversacional Laravel + agente FastAPI/Gemini/MCP; sin persistencia |
 
 ## Flujo actual y contratos
 

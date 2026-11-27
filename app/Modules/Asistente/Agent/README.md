@@ -17,7 +17,7 @@ export LARAVEL_INTERNAL_BASE_URL="http://127.0.0.1:8000"
 uvicorn app.Modules.Asistente.Agent.main:app --host 127.0.0.1 --port 8091
 ```
 
-Laravel debe usar el mismo token en `ASSISTANT_AGENT_TOKEN` y llamar a `http://127.0.0.1:8091`. No exponer el puerto 8091 a Internet. En servidores, ejecutar con un usuario de servicio, un entorno virtual aislado y un supervisor (systemd); no instalar paquetes globalmente.
+Laravel debe usar el mismo token en `ASSISTANT_AGENT_TOKEN` y llamar a `http://127.0.0.1:8091`. No exponer el puerto 8091 a Internet. En servidores, usar el instalador y la guía [DEPLOYMENT.md](./DEPLOYMENT.md), que crea el entorno virtual, genera el token compartido, protege las variables fuera del repositorio y registra el proceso en systemd. No instalar paquetes globalmente.
 
 ## Herramientas MCP incluidas
 
