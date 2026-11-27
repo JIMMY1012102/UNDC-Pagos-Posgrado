@@ -9,13 +9,19 @@ use Illuminate\Http\Client\ConnectionException;
 
 final class AgentAssistantProvider implements AssistantProvider
 {
+    public function __construct(private readonly GeminiAssistantProvider $legacyProvider)
+    {
+    }
+
     public function generate(string $message): string
     {
         $url = rtrim((string) config('services.assistant_agent.url'), '/');
         $token = (string) config('services.assistant_agent.token');
 
+        // Keep the current Gemini HTTP adapter working until the Python service
+        // and its private shared token have been configured in this environment.
         if ($url === '' || trim($token) === '') {
-            throw new AssistantUnavailable('El asistente no está configurado todavía. Inténtalo más tarde.');
+            return $this->legacyProvider->generate($message);
         }
 
         try {
