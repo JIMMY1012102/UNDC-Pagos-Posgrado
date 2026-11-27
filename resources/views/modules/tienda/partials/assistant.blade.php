@@ -1,13 +1,8 @@
 <aside class="undc-assistant" data-undc-assistant>
-    <button class="undc-assistant-launcher" type="button" aria-expanded="false" aria-controls="undcAssistantWindow">
+    <button class="undc-assistant-launcher" type="button" aria-label="Abrir asistente UNDC" aria-expanded="false" aria-controls="undcAssistantWindow">
         <span class="undc-assistant-launcher-art" aria-hidden="true">
             <img src="{{ asset('assets/asistente/mascota-undc.webp') }}" alt="" loading="lazy">
         </span>
-        <span class="undc-assistant-launcher-copy">
-            <strong>Asistente <b>UNDC</b></strong>
-            <small>¿En qué puedo ayudarte?</small>
-        </span>
-        <span class="undc-assistant-launcher-arrow" aria-hidden="true">›</span>
     </button>
 
     <section class="undc-assistant-window" id="undcAssistantWindow" aria-label="Chat con el asistente UNDC" hidden>
