@@ -13,6 +13,7 @@
 @if($isJourneyHome)
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/undc-scroll-journey.css') }}?v={{ filemtime(public_path('css/undc-scroll-journey.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/undc-assistant.css') }}?v={{ filemtime(public_path('css/undc-assistant.css')) }}">
 @else
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/undc-tienda.css') }}?v={{ filemtime(public_path('css/undc-tienda.css')) }}">
@@ -30,8 +31,8 @@
 @unless($isJourneyHome)
 @include('modules.tienda.partials.header')
 @include('modules.tienda.partials.accessibility')
-@include('modules.tienda.partials.assistant')
 @endunless
+@include('modules.tienda.partials.assistant')
 @yield('heroes')
 @unless($isJourneyHome)
 <main class="wrap" id="catalogo">@yield('content')</main>
@@ -40,6 +41,7 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 @if($isJourneyHome)
 <script src="{{ asset('js/undc-scroll-journey.js') }}?v={{ filemtime(public_path('js/undc-scroll-journey.js')) }}" defer></script>
+<script src="{{ asset('js/undc-assistant.js') }}?v={{ filemtime(public_path('js/undc-assistant.js')) }}" defer></script>
 @else
 <script src="{{ asset('js/undc-tienda.js') }}?v={{ filemtime(public_path('js/undc-tienda.js')) }}" defer></script>
 <script src="{{ asset('js/undc-hero.js') }}?v={{ filemtime(public_path('js/undc-hero.js')) }}" defer></script>
