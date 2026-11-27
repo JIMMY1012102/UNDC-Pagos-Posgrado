@@ -1,11 +1,11 @@
 <?php
 
-namespace App\\Modules\\Asistente\\Services;
+namespace App\Modules\Asistente\Services;
 
-use App\\Modules\\Asistente\\Contracts\\AssistantProvider;
-use App\\Modules\\Asistente\\Exceptions\\AssistantUnavailable;
-use Illuminate\\Http\\Client\\ConnectionException;
-use Illuminate\\Support\\Facades\\Http;
+use App\Modules\Asistente\Contracts\AssistantProvider;
+use App\Modules\Asistente\Exceptions\AssistantUnavailable;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
 
 final class GeminiAssistantProvider implements AssistantProvider
 {
