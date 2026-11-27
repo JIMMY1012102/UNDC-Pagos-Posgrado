@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Modules\Asistente\Contracts\AssistantProvider;
-use App\Modules\Asistente\Services\GeminiAssistantProvider;
+use App\Modules\Asistente\Services\AgentAssistantProvider;
+use App\Modules\Catalogo\Contracts\CatalogItemLookup;
+use App\Modules\Catalogo\Services\CatalogItemLookupService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -11,25 +13,14 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        $this->app->bind(
-            \App\Modules\Catalogo\Contracts\CatalogItemLookup::class,
-            \App\Modules\Catalogo\Services\CatalogItemLookupService::class
-        );
-
-        $this->app->bind(AssistantProvider::class, GeminiAssistantProvider::class);
+        $this->app->bind(CatalogItemLookup::class, CatalogItemLookupService::class);
+        $this->app->bind(AssistantProvider::class, AgentAssistantProvider::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Named buckets prevent catalogue/cart requests from consuming login attempts.
         RateLimiter::for('market-login', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip())
                 ->response(function (Request $request, array $headers) {
