@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from typing import Any
 
@@ -15,6 +16,19 @@ def _model_chain() -> list[str]:
     backups = [item.strip() for item in os.getenv("GEMINI_FALLBACK_MODELS", "").split(",") if item.strip()]
     legacy = os.getenv("GEMINI_FALLBACK_MODEL", "").strip()
     return list(dict.fromkeys(item for item in [primary, *backups, legacy] if item))
+
+
+def _plain_text(value: str) -> str:
+    """Remove common Markdown formatting so chat replies remain readable."""
+    value = re.sub(r"(?m)^\\s{0,3}#{1,6}\\s*", "", value)
+    value = re.sub(r"\\*\\*(.*?)\\*\\*", r"\\1", value)
+    value = re.sub(r"__(.*?)__", r"\\1", value)
+    value = re.sub(r"(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)", r"\\1", value)
+    value = re.sub(r"(?<!\\w)_([^_\\n]+)_(?!\\w)", r"\\1", value)
+    value = value.replace("`", "")
+    value = re.sub(r"(?m)^\\s*[-+*]\\s+", "", value)
+    value = re.sub(r"\\n{3,}", "\\n\\n", value)
+    return value.strip()
 
 
 def _function_declarations(mcp_tools: list[Any]) -> list[types.FunctionDeclaration]:
@@ -93,10 +107,12 @@ class AssistantAgent:
                     system_instruction=(
                         "Eres el asistente virtual de la Escuela de Posgrado de la UNDC. "
                         "Responde siempre en español, de forma directa, breve y natural. "
-                        "Por defecto usa de 1 a 3 frases cortas o hasta 3 viñetas; responde "
-                        "solo lo que preguntaron. No uses saludos, introducciones, conclusiones, "
-                        "repeticiones ni explicaciones largas. Amplía únicamente si el usuario "
-                        "pide detalles. "
+                        "Usa texto plano: nunca uses Markdown, asteriscos, doble asterisco, "
+                        "encabezados con #, bloques de código, tablas, HTML ni emojis. "
+                        "Responde en 1 a 3 frases cortas y, si son varios datos, pon cada dato "
+                        "en una línea sin viñetas. Responde solo lo que preguntaron. No uses "
+                        "saludos, introducciones, conclusiones, repeticiones ni explicaciones "
+                        "largas. Amplía únicamente si el usuario pide detalles. "
                         "Cuando pregunten por oficinas, servicios, códigos, importes o requisitos, "
                         "consulta las herramientas MCP y basa la respuesta en sus datos. "
                         "Muestra importes con S/ y conserva exactamente el valor del catálogo; "
@@ -117,7 +133,7 @@ class AssistantAgent:
             if not calls:
                 answer = response.text
                 if answer and answer.strip():
-                    return answer.strip()
+                    return _plain_text(answer)
                 raise RuntimeError("Gemini returned an empty response")
 
             history.append(content)
