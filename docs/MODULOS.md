@@ -11,7 +11,7 @@ Los módulos **reales** están en `app/Modules/`, con nombres alineados al [mapa
 | Pagos | 6 | Estructura de integración; no hay cobro real Pay-me implementado |
 | Tesoreria | 6 | Estructura para procesos internos, pendiente de validación institucional |
 | Seguridad | 13 | Roles, permisos, sesiones y soporte de Laravel |
-| Asistente | 0 | Endpoint API y proveedor Gemini con cadena ordenada configurable; sin persistencia propia |
+| Asistente | 0 | Endpoint Laravel + agente FastAPI/Gemini/MCP; sin persistencia propia |
 
 **Asistente** es un módulo transversal sin tablas ni migraciones. Laravel conserva el endpoint API y valida el mensaje; `AgentAssistantProvider` comunica con un agente FastAPI protegido por token interno. El agente usa Gemini con cadena ordenada de modelos y cliente MCP. El servidor MCP expone herramientas de lectura del catálogo a través de la API pública existente de Catalogo; no accede directamente a `tm_*`, no crea pedidos y no procesa pagos. El código Python y PHP permanece agrupado en `app/Modules/Asistente/`, aunque Python se ejecuta como proceso independiente. Las dependencias Python se aíslan en `Agent/requirements.txt`; no se agregan dependencias Composer. Mientras no se configure `ASSISTANT_AGENT_TOKEN`, se mantiene el adaptador HTTP Gemini anterior para compatibilidad. La ruta Laravel continúa bajo middleware API, no CSRF web.
 
