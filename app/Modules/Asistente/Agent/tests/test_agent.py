@@ -51,7 +51,7 @@ class McpServerContractTests(unittest.TestCase):
 
         names = asyncio.run(discover())
         self.assertEqual(
-            ["listar_oficinas_catalogo", "consultar_catalogo_oficina"],
+            ["consultar_catalogo_oficina", "listar_oficinas_catalogo"],
             sorted(names),
         )
 
