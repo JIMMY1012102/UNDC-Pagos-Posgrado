@@ -196,6 +196,8 @@ jobs:
           cache-dependency-path: app/Modules/Asistente/Agent/requirements.txt
       - name: Instalar dependencias aisladas del agente
         run: python -m pip install -r app/Modules/Asistente/Agent/requirements.txt
+      - name: Comprobar sintaxis del instalador Linux
+        run: bash -n app/Modules/Asistente/Agent/deploy/install-agent.sh
       - name: Comprobar sintaxis Python
         run: python -m compileall -q app/Modules/Asistente/Agent
       - name: Probar configuración Gemini y descubrimiento de herramientas MCP
