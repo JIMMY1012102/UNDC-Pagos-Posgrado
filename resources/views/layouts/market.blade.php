@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="{{ asset('css/undc-orders.css') }}?v={{ filemtime(public_path('css/undc-orders.css')) }}">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/undc-hero-claro.css') }}?v={{ filemtime(public_path('css/undc-hero-claro.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/undc-assistant.css') }}?v={{ filemtime(public_path('css/undc-assistant.css')) }}">
 @endif
 </head>
 @php($showSocialRail = !$isJourneyHome && trim($__env->yieldContent('marketPage', 'catalog')) === 'catalog')
@@ -29,6 +30,7 @@
 @unless($isJourneyHome)
 @include('modules.tienda.partials.header')
 @include('modules.tienda.partials.accessibility')
+@include('modules.tienda.partials.assistant')
 @endunless
 @yield('heroes')
 @unless($isJourneyHome)
@@ -42,6 +44,7 @@
 <script src="{{ asset('js/undc-tienda.js') }}?v={{ filemtime(public_path('js/undc-tienda.js')) }}" defer></script>
 <script src="{{ asset('js/undc-hero.js') }}?v={{ filemtime(public_path('js/undc-hero.js')) }}" defer></script>
 <script src="{{ asset('js/undc-hero-claro.js') }}?v={{ filemtime(public_path('js/undc-hero-claro.js')) }}" defer></script>
+<script src="{{ asset('js/undc-assistant.js') }}?v={{ filemtime(public_path('js/undc-assistant.js')) }}" defer></script>
 @endif
 </body></html>
 
