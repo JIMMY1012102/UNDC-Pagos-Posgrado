@@ -17,14 +17,21 @@ export LARAVEL_INTERNAL_BASE_URL="http://127.0.0.1:8000"
 uvicorn app.Modules.Asistente.Agent.main:app --host 127.0.0.1 --port 8091
 ```
 
-Laravel debe usar el mismo token en `ASSISTANT_AGENT_TOKEN` y llamar a `http://127.0.0.1:8091`. No exponer el puerto 8091 a Internet. En servidores, usar el instalador y la guía [DEPLOYMENT.md](./DEPLOYMENT.md), que crea el entorno virtual, genera el token compartido, protege las variables fuera del repositorio y registra el proceso en systemd. No instalar paquetes globalmente.
+## Instalación en servidor
+
+Consulta [DEPLOYMENT.md](./DEPLOYMENT.md). Hay dos modalidades:
+
+- **Sin sudo:** `bash app/Modules/Asistente/Agent/deploy/install-agent-user.sh`. Usa el Python disponible (incluido 3.12), un entorno virtual privado en el home del usuario y crontab `@reboot` si el daemon cron está activo.
+- **Con systemd:** `sudo SERVICE_USER=undcdeploy bash app/Modules/Asistente/Agent/deploy/install-agent.sh`. Requiere root/sudo, systemd y Python 3.11.
+
+Ambas modalidades protegen los secretos fuera del repositorio y dejan FastAPI escuchando solo en `127.0.0.1:8091`. No instalar paquetes globalmente ni exponer el puerto 8091 a Internet.
 
 ## Herramientas MCP incluidas
 
 - `listar_oficinas_catalogo`: usa `GET /api/v1/tienda/catalogo/oficinas`.
 - `consultar_catalogo_oficina`: usa `GET /api/v1/tienda/catalogo?office_id=N`.
 
-Las herramientas no consultan MariaDB ni tablas `tm_*`, no escriben datos, no crean pedidos y no procesan pagos. La cotización mostrada procede de la API del módulo Catálogo. Añadir herramientas de pedidos exige primero definir contratos de lectura y autorización con el módulo correspondiente.
+Las herramientas no consultan MariaDB ni tablas `tm_*`, no escriben datos, no crean pedidos y no procesan pagos. Añadir herramientas de pedidos exige primero definir contratos de lectura y autorización con el módulo correspondiente.
 
 ## Seguridad
 

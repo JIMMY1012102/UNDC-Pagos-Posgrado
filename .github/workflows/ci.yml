@@ -188,16 +188,18 @@ jobs:
     steps:
       - name: Descargar código
         uses: actions/checkout@v4
-      - name: Preparar Python 3.11
+      - name: Preparar Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: pip
           cache-dependency-path: app/Modules/Asistente/Agent/requirements.txt
       - name: Instalar dependencias aisladas del agente
         run: python -m pip install -r app/Modules/Asistente/Agent/requirements.txt
-      - name: Comprobar sintaxis del instalador Linux
-        run: bash -n app/Modules/Asistente/Agent/deploy/install-agent.sh
+      - name: Comprobar sintaxis de los instaladores Linux
+        run: |
+          bash -n app/Modules/Asistente/Agent/deploy/install-agent.sh
+          bash -n app/Modules/Asistente/Agent/deploy/install-agent-user.sh
       - name: Comprobar sintaxis Python
         run: python -m compileall -q app/Modules/Asistente/Agent
       - name: Probar configuración Gemini y descubrimiento de herramientas MCP
