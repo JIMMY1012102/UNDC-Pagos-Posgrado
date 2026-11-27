@@ -11,7 +11,7 @@
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
 | Tesoreria | 6 | Conciliación, validación, certificados y auditoría |
 | Seguridad | 13 | Roles y permisos Spatie, sesiones y soporte de Laravel |
-| Asistente | 0 | API conversacional y adaptador de proveedor Gemini; sin persistencia |
+| Asistente | 0 | API conversacional Laravel + agente FastAPI/Gemini/MCP; sin persistencia |
 
 ## Flujo actual y contratos
 
