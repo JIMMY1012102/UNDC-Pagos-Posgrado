@@ -1,48 +1,38 @@
 # Módulo Asistente
 
-Responsabilidad: exponer un endpoint HTTP para enviar un mensaje a un proveedor de IA, sin acoplar el módulo a Gemini.
+Responsabilidad: conversación asistida por Gemini con herramientas MCP de lectura, sin persistencia propia ni tablas.
 
 ## Estructura
 
 - `Contracts/AssistantProvider.php`: contrato del proveedor.
-- `Services/AssistantService.php`: coordinación de la solicitud.
-- `Services/GeminiAssistantProvider.php`: adaptador HTTP de Gemini y selección secuencial de modelos.
-- `Http/Controllers/AssistantController.php`: validación y respuesta JSON.
-- `Exceptions/AssistantUnavailable.php`: indisponibilidad comunicable al cliente.
-- `routes.php`: ruta propia del módulo, cargada desde el grupo API.
+- `Http/Controllers/AssistantController.php`: validación del endpoint público.
+- `Services/AssistantService.php`: coordinación del caso de uso.
+- `Services/AgentAssistantProvider.php`: adaptador Laravel hacia FastAPI, con compatibilidad Gemini HTTP mientras el agente no esté configurado.
+- `Services/GeminiAssistantProvider.php`: adaptador heredado y cadena de modelos de respaldo.
+- `Agent/`: aplicación Python/FastAPI, integración Gemini y servidor MCP.
+- `Agent/mcp_server.py`: herramientas MCP que consumen la API de Catálogo.
+- `routes.php`: endpoint propio del módulo, cargado desde el grupo API.
 
-## Endpoint
+## Flujo
 
-`POST /api/v1/asistente/mensajes`
+Navegador → Laravel (validación y límite de frecuencia) → FastAPI (token interno) → Gemini (selección de modelo) → cliente MCP → herramientas de lectura → API pública de Catálogo Laravel.
 
-Entrada JSON: `{"message":"..."}`. El mensaje es obligatorio y admite hasta 4.000 caracteres. La respuesta correcta entrega el texto en `data.answer`; errores de proveedor devuelven HTTP 503 con un mensaje amigable. La validación devuelve HTTP 422.
+El agente Python se ejecuta como proceso independiente por tratarse de otro runtime, pero todo el código del contexto funcional queda agrupado en esta carpeta del módulo. Instrucciones de instalación y ejecución: `Agent/README.md`.
 
-La ruta se carga como API (sin middleware CSRF de sesión), tiene límite de 20 solicitudes por minuto y no requiere acceso a los módulos de pagos o checkout.
+## Herramientas MCP
 
-## Configuración de modelos
+- `listar_oficinas_catalogo`: consulta las oficinas publicadas.
+- `consultar_catalogo_oficina`: consulta conceptos publicados de una oficina.
 
-Definir en el entorno privado:
+Las herramientas usan exclusivamente los endpoints existentes del módulo Catálogo. No consultan directamente MariaDB ni tablas `tm_*`, no crean pedidos y no procesan pagos. Las futuras herramientas de Pedidos requieren contratos y autorización explícitos.
 
-- `GEMINI_API_KEY`: credencial de Gemini.
-- `GEMINI_MODEL`: modelo principal.
-- `GEMINI_FALLBACK_MODELS`: lista opcional de modelos alternativos, separada por comas y en orden de prioridad.
-- `GEMINI_FALLBACK_MODEL`: variable singular heredada; se conserva por compatibilidad si todavía existe una configuración anterior.
+## Configuración
 
-Ejemplo de cadena con cuatro intentos (un principal y tres respaldos):
+- `ASSISTANT_AGENT_URL`: URL interna FastAPI, por defecto `http://127.0.0.1:8091`.
+- `ASSISTANT_AGENT_TOKEN`: secreto compartido Laravel/Python; obligatorio para activar el agente.
+- `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODELS`: disponibles en el entorno del proceso Python.
+- `LARAVEL_INTERNAL_BASE_URL`: URL local de Laravel consumida por el servidor MCP.
 
-```dotenv
-GEMINI_MODEL=gemini-2.5-flash
-GEMINI_FALLBACK_MODELS=gemini-3.5-flash-lite,gemini-3.6-flash,gemini-3.5-flash
-```
+Si el token no está configurado, Laravel conserva temporalmente el proveedor HTTP Gemini existente. Una vez configurado, las solicitudes pasan por FastAPI y MCP. No versionar credenciales, no exponer el puerto interno del agente y no añadir secretos al repositorio.
 
-Los identificadores del ejemplo proceden de pruebas anteriores en otro proyecto. Antes de habilitarlos en producción, confirmar que estén disponibles para el proyecto y la clave de Google AI usados por este despliegue.
-
-El proveedor intenta los modelos en orden ante HTTP 404, 408, 429, errores 5xx o respuestas sin texto. Los errores de autenticación y solicitudes inválidas no provocan reintentos, porque cambiar de modelo no los corrige. Si se pierde la conexión con Google, devuelve HTTP 503 inmediatamente: todos los modelos usan el mismo servicio remoto y repetir el timeout solo demoraría la respuesta. Si ningún modelo responde, devuelve HTTP 503 sin exponer detalles internos ni credenciales.
-
-La lista admite tantos respaldos como se configuren; la prueba automatizada verifica cuatro intentos en orden. Esta cadena mejora la tolerancia a límites y saturación de un modelo, pero no garantiza disponibilidad si el servidor pierde Internet o si todos los modelos comparten una cuota agotada.
-
-Las pruebas usan `Http::fake()`; nunca llaman a Gemini real. El módulo no crea tablas ni migraciones.
-
-## Fuera de alcance
-
-La carpeta `Tools/` y la herramienta `consultar_tarifa` corresponden a la Fase 2. Esa futura herramienta deberá reutilizar `Catalogo/Services/OrderQuoteService` para obtener el mismo importe que cotiza Pedidos, sin consultar directamente tablas `tm_*`.
+No se agregan tablas, migraciones ni dependencias Composer.
