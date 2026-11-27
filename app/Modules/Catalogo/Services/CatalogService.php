@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\Catalogo\Services;
+namespace App\\Modules\\Catalogo\\Services;
 
-use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
+use App\\Modules\\Sispagos\\Queries\\PublishedCatalogQuery;
+use Illuminate\\Support\\Collection;
+use Illuminate\\Support\\Facades\\Cache;
 
 final class CatalogService
 {
@@ -38,18 +38,24 @@ final class CatalogService
 
     public function offices(): Collection
     {
-        return Cache::remember('catalogo.publico.v1.oficinas', 120, fn (): Collection => $this->catalog->offices()->map(static fn (object $office): array => [
-            'id' => (int) $office->id,
-            'name' => (string) $office->name,
-        ]));
+        // Cache only scalar arrays: production disables unserialization of PHP classes.
+        $offices = Cache::remember('catalogo.publico.v2.oficinas', 120, fn (): array => $this->catalog->offices()
+            ->map(static fn (object $office): array => [
+                'id' => (int) $office->id,
+                'name' => (string) $office->name,
+            ])
+            ->all());
+
+        return collect($offices);
     }
 
     /** @return Collection<int, array<string, mixed>> */
     public function forOffice(int $officeId): Collection
     {
-        $items = Cache::remember("catalogo.publico.v1.oficina.{$officeId}", 120, function () use ($officeId): Collection {
+        $items = Cache::remember("catalogo.publico.v2.oficina.{$officeId}", 120, function () use ($officeId): array {
             $items = $this->catalog->forOffice($officeId);
             $quotes = $this->prices->linesForItems($items);
+
             return $items->map(function (object $item) use ($quotes): array {
                 $quote = $quotes[$item->catalog_item_id] ?? null;
                 return [
@@ -71,11 +77,11 @@ final class CatalogService
                     'orderable' => $quote !== null,
                     'orderable_reason' => $quote !== null ? null : ($item->requires_eligibility_check ? 'eligibility_required' : 'invalid_or_ambiguous_price'),
                 ];
-            });
+            })->all();
         });
 
         $status = PricingPolicy::status();
 
-        return $items->map(static fn (array $item): array => [...$item, ...$status]);
+        return collect($items)->map(static fn (array $item): array => [...$item, ...$status]);
     }
 }
