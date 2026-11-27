@@ -45,7 +45,11 @@ final class GeminiAssistantProvider implements AssistantProvider
                         ]],
                     ]);
             } catch (ConnectionException) {
-                continue;
+                // Todos los modelos usan el mismo servicio remoto: si el servidor
+                // no puede conectarse, cambiar de modelo solo repetiría el timeout.
+                throw new AssistantUnavailable(
+                    'No se pudo conectar con el servicio del asistente. Comprueba la conexión e inténtalo nuevamente.',
+                );
             }
 
             // Un modelo alternativo puede atender la solicitud si el principal
