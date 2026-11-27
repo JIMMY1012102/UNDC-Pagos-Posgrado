@@ -1,6 +1,6 @@
 # UNDC Market — arquitectura modular basada en DDD ligero
 
-**Estado: propuesta implementada en rama de desarrollo, no desplegada.** Un Laravel, una MariaDB y siete módulos responsables de **44 tablas**.
+**Estado: propuesta implementada en rama de desarrollo, no desplegada.** Un Laravel, una MariaDB y ocho módulos; los siete módulos de negocio existentes conservan sus **44 tablas** y Asistente no agrega tablas.
 
 | Módulo real (`app/Modules/`) | Tablas | Alcance |
 |---|---:|---|
@@ -11,6 +11,7 @@
 | Pagos | 6 | Intentos, transacciones, cobro aplicado, webhooks e incidencias |
 | Tesoreria | 6 | Conciliación, validación, certificados y auditoría |
 | Seguridad | 13 | Roles y permisos Spatie, sesiones y soporte de Laravel |
+| Asistente | 0 | API conversacional y adaptador de proveedor Gemini; sin persistencia |
 
 ## Flujo actual y contratos
 
@@ -22,18 +23,25 @@
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
 5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
 6. **Seguridad** soporta permisos, sesiones, caché y colas sin introducir endpoints administrativos.
+7. **Asistente** expone `POST /api/v1/asistente/mensajes`. El controlador valida mensajes de hasta 4.000 caracteres; el servicio utiliza el contrato `Asistente/Contracts/AssistantProvider`, enlazado al adaptador HTTP Gemini. `GEMINI_API_KEY` y `GEMINI_MODEL` se leen desde configuración, nunca se versionan. Las pruebas usan HTTP falso y no realizan llamadas externas. El módulo no consulta tablas de otros módulos ni tiene tablas propias.
 
-Las vistas existentes en `resources/views/modules/acceso` y `resources/views/modules/tienda` conservan su nombre por compatibilidad de presentación; **no** son módulos de backend aparte de los siete.
+Las vistas existentes en `resources/views/modules/acceso` y `resources/views/modules/tienda` conservan su nombre por compatibilidad de presentación; **no** son módulos de backend aparte de los ocho.
 
 ## Regla de datos
 
-- Una única base `tesoreria_dev` con las 44 tablas actuales.
+- Una única base `tesoreria_dev` con las 44 tablas actuales de los módulos con persistencia. Asistente no agrega tablas.
 - Cada módulo administra las tablas asignadas; evitar escrituras directas desde otros módulos.
-- **No alterar ninguna de las seis `tm_*`**. Los módulos nuevos las consultan a través del adaptador Sispagos bajo permisos autorizados.
+- **No alterar ninguna de las seis `tm_*`**. Los módulos nuevos que necesiten información de SISPAGOS deben consumir las capacidades públicas del adaptador correspondiente; Asistente no accede a esas tablas.
 - No mover, renombrar ni volver a ejecutar migraciones Laravel ya instaladas. Sus nombres están registrados en la tabla `migrations`.
 - Mantener las FK físicas que garantizan integridad relacional. Contratos de servicio no sustituyen relaciones SQL.
 - Las 24 tablas de negocio usan `tienda_*`; se conserva el historial original y se agrega una migración de renombrado de las 23 originales y otra para `tienda_categorias`. [Equivalencias y despliegue coordinado](./NOMBRES_TABLAS_ESPANOL.md).
 - Para funcionalidades futuras, agregar servicios y migraciones nuevas de forma incremental, no reestructurar todo.
+
+## Asistente y evolución
+
+El módulo Asistente es stateless en esta fase: no guarda conversaciones ni añade dependencias Composer. La integración usa el cliente HTTP de Laravel, con configuración por entorno y respuestas de indisponibilidad controladas. La carpeta `Tools/` todavía no forma parte del módulo.
+
+Para la Fase 2, cualquier herramienta `consultar_tarifa` deberá reutilizar `Catalogo/Services/OrderQuoteService`, de modo que presente exactamente la misma cotización que Pedidos. No debe consultar `tm_*` ni duplicar reglas de precios.
 
 ## Pruebas y despliegue
 
@@ -41,4 +49,4 @@ La CI de GitHub Actions usa PHP/Laravel, SQLite para pruebas unitarias, **MariaD
 
 **No hacer merge ni despliegue automático**: revisar pruebas, documentos, aprobación OTI/Tesorería y el estado real de la rama desplegada. No declarar pagos ni validaciones operativas.
 
-[Mapa general de 44 tablas y 7 colores](./modelo-datos/00_MAPA_GENERAL_43_TABLAS.md) · [Diagramas específicos](./modelo-datos/README.md).
+[Mapa general de 44 tablas y 8 módulos](./modelo-datos/00_MAPA_GENERAL_43_TABLAS.md) · [Diagramas específicos](./modelo-datos/README.md).

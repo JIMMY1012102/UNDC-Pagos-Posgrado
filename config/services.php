@@ -42,4 +42,9 @@ return [
         'enabled' => env('GOOGLE_LOGIN_ENABLED', false) === true || env('GOOGLE_LOGIN_ENABLED', 'false') === 'true',
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL'),
+    ],
+
 ];

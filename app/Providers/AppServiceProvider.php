@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Modules\Asistente\Contracts\AssistantProvider;
+use App\Modules\Asistente\Services\GeminiAssistantProvider;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -18,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
             \App\Modules\Catalogo\Contracts\CatalogItemLookup::class,
             \App\Modules\Catalogo\Services\CatalogItemLookupService::class
         );
+
+        $this->app->bind(AssistantProvider::class, GeminiAssistantProvider::class);
     }
 
     /**
