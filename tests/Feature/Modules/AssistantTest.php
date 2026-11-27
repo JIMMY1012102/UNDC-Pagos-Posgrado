@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\\Feature\\Modules;
+namespace Tests\Feature\Modules;
 
-use Illuminate\\Http\\Client\\Request;
-use Illuminate\\Support\\Facades\\Http;
-use Tests\\TestCase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 class AssistantTest extends TestCase
 {
@@ -49,8 +49,8 @@ class AssistantTest extends TestCase
         $attemptedModels = [];
 
         Http::fake(function (Request $request) use (&$attemptedModels) {
-            preg_match('/models\\/([^:]+):generateContent/', $request->url(), $matches);
-            $model = $matches[1] ?? 'unknown';
+            $path = explode('/models/', $request->url(), 2)[1] ?? '';
+            $model = explode(':', $path, 2)[0];
             $attemptedModels[] = $model;
 
             if ($model === 'primary-model') {
