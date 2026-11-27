@@ -3,7 +3,7 @@
 namespace Tests\Feature\Modules;
 
 use App\Modules\Asistente\Contracts\AssistantProvider;
-use App\Modules\Asistente\Services\GeminiAssistantProvider;
+use App\Modules\Asistente\Services\AgentAssistantProvider;
 use App\Modules\Catalogo\Contracts\CatalogItemLookup;
 use App\Modules\Catalogo\Services\CatalogItemLookupService;
 use App\Modules\Pedidos\Services\CartService;
@@ -22,7 +22,7 @@ class SevenModuleBoundariesTest extends TestCase
         }
 
         $this->assertInstanceOf(CatalogItemLookupService::class, app(CatalogItemLookup::class));
-        $this->assertInstanceOf(GeminiAssistantProvider::class, app(AssistantProvider::class));
+        $this->assertInstanceOf(AgentAssistantProvider::class, app(AssistantProvider::class));
         $this->assertNotNull(app('router')->getRoutes()->getByName('api.tienda.catalogo.index'));
         $this->assertNotNull(app('router')->getRoutes()->getByName('api.tienda.carritos.add'));
         $this->assertNotNull(app('router')->getRoutes()->getByName('api.acceso.perfil.show'));
