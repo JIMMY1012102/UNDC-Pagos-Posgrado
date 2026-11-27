@@ -37,7 +37,7 @@ GEMINI_FALLBACK_MODELS=gemini-3.5-flash-lite,gemini-3.6-flash,gemini-3.5-flash
 
 Los identificadores del ejemplo proceden de pruebas anteriores en otro proyecto. Antes de habilitarlos en producción, confirmar que estén disponibles para el proyecto y la clave de Google AI usados por este despliegue.
 
-El proveedor intenta los modelos en orden ante errores de conexión, HTTP 404, 408, 429, errores 5xx o respuestas sin texto. Los errores de autenticación y solicitudes inválidas no provocan reintentos, porque cambiar de modelo no los corrige. Si ningún modelo responde, devuelve HTTP 503 sin exponer detalles internos ni credenciales.
+El proveedor intenta los modelos en orden ante HTTP 404, 408, 429, errores 5xx o respuestas sin texto. Los errores de autenticación y solicitudes inválidas no provocan reintentos, porque cambiar de modelo no los corrige. Si se pierde la conexión con Google, devuelve HTTP 503 inmediatamente: todos los modelos usan el mismo servicio remoto y repetir el timeout solo demoraría la respuesta. Si ningún modelo responde, devuelve HTTP 503 sin exponer detalles internos ni credenciales.
 
 La lista admite tantos respaldos como se configuren; la prueba automatizada verifica cuatro intentos en orden. Esta cadena mejora la tolerancia a límites y saturación de un modelo, pero no garantiza disponibilidad si el servidor pierde Internet o si todos los modelos comparten una cuota agotada.
 
