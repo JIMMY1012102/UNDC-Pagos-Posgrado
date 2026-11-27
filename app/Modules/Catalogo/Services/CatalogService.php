@@ -1,10 +1,10 @@
 <?php
 
-namespace App\\Modules\\Catalogo\\Services;
+namespace App\Modules\Catalogo\Services;
 
-use App\\Modules\\Sispagos\\Queries\\PublishedCatalogQuery;
-use Illuminate\\Support\\Collection;
-use Illuminate\\Support\\Facades\\Cache;
+use App\Modules\Sispagos\Queries\PublishedCatalogQuery;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 final class CatalogService
 {
