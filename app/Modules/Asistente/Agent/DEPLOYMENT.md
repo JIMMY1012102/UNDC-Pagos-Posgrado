@@ -20,7 +20,7 @@ cd /var/www/undc-pagos-nuevo
 sudo SERVICE_USER=undcdeploy bash app/Modules/Asistente/Agent/deploy/install-agent.sh
 ```
 
-Cambia `undcdeploy` por el usuario real que ejecuta Laravel/PHP-FPM si fuera distinto. El script pregunta de forma oculta la clave Gemini y solicita el modelo principal y la lista opcional de modelos alternativos.
+Cambia `undcdeploy` por el usuario real que ejecuta Laravel/PHP-FPM si fuera distinto. El script pregunta de forma oculta la clave Gemini, solicita el modelo principal y la lista opcional de modelos alternativos, y pide la URL base de Laravel que el servidor pueda alcanzar. Si Laravel no escucha en `127.0.0.1:8000`, escribe la URL real del sitio (por ejemplo, `https://tu-dominio`) o la URL interna configurada en Nginx.
 
 El instalador:
 
@@ -54,14 +54,14 @@ ASSISTANT_AGENT_URL=http://127.0.0.1:8091
 ASSISTANT_AGENT_TOKEN=<mismo-token-aleatorio>
 ```
 
-Entorno del proceso Python, almacenado fuera del repositorio:
+Entorno del proceso Python, almacenado fuera del repositorio en `/etc/undc-asistente/agent.env`:
 
 ```dotenv
 GEMINI_API_KEY=<clave-privada>
 GEMINI_MODEL=<id-de-modelo-habilitado>
 GEMINI_FALLBACK_MODELS=<modelo-alternativo-1,modelo-alternativo-2>
 ASSISTANT_AGENT_TOKEN=<mismo-token-aleatorio>
-LARAVEL_INTERNAL_BASE_URL=http://127.0.0.1:8000
+LARAVEL_INTERNAL_BASE_URL=<URL-base-de-Laravel-accesible-desde-el-servidor>
 ASSISTANT_MAX_TOOL_ROUNDS=5
 ```
 
