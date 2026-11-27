@@ -122,7 +122,7 @@ class CatalogApiTest extends TestCase
             foreach ([$old, $new] as $stored) {
                 DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
                     ->update(['categoria_codigo' => $stored]);
-                Cache::forget('catalogo.publico.v1.oficina.7');
+                Cache::forget('catalogo.publico.v2.oficina.7');
                 $this->getJson('/api/v1/tienda/catalogo?office_id=7')
                     ->assertOk()->assertJsonPath('data.0.category', $new);
             }
@@ -130,7 +130,7 @@ class CatalogApiTest extends TestCase
         foreach ([null, '', 'personalizada'] as $category) {
             DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')
                 ->update(['categoria_codigo' => $category]);
-            Cache::forget('catalogo.publico.v1.oficina.7');
+            Cache::forget('catalogo.publico.v2.oficina.7');
             $this->getJson('/api/v1/tienda/catalogo?office_id=7')
                 ->assertOk()->assertJsonPath('data.0.category', $category);
         }
@@ -202,7 +202,7 @@ class CatalogApiTest extends TestCase
         $this->assertSame('23.45', $service->referencesFor([$id])[$id]['reference_amount']);
         DB::table('tienda_conceptos_catalogo')->where('id', $id)->update(['requiere_verificacion_elegibilidad' => true]);
         $this->assertSame('10.00', $service->referencesFor([$id])[$id]['reference_amount']);
-        Cache::forget('catalogo.publico.v1.oficina.7');
+        Cache::forget('catalogo.publico.v2.oficina.7');
         $this->assertFalse($service->forOffice(7)->first()['orderable']);
     }
     public function test_second_public_request_uses_array_cache_without_catalog_queries(): void
@@ -210,7 +210,9 @@ class CatalogApiTest extends TestCase
         $this->prepareFixture();
         $this->assertSame('array', config('cache.default'));
         $this->getJson('/api/v1/tienda/catalogo/oficinas')->assertOk()->assertJsonCount(1, 'data');
+        $this->assertIsArray(Cache::get('catalogo.publico.v2.oficinas'));
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()->assertJsonCount(1, 'data');
+        $this->assertIsArray(Cache::get('catalogo.publico.v2.oficina.7'));
         DB::enableQueryLog();
         DB::flushQueryLog();
         try {
@@ -236,7 +238,7 @@ class CatalogApiTest extends TestCase
         $id = (int) DB::table('tienda_conceptos_catalogo')->where('slug', 'demo')->value('id');
         $this->getJson('/api/v1/tienda/catalogo?office_id=7')->assertOk()
             ->assertJsonPath('data.0.checkout_enabled', false);
-        $cached = Cache::get('catalogo.publico.v1.oficina.7')->first();
+        $cached = Cache::get('catalogo.publico.v2.oficina.7')->first();
         $this->assertArrayNotHasKey('checkout_enabled', $cached);
         $this->assertArrayNotHasKey('pricing_status', $cached);
         config(['payments.payme_enabled' => true]); // Test configuration only; no payment action.
