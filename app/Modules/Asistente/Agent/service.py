@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import re
 import sys
@@ -9,6 +10,13 @@ from google import genai
 from google.genai import errors, types
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+
+logger = logging.getLogger(__name__)
+
+
+class _ModelUnavailable(RuntimeError):
+    """A model answered without usable content; try the next configured model."""
 
 
 def _model_chain() -> list[str]:
@@ -74,16 +82,30 @@ class AssistantAgent:
         self, client: genai.Client, session: ClientSession, message: str,
         declarations: list[types.FunctionDeclaration],
     ) -> str:
-        for model in self.models:
+        for index, model in enumerate(self.models):
             try:
                 return await self._run_model(client, session, model, message, declarations)
+            except _ModelUnavailable as exc:
+                if index == len(self.models) - 1:
+                    break
+                logger.warning(
+                    "Gemini model %s returned no usable answer; trying the next configured model: %s",
+                    model, exc,
+                )
             except errors.APIError as exc:
                 try:
                     status = int(getattr(exc, "code", 0))
                 except (TypeError, ValueError):
                     status = 0
+                # Retry another model for model-specific/transient API failures only.
                 if status not in (404, 408, 429) and status < 500:
                     raise
+                if index == len(self.models) - 1:
+                    break
+                logger.warning(
+                    "Gemini model %s failed with API status %s; trying the next configured model",
+                    model, status,
+                )
             except (TimeoutError, OSError, ConnectionError):
                 # A transport failure is shared by all model IDs; do not repeat it.
                 raise
@@ -128,13 +150,13 @@ class AssistantAgent:
             candidate = response.candidates[0] if response.candidates else None
             content = candidate.content if candidate else None
             if content is None:
-                raise RuntimeError("Gemini returned no candidate")
+                raise _ModelUnavailable("Gemini returned no candidate")
             calls = [part.function_call for part in (content.parts or []) if part.function_call]
             if not calls:
                 answer = response.text
                 if answer and answer.strip():
                     return _plain_text(answer)
-                raise RuntimeError("Gemini returned an empty response")
+                raise _ModelUnavailable("Gemini returned an empty response")
 
             history.append(content)
             tool_parts = []
@@ -151,4 +173,4 @@ class AssistantAgent:
                     name=call.name, response=payload
                 ))
             history.append(types.Content(role="user", parts=tool_parts))
-        raise RuntimeError("Assistant exceeded the maximum tool-call rounds")
+        raise _ModelUnavailable("Gemini exceeded the maximum tool-call rounds")
