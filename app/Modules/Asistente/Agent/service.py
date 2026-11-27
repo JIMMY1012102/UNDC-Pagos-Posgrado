@@ -125,5 +125,5 @@ class AssistantAgent:
                 tool_parts.append(types.Part.from_function_response(
                     name=call.name, response=payload
                 ))
-            history.append(types.Content(role="tool", parts=tool_parts))
+            history.append(types.Content(role="user", parts=tool_parts))
         raise RuntimeError("Assistant exceeded the maximum tool-call rounds")
