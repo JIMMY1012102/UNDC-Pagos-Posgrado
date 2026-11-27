@@ -23,7 +23,7 @@
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
 5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
 6. **Seguridad** soporta permisos, sesiones, caché y colas sin introducir endpoints administrativos.
-7. **Asistente** expone `POST /api/v1/asistente/mensajes`. El controlador valida mensajes de hasta 4.000 caracteres; el servicio utiliza el contrato `Asistente/Contracts/AssistantProvider`, enlazado al adaptador HTTP Gemini. `GEMINI_API_KEY` y `GEMINI_MODEL` se leen desde configuración, nunca se versionan. Las pruebas usan HTTP falso y no realizan llamadas externas. El módulo no consulta tablas de otros módulos ni tiene tablas propias.
+7. **Asistente** expone `POST /api/v1/asistente/mensajes` desde el grupo API de Laravel (sin CSRF de sesión). El controlador valida mensajes de hasta 4.000 caracteres; el servicio utiliza el contrato `Asistente/Contracts/AssistantProvider`, enlazado al adaptador HTTP Gemini. El proveedor admite un modelo principal y otro alternativo configurados por entorno. Las pruebas usan HTTP falso y no realizan llamadas externas. El módulo no consulta tablas de otros módulos ni tiene tablas propias.
 
 Las vistas existentes en `resources/views/modules/acceso` y `resources/views/modules/tienda` conservan su nombre por compatibilidad de presentación; **no** son módulos de backend aparte de los ocho.
 
@@ -39,7 +39,7 @@ Las vistas existentes en `resources/views/modules/acceso` y `resources/views/mod
 
 ## Asistente y evolución
 
-El módulo Asistente es stateless en esta fase: no guarda conversaciones ni añade dependencias Composer. La integración usa el cliente HTTP de Laravel, con configuración por entorno y respuestas de indisponibilidad controladas. La carpeta `Tools/` todavía no forma parte del módulo.
+El módulo Asistente es stateless: no guarda conversaciones ni añade dependencias Composer. La integración usa el cliente HTTP de Laravel, con configuración por entorno y respuestas de indisponibilidad controladas. El modelo alternativo opcional se usa automáticamente ante fallos temporales o indisponibilidad del modelo principal. La carpeta `Tools/` todavía no forma parte del módulo.
 
 Para la Fase 2, cualquier herramienta `consultar_tarifa` deberá reutilizar `Catalogo/Services/OrderQuoteService`, de modo que presente exactamente la misma cotización que Pedidos. No debe consultar `tm_*` ni duplicar reglas de precios.
 
