@@ -20,14 +20,14 @@ def _model_chain() -> list[str]:
 
 def _plain_text(value: str) -> str:
     """Remove common Markdown formatting so chat replies remain readable."""
-    value = re.sub(r"(?m)^\\s{0,3}#{1,6}\\s*", "", value)
-    value = re.sub(r"\\*\\*(.*?)\\*\\*", r"\\1", value)
-    value = re.sub(r"__(.*?)__", r"\\1", value)
-    value = re.sub(r"(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)", r"\\1", value)
-    value = re.sub(r"(?<!\\w)_([^_\\n]+)_(?!\\w)", r"\\1", value)
-    value = value.replace("`", "")
-    value = re.sub(r"(?m)^\\s*[-+*]\\s+", "", value)
-    value = re.sub(r"\\n{3,}", "\\n\\n", value)
+    value = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", value)
+    value = re.sub(r"\*\*(.*?)\*\*", r"\1", value)
+    value = re.sub(r"__(.*?)__", r"\1", value)
+    value = re.sub(r"(?<!\w)\*([^*\n]+)\*(?!\w)", r"\1", value)
+    value = re.sub(r"(?<!\w)_([^_\n]+)_(?!\w)", r"\1", value)
+    value = value.replace(chr(96), "")
+    value = re.sub(r"(?m)^\s*[-+*]\s+", "", value)
+    value = re.sub(r"\n{3,}", "\n\n", value)
     return value.strip()
 
 
