@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 from typing import Any
@@ -65,8 +64,11 @@ class AssistantAgent:
             try:
                 return await self._run_model(client, session, model, message, declarations)
             except errors.APIError as exc:
-                status = getattr(exc, "code", None)
-                if status not in (404, 408, 429) and not (isinstance(status, int) and status >= 500):
+                try:
+                    status = int(getattr(exc, "code", 0))
+                except (TypeError, ValueError):
+                    status = 0
+                if status not in (404, 408, 429) and status < 500:
                     raise
             except (TimeoutError, OSError, ConnectionError):
                 # A transport failure is shared by all model IDs; do not repeat it.
@@ -85,7 +87,18 @@ class AssistantAgent:
             response = await client.aio.models.generate_content(
                 model=model,
                 contents=history,
-                config=types.GenerateContentConfig(tools=tools, temperature=0.2),
+                config=types.GenerateContentConfig(
+                    tools=tools,
+                    temperature=0.2,
+                    system_instruction=(
+                        "Eres el asistente de UNDC Market. Usa las herramientas MCP cuando "
+                        "necesites consultar oficinas o conceptos publicados. Basa tus respuestas "
+                        "en los resultados devueltos; si no hay datos, dilo claramente. "
+                        "No inventes precios, disponibilidad ni requisitos. No afirmes que "
+                        "creaste pedidos, modificaste datos o procesaste pagos: las herramientas "
+                        "disponibles son solo de consulta."
+                    ),
+                ),
             )
             candidate = response.candidates[0] if response.candidates else None
             content = candidate.content if candidate else None
