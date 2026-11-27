@@ -23,7 +23,7 @@
 4. **Pagos** tiene estructura de datos preparada, pero no hay cobro real Pay-me implementado.
 5. **Tesoreria** tiene estructura para conciliación, validación y constancias, todavía sin un flujo funcional institucional validado.
 6. **Seguridad** soporta permisos, sesiones, caché y colas sin introducir endpoints administrativos.
-7. **Asistente** expone `POST /api/v1/asistente/mensajes` desde el grupo API de Laravel (sin CSRF de sesión). El controlador valida mensajes de hasta 4.000 caracteres; el servicio utiliza el contrato `Asistente/Contracts/AssistantProvider`, enlazado al adaptador HTTP Gemini. El proveedor recorre una lista ordenada de modelos configurada por entorno y no consulta tablas de otros módulos. Las pruebas usan HTTP falso y no realizan llamadas externas.
+7. **Asistente** expone `POST /api/v1/asistente/mensajes` desde el grupo API de Laravel (sin CSRF de sesión). Laravel valida el mensaje y delega en FastAPI mediante un token interno; el agente Python usa Gemini y un cliente MCP para ejecutar herramientas de lectura. El servidor MCP consulta el catálogo exclusivamente mediante la API pública de Catalogo. Si el agente no está configurado, se conserva el adaptador HTTP Gemini anterior para compatibilidad. No se accede directamente a tablas de otros módulos.
 
 Las vistas existentes en `resources/views/modules/acceso` y `resources/views/modules/tienda` conservan su nombre por compatibilidad de presentación; **no** son módulos de backend aparte de los ocho.
 
