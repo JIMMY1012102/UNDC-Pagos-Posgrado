@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Modules\Asistente\Services;
+namespace App\\Modules\\Asistente\\Services;
 
-use App\Modules\Asistente\Contracts\AssistantProvider;
-use App\Modules\Asistente\Exceptions\AssistantUnavailable;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
+use App\\Modules\\Asistente\\Contracts\\AssistantProvider;
+use App\\Modules\\Asistente\\Exceptions\\AssistantUnavailable;
+use Illuminate\\Http\\Client\\ConnectionException;
+use Illuminate\\Support\\Facades\\Http;
 
 final class GeminiAssistantProvider implements AssistantProvider
 {
@@ -18,10 +18,17 @@ final class GeminiAssistantProvider implements AssistantProvider
             throw new AssistantUnavailable('El asistente no está configurado todavía. Inténtalo más tarde.');
         }
 
-        $models = array_values(array_unique(array_filter([
-            trim($primaryModel),
-            config('services.gemini.fallback_model'),
-        ], fn ($model): bool => is_string($model) && trim($model) !== '')));
+        $configuredFallbacks = config('services.gemini.fallback_models', []);
+        $models = array_merge(
+            [$primaryModel],
+            is_array($configuredFallbacks) ? $configuredFallbacks : [],
+            [config('services.gemini.fallback_model')],
+        );
+
+        $models = array_values(array_unique(array_filter(
+            array_map(static fn ($model): string => is_string($model) ? trim($model) : '', $models),
+            static fn (string $model): bool => $model !== '',
+        )));
 
         foreach ($models as $model) {
             $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/'
@@ -37,13 +44,14 @@ final class GeminiAssistantProvider implements AssistantProvider
                             'parts' => [['text' => $message]],
                         ]],
                     ]);
-            } catch (ConnectionException $exception) {
+            } catch (ConnectionException) {
                 continue;
             }
 
-            // Reintentar con el modelo alternativo ante indisponibilidad,
-            // límite de cuota o modelo inexistente. Errores de credenciales
-            // y solicitudes inválidas no se solucionan cambiando de modelo.
+            // Un modelo alternativo puede atender la solicitud si el principal
+            // no existe en este proyecto, está limitado o su servicio está caído.
+            // Los errores de autenticación y de solicitud no se corrigen cambiando
+            // de modelo, por lo que se devuelven sin consumir los respaldos.
             if (in_array($response->status(), [404, 408, 429], true) || $response->serverError()) {
                 continue;
             }
