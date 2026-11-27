@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Modules;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -127,6 +128,27 @@ class AssistantTest extends TestCase
         $this->postJson('/api/v1/asistente/mensajes', ['message' => 'Hola'])
             ->assertStatus(503)
             ->assertJsonPath('success', false);
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_connection_failure_returns_without_repeating_the_same_remote_request(): void
+    {
+        config([
+            'services.gemini.api_key' => 'test-api-key',
+            'services.gemini.model' => 'primary-model',
+            'services.gemini.fallback_models' => ['backup-one', 'backup-two', 'backup-three'],
+            'services.gemini.fallback_model' => null,
+        ]);
+
+        Http::fake(function () {
+            throw new ConnectionException('connection unavailable');
+        });
+
+        $this->postJson('/api/v1/asistente/mensajes', ['message' => 'Hola'])
+            ->assertStatus(503)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'No se pudo conectar con el servicio del asistente. Comprueba la conexión e inténtalo nuevamente.');
 
         Http::assertSentCount(1);
     }
