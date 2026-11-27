@@ -42,6 +42,7 @@ class ModuleStructureTest extends TestCase
         foreach ($actions as $name => [$controller, $method]) {
             $route = app('router')->getRoutes()->getByName($name);
             $this->assertNotNull($route, $name);
+            // Invokable controllers are stored by Laravel as the class name alone.
             $expectedAction = $method === null ? $controller : $controller.'@'.$method;
             $this->assertSame($expectedAction, $route->getActionName(), $name);
             $this->assertInstanceOf($controller, app($controller));
