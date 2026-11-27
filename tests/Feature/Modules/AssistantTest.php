@@ -141,7 +141,11 @@ class AssistantTest extends TestCase
             'services.gemini.fallback_model' => null,
         ]);
 
-        Http::fake(function () {
+        $attempts = 0;
+
+        Http::fake(function () use (&$attempts) {
+            $attempts++;
+
             throw new ConnectionException('connection unavailable');
         });
 
@@ -150,7 +154,7 @@ class AssistantTest extends TestCase
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'No se pudo conectar con el servicio del asistente. Comprueba la conexión e inténtalo nuevamente.');
 
-        Http::assertSentCount(1);
+        $this->assertSame(1, $attempts);
     }
 
     public function test_message_is_required_and_has_a_maximum_length(): void
