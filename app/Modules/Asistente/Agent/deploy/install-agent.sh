@@ -41,9 +41,12 @@ read -r -p "Modelos alternativos separados por coma (opcional): " GEMINI_FALLBAC
 [[ "${GEMINI_FALLBACK_MODELS}" != *$'\n'* ]] || fail "La lista de modelos no puede contener saltos de línea."
 
 ASSISTANT_AGENT_TOKEN="$(openssl rand -hex 32)"
-LARAVEL_INTERNAL_BASE_URL="${LARAVEL_INTERNAL_BASE_URL:-http://127.0.0.1:8000}"
-[[ "${LARAVEL_INTERNAL_BASE_URL}" == http://127.0.0.1:* || "${LARAVEL_INTERNAL_BASE_URL}" == https://127.0.0.1:* ]] || fail "LARAVEL_INTERNAL_BASE_URL debe apuntar a localhost; ajusta la configuración si Laravel usa otro puerto local."
-export GEMINI_API_KEY GEMINI_MODEL GEMINI_FALLBACK_MODELS ASSISTANT_AGENT_TOKEN PORT LARAVEL_INTERNAL_BASE_URL
+DEFAULT_LARAVEL_URL="${LARAVEL_INTERNAL_BASE_URL:-http://127.0.0.1:8000}"
+read -r -p "URL base de Laravel accesible desde este servidor [${DEFAULT_LARAVEL_URL}]: " INPUT_LARAVEL_URL
+LARAVEL_INTERNAL_BASE_URL="${INPUT_LARAVEL_URL:-${DEFAULT_LARAVEL_URL}}"
+[[ "${LARAVEL_INTERNAL_BASE_URL}" =~ ^https?://[^[:space:]]+$ ]] || fail "Indica una URL http(s) válida, sin espacios."
+ASSISTANT_MAX_TOOL_ROUNDS="${ASSISTANT_MAX_TOOL_ROUNDS:-5}"
+export GEMINI_API_KEY GEMINI_MODEL GEMINI_FALLBACK_MODELS ASSISTANT_AGENT_TOKEN PORT LARAVEL_INTERNAL_BASE_URL ASSISTANT_MAX_TOOL_ROUNDS
 
 install -d -m 0750 -o root -g "${SERVICE_GROUP}" "${ENV_DIR}"
 install -d -m 0755 -o root -g root /opt/undc-asistente
